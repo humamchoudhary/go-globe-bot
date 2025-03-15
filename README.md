@@ -10,8 +10,8 @@ Before setting up the project, ensure you have the following installed:
 ## Setup Guide
 ### Clone the Repository
 ```bash
-git clone https://github.com/your-repo/flask-app.git
-cd flask-app
+git clone https://github.com/humamchoudhary/go-globe-bot
+cd go-globe-bot
 ```
 
 ### Create a Virtual Environment (Optional but Recommended)
