@@ -28,9 +28,7 @@ pip install -r requirements.txt
 
 ### 4️⃣ Run Flask App (Development Mode)
 ```bash
-export FLASK_APP=app.py   # macOS/Linux
-set FLASK_APP=app.py      # Windows
-flask run
+python app.py
 ```
 The application will start at: `http://127.0.0.1:5000`
 
