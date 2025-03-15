@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <meta name="description" content="Go-Globe">
+    <meta name="author" content="Muhammad Humam">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>{% block title %} Go Globe Chatbot {% endblock %}</title>
+
+    <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
+
+    <script>
+        if (!localStorage.frenify_skin) {
+            localStorage.frenify_skin = 'dark';
+        }
+        if (!localStorage.frenify_panel) {
+            localStorage.frenify_panel = '';
+        }
+        // if ("{{request.args.get('mode')}}" !== None) {
+        //     localStorage.frenify_skin = "{{request.args.get('mode')}}"
+        // }
+
+        document.documentElement.setAttribute("data-techwave-skin", localStorage.frenify_skin);
+        if (localStorage.frenify_panel !== '') {
+            document.documentElement.classList.add(localStorage.frenify_panel);
+        }
+
+    </script>
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- <script src="https://unpkg.com/@tailwindcss/browser@4"></script> <!-- Styles --> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script>
+        // Font files are injected from Flask context processor
+        const fontFiles = {{font_files| tojson }};
+        const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
+
+        function loadFonts() {
+            fontFiles.forEach(fileName => {
+                // Extract weight and style info from filename
+                let fontWeight = "normal";
+                let fontStyle = "normal";
+
+                if (fileName.includes("Bold")) fontWeight = "bold";
+                if (fileName.includes("Light")) fontWeight = "300";
+                if (fileName.includes("Thin")) fontWeight = "100";
+                if (fileName.includes("Italic")) fontStyle = "italic";
+
+                // Create font-face declaration
+                const style = document.createElement("style");
+                style.innerHTML = `
+                    @font-face {
+                        font-family: 'Proxima Nova';
+                        src: url('${fontFolder}/${fileName}') format('${getFormat(fileName)}');
+                        font-weight: ${fontWeight};
+                        font-style: ${fontStyle};
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+
+            console.log(`Loaded ${fontFiles.length} font variations`);
+        }
+
+        function getFormat(fileName) {
+            if (fileName.endsWith(".ttf")) return "truetype";
+            if (fileName.endsWith(".otf")) return "opentype";
+            if (fileName.endsWith(".woff")) return "woff";
+            if (fileName.endsWith(".woff2")) return "woff2";
+            return "truetype"; // default
+        }
+
+        loadFonts();
+    </script>
+
+    <!-- Styles -->
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} />
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
+    <!--[if lt IE 9]> <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script> <![endif]-->
+    <!-- !Styles -->
+
+</head>
+
+<body>
+
+    <!-- AI Chat Bot Page -->
+    <div class="techwave_fn_aichatbot_page fn__chatbot" style="min-height: 100vh;">
+
+        <div class="chat__page" style="height: 100%;">
+            <!-- REPLACE WITH HTMX --->
+
+            {% if chat %}
+            <div class="container" style="height: 100%;">
+                <div class="chat__list">
+
+
+                    <div id="chat__item" class="chat__item active">
+                        {% for message in chat.messages %}{% include 'user/fragments/chat_message.html' %}{%
+                        endfor %}
+                    </div>
+
+
+                </div>
+            </div>
+            {% else %}
+
+            <div class="container w-full h-full flex justify-center items-center">
+                <h1 class="text-bold" style="font-weight: bold;">Welcome To
+                    <!-- <span -->
+                    <!--     style="color:var(--techwave-main-color);font-style: italic;">GO</span><span style="font-style: italic;">-Globe</span>  -->
+                    Chat Bot
+                </h1>
+            </div>
+
+            {% endif %}
+            {% if chat %}
+            <div class="chat__comment chat__input">
+                <div class="container" style="display: flex; flex-direction: row; width: 100%; gap: 10px;">
+                    <div class="fn__chat_comment" style="width: 100%;">
+                        <textarea rows="1" class="fn__hidden_textarea" tabindex="-1"></textarea>
+                        <textarea rows="1" name="message" hx-on::before-request="this.value=''; scrollToBottom();"
+                            hx-post="{{request.path}}/send_message" hx-swap="none"
+                            hx-trigger="keyup[key=='Enter' && this.value.trim() != ''] from:body"
+                            placeholder="Send a message..." id="fn__chat_textarea"></textarea>
+                        <button hx-post="{{request.path}}/send_message" hx-swap="none" hx-include="#fn__chat_textarea"
+                            id='fn__chat_button'
+                            hx-disabled="document.getElementById('fn__chat_textarea').value.trim() === ''"
+                            hx-on::before-request="document.getElementById('fn__chat_textarea').value=''"><img src={{
+                                url_for('static', filename='svg/enter.svg' ) }} alt="" class="fn__svg"
+                                style="color: #fff;"></button>
+                    </div>
+
+                    <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin">Request Admin</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+            <script>
+
+                function scrollToBottom() {
+                    if (document.querySelector(".techwave_fn_intro")) {
+                        const chatTextarea = document.getElementById("fn__chat_textarea");
+                        if (chatTextarea) {
+                            const scrollTop = chatTextarea.getBoundingClientRect().top + window.scrollY - window.innerHeight + 100;
+                            window.scrollTo({top: scrollTop, behavior: "smooth"});
+                        }
+                    } else {
+                        const scrollTop = document.documentElement.scrollHeight - window.innerHeight;
+                        window.scrollTo({top: scrollTop, behavior: "smooth"});
+                    }
+                }
+                scrollToBottom();
+
+            </script>
+            {% if chat %}
+
+            <style>
+                .md-content code {
+                    background: #f0f0f0;
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+
+                .md-content pre {
+                    background: #f0f0f0;
+                    padding: 8px;
+                    border-radius: 4px;
+                    overflow: auto;
+                }
+
+                .md-content blockquote {
+                    border-left: 3px solid #ddd;
+                    margin-left: 0;
+                    padding-left: 10px;
+                    color: #555;
+                }
+            </style>
+
+            <!-- Minimal Markdown Processing -->
+            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+
+            <script>
+
+                document.addEventListener('DOMContentLoaded', function () {
+
+                    document.querySelectorAll('.md-content').forEach(el => {
+                        el.innerHTML = marked.parse(el.textContent);
+                    });
+                    const roomId = "{{chat.room_id}}";
+                    console.log(roomId)
+
+                    const socket = io();
+
+                    socket.on('connect', function () {
+                        console.log('connect')
+                        socket.emit('join_min', {room: roomId});
+                    });
+
+                    socket.on('new_message', function (data) {
+                        console.log(data)
+                        appendMessage(data);
+                    });
+
+
+                });
+
+                function appendMessage(message) {
+                    const messagesContainer = document.getElementById('chat__item');
+
+                    const messageHTML = `
+            <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
+            <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
+            <div class="chat">
+                <p>${marked.parse(message.content)}</p>
+            </div>
+        </div>
+    `;
+
+                    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+
+                    scrollToBottom();
+                }
+
+
+            </script>
+            {% endif %}
+
+        </div>
+
+    </div>
+    <!-- !AI Chat Bot Page -->
+
+
+    <script type="text/javascript" src={{ url_for('static', filename='js/jquery.js' ) }}></script>
+    <script type="text/javascript" src={{ url_for('static', filename='js/plugins.js' ) }}></script>
+    <script type="text/javascript" src={{ url_for('static', filename='js/init.js' ) }}></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+
+</body>
+
+</html>

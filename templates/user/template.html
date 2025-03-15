@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en"> <!--<![endif]-->
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <meta name="description" content="Go-Globe">
+    <meta name="author" content="Muhammad Humam">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>{% block title %} Go Globe Chatbot {% endblock %}</title>
+
+    <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
+
+    <script>
+        if (!localStorage.frenify_skin) {
+            localStorage.frenify_skin = 'dark';
+        }
+        if (!localStorage.frenify_panel) {
+            localStorage.frenify_panel = '';
+        }
+        // if ("{{request.args.get('mode')}}" !== None) {
+        //     localStorage.frenify_skin = "{{request.args.get('mode')}}"
+        // }
+        
+        document.documentElement.setAttribute("data-techwave-skin", localStorage.frenify_skin);
+        if (localStorage.frenify_panel !== '') {
+            document.documentElement.classList.add(localStorage.frenify_panel);
+        }
+
+    </script>
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script> <!-- Styles -->
+
+    <script>
+        // Font files are injected from Flask context processor
+        const fontFiles = {{font_files| tojson }};
+        const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
+
+        function loadFonts() {
+            fontFiles.forEach(fileName => {
+                // Extract weight and style info from filename
+                let fontWeight = "normal";
+                let fontStyle = "normal";
+
+                if (fileName.includes("Bold")) fontWeight = "bold";
+                if (fileName.includes("Light")) fontWeight = "300";
+                if (fileName.includes("Thin")) fontWeight = "100";
+                if (fileName.includes("Italic")) fontStyle = "italic";
+
+                // Create font-face declaration
+                const style = document.createElement("style");
+                style.innerHTML = `
+                    @font-face {
+                        font-family: 'Proxima Nova';
+                        src: url('${fontFolder}/${fileName}') format('${getFormat(fileName)}');
+                        font-weight: ${fontWeight};
+                        font-style: ${fontStyle};
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+
+            console.log(`Loaded ${fontFiles.length} font variations`);
+        }
+
+        function getFormat(fileName) {
+            if (fileName.endsWith(".ttf")) return "truetype";
+            if (fileName.endsWith(".otf")) return "opentype";
+            if (fileName.endsWith(".woff")) return "woff";
+            if (fileName.endsWith(".woff2")) return "woff2";
+            return "truetype"; // default
+        }
+
+        loadFonts();
+    </script>
+
+    <!-- Styles -->
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} />
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
+    <!--[if lt IE 9]> <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script> <![endif]-->
+    <!-- !Styles -->
+
+</head>
+
+
+<body>
+
+
+
+    <!-- Moving Submenu -->
+    <div class="techwave_fn_fixedsub">
+        <ul></ul>
+    </div>
+    <!-- !Moving Submenu -->
+
+    <!-- Preloader -->
+    <div class="techwave_fn_preloader">
+        <svg>
+            <circle class="first_circle" cx="50%" cy="50%" r="110"></circle>
+            <circle class="second_circle" cx="50%" cy="50%" r="110"></circle>
+        </svg>
+    </div>
+    <!-- !Preloader -->
+
+
+    <!-- MAIN WRAPPER -->
+    <div class="techwave_fn_wrapper fn__has_sidebar">
+        <div class="techwave_fn_wrap">
+
+
+
+            <!-- HEADER -->
+            <header class="techwave_fn_header">
+
+                <!-- Header left: token information -->
+                <div class="header__left">
+                </div>
+                <!-- /Header left: token information -->
+
+
+                <!-- Header right: navigation bar -->
+                <div class="header__right">
+                    <div class="fn__nav_bar">
+
+
+                        <!-- Language (bar item) -->
+                        <div class="bar__item bar__item_language">
+                            <a href="#" class="item_opener">
+                                <img src={{ url_for('static', filename='svg/language.svg' ) }} alt="" class="fn__svg">
+                            </a>
+                            <div class="item_popup">
+                                <ul>
+                                    <li>
+                                        <span class="active">English</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- !Language (bar item) -->
+
+                        <!-- Site Skin (bar item) -->
+                        <div class="bar__item bar__item_skin">
+                            <a href="#" class="item_opener">
+                                <img src={{ url_for('static', filename='svg/sun.svg' ) }} alt=""
+                                    class="fn__svg light_mode">
+                                <img src={{ url_for('static', filename='svg/moon.svg' ) }} alt=""
+                                    class="fn__svg dark_mode">
+                            </a>
+                        </div>
+                        <!-- !Site Skin (bar item) -->
+
+
+
+                    </div>
+                </div>
+                <!-- !Header right: navigation bar -->
+
+            </header>
+            <!-- !HEADER -->
+
+
+            <!-- LEFT PANEL -->
+            <div class="techwave_fn_leftpanel">
+
+                <div class="mobile_extra_closer"></div>
+
+                <!-- logo (left panel) -->
+                <div class="leftpanel_logo">
+                    <a href="index.html" class="fn_logo">
+                        <span class="full_logo">
+                            <img src={{ url_for('static', filename='img/logo.svg' ) }} alt="" class="desktop_logo">
+                            <img src={{ url_for('static', filename='img/logo.svg' ) }} alt="" class="retina_logo">
+                        </span>
+                        <span class="short_logo"
+                            style="justify-items: center; align-items: center; justify-content: center;">
+                            <img src={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}
+                                style="max-width:70%;" alt="" class="desktop_logo">
+                            <img src={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }} alt=""
+                                class="retina_logo">
+                        </span>
+                    </a>
+                    <a href="#" class="fn__closer fn__icon_button desktop_closer">
+                        <img src={{ url_for('static', filename='svg/arrow.svg' ) }} alt="" class="fn__svg">
+                    </a>
+                    <a href="#" class="fn__closer fn__icon_button mobile_closer">
+                        <img src={{ url_for('static', filename='svg/arrow.svg' ) }} alt="" class="fn__svg">
+                    </a>
+                </div>
+                <!-- !logo (left panel) -->
+
+                <!-- content (left panel) -->
+                <div class="leftpanel_content">
+
+                    <!-- #1 navigation group -->
+                    <div class="nav_group">
+                        <!-- <h2 class="group__title">Start Here</h2> -->
+                        <ul class="group__list">
+                            <li>
+                                <a href="/" class="fn__tooltip menu__item" data-position="right" title="Home">
+                                    <span class="icon"><img src={{ url_for('static', filename='svg/home.svg' ) }} alt=""
+                                            class="fn__svg"></span>
+                                    <span class="text">Home</span>
+                                </a>
+                            </li>
+                            <!-- <li> -->
+                            <!--     <a href="community-feed.html" class="fn__tooltip menu__item" data-position="right" -->
+                            <!--         title="Community Feed"> -->
+                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/community.svg' ) }} -->
+                            <!--                 alt="" class="fn__svg"></span> -->
+                            <!--         <span class="text">Community Feed</span> -->
+                            <!--     </a> -->
+                            <!-- </li> -->
+                            <!-- <li> -->
+                            <!--     <a href="personal-feed.html" class="fn__tooltip menu__item" data-position="right" -->
+                            <!--         title="Personal Feed"> -->
+                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/person.svg' ) }} -->
+                            <!--                 alt="" class="fn__svg"></span> -->
+                            <!--         <span class="text">Personal Feed<span class="count">48</span></span> -->
+                            <!--     </a> -->
+                            <!-- </li> -->
+                            <!-- <li> -->
+                            <!--     <a href="models.html" class="fn__tooltip menu__item" data-position="right" -->
+                            <!--         title="Finetuned Models"> -->
+                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/cube.svg' ) }} alt="" -->
+                            <!--                 class="fn__svg"></span> -->
+                            <!--         <span class="text">Finetuned Models</span> -->
+                            <!--     </a> -->
+                            <!-- </li> -->
+                        </ul>
+                    </div>
+                    <!-- !#1 navigation group -->
+
+                    <!-- #2 navigation group -->
+                    <!-- <div class="nav_group"> -->
+                    <!--     <h2 class="group__title">User Tools</h2> -->
+                    <!--     <ul class="group__list"> -->
+                    <!--         <li> -->
+                    <!--             <a href="image-generation.html" class="fn__tooltip menu__item" data-position="right" -->
+                    <!--                 title="Image Generation"> -->
+                    <!--                 <span class="icon"><img src={{ url_for('static', filename='svg/image.svg' ) }} -->
+                    <!--                         alt="" class="fn__svg"></span> -->
+                    <!--                 <span class="text">Image Generation</span> -->
+                    <!--             </a> -->
+                    <!--         </li> -->
+                    <!--         <li> -->
+                    <!--             <a href="ai-chat-bot.html" class="fn__tooltip active menu__item" data-position="right" -->
+                    <!--                 title="AI Chat Bot"> -->
+                    <!--                 <span class="icon"><img src={{ url_for('static', filename='svg/chat.svg' ) }} alt="" -->
+                    <!--                         class="fn__svg"></span> -->
+                    <!--                 <span class="text">AI Chat Bot</span> -->
+                    <!--             </a> -->
+                    <!--         </li> -->
+                    <!--     </ul> -->
+                    <!-- </div> -->
+                    <!-- !#2 navigation group -->
+
+                    <!-- #3 navigation group -->
+                    <div class="nav_group">
+                        <!-- <h2 class="group__title">Support</h2> -->
+                        <ul class="group__list">
+                            <!-- <li> -->
+                            <!--     <a href="pricing.html" class="fn__tooltip menu__item" data-position="right" -->
+                            <!--         title="Pricing"> -->
+                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/dollar.svg' ) }} -->
+                            <!--                 alt="" class="fn__svg"></span> -->
+                            <!--         <span class="text">Pricing</span> -->
+                            <!--     </a> -->
+                            <!-- </li> -->
+                            <!-- <li class="menu-item-has-children"> -->
+                            <!--     <a href="video-generation.html" class="fn__tooltip menu__item" title="FAQ &amp; Help" -->
+                            <!--         data-position="right"> -->
+                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/question.svg' ) }} -->
+                            <!--                 alt="" class="fn__svg"></span> -->
+                            <!--         <span class="text">FAQ &amp; Help</span> -->
+                            <!--         <span class="trigger"><img src={{ url_for('static', filename='svg/arrow.svg' ) }} -->
+                            <!--                 alt="" class="fn__svg"></span> -->
+                            <!--     </a> -->
+                            <!--     <ul class="sub-menu"> -->
+                            <!--         <li> -->
+                            <!--             <a href="documentation.html"><span class="text">Documentation</span></a> -->
+                            <!--         </li> -->
+                            <!--         <li> -->
+                            <!--             <a href="faq.html"><span class="text">FAQ</span></a> -->
+                            <!--         </li> -->
+                            <!--         <li> -->
+                            <!--             <a href="changelog.html"><span class="text">Changelog<span -->
+                            <!--                         class="fn__sup">(1.0.0)</span></span></a> -->
+                            <!--         </li> -->
+                            <!--         <li> -->
+                            <!--             <a href="contact.html"><span class="text">Contact Us</span></a> -->
+                            <!--         </li> -->
+                            <!--         <li> -->
+                            <!--             <a href="index-2.html"><span class="text">Home #2</span></a> -->
+                            <!--         </li> -->
+                            <!--     </ul> -->
+                            <!-- </li> -->
+                            <li>
+                                <a href="/logout" class="fn__tooltip menu__item" data-position="right" title="Log Out">
+                                    <span class="icon"><img src={{ url_for('static', filename='svg/logout.svg' ) }}
+                                            alt="" class="fn__svg"></span>
+                                    <span class="text">Log Out</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- !#3 navigation group -->
+
+
+                </div>
+                <!-- !content (left panel) -->
+
+            </div>
+            <!-- !LEFT PANEL -->
+
+
+            <!-- CONTENT -->
+            <div class="techwave_fn_content">
+
+                <!-- PAGE (all pages go inside this div) -->
+                <div class="techwave_fn_page">
+                    {% block content %}{% endblock %}
+                </div>
+                <!-- !PAGE (all pages go inside this div) -->
+
+
+                <!-- FOOTER (inside the content) -->
+                <footer class="techwave_fn_footer">
+                    <div class="techwave_fn_footer_content">
+                        <div class="copyright">
+                            <p>© 2005 - 2025 GO-Globe ™ | CUSTOM DEVELOPMENT. All rights reserved. </p>
+                        </div>
+                        <div class="menu_items">
+                            <ul>
+                                <li><a href="terms.html">Terms of Service</a></li>
+                                <li><a href="privacy.html">Privacy Policy</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </footer>
+                <!-- !FOOTER (inside the content) -->
+
+            </div>
+            <!-- !CONTENT -->
+
+
+        </div>
+    </div>
+    <!-- !MAIN WRAPPER -->
+
+
+
+    <!-- Scripts -->
+    <script type="text/javascript" src={{ url_for('static', filename='js/jquery.js' ) }}></script>
+    <script type="text/javascript" src={{ url_for('static', filename='js/plugins.js' ) }}></script>
+    <script type="text/javascript" src={{ url_for('static', filename='js/init.js' ) }}></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- !Scripts -->
+
+</body>
+
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en"> <!--<![endif]-->
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <meta name="description" content="TechWave">
+    <meta name="author" content="SRBThemes">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Sign In - TechWave</title>
+
+    <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.png' ) }}>
+
+    <script>
+        if (!localStorage.frenify_skin) {
+            localStorage.frenify_skin = 'dark';
+        }
+        if (!localStorage.frenify_panel) {
+            localStorage.frenify_panel = '';
+        }
+        document.documentElement.setAttribute("data-techwave-skin", localStorage.frenify_skin);
+        if (localStorage.frenify_panel !== '') {
+            document.documentElement.classList.add(localStorage.frenify_panel);
+        }
+
+    </script>
+
+
+    <!-- <script src="https://unpkg.com/@tailwindcss/browser@4"></script> 
+    -->
+    <!-- Styles -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} />
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
+    <!--[if lt IE 9]> <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script> <![endif]-->
+    <!-- !Styles -->
+
+
+    <script>
+        // Font files are injected from Flask context processor
+        const fontFiles = {{font_files| tojson }};
+        const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
+
+        function loadFonts() {
+            fontFiles.forEach(fileName => {
+                // Extract weight and style info from filename
+                let fontWeight = "normal";
+                let fontStyle = "normal";
+
+                if (fileName.includes("Bold")) fontWeight = "bold";
+                if (fileName.includes("Light")) fontWeight = "300";
+                if (fileName.includes("Thin")) fontWeight = "100";
+                if (fileName.includes("Italic")) fontStyle = "italic";
+
+                // Create font-face declaration
+                const style = document.createElement("style");
+                style.innerHTML = `
+                    @font-face {
+                        font-family: 'Proxima Nova';
+                        src: url('${fontFolder}/${fileName}') format('${getFormat(fileName)}');
+                        font-weight: ${fontWeight};
+                        font-style: ${fontStyle};
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+
+            console.log(`Loaded ${fontFiles.length} font variations`);
+        }
+
+        function getFormat(fileName) {
+            if (fileName.endsWith(".ttf")) return "truetype";
+            if (fileName.endsWith(".otf")) return "opentype";
+            if (fileName.endsWith(".woff")) return "woff";
+            if (fileName.endsWith(".woff2")) return "woff2";
+            return "truetype"; // default
+        }
+
+        loadFonts();
+    </script>
+
+    <style>
+        .input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body>
+    <!-- Sign In -->
+    <div class="techwave_fn_sign">
+        <div class="sign__content">
+            <img src={{ url_for('static', filename='img/logo.svg' ) }} alt="" class="desktop_logo"
+                style="max-width: 250px; margin-left: auto; margin-right: auto; margin-bottom: 20px;">
+            <div class="login">
+                <div class="form__content">
+                    <div class="form__title mb-10">User Authentication</div>
+
+                    <p id="error-message" class="error" style="display: none"></p>
+
+                    <div class="form__email">
+                        <label for="name">Name</label>
+                        <input type="text" class="input" id="name" name="name" placeholder="Enter your name"
+                            autocapitalize="off" autocomplete="name">
+                    </div>
+                    <div class="form__email">
+                        <label for="email">Email</label>
+                        <input type="email" class="input" id="email" name="email" placeholder="Enter your email"
+                            autocapitalize="off" autocomplete="email">
+                    </div>
+                    <div class="form__email">
+                        <label for="phone">Phone</label>
+                        <input type="text" class="input" id="phone" name="phone" placeholder="Enter your phone number"
+                            autocapitalize="off" autocomplete="tel">
+                    </div>
+                    <div class="form__pass checkbox-container"
+                        style="display: flex; align-items: center; margin-top: 15px; margin-bottom: 15px;">
+                        <input type="checkbox" id="anonymous" name="anonymous" style="width: auto; margin-right: 10px;">
+                        <label for="anonymous">Chat Anonymously</label>
+                    </div>
+                    <button id="login-btn"
+                        class="fn__submit form__submit duration-300 transition-all hover:cursor-pointer font-bold">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- !Sign In -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginBtn = document.getElementById("login-btn");
+            const nameInput = document.getElementById("name");
+            const emailInput = document.getElementById("email");
+            const phoneInput = document.getElementById("phone");
+            const anonymousCheckbox = document.getElementById("anonymous");
+            const errorMessage = document.getElementById("error-message");
+
+            // Function to toggle input fields based on anonymous checkbox
+            function toggleInputFields() {
+                const isAnonymous = anonymousCheckbox.checked;
+                nameInput.disabled = isAnonymous;
+                emailInput.disabled = isAnonymous;
+                phoneInput.disabled = isAnonymous;
+
+                // Clear fields if anonymous is checked
+                if (isAnonymous) {
+                    nameInput.value = "";
+                    emailInput.value = "";
+                    phoneInput.value = "";
+                }
+            }
+
+            // Add event listener to the anonymous checkbox
+            anonymousCheckbox.addEventListener("change", toggleInputFields);
+
+            loginBtn.addEventListener("click", function () {
+                const isAnonymous = anonymousCheckbox.checked;
+                const name = nameInput.value.trim();
+                const email = emailInput.value.trim();
+                const phone = phoneInput.value.trim();
+
+                // Only validate fields if not anonymous
+                if (!isAnonymous && (!name || !email)) {
+                    showError("Please enter both name and email");
+                    return;
+                }
+
+                fetch("/auth{% if request.args.get('redir') %}?redir={{request.args.get('redir')}}{% endif %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        anonymous: isAnonymous
+                    }),
+                })
+
+                    .then((response) => {
+                        if (response.ok) {
+                            // return response.json().then((data) => {
+                            window.location.href = "{{url_for(request.args.get('redir','chat.index'))}}";
+                            // });
+                        } else {
+                            return response.json().then((data) => {
+                                showError(data.error || "Login failed");
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        showError("An error occurred. Please try again.");
+                    });
+
+            });
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = "block";
+            }
+
+            // Handle enter key
+            phoneInput.addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    loginBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

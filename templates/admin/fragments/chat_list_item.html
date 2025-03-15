@@ -1,0 +1,24 @@
+<li class="group__item">
+  <a
+
+      href="/admin/chat/{{chat}}"
+    class="fn__chat_link {{'active' if request.path.split('/')[-1] == chat }}"
+  >
+    <p class="text text-clip">{{chat}}</p>
+  </a>
+</li>
+
+<!-- <script> -->
+<!--   document.addEventListener("DOMContentLoaded", function () { -->
+<!--     let chatItem = document.getElementById("{{ chat }}"); -->
+<!---->
+<!--     if (chatItem) { -->
+<!--       chatItem.addEventListener("click", function () { -->
+<!--         document -->
+<!--           .querySelector(".admin-active") -->
+<!--           ?.classList.remove("admin-active"); -->
+<!--         this.classList.add("admin-active"); -->
+<!--       }); -->
+<!--     } -->
+<!--   }); -->
+<!-- </script> -->

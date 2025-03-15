@@ -1,0 +1,35 @@
+{% extends 'admin/template.html' %} {% block content %}
+<!-- AI Chat Bot Page -->
+<div class="techwave_fn_aichatbot_page fn__chatbot">
+  <div class="chat__page">
+    <!-- REPLACE WITH HTMX --->
+
+    {% include 'admin/fragments/chat_page.html' %}
+  </div>
+  <div class="chat__sidebar">
+    <!-- <div class="sidebar_header"> -->
+    <!--     <a href="/newchat" class="fn__new_chat_link"> -->
+    <!--         <span class="icon"></span> -->
+    <!--         <span class="text">New Chat</span> -->
+    <!--     </a> -->
+    <!-- </div> -->
+
+    <div
+      class="sidebar_content border-[var(--techwave-border-color)] border-b"
+      style="
+        border-bottom-color: var(--techwave-border-color);
+        border-bottom-width: 1px;
+        border-style: solid;
+      "
+    >
+      <ul id="chat_list" class="group__list">
+        {% if chats %} {% for chat in chats %}{% include
+        'admin/fragments/chat_list_item.html' %}{% endfor %} {% else %}
+        <p>No Active chat</p>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- !AI Chat Bot Page -->
+{% endblock %}
