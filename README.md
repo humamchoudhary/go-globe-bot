@@ -21,6 +21,9 @@ source venv/bin/activate  # On macOS/Linux
 venv\Scripts\activate    # On Windows
 ```
 
+### Create a Environment Vars
+Fill .env file with enviroment variables and keys
+
 ### Install Dependencies
 ```bash
 pip install -r requirements.txt
