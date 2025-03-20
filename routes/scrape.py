@@ -90,7 +90,7 @@ def scrape_with_session(url, cookies=None, headers=None, timeout=30, rotate_user
 
         # Raise exception for bad status codes
         response.raise_for_status()
-        print(response.apparent_encoding)
+        # print(response.apparent_encoding)
         soup = BeautifulSoup(response.text, 'html.parser')
 
         return {
