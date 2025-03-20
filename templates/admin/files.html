@@ -1,19 +1,71 @@
 {% extends 'admin/template.html' %} {% block content %}
 
-<div class="container mx-auto p-4">
+<div class="ml-6 p-4 mt-6">
   <h2 class="text-2xl font-bold mb-4">Uploaded Files</h2>
 
   <div
     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2"
     id="file-grid"
   >
+
+     <!-- Scrape Website  -->
+    <div
+      class="file-upload-item"
+      onclick="document.getElementById('scrape-model').classList.remove('hidden')"
+    >
+      <span class="">Scrape Website</span>
+    </div>
+
+
+    <div id='scrape-model' class='absolute flex flex-col justify-center items-center z-100 w-full h-full top-0 bottom-0 left-0 right-0 bg-black/20 hidden'>
+    
+
+<form class='flex flex-col items-center justify-center gap-7 px-22 py-14 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] relative min-w-24 min-h-24'
+      hx-post="/admin/scrape"
+      hx-trigger="submit"
+      hx-indicator="#loading-indicator"
+      hx-swap='none'
+      hx-on::after-request="location.reload()">
+    <div 
+        onclick="document.getElementById('scrape-model').classList.add('hidden')"
+        class='border border-[var(--techwave-hover-color)] absolute top-5 right-5 p-1 hover:cursor-pointer hover:bg-[var(--techwave-border-color)] duration-200 transition-all rounded'>
+        <i data-lucide='x' class='text-[var(--techwave-hover-color)] size-4'></i>
+    </div>
+    <h2 class='text-2xl font-semibold'>Scrape Website</h2>
+    <div class='flex flex-col gap-2 items-center justify-center'>
+        <label class='w-full' for='url'>Page Url</label>
+    <textarea id='url' name='url' placeholder='https://example.com/endpoint'  
+        class="text-xl flex min-h-24 w-124 rounded-md border border-[var(--techwave-border-color)] bg-background px-3 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)]"
+    ></textarea>
+    <p class=' font-normal text-sm text-[var(--techwave-heading-color)]'>Split multiple urls on different lines</p>
+    </div>
+    <button
+        type='submit'
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--techwave-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-[var(--techwave-site-bg-color)] hover:bg-white py-2 px-7">
+        <span>Scrape</span>
+        <div id="loading-indicator" class="htmx-indicator hidden">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+    </button>
+</form>
+
+    </div>
+    
+
+     <!-- /Scrape Website -->
+
+
+
     <!-- Upload Button -->
     <div
       class="file-upload-item"
       onclick="document.getElementById('file-input').click()"
     >
-      <img src="" />
-      <span class="">Upload File</span>
+       <i data-lucide="upload" class="h-8 w-8 text-gray-400 mb-4"></i>
+      <span class="">upload file</span>
     </div>
 
     <!-- Hidden File Input -->
@@ -39,7 +91,9 @@
 
 
 <script>
-  document.getElementById("file-input").addEventListener("change", function () {
+ 
+
+    document.getElementById("file-input").addEventListener("change", function () {
     let formData = new FormData();
     for (let file of this.files) {
       formData.append("files", file);
@@ -56,5 +110,7 @@
     .catch(error => console.error("Upload error:", error));
   });
 </script>
+
+
 
 {% endblock %}

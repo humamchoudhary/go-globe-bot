@@ -81,15 +81,8 @@
 
         loadFonts();
     </script>
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
-    <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
-    <!-- <link -->
-    <!--     href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" -->
-    <!--     rel="stylesheet"> -->
-
 
     <!-- Styles -->
-    <!-- <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} /> -->
     <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -165,20 +158,6 @@
                         <!--     </div> -->
                         <!-- </div> -->
                         <!-- !Language (bar item) -->
-
-                        <!-- Site Skin (bar item) -->
-                        <!-- <div class="bar__item bar__item_skin"> -->
-                        <!--     <a href="#" class="item_opener"> -->
-                        <!--         <img src={{ url_for('static', filename='svg/sun.svg' ) }} alt="" -->
-                        <!--             class="fn__svg light_mode"> -->
-                        <!--         <img src={{ url_for('static', filename='svg/moon.svg' ) }} alt="" -->
-                        <!--             class="fn__svg dark_mode"> -->
-                        <!--     </a> -->
-                        <!-- </div> -->
-                        <!-- !Site Skin (bar item) -->
-
-
-
                     </div>
                 </div>
                 <!-- !Header right: navigation bar -->
@@ -221,10 +200,9 @@
 
                     <!-- #1 navigation group -->
                     <div class="nav_group">
-                        <!-- <h2 class="group__title">Start Here</h2> -->
                         <ul class="group__list">
                             <li>
-                                <a href="/admin" class="fn__tooltip menu__item" data-position="right" title="Home">
+                                <a href="/admin" class="menu__item duration-200 transition-all " data-position="right">
                                     <span class="icon"><img src={{ url_for('static', filename='svg/home.svg' ) }} alt=""
                                             class="fn__svg"></span>
                                     <span class="text">Home</span>
@@ -233,8 +211,8 @@
                             </li>
 
                             <li>
-                                <a href="/admin/files" class="fn__tooltip menu__item" data-position="right"
-                                    title="Home">
+                                <a href="/admin/files" class="menu__item duration-200 transition-all"
+                                    data-position="right">
                                     <span class="icon"><img src={{ url_for('static', filename='svg/upload.svg' ) }}
                                             alt="" class="fn__svg"></span>
                                     <span class="text">Upload File</span>
@@ -242,8 +220,8 @@
                             </li>
 
                             <li>
-                                <a href="/admin/settings" class="fn__tooltip menu__item" data-position="right"
-                                    title="Home">
+                                <a href="/admin/settings" class="menu__item duration-200 transition-all"
+                                    data-position="right">
                                     <span class="icon"><img src={{ url_for('static', filename='svg/setting.svg' ) }}
                                             alt="" class="fn__svg"></span>
                                     <span class="text">Settings</span>
@@ -251,125 +229,17 @@
 
                             </li>
 
-                            <!-- <li> -->
-                            <!--     <a href="/cost" class="fn__tooltip menu__item" data-position="right" title="Home"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/home.svg' ) }} alt="" -->
-                            <!--                 class="fn__svg"></span> -->
-                            <!--         <span class="text">Cost</span> -->
-                            <!--     </a> -->
-                            <!-- </li> -->
-                            <!---->
-                            <!-- <li> -->
-                            <!--     <a href="/new-admin" class="fn__tooltip menu__item" data-position="right" title="Home"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/home.svg' ) }} alt="" -->
-                            <!--                 class="fn__svg"></span> -->
-                            <!--         <span class="text">Add New Admin</span> -->
-                            <!--     </a> -->
-                            <!-- </li> -->
-
-                            <!-- <li> -->
-                            <!--     <a href="/logs" class="fn__tooltip menu__item" data-position="right" title="Home"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/home.svg' ) }} alt="" -->
-                            <!--                 class="fn__svg"></span> -->
-                            <!--         <span class="text">Logs</span> -->
-                            <!--     </a> -->
-                            <!-- </li> -->
-
-                            <!-- <li> -->
-                            <!--     <a href="community-feed.html" class="fn__tooltip menu__item" data-position="right" -->
-                            <!--         title="Community Feed"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/community.svg' ) }} -->
-                            <!--                 alt="" class="fn__svg"></span> -->
-                            <!--         <span class="text">Community Feed</span> -->
-                            <!--     </a> -->
-                            <!-- </li> -->
-                            <!-- <li> -->
-                            <!--     <a href="personal-feed.html" class="fn__tooltip menu__item" data-position="right" -->
-                            <!--         title="Personal Feed"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/person.svg' ) }} -->
-                            <!--                 alt="" class="fn__svg"></span> -->
-                            <!--         <span class="text">Personal Feed<span class="count">48</span></span> -->
-                            <!--     </a> -->
-                            <!-- </li> -->
-                            <!-- <li> -->
-                            <!--     <a href="models.html" class="fn__tooltip menu__item" data-position="right" -->
-                            <!--         title="Finetuned Models"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/cube.svg' ) }} alt="" -->
-                            <!--                 class="fn__svg"></span> -->
-                            <!--         <span class="text">Finetuned Models</span> -->
-                            <!--     </a> -->
-                            <!-- </li> -->
                         </ul>
                     </div>
                     <!-- !#1 navigation group -->
 
-                    <!-- #2 navigation group -->
-                    <!-- <div class="nav_group"> -->
-                    <!--     <h2 class="group__title">User Tools</h2> -->
-                    <!--     <ul class="group__list"> -->
-                    <!--         <li> -->
-                    <!--             <a href="image-generation.html" class="fn__tooltip menu__item" data-position="right" -->
-                    <!--                 title="Image Generation"> -->
-                    <!--                 <span class="icon"><img src={{ url_for('static', filename='svg/image.svg' ) }} -->
-                    <!--                         alt="" class="fn__svg"></span> -->
-                    <!--                 <span class="text">Image Generation</span> -->
-                    <!--             </a> -->
-                    <!--         </li> -->
-                    <!--         <li> -->
-                    <!--             <a href="ai-chat-bot.html" class="fn__tooltip active menu__item" data-position="right" -->
-                    <!--                 title="AI Chat Bot"> -->
-                    <!--                 <span class="icon"><img src={{ url_for('static', filename='svg/chat.svg' ) }} alt="" -->
-                    <!--                         class="fn__svg"></span> -->
-                    <!--                 <span class="text">AI Chat Bot</span> -->
-                    <!--             </a> -->
-                    <!--         </li> -->
-                    <!--     </ul> -->
-                    <!-- </div> -->
-                    <!-- !#2 navigation group -->
 
                     <!-- #3 navigation group -->
                     <div class="nav_group">
-                        <!-- <h2 class="group__title">Support</h2> -->
                         <ul class="group__list">
-                            <!-- <li> -->
-                            <!--     <a href="pricing.html" class="fn__tooltip menu__item" data-position="right" -->
-                            <!--         title="Pricing"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/dollar.svg' ) }} -->
-                            <!--                 alt="" class="fn__svg"></span> -->
-                            <!--         <span class="text">Pricing</span> -->
-                            <!--     </a> -->
-                            <!-- </li> -->
-                            <!-- <li class="menu-item-has-children"> -->
-                            <!--     <a href="video-generation.html" class="fn__tooltip menu__item" title="FAQ &amp; Help" -->
-                            <!--         data-position="right"> -->
-                            <!--         <span class="icon"><img src={{ url_for('static', filename='svg/question.svg' ) }} -->
-                            <!--                 alt="" class="fn__svg"></span> -->
-                            <!--         <span class="text">FAQ &amp; Help</span> -->
-                            <!--         <span class="trigger"><img src={{ url_for('static', filename='svg/arrow.svg' ) }} -->
-                            <!--                 alt="" class="fn__svg"></span> -->
-                            <!--     </a> -->
-                            <!--     <ul class="sub-menu"> -->
-                            <!--         <li> -->
-                            <!--             <a href="documentation.html"><span class="text">Documentation</span></a> -->
-                            <!--         </li> -->
-                            <!--         <li> -->
-                            <!--             <a href="faq.html"><span class="text">FAQ</span></a> -->
-                            <!--         </li> -->
-                            <!--         <li> -->
-                            <!--             <a href="changelog.html"><span class="text">Changelog<span -->
-                            <!--                         class="fn__sup">(1.0.0)</span></span></a> -->
-                            <!--         </li> -->
-                            <!--         <li> -->
-                            <!--             <a href="contact.html"><span class="text">Contact Us</span></a> -->
-                            <!--         </li> -->
-                            <!--         <li> -->
-                            <!--             <a href="index-2.html"><span class="text">Home #2</span></a> -->
-                            <!--         </li> -->
-                            <!--     </ul> -->
-                            <!-- </li> -->
                             <li>
-                                <a href="/admin/logout" class="fn__tooltip menu__item" data-position="right"
-                                    title="Log Out">
+                                <a href="/admin/logout" class="menu__item duration-200 transition-all"
+                                    data-position="right">
                                     <span class="icon"><img src={{ url_for('static', filename='svg/logout.svg' ) }}
                                             alt="" class="fn__svg"></span>
                                     <span class="text">Log Out</span>
@@ -474,7 +344,9 @@
         })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script>
+  lucide.createIcons();
+</script>
 </body>
 
 </html>

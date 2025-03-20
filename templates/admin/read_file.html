@@ -44,7 +44,7 @@
       <img src="{{ url_for('admin.serve_file', file_name=file.filename.split('/')[-1]) }}" alt="Image Preview">
     </div>
   {% elif file_readable %}
-    <pre>{{ file.content }}</pre>
+    <pre class='w-full text-wrap'>{{ file.content }}</pre>
   {% else %}
     <p>File is not readable</p>
   {% endif %}

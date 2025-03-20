@@ -1,3 +1,11 @@
+from urllib.parse import urlparse
+import xml.etree.ElementTree as ET
+from bs4 import BeautifulSoup
+import requests
+from .scrape import scrape_with_session
+from ast import literal_eval
+import re
+import time
 import copy
 from flask import send_from_directory
 import uuid
@@ -296,6 +304,7 @@ def settings():
     print(config)
     return render_template('admin/settings.html', settings=config['SETTINGS'])
 
+
 def save_settings(settings):
     session['settings'] = settings
     return True
@@ -359,6 +368,136 @@ def set_theme(theme_type):
     # data = request.json
     current_app.config['SETTINGS']['theme'] = theme_type
     return '', 200
+
+
+# @admin_bp.route('/scrape', methods=['POST'])
+# @admin_required
+# def scrape():
+#     urls = str(request.form.get('url')).rsplit()
+#     # time.sleep(2)
+#     for url in urls:
+#         res = scrape_with_session(
+#             url, rotate_user_agents=True, random_delay=True)
+#
+#         lines = str(res['text'])
+#         lines = re.sub(r"\s+", " ", lines).strip()
+#         with open(f"{os.getcwd()}/files/{'-'.join(res['url'].split('/')[2:])}.txt", 'w') as f:
+#             print(f.name)
+#             f.write(lines)
+#
+#     return '', 200
+#
+
+
+@admin_bp.route('/scrape', methods=['POST'])
+@admin_required
+def scrape():
+    urls = str(request.form.get('url')).rsplit()
+    all_urls = []
+
+    # Process each URL (could be a sitemap or regular page)
+    for url in urls:
+        collected_urls = process_url(url)
+        all_urls.extend(collected_urls)
+
+    # Now scrape all the collected URLs
+    for url in all_urls:
+        res = scrape_with_session(
+            url,
+            rotate_user_agents=True,
+            random_delay=True
+        )
+
+        if res and 'text' in res:
+            lines = str(res['text'])
+            print(lines)
+            lines = re.sub(r"\s+", " ", lines).strip()
+
+            # Create a filename from the URL
+            filename = '-'.join(res['url'].split('/')[2:])
+            if not filename:
+                # Use domain if path is empty
+                filename = urlparse(res['url']).netloc
+
+            filepath = f"{os.getcwd()}/files/{filename}.txt"
+
+            with open(filepath, 'w') as f:
+                print(f"Saving content to {f.name}")
+                f.write(lines)
+
+    return '', 200
+
+
+def process_url(url):
+    """
+    Process a URL which could be a sitemap or a regular page.
+    Returns a list of URLs to scrape.
+    """
+    result_urls = []
+
+    try:
+        response = requests.get(url, timeout=30)
+        if response.status_code != 200:
+            print(f"Failed to fetch {url}: Status code {response.status_code}")
+            return [url]  # Return original URL if we can't process it
+
+        content_type = response.headers.get('Content-Type', '')
+
+        # Check if it's XML (likely a sitemap)
+        if 'xml' in content_type or url.endswith('.xml') or '<urlset' in response.text or '<sitemapindex' in response.text:
+            # This appears to be a sitemap
+            urls_from_sitemap = extract_urls_from_sitemap(response.text, url)
+            result_urls.extend(urls_from_sitemap)
+        else:
+            # This is a regular URL to scrape
+            result_urls.append(url)
+
+    except Exception as e:
+        print(f"Error processing {url}: {str(e)}")
+        result_urls.append(url)  # Include the original URL if processing fails
+
+    return result_urls
+
+
+def extract_urls_from_sitemap(sitemap_content, base_url):
+    """
+    Extract URLs from a sitemap, handling both regular sitemaps and sitemap indexes.
+    Returns a list of URLs.
+    """
+    urls = []
+
+    try:
+        # Parse the XML
+        root = ET.fromstring(sitemap_content)
+
+        # Handle sitemap index (collection of sitemaps)
+        if root.tag.endswith('sitemapindex'):
+            # This is a sitemap index, we need to process each sitemap
+            for sitemap in root.findall('.//{*}sitemap'):
+                loc_elem = sitemap.find('.//{*}loc')
+                if loc_elem is not None and loc_elem.text:
+                    # Recursively process this sitemap
+                    child_sitemap_url = loc_elem.text.strip()
+                    print(f"Found child sitemap: {child_sitemap_url}")
+                    child_urls = process_url(child_sitemap_url)
+                    urls.extend(child_urls)
+
+        # Handle regular sitemap
+        elif root.tag.endswith('urlset'):
+            # This is a regular sitemap with URLs
+            for url_elem in root.findall('.//{*}url'):
+                loc_elem = url_elem.find('.//{*}loc')
+                if loc_elem is not None and loc_elem.text:
+                    page_url = loc_elem.text.strip()
+                    urls.append(page_url)
+
+    except Exception as e:
+        print(f"Error parsing sitemap from {base_url}: {str(e)}")
+        # Fall back to regex-based extraction if XML parsing fails
+        urls.extend(re.findall(r'<loc>(.*?)</loc>', sitemap_content))
+
+    print(f"Extracted {len(urls)} URLs from sitemap")
+    return urls
 
 
 def register_admin_socketio_events(socketio):

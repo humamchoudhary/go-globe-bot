@@ -51,10 +51,10 @@ def create_app(config_class=Config):
         },
         'subjects': [],
         'apiKeys': {
-            'claude': os.environ.get('CLAUDE_KEY', '') ,
-            'openAi': os.environ.get('OPENAI_KEY', '') ,
+            'claude': os.environ.get('CLAUDE_KEY', ''),
+            'openAi': os.environ.get('OPENAI_KEY', ''),
             'gemini': os.environ.get('GEMINI_KEY', '')},
-        'theme': 'light',
+        'theme': 'system',
         'model': 'gemini',
     }
 
