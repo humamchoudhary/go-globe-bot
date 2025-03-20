@@ -7,7 +7,7 @@ class ChatService:
         self.db = db
         self.chats_collection = db.chats
 
-    def create_chat(self, user_id):
+    def create_chat(self, user_id, subject):
         chat_id = str(uuid.uuid4())
         # if not room_id:
         #     room_id = f"{user_id}-{chat_id[:8]}"
@@ -21,7 +21,7 @@ class ChatService:
             chat_id=chat_id,
             # room_id=room_id,
             user_id=user_id,
-            messages=initial_messages
+            messages=initial_messages, subject=subject
         )
 
         self.chats_collection.insert_one(chat.to_dict())

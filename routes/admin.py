@@ -1,3 +1,4 @@
+import copy
 from flask import send_from_directory
 import uuid
 import os
@@ -55,7 +56,7 @@ def chat(room_id):
     chat = chat_service.get_chat_by_room_id(room_id)
     chats = chat_service.get_all_chats()
 
-    chats_data = [c.room_id for c in chats if c.admin_required]
+    chats_data = [c for c in chats if c.admin_required]
     if not chat:
         return redirect(url_for('admin.dashboard'))
     if request.headers.get('HX-Request'):
@@ -180,55 +181,52 @@ def serve_file(file_name):
 @admin_bp.route("/upload", methods=["POST"])
 @admin_required
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file provided"}), 400
+    if 'files' not in request.files:
+        return jsonify({"error": "No files provided"}), 400
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+    uploaded_files = request.files.getlist("files")  # Get multiple files
+    file_items = []
 
-    original_filename = secure_filename(file.filename)
-    file_extension = os.path.splitext(original_filename)[1].lower()
+    for file in uploaded_files:
+        if file.filename == '':
+            continue
 
-    # Generate a unique filename to prevent overwriting
-    unique_filename = f"{uuid.uuid4().hex}{file_extension}"
-    file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+        original_filename = secure_filename(file.filename)
+        file_extension = os.path.splitext(original_filename)[1].lower()
+        unique_filename = f"{uuid.uuid4().hex}{file_extension}"
+        file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
 
-    # Check if the file is a PDF
-    if file_extension == '.pdf':
-        try:
-            # Save the file temporarily
-            temp_path = os.path.join(UPLOAD_FOLDER, f"temp_{unique_filename}")
-            file.save(temp_path)
+        if file_extension == '.pdf':
+            try:
+                temp_path = os.path.join(
+                    UPLOAD_FOLDER, f"temp_{unique_filename}")
+                file.save(temp_path)
+                images = pdf2image.convert_from_path(temp_path)
 
-            # Convert PDF to images
-            images = pdf2image.convert_from_path(temp_path)
-
-            # If PDF has multiple pages, save the first one
-            # You can modify this to save all pages if needed
-            if images:
-                image_filename = f"{os.path.splitext(unique_filename)[0]}.png"
-                image_path = os.path.join(UPLOAD_FOLDER, image_filename)
-                images[0].save(image_path, 'PNG')
-
-                # Remove the temporary PDF file
-                os.remove(temp_path)
-
-                # Return the image filename instead
-                return render_template("admin/fragments/file_item.html", file=image_filename), 200
-            else:
-                # If conversion fails, save original PDF
+                if images:
+                    image_filename = f"{
+                        os.path.splitext(unique_filename)[0]}.png"
+                    image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+                    images[0].save(image_path, 'PNG')
+                    os.remove(temp_path)
+                    file_items.append(render_template(
+                        "admin/fragments/file_item.html", file=image_filename))
+                else:
+                    file.save(file_path)
+                    file_items.append(render_template(
+                        "admin/fragments/file_item.html", file=unique_filename))
+            except Exception as e:
+                file.seek(0)
                 file.save(file_path)
-        except Exception as e:
-            # If conversion fails, save original PDF
-            file.seek(0)  # Reset file pointer
+                print(f"PDF conversion error: {e}")
+                file_items.append(render_template(
+                    "admin/fragments/file_item.html", file=unique_filename))
+        else:
             file.save(file_path)
-            print(f"PDF conversion error: {e}")
-    else:
-        # For non-PDF files, save directly
-        file.save(file_path)
+            file_items.append(render_template(
+                "admin/fragments/file_item.html", file=unique_filename))
 
-    return render_template("admin/fragments/file_item.html", file=unique_filename), 200
+    return "".join(file_items), 200  # Return all file items as HTML
 
 
 @admin_bp.route('/logout')
@@ -247,7 +245,7 @@ def dashboard():
     chats = chat_service.get_all_chats()
 
     # Convert to dictionary representation
-    chats_data = [chat.room_id for chat in chats if chat.admin_required]
+    chats_data = [chat for chat in chats if chat.admin_required]
     return render_template('admin/dashboard.html', chats=chats_data, username="Admin")
 
 
@@ -282,6 +280,85 @@ def join_chat(room_id):
     return render_template('chat.html', room_id=room_id, is_admin=True)
 
 # Socket.IO events for admin
+
+
+@admin_bp.route('/settings', methods=['GET'])
+@admin_required
+def settings():
+
+    config = dict(current_app.config)
+    print(os.path.join(os.getcwd(),
+          current_app.config['SETTINGS']['logo']['large'][1:]))
+    config['SETTINGS']['logo']['large'] = current_app.config['SETTINGS']['logo']['large'] if os.path.exists(
+        os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['large'][1:])) else ''
+    config['SETTINGS']['logo']['small'] = current_app.config['SETTINGS']['logo']['small'] if os.path.exists(
+        os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['small'][1:])) else ''
+    print(config)
+    return render_template('admin/settings.html', settings=config['SETTINGS'])
+
+def save_settings(settings):
+    session['settings'] = settings
+    return True
+
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "txt", 'svg'}
+
+
+def allowed_file(filename):
+    """Check if file extension is allowed."""
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@admin_bp.route('/update-logo/<file_name>', methods=['POST'])
+@admin_required
+def upload_logo(file_name):
+
+    if "file" not in request.files:
+        return "No file part", 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return "No selected file", 400
+    if file_name == 'logo.svg':
+        f_type = 'large'
+    elif file_name == 'logo-desktop-mini.svg':
+        f_type = 'small'
+    if file and allowed_file(file_name):
+        # Prevent directory traversal attacks
+        filename = secure_filename(file_name)
+        file_path = os.path.join(current_app.config["LOGOS_FOLDER"], filename)
+        file.save(file_path)
+        current_app.config['SETTINGS']['logo'][f_type] = os.path.join(
+            '/static', 'img', filename)
+        # print(current_app.config)
+        return f"File saved at {file_path}", 200
+
+    return "Invalid file type", 400
+
+
+@admin_bp.route('/settings/api/<api_type>', methods=['POST', 'DELETE'])
+@admin_required
+def api_key(api_type):
+    if request.method == 'DELETE':
+        current_app.config['SETTINGS']['apiKeys'][api_type] = ''
+
+        print(current_app.config)
+        return '', 200
+    elif request.method == 'POST':
+        # data = request.json
+        current_app.config['SETTINGS']['apiKeys'][api_type] = request.form.get(
+            "key")
+        print(current_app.config)
+        return '', 200
+    return '', 500
+
+
+@admin_bp.route('/settings/theme/<theme_type>', methods=['POST'])
+@admin_required
+def set_theme(theme_type):
+    # data = request.json
+    current_app.config['SETTINGS']['theme'] = theme_type
+    return '', 200
 
 
 def register_admin_socketio_events(socketio):

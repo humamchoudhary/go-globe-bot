@@ -14,7 +14,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <title>Admin Login - Go Globe </title>
+    <title>Sign In - Go Globe</title>
 
     <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
 
@@ -36,14 +36,10 @@
 
     </script>
 
-    <!-- Google Fonts -->
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
-    <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
-    <!-- <link -->
-    <!--     href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" -->
-    <!--     rel="stylesheet"> -->
-    <!-- <!-- !Google Fonts -->
 
+    <!-- <script src="https://unpkg.com/@tailwindcss/browser@4"></script> 
+    -->
+    <!-- Styles -->
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} />
@@ -95,85 +91,137 @@
         loadFonts();
     </script>
 
+    <style>
+        .input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
 
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-<!-- <script src="https://unpkg.com/@tailwindcss/browser@4"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
 <body>
-
-
     <!-- Sign In -->
     <div class="techwave_fn_sign">
-
         <div class="sign__content">
             <img src={{ url_for('static', filename='img/logo.svg' ) }} alt="" class="desktop_logo"
                 style="max-width: 250px; margin-left: auto; margin-right: auto; margin-bottom: 20px;">
             <div class="login">
                 <div class="form__content">
-                    <div class="form__title mb-10">Sign In</div>
+                    <div class="form__title mb-10">User Authentication</div>
 
                     <p id="error-message" class="error" style="display: none"></p>
+
                     <div class="form__email">
-                        <label for="user_login">Email OR Username</label>
-                        <input type="text" class="input" id="user_login" autocapitalize="off" autocomplete="email"
-                            name="email" aria-describedby="login-message">
+                        <label for="name">Name</label>
+                        <input type="text" class="input" id="name" name="name" placeholder="Enter your name"
+                            autocapitalize="off" autocomplete="name">
                     </div>
-                    <div class="form__pass">
-                        <div class="pass_lab">
-                            <label for="user_password">Password</label>
-                            <a href="#">Forget Password?</a>
-                        </div>
-                        <input type="password" id="user_password" autocomplete="current-password" name="password"
-                            spellcheck="false">
+                    <div class="form__email">
+                        <label for="email">Email</label>
+                        <input type="email" class="input" id="email" name="email" placeholder="Enter your email"
+                            autocapitalize="off" autocomplete="email">
                     </div>
+
+                    <div class="form__email">
+                        <label for="subject">Message Subject</label>
+                        <input type="text" class="input" id="subject" name="subject" placeholder="Enter message subject"
+                            autocapitalize="off" autocomplete="off">
+                    </div>
+                    <div class="form__email">
+                        <label for="phone">Phone</label>
+                        <input type="text" class="input" id="phone" name="phone" placeholder="Enter your phone number"
+                            autocapitalize="off" autocomplete="tel">
+                    </div>
+                    <!-- <div class="form__pass checkbox-container" -->
+                    <!--     style="display: flex; align-items: center; margin-top: 15px; margin-bottom: 15px;"> -->
+                    <!--     <input type="checkbox" id="anonymous" name="anonymous" style="width: auto; margin-right: 10px;"> -->
+                    <!--     <label for="anonymous">Chat Anonymously</label> -->
+                    <!-- </div> -->
                     <button id="login-btn"
-                        class="fn__submit form__submit duration-300 transition-all hover:cursor-pointer font-bold ">Sign
-                        In</button>
+                        class="fn__submit form__submit duration-300 transition-all hover:cursor-pointer font-bold">Submit</button>
                 </div>
             </div>
         </div>
-
     </div>
     <!-- !Sign In -->
-
-
-
-    <!-- Scripts -->
-    <!-- <script type="text/javascript" src={{ url_for('static', filename='js/jquery.js' ) }}></script> -->
-    <!-- <script type="text/javascript" src={{ url_for('static', filename='js/plugins.js' ) }}></script> -->
-    <!-- <script type="text/javascript" src={{ url_for('static', filename='js/init.js' ) }}></script> -->
-    <!-- !Scripts -->
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const loginBtn = document.getElementById("login-btn");
-            const usernameInput = document.getElementById("user_login");
-            const passwordInput = document.getElementById("user_password");
+            const nameInput = document.getElementById("name");
+            const emailInput = document.getElementById("email");
+            const subjectInput = document.getElementById("subject");
+            const phoneInput = document.getElementById("phone");
+            // const anonymousCheckbox = document.getElementById("anonymous");
             const errorMessage = document.getElementById("error-message");
 
-            loginBtn.addEventListener("click", function () {
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value.trim();
+            // Function to toggle input fields based on anonymous checkbox
+            function toggleInputFields() {
+                // const isAnonymous = anonymousCheckbox.checked;
+                nameInput.disabled = isAnonymous;
+                emailInput.disabled = isAnonymous;
+                phoneInput.disabled = isAnonymous;
 
-                if (!username || !password) {
-                    showError("Please enter both username and password");
+                // Clear fields if anonymous is checked
+                if (isAnonymous) {
+                    nameInput.value = "";
+                    emailInput.value = "";
+                    phoneInput.value = "";
+                }
+            }
+
+            // Add event listener to the anonymous checkbox
+            // anonymousCheckbox.addEventListener("change", toggleInputFields);
+
+            loginBtn.addEventListener("click", function () {
+                // const isAnonymous = anonymousCheckbox.checked;
+                const name = nameInput.value.trim();
+                const email = emailInput.value.trim();
+                const phone = phoneInput.value.trim();
+                const subject = subjectInput.value.trim();
+
+                // Only validate fields if not anonymous
+                // if (!isAnonymous && (!name || !email)) {
+
+                if (!email && !phone) {
+                    showError('Email or Phone is required')
+                    return
+                }
+                if (!name ||!email) {
+                    showError("Please enter both name and email");
+                    return;
+                }
+                if (!subject) {
+                    showError('Subject is required');
                     return;
                 }
 
-                fetch("/admin/login", {
+                fetch("/min/auth", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({username, password}),
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        // anonymous: isAnonymous,
+                        subject: subject
+                    }),
                 })
+
                     .then((response) => {
                         if (response.ok) {
-                            return response.json().then((data) => {
-                                window.location.href = "/admin/";
-                            });
+                            console.log(response)
+                            if (response.redirected) {
+                                window.location.href = response.url
+                            }
+                            // window.location.href = "{{url_for('min.index')}}";
+                            // });
                         } else {
                             return response.json().then((data) => {
                                 showError(data.error || "Login failed");
@@ -184,6 +232,7 @@
                         console.error("Error:", error);
                         showError("An error occurred. Please try again.");
                     });
+
             });
 
             function showError(message) {
@@ -192,16 +241,13 @@
             }
 
             // Handle enter key
-            passwordInput.addEventListener("keypress", function (e) {
+            phoneInput.addEventListener("keypress", function (e) {
                 if (e.key === "Enter") {
                     loginBtn.click();
                 }
             });
         });
     </script>
-
-
-
 </body>
 
 </html>

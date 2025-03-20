@@ -19,13 +19,13 @@
     <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
 
     <script>
-        if (!localStorage.frenify_skin) {
-            localStorage.frenify_skin = 'dark';
-        }
-        if (!localStorage.frenify_panel) {
-            localStorage.frenify_panel = '';
-        }
-        document.documentElement.setAttribute("data-techwave-skin", localStorage.frenify_skin);
+        // if (!localStorage.frenify_skin) {
+        //     localStorage.frenify_skin = 'dark';
+        // }
+        // if (!localStorage.frenify_panel) {
+        //     localStorage.frenify_panel = '';
+        // }
+        document.documentElement.setAttribute("data-techwave-skin", '{{settings["theme"]}}');
         if (localStorage.frenify_panel !== '') {
             document.documentElement.classList.add(localStorage.frenify_panel);
         }
@@ -35,9 +35,10 @@
         }
 
     </script>
-
+    {% block header_script %}{% endblock %}
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         // Font files are injected from Flask context processor
         const fontFiles = {{font_files| tojson }};
@@ -80,36 +81,34 @@
 
         loadFonts();
     </script>
-    <!-- <!-- Google Fonts --> -->
     <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
     <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
     <!-- <link -->
     <!--     href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" -->
     <!--     rel="stylesheet"> -->
-    <!-- <!-- !Google Fonts --> -->
+
 
     <!-- Styles -->
-    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} />
+    <!-- <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} /> -->
     <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
 
- <!-- <script src="https://unpkg.com/@tailwindcss/browser@4"></script> -->
-
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>    <!--[if lt IE 9]> <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script> <![endif]-->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!--[if lt IE 9]> <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script> <![endif]-->
     <!-- !Styles -->
 
 </head>
 
 <body>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
     <div class="flash-messages">
-      {% for category, message in messages %}
+        {% for category, message in messages %}
         <div class="alert alert-{{ category }}">{{ message }}</div>
-      {% endfor %}
+        {% endfor %}
     </div>
-  {% endif %}
-{% endwith %}
+    {% endif %}
+    {% endwith %}
     <!-- Moving Submenu -->
     <div class="techwave_fn_fixedsub">
         <ul></ul>
@@ -147,35 +146,35 @@
 
 
                         <!-- Language (bar item) -->
-                        <div class="bar__item bar__item_language">
-                            <a href="#" class="item_opener">
-                                <img src={{ url_for('static', filename='svg/language.svg' ) }} alt="" class="fn__svg">
-                            </a>
-                            <div class="item_popup">
-                                <ul>
-                                    <li>
-                                        <span class="active">English</span>
-                                    </li>
-                                    <li>
-                                        <a href="#">Spanish</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">French</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                        <!-- <div class="bar__item bar__item_language"> -->
+                        <!--     <a href="#" class="item_opener"> -->
+                        <!--         <img src={{ url_for('static', filename='svg/language.svg' ) }} alt="" class="fn__svg"> -->
+                        <!--     </a> -->
+                        <!--     <div class="item_popup"> -->
+                        <!--         <ul> -->
+                        <!--             <li> -->
+                        <!--                 <span class="active">English</span> -->
+                        <!--             </li> -->
+                        <!--             <li> -->
+                        <!--                 <a href="#">Spanish</a> -->
+                        <!--             </li> -->
+                        <!--             <li> -->
+                        <!--                 <a href="#">French</a> -->
+                        <!--             </li> -->
+                        <!--         </ul> -->
+                        <!--     </div> -->
+                        <!-- </div> -->
                         <!-- !Language (bar item) -->
 
                         <!-- Site Skin (bar item) -->
-                        <div class="bar__item bar__item_skin">
-                            <a href="#" class="item_opener">
-                                <img src={{ url_for('static', filename='svg/sun.svg' ) }} alt=""
-                                    class="fn__svg light_mode">
-                                <img src={{ url_for('static', filename='svg/moon.svg' ) }} alt=""
-                                    class="fn__svg dark_mode">
-                            </a>
-                        </div>
+                        <!-- <div class="bar__item bar__item_skin"> -->
+                        <!--     <a href="#" class="item_opener"> -->
+                        <!--         <img src={{ url_for('static', filename='svg/sun.svg' ) }} alt="" -->
+                        <!--             class="fn__svg light_mode"> -->
+                        <!--         <img src={{ url_for('static', filename='svg/moon.svg' ) }} alt="" -->
+                        <!--             class="fn__svg dark_mode"> -->
+                        <!--     </a> -->
+                        <!-- </div> -->
                         <!-- !Site Skin (bar item) -->
 
 
@@ -198,12 +197,12 @@
                     <a href="/admin" class="fn_logo">
                         <span class="full_logo">
                             <img src={{ url_for('static', filename='img/logo.svg' ) }} alt="" class="desktop_logo">
-                            <img src={{ url_for('static', filename='img/logo.svg' ) }} alt=""
-                                class="retina_logo">
+                            <img src={{ url_for('static', filename='img/logo.svg' ) }} alt="" class="retina_logo">
                         </span>
-                        <span class="short_logo" style="justify-items: center; align-items: center; justify-content: center;">
-                            <img src={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }} style="max-width:70%;" alt=""
-                                class="desktop_logo">
+                        <span class="short_logo"
+                            style="justify-items: center; align-items: center; justify-content: center;">
+                            <img src={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}
+                                style="max-width:70%;" alt="" class="desktop_logo">
                             <img src={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }} alt=""
                                 class="retina_logo">
                         </span>
@@ -234,11 +233,22 @@
                             </li>
 
                             <li>
-                                <a href="/admin/files" class="fn__tooltip menu__item" data-position="right" title="Home">
-                                    <span class="icon"><img src={{ url_for('static', filename='svg/upload.svg' ) }} alt=""
-                                            class="fn__svg"></span>
+                                <a href="/admin/files" class="fn__tooltip menu__item" data-position="right"
+                                    title="Home">
+                                    <span class="icon"><img src={{ url_for('static', filename='svg/upload.svg' ) }}
+                                            alt="" class="fn__svg"></span>
                                     <span class="text">Upload File</span>
                                 </a>
+                            </li>
+
+                            <li>
+                                <a href="/admin/settings" class="fn__tooltip menu__item" data-position="right"
+                                    title="Home">
+                                    <span class="icon"><img src={{ url_for('static', filename='svg/setting.svg' ) }}
+                                            alt="" class="fn__svg"></span>
+                                    <span class="text">Settings</span>
+                                </a>
+
                             </li>
 
                             <!-- <li> -->
@@ -358,7 +368,8 @@
                             <!--     </ul> -->
                             <!-- </li> -->
                             <li>
-                                <a href="/admin/logout" class="fn__tooltip menu__item" data-position="right" title="Log Out">
+                                <a href="/admin/logout" class="fn__tooltip menu__item" data-position="right"
+                                    title="Log Out">
                                     <span class="icon"><img src={{ url_for('static', filename='svg/logout.svg' ) }}
                                             alt="" class="fn__svg"></span>
                                     <span class="text">Log Out</span>
@@ -446,27 +457,24 @@
                 const chat_list = `
 
 <li class="group__item">
-  <div
-    class="fn__chat_link "
-    hx-get="/admin/chat/${data.room_id}"
-    hx-swap="innerHTML"
-    hx-target=".chat__page"
-    hx-trigger="click"
-    hx-push-url="true"
-    id="${data.room_id}"
+  <a
+                href="/admin/chat/${data.room_id}"
+    class="fn__chat_link {{'active' if request.path.split('/')[-1] == chat }}"
   >
-    <p class="text text-clip">${data.room_id}</p>
-  </div>
+    <p class="text text-clip">${data.subject}</p>
+  </a>
 </li>
+
+
                 `
-                chatsContainer.insertAdjacentHTML('beforeend', chat_list)
+                chatsContainer.insertAdjacentHTML('afterbegin', chat_list)
 
 
             })
         })
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </body>
 
 </html>
-

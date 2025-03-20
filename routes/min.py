@@ -1,3 +1,4 @@
+import random
 from flask import render_template, session, request, jsonify, redirect, url_for, current_app
 from flask_socketio import join_room, leave_room, emit
 from . import min_bp
@@ -11,13 +12,13 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            return redirect('/login?redir=min.index')
+            return redirect('/min/login')
 
         user_service = UserService(current_app.db)
         user = user_service.get_user_by_id(session['user_id'])
 
         if not user:
-            return redirect('/login?redir=min.index')
+            return redirect('/min/login')
         return f(*args, **kwargs)
     return decorated_function
 
@@ -28,13 +29,68 @@ def index():
     return redirect(url_for('min.new_chat'))
 
 
-@min_bp.route('/newchat', methods=['GET'])
+@min_bp.route('login', methods=['GET', 'POST'])
+def login():
+    if request.method == "GET":
+        return render_template('user/min-login.html')
+
+
+def generate_random_username():
+    return f"user_{random.randint(1000, 9999)}"
+
+
+@min_bp.route('/auth', methods=['POST', 'GET'])
+def auth_user():
+    # print(request.json)
+    # return jsonify({'error':"test error"}),404
+    if request.method == "GET":
+        sess_user = session.get('user_id')
+        return ('', 204) if sess_user else jsonify(False)
+
+    # Check if the user is already authenticated
+    # if 'user_id' in session:
+    #     return ('', 204)
+
+    data = request.json or {}
+    name = data.get('name')
+    email = data.get('email')
+    phone = data.get('phone')
+    subject = data.get('subject')
+    is_anon = data.get('anonymous')
+    user_ip = request.remote_addr  # Automatically fetch IP
+    user_service = UserService(current_app.db)
+    if is_anon:
+        name = generate_random_username()
+        user = user_service.create_user(name, ip=user_ip)
+
+    else:
+        user = user_service.create_user(
+            name, email=email, phone=phone, ip=user_ip)
+
+    if not (name or email or phone):
+        # if not ALLOW_EMPTY_USERS:
+        if not True:
+            return jsonify({"error": "Empty users are not allowed."}), 400
+        name = generate_random_username()
+
+    # Store user details in session (replace with DB logic if needed)
+
+    session['user_id'] = user.user_id
+    session['role'] = "user"
+    # return redirect(url_for('chat.index'))
+    print(subject)
+    return redirect(url_for('min.new_chat', subject=subject))
+
+    # return jsonify({"error": "Empty users are not allowed."}), 400
+
+
+@min_bp.route('/newchat/<string:subject>', methods=['GET'])
 @login_required
-def new_chat():
+def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
-    chat = chat_service.create_chat(user.user_id)
+    chat = chat_service.create_chat(user.user_id, subject=subject)
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
 
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
@@ -49,6 +105,7 @@ def chat(chat_id):
 
     chat_service = ChatService(current_app.db)
     chat = chat_service.get_chat_by_room_id(f'{user.user_id}-{chat_id[:8]}')
+    print(not chat)
     if not chat:
         return redirect(url_for('min.new_chat'))
     # Get the username from session, fallback to "USER" if not available
@@ -76,7 +133,7 @@ def ping_admin(chat_id):
     # Notify admins via socketio
     current_app.socketio.emit('admin_required', {
         'room_id': room_id,
-        'chat_id': chat.chat_id
+        'chat_id': chat.chat_id, 'subject': chat.subject
     }, room='admin')
 
     if request.headers.get('HX-Request'):  # HTMX request

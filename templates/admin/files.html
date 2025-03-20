@@ -17,26 +17,44 @@
     </div>
 
     <!-- Hidden File Input -->
-    <input
-      type="file"
-      id="file-input"
-      class="hidden"
-      hx-post="{{ url_for('admin.upload_file') }}"
-      hx-target="#file-grid"
-      hx-swap="beforeend"
-      hx-trigger="fileSelected"
-      hx-encoding="multipart/form-data"
-      name="file"
-    />
+<input
+  type="file"
+  id="file-input"
+  class="hidden"
+  hx-post="{{ url_for('admin.upload_file') }}"
+  hx-target="#file-grid"
+  hx-swap="beforeend"
+  hx-trigger="fileSelected"
+  hx-encoding="multipart/form-data"
+  name="files"
+  multiple
+  accept=".png, .jpg, .jpeg, .gif, .bmp, .webp, .svg, .txt, .md, .csv, .log, .json, .xml, .pdf, .html"
+/>
 
     <!-- Render Uploaded Files -->
     {% for file in files %} {% include 'admin/fragments/file_item.html' with
     context %} {% endfor %}
   </div>
 </div>
+
+
 <script>
   document.getElementById("file-input").addEventListener("change", function () {
-    this.dispatchEvent(new Event("fileSelected", { bubbles: true }));
+    let formData = new FormData();
+    for (let file of this.files) {
+      formData.append("files", file);
+    }
+
+    fetch("{{ url_for('admin.upload_file') }}", {
+      method: "POST",
+      body: formData,
+    })
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById("file-grid").insertAdjacentHTML("beforeend", html);
+    })
+    .catch(error => console.error("Upload error:", error));
   });
 </script>
+
 {% endblock %}

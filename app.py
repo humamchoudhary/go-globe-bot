@@ -42,8 +42,27 @@ def create_app(config_class=Config):
     db = client.get_database()
     app.db = db
     app.config['SESSION_MONGODB'] = client
+    app.config['LOGOS_FOLDER'] = os.path.join(os.getcwd(), 'static/img/')
+    app.config['SETTINGS'] = {
+        'logo': {
+            'large': '/static/img/logo.svg',
+            'small':
+            '/static/img/logo-desktop-mini.svg',
+        },
+        'subjects': [],
+        'apiKeys': {
+            'claude': os.environ.get('CLAUDE_KEY', '') ,
+            'openAi': os.environ.get('OPENAI_KEY', '') ,
+            'gemini': os.environ.get('GEMINI_KEY', '')},
+        'theme': 'light',
+        'model': 'gemini',
+    }
 
-    app.bot = Bot(Config.BOT_NAME)
+    @app.context_processor
+    def settings():
+        print(app.config['SETTINGS'])
+        return {'settings': app.config['SETTINGS']}
+    app.bot = Bot(Config.BOT_NAME, app=app)
 
     # Setup Flask-Session
     Session(app)
@@ -79,6 +98,7 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def inject_font_data():
+        print('fonts called')
         return {'font_files': get_font_data()}
 
     @app.route("/site-map")

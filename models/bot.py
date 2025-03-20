@@ -1,4 +1,5 @@
 # from config import Config
+from flask import current_app
 from google import genai
 import os
 from google.genai import types
@@ -9,10 +10,14 @@ load_dotenv()
 
 
 class Bot:
-    def __init__(self, name):
-        self.gm_key = os.environ.get('GEMINI_KEY', None)
-        self.gpt_key = os.environ.get('OPENAI_KEY', None)
-        self.cld_key = os.environ.get('CLAUDE_KEY', None)
+    def __init__(self, name, app):
+        # self.gm_key = os.environ.get('GEMINI_KEY', None)
+        # self.gpt_key = os.environ.get('OPENAI_KEY', None)
+        # self.cld_key = os.environ.get('CLAUDE_KEY', None)
+
+        self.gm_key = app.config['SETTINGS']['apiKeys']['gemini']
+        self.gpt_key = app.config['SETTINGS']['apiKeys']['openAi']
+        self.cld_key = app.config['SETTINGS']['apiKeys']['claude']
         self.active_bot = None
         self.active_bot_name = ""
         self.sys_prompt = f"Your name is {

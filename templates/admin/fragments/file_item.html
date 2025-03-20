@@ -1,15 +1,20 @@
 <!-- admin/fragments/file_item.html -->
 <a href="{{ url_for('admin.file_page', file_name=file) }}" class="block">
-    <div class="file-item p-2 border rounded hover:bg-gray-100">
-        {% set file_ext = file.split('.')[-1].lower() %}
-        {% if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
-        <img src="{{ url_for('admin.serve_file', file_name=file) }}" alt="{{ file }}"
-            class="w-full h-32 object-cover mb-2">
-        {% else %}
-        <div class="w-full h-32 flex items-center justify-center bg-gray-200 mb-2">
-            <span class="text-xl">{{ file_ext.upper() }}</span>
-        </div>
-        {% endif %}
-        <p class="text-sm truncate">{{ file[:10] }}{% if file|length>10%}...{{file_ext}}{%endif%}</p>
+  <div class="file-item p-2 border rounded hover:bg-gray-700/40">
+    {% set file_ext = file.split('.')[-1].lower() %} {% if file_ext in ['jpg',
+    'jpeg', 'png', 'gif', 'webp', 'svg'] %}
+    <img
+      src="{{ url_for('admin.serve_file', file_name=file) }}"
+      alt="{{ file }}"
+      class="w-full h-32 object-cover mb-2"
+    />
+    {% else %}
+    <div class="w-full h-32 flex items-center justify-center mb-2">
+      <span class="text-xl">{{ file_ext.upper() }}</span>
     </div>
+    {% endif %}
+    <p class="text-sm truncate">
+      {{ file[:10] }}{% if file|length>10%}...{{file_ext}}{%endif%}
+    </p>
+  </div>
 </a>

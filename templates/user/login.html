@@ -19,13 +19,17 @@
     <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
 
     <script>
-        if (!localStorage.frenify_skin) {
-            localStorage.frenify_skin = 'dark';
-        }
-        if (!localStorage.frenify_panel) {
-            localStorage.frenify_panel = '';
-        }
-        document.documentElement.setAttribute("data-techwave-skin", localStorage.frenify_skin);
+        // if (!localStorage.frenify_skin) {
+        //     localStorage.frenify_skin = 'dark';
+        // }
+        // if (!localStorage.frenify_panel) {
+        //     localStorage.frenify_panel = '';
+        // }
+        // // if ("{{request.args.get('mode')}}" !== None) {
+        // //     localStorage.frenify_skin = "{{request.args.get('mode')}}"
+        // // }
+
+        document.documentElement.setAttribute("data-techwave-skin", '{{settings["theme"]}}');
         if (localStorage.frenify_panel !== '') {
             document.documentElement.classList.add(localStorage.frenify_panel);
         }

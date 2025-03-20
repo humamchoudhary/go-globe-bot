@@ -1,8 +1,8 @@
 @charset "utf-8";
 
-
-
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 .markdown-content {
   /* Basic styling */
@@ -11,16 +11,20 @@
 }
 
 /* Headers */
-.markdown-content h1, .markdown-content h2, 
-.markdown-content h3, .markdown-content h4, 
-.markdown-content h5, .markdown-content h6 {
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
   margin-top: 1em;
   margin-bottom: 0.5em;
   font-weight: bold;
 }
 
 /* Lists */
-.markdown-content ul, .markdown-content ol {
+.markdown-content ul,
+.markdown-content ol {
   padding-left: 1.5em;
   margin-bottom: 1em;
 }
@@ -57,11 +61,14 @@
   margin-bottom: 1em;
 }
 
-.markdown-content table, .markdown-content th, .markdown-content td {
+.markdown-content table,
+.markdown-content th,
+.markdown-content td {
   border: 1px solid #ddd;
 }
 
-.markdown-content th, .markdown-content td {
+.markdown-content th,
+.markdown-content td {
   padding: 8px;
   text-align: left;
 }
@@ -80,8 +87,6 @@
   border-top: 1px solid #ddd;
   margin: 1em 0;
 }
-
-
 
 /*
 /*	Copyright (c) 2023 Frenify
@@ -254,7 +259,7 @@ body {
 
 p {
   letter-spacing: 0;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 ol li {
@@ -711,9 +716,9 @@ frenify_typing span {
   margin-top: 15px;
 }
 
-button:hover {
-  background: #0056b3;
-}
+/* button:hover { */
+/*   background: #0056b3; */
+/* } */
 
 .fn__submit {
   display: block;
@@ -743,7 +748,7 @@ button:hover {
   background-color: var(--techwave-button-bg-color);
   outline: none;
   outline-color: transparent;
-  border-radius: 20px;
+  /* border-radius: 20px; */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -5723,7 +5728,6 @@ a.fn__like.no_border .fn__svg {
 }
 
 .ping-admin {
-  color: #fff;
   border: 2px solid var(--techwave-border-color);
   border-radius: 8px;
   text-align: center;
@@ -7136,7 +7140,7 @@ a.fn__like.no_border .fn__svg {
   width: 100%;
   max-width: 100%;
   min-width: 100%;
-  border-radius: 20px;
+  /* border-radius: 20px; */
   height: 40px;
   display: block;
   text-align: center;
