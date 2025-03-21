@@ -226,7 +226,7 @@ select {
   width: 100%;
   padding: 0 14px;
   background-color: var(--techwave-some-a-bg-color);
-  border: 2px solid transparent;
+  border: 2px solid var(--techwave-border-color);
   border-radius: 5px;
   outline: none;
   color: var(--techwave-heading-color);
@@ -526,7 +526,7 @@ frenify_typing span {
 .file-upload-item {
   display: flex;
   flex-direction: column;
-  width: 200px;
+  /* width: 200px; */
   height: 200px;
   border: 1px dashed var(--techwave-border-color);
   text-align: center;
@@ -544,7 +544,7 @@ frenify_typing span {
 .file-item {
   display: flex;
   flex-direction: column;
-  width: 200px;
+  /* width: 200px; */
   height: 200px;
   border: 1px solid var(--techwave-border-color);
   text-align: center;

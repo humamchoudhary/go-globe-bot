@@ -21,7 +21,7 @@ class Bot:
         self.active_bot = None
         self.active_bot_name = ""
         self.sys_prompt = f"Your name is {
-            name}, you are a general customer service assistant. help the user with the provided data. dont generate information from your own, if you dont know about anything tell the user you can help with that issue please click the request admin button for human help. the attached images are also part of system promtp"
+            name}, you are a general customer service assistant. help the user with the provided data. dont generate information from your own, if you dont know about anything tell the user you cant help with that issue please click the request admin button for human help. the attached images are also part of system promtp"
         # self.default_sys_p = self.sys_prompt
         self.bot_maps = {"gm_2.0_f": self._gemini}
         self._set_bot('gm_2.0_f')
@@ -33,10 +33,13 @@ class Bot:
     #     os.listdir('')
 
     def responed(self, input):
-        return self.bot_maps[self.active_bot_name](input).text
+
+        res, t = self.bot_maps[self.active_bot_name](input)
+        return res.text, t
 
     def _set_bot(self, name):
         if name == "gm_2.0_f":
+            genai
             self.active_bot = genai.Client(api_key=self.gm_key)
             self.active_bot_name = name
         else:
@@ -66,9 +69,32 @@ class Bot:
             print(input_data)
             response = self.active_bot.models.generate_content(
                 model="gemini-2.0-flash", config=types.GenerateContentConfig(system_instruction=self.sys_prompt+".\n\n".join(text), max_output_tokens=1000), contents=input_data)
-            return response
-            # print(text)
-            # print(images)
+            # print(self.active_bot.models.count_tokens(
+            #     contents=[input+self.sys_pro], model="gemini-2.0-flash"))
+            # print(response.usage_metadata.dict())
+            tokens = self._count_tokens(response)
+            return response, tokens
+
+    def _get_cur_cost(self):
+        """
+        return per mil token cost
+        returns:
+                TUPLE(input,output)
+
+            """
+        return 0.05, 0.1
+
+    def _count_tokens(self, res, content=None):
+        inp_cost, out_cost = 0, 0
+        if self.active_bot_name == 'gm_2.0_f':
+            tokens = res.usage_metadata.dict()
+            inp_cost, out_cost = self._get_cur_cost()
+            tokens = {'output': tokens['candidates_token_count'],
+                      'input': tokens['prompt_token_count'], 'inp_cost': inp_cost, 'out_cost': out_cost}
+        total_cost = (
+            inp_cost * tokens['inp_cost']/1000000) + (out_cost * tokens['output']/1000000)
+        tokens['cost'] = total_cost
+        return tokens
 
 
 if __name__ == "__main__":

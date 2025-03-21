@@ -24,7 +24,7 @@
 <div class="techwave_fn_aichatbot_page fn__chatbot" style="margin-inline: 34px">
   <div class="chat__page">
     <h1>Settings</h1>
-    <div class="grid grid-cols-2 gap-10">
+    <div class="grid  grid-cols-1 md:grid-cols-2 gap-10">
       <div class="gap-4 flex flex-col">
         <div
           class="flex flex-col justify-center"
@@ -104,7 +104,7 @@ class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-m
           "
         >
           <h2 style="font-size: 26px">General Settings</h2>
-          <div class='grid grid-cols-3 items-center justify-center gap-4 h-24 my-6'>
+          <div class='grid grid-cols-1 md:grid-cols-3 items-center justify-center gap-4 h-64 md:h-24 my-6'>
               {% for theme in ['light','system','dark'] %}
               <div 
                hx-post='/admin/settings/theme/{{theme}}'

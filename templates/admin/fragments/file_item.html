@@ -1,6 +1,6 @@
 <!-- admin/fragments/file_item.html -->
-<a href="{{ url_for('admin.file_page', file_name=file) }}" class="block">
-  <div class="file-item p-2 border rounded hover:bg-gray-700/40">
+<a href="{{ url_for('admin.file_page', file_name=file) }}" class="block w-full">
+  <div class="file-item p-2 border w-full rounded hover:bg-gray-700/40">
     {% set file_ext = file.split('.')[-1].lower() %} {% if file_ext in ['jpg',
     'jpeg', 'png', 'gif', 'webp', 'svg'] %}
     <img

@@ -2,6 +2,7 @@ from flask import render_template, session, request, jsonify, redirect, url_for,
 from flask_socketio import join_room, leave_room, emit
 from . import chat_bp
 from services.user_service import UserService
+from services.usage_service import UsageService
 from services.chat_service import ChatService
 from functools import wraps
 
@@ -139,7 +140,12 @@ def send_message(chat_id):
         'timestamp': new_message.timestamp.isoformat(),
     }, room=f'{user.user_id}-{chat_id[:8]}')
     if (not chat.admin_required):
-        msg = current_app.bot.responed(message)
+        msg, usage = current_app.bot.responed(message)
+        print(msg)
+        print(usage)
+
+        usage_service = UsageService(current_app.db)
+        usage_service.add_cost(usage['input'], usage['output'], usage['cost'])
 
         bot_message = chat_service.add_message(
             chat.room_id, chat.bot_name, msg)

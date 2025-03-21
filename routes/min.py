@@ -1,3 +1,4 @@
+from services.usage_service import UsageService
 import random
 from flask import render_template, session, request, jsonify, redirect, url_for, current_app
 from flask_socketio import join_room, leave_room, emit
@@ -174,8 +175,10 @@ def send_message(chat_id):
     }, room=f'{user.user_id}-{chat_id[:8]}')
 
     if (not chat.admin_required):
-        msg = current_app.bot.responed(message)
+        msg, usage = current_app.bot.responed(message)
 
+        usage_service = UsageService(current_app.db)
+        usage_service.add_cost(usage['input'], usage['output'], usage['cost'])
         bot_message = chat_service.add_message(
             chat.room_id, chat.bot_name, msg)
 
