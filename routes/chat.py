@@ -140,7 +140,7 @@ def send_message(chat_id):
         'timestamp': new_message.timestamp.isoformat(),
     }, room=f'{user.user_id}-{chat_id[:8]}')
     if (not chat.admin_required):
-        msg, usage = current_app.bot.responed(message)
+        msg, usage = current_app.bot.responed(message, chat.messages)
         print(msg)
         print(usage)
 
@@ -159,9 +159,9 @@ def send_message(chat_id):
     return render_template('user/fragments/chat_message.html', message=new_message, username=user.name)
 
 
-@chat_bp.route('/newchat', methods=['GET'])
+@chat_bp.route('/newchat/<string:subject>', methods=['GET'])
 @user_required
-def new_chat():
+def new_chat(subject):
     if 'user_id' not in session:
         return redirect(url_for('chat.index'))
 
@@ -173,7 +173,7 @@ def new_chat():
         return redirect(url_for('chat.index'))
 
     # Create a new chat with server-generated room_id
-    chat = chat_service.create_chat(user.user_id)
+    chat = chat_service.create_chat(user.user_id, subject=subject)
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
 
     if request.headers.get('HX-Request'):  # HTMX request

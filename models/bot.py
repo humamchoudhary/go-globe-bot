@@ -21,7 +21,7 @@ class Bot:
         self.active_bot = None
         self.active_bot_name = ""
         self.sys_prompt = f"Your name is {
-            name}, you are a general customer service assistant. help the user with the provided data. dont generate information from your own, if you dont know about anything tell the user you cant help with that issue please click the request admin button for human help. the attached images are also part of system promtp"
+            name}, you are a general customer service assistant. help the user with the provided data. dont generate information from your own neither give user response that is not related to the content provided, if you dont know about anything tell the user you cant help with that issue please click the request admin button for human help. the attached images are also part of system promtp"
         # self.default_sys_p = self.sys_prompt
         self.bot_maps = {"gm_2.0_f": self._gemini}
         self._set_bot('gm_2.0_f')
@@ -32,9 +32,9 @@ class Bot:
     # def update_sys_p(self):
     #     os.listdir('')
 
-    def responed(self, input):
+    def responed(self, input, prev=None):
 
-        res, t = self.bot_maps[self.active_bot_name](input)
+        res, t = self.bot_maps[self.active_bot_name](input, prev)
         return res.text, t
 
     def _set_bot(self, name):
@@ -45,7 +45,7 @@ class Bot:
         else:
             raise NotImplementedError('Not Implemented')
 
-    def _gemini(self, input):
+    def _gemini(self, input, prev=None):
         if self.active_bot_name != 'gm_2.0_f':
             raise ValueError('Select Gemini as active bot before using this')
         else:
@@ -67,8 +67,14 @@ class Bot:
             input_data = [input]
             input_data.extend(images)
             print(input_data)
+            print([str(m) for m in prev])
             response = self.active_bot.models.generate_content(
-                model="gemini-2.0-flash", config=types.GenerateContentConfig(system_instruction=self.sys_prompt+".\n\n".join(text), max_output_tokens=1000), contents=input_data)
+                model="gemini-2.0-flash", config=types.GenerateContentConfig(system_instruction=self.sys_prompt
+                                                                             # + '\n\nprevious chat: ' +
+                                                                             # str([
+                                                                             #     str(m) for m in prev])
+                                                                             + ".\n\n".join(text),
+                                                                             max_output_tokens=1000), contents=input_data)
             # print(self.active_bot.models.count_tokens(
             #     contents=[input+self.sys_pro], model="gemini-2.0-flash"))
             # print(response.usage_metadata.dict())
@@ -82,7 +88,7 @@ class Bot:
                 TUPLE(input,output)
 
             """
-        return 0.05, 0.1
+        return os.environ.get('GM_INPUT_PRICE', 0), os.environ.get('GM_OUTPUT,PRICE', 0)
 
     def _count_tokens(self, res, content=None):
         inp_cost, out_cost = 0, 0

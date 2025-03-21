@@ -110,12 +110,20 @@ def create_app(config_class=Config):
                 links.append((url, rule.endpoint))
         return jsonify(links)
 
-    @app.route('/test-page')
-    def testpage():
-        chat_names = ['chat1 name', 'chat2 name', 'chat2 name']
-        chats = [{'sender': "bot", 'message': "Hello! How can I help you today?", 'timestamp': "10-10-2024"},
-                 {'sender': "user", 'message': "Temp user message", 'timestamp': "10-10-2024"}]
-        return render_template('test.html', chats=chat_names, messages=chats)
+    @app.route('/privacy')
+    def privacy():
+        return render_template('privacy.html')
+    
+    @app.route('/terms')
+    def terms():
+        return render_template('terms.html')
+
+    # @app.route('/test-page')
+    # def testpage():
+    #     chat_names = ['chat1 name', 'chat2 name', 'chat2 name']
+    #     chats = [{'sender': "bot", 'message': "Hello! How can I help you today?", 'timestamp': "10-10-2024"},
+    #              {'sender': "user", 'message': "Temp user message", 'timestamp': "10-10-2024"}]
+    #     return render_template('test.html', chats=chat_names, messages=chats)
 
     return app, socketio
 

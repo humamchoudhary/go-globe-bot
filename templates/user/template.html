@@ -19,15 +19,6 @@
     <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
 
     <script>
-        // if (!localStorage.frenify_skin) {
-        //     localStorage.frenify_skin = 'dark';
-        // }
-        // if (!localStorage.frenify_panel) {
-        //     localStorage.frenify_panel = '';
-        // }
-        // // if ("{{request.args.get('mode')}}" !== None) {
-        // //     localStorage.frenify_skin = "{{request.args.get('mode')}}"
-        // // }
 
         document.documentElement.setAttribute("data-techwave-skin", '{{settings["theme"]}}');
         if (localStorage.frenify_panel !== '') {
@@ -38,6 +29,7 @@
 
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script> <!-- Styles -->
 
     <script>
@@ -84,7 +76,7 @@
     </script>
 
     <!-- Styles -->
-    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} />
+    <!-- <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} /> -->
     <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
     <!--[if lt IE 9]> <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script> <![endif]-->
     <!-- !Styles -->
@@ -133,29 +125,29 @@
 
 
                         <!-- Language (bar item) -->
-                        <div class="bar__item bar__item_language">
-                            <a href="#" class="item_opener">
-                                <img src={{ url_for('static', filename='svg/language.svg' ) }} alt="" class="fn__svg">
-                            </a>
-                            <div class="item_popup">
-                                <ul>
-                                    <li>
-                                        <span class="active">English</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                        <!-- <div class="bar__item bar__item_language"> -->
+                        <!--     <a href="#" class="item_opener"> -->
+                        <!--         <img src={{ url_for('static', filename='svg/language.svg' ) }} alt="" class="fn__svg"> -->
+                        <!--     </a> -->
+                        <!--     <div class="item_popup"> -->
+                        <!--         <ul> -->
+                        <!--             <li> -->
+                        <!--                 <span class="active">English</span> -->
+                        <!--             </li> -->
+                        <!--         </ul> -->
+                        <!--     </div> -->
+                        <!-- </div> -->
                         <!-- !Language (bar item) -->
 
                         <!-- Site Skin (bar item) -->
-                        <div class="bar__item bar__item_skin">
-                            <a href="#" class="item_opener">
-                                <img src={{ url_for('static', filename='svg/sun.svg' ) }} alt=""
-                                    class="fn__svg light_mode">
-                                <img src={{ url_for('static', filename='svg/moon.svg' ) }} alt=""
-                                    class="fn__svg dark_mode">
-                            </a>
-                        </div>
+                        <!-- <div class="bar__item bar__item_skin"> -->
+                        <!--     <a href="#" class="item_opener"> -->
+                        <!--         <img src={{ url_for('static', filename='svg/sun.svg' ) }} alt="" -->
+                        <!--             class="fn__svg light_mode"> -->
+                        <!--         <img src={{ url_for('static', filename='svg/moon.svg' ) }} alt="" -->
+                        <!--             class="fn__svg dark_mode"> -->
+                        <!--     </a> -->
+                        <!-- </div> -->
                         <!-- !Site Skin (bar item) -->
 
 
@@ -340,8 +332,8 @@
                         </div>
                         <div class="menu_items">
                             <ul>
-                                <li><a href="terms.html">Terms of Service</a></li>
-                                <li><a href="privacy.html">Privacy Policy</a></li>
+                                <li><a href="terms">Terms of Service</a></li>
+                                <li><a href="privacy">Privacy Policy</a></li>
                             </ul>
                         </div>
                     </div>
@@ -366,6 +358,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
     <!-- !Scripts -->
 
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 
 </html>

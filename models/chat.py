@@ -22,6 +22,9 @@ class Message:
             timestamp=data.get("timestamp")
         )
 
+    def __str__(self):
+        return f"{self.to_dict()}"
+
 
 class Chat:
     def __init__(self, chat_id, user_id, bot_name="bot", messages=None,
