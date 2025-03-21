@@ -4,7 +4,6 @@ import logging
 import random
 import time
 from urllib.parse import urlparse
-from html2image import Html2Image
 
 
 def scrape_with_session(url, cookies=None, headers=None, timeout=30, rotate_user_agents=True, random_delay=True):
