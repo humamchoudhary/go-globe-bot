@@ -19,12 +19,6 @@
     <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
 
     <script>
-        // if (!localStorage.frenify_skin) {
-        //     localStorage.frenify_skin = 'dark';
-        // }
-        // if (!localStorage.frenify_panel) {
-        //     localStorage.frenify_panel = '';
-        // }
         document.documentElement.setAttribute("data-techwave-skin", '{{settings["theme"]}}');
         if (localStorage.frenify_panel !== '') {
             document.documentElement.classList.add(localStorage.frenify_panel);
@@ -86,7 +80,6 @@
     <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!--[if lt IE 9]> <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script> <![endif]-->
     <!-- !Styles -->
 
 </head>
@@ -137,27 +130,6 @@
                 <div class="header__right">
                     <div class="fn__nav_bar">
 
-
-                        <!-- Language (bar item) -->
-                        <!-- <div class="bar__item bar__item_language"> -->
-                        <!--     <a href="#" class="item_opener"> -->
-                        <!--         <img src={{ url_for('static', filename='svg/language.svg' ) }} alt="" class="fn__svg"> -->
-                        <!--     </a> -->
-                        <!--     <div class="item_popup"> -->
-                        <!--         <ul> -->
-                        <!--             <li> -->
-                        <!--                 <span class="active">English</span> -->
-                        <!--             </li> -->
-                        <!--             <li> -->
-                        <!--                 <a href="#">Spanish</a> -->
-                        <!--             </li> -->
-                        <!--             <li> -->
-                        <!--                 <a href="#">French</a> -->
-                        <!--             </li> -->
-                        <!--         </ul> -->
-                        <!--     </div> -->
-                        <!-- </div> -->
-                        <!-- !Language (bar item) -->
                     </div>
                 </div>
                 <!-- !Header right: navigation bar -->
