@@ -59,7 +59,10 @@
                                 style="color: #fff;"></button>
                 </div>
 
-                <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin">Request Admin</div>
+                <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin" title='Request Admin'
+                    >
+                    <i data-lucide='headset'></i>
+                </div>
             </div>
         </div>
         {% endif %}
@@ -167,7 +170,7 @@
             </button>
         </div>
         <div class="sidebar_content">
-            <ul class="group__list">
+            <ul class="flex flex-col gap-2">
                 {% if chats %}
                 {% for chat in chats %}{% include 'user/fragments/chat_list_item.html' %}{% endfor %}
                 {% else %}
@@ -177,8 +180,8 @@
         </div>
     </div>
 
-<div id='newchat-modal' class='fixed flex flex-col justify-center items-center z-100 w-full h-full top-0 bottom-0 left-0 right-0 bg-black/20 hidden'>
-    <form class='flex flex-col items-center justify-center gap-7 px-22 py-14 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] relative min-w-24 min-h-24'
+<div id='newchat-modal' class='fixed flex flex-col w-screen justify-center items-center z-100 h-full top-0 bottom-0 left-0 right-0 bg-black/20 hidden'>
+    <form class='flex flex-col items-center justify-center gap-7 rounded-md px-6 md:px-22 py-14 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] relative  md:min-w-24 min-h-24'
           onsubmit="redirectToChat(event)">
         <div 
             onclick="document.getElementById('newchat-modal').classList.add('hidden')"
@@ -189,7 +192,7 @@
         <div class='flex flex-col gap-2 items-center justify-center'>
             <label class='w-full' for='subject'>Subject</label>
             <input id='subject' name='subject' placeholder='Please Enter the subject of the chat'  
-                class="text-xl flex w-124 rounded-md border border-[var(--techwave-border-color)] bg-background px-3 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)]"
+                class="text-xl flex w-74 md:w-124 rounded-md border border-[var(--techwave-border-color)] bg-background px-3 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)]"
             >
         </div>
         <button

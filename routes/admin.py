@@ -504,46 +504,61 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
 def get_latest_entry(period, collection):
     """Get the latest available entry for a given period (daily, monthly, yearly)."""
     latest = collection.find_one({"period": period}, sort=[("date", -1)])
-    return latest["date"] if latest else None@admin_bp.route('/usage')
+    return latest["date"] if latest else None
 
+
+def get_all_entry(period, collection):
+    latest = collection.find({"period": period}, sort=[("date", -1)])
+    return latest
 
 @admin_bp.route('/usage/')
 @admin_required
 def usage():
     usage_service = UsageService(current_app.db)
-
+    
+    # Get all unique dates for each period
+    daily_dates = list(usage_service.collection.distinct("date", {"period": "daily"}))
+    monthly_dates = list(usage_service.collection.distinct("date", {"period": "monthly"}))
+    yearly_dates = list(usage_service.collection.distinct("date", {"period": "yearly"}))
+    
+    # Get the latest entries
     latest_daily = get_latest_entry("daily", usage_service.collection)
     latest_monthly = get_latest_entry("monthly", usage_service.collection)
     latest_yearly = get_latest_entry("yearly", usage_service.collection)
-
-    return render_template("admin/usage.html", latest_daily=latest_daily, latest_monthly=latest_monthly, latest_yearly=latest_yearly)
-
+    
+    return render_template("admin/usage.html",
+                           latest_daily=latest_daily, 
+                           latest_monthly=latest_monthly, 
+                           latest_yearly=latest_yearly,
+                           daily_dates=daily_dates,
+                           monthly_dates=monthly_dates,
+                           yearly_dates=yearly_dates)
 
 @admin_bp.route('/api/usage/')
 @admin_required
 def api_usage():
-
     usage_service = UsageService(current_app.db)
     period = request.args.get("period", "daily")
     date = request.args.get("date", get_latest_entry(
         period, usage_service.collection))
-
+    
+    # Find the specific data point
     data = usage_service.collection.find_one({"period": period, "date": date})
+    
+    # If no data found, fall back to latest entry
     if not data:
-
-        data = usage_service.collection.find_one(
-            {"period": period, "date": get_latest_entry(period, usage_service.collection)})
+        date = get_latest_entry(period, usage_service.collection)
+        data = usage_service.collection.find_one({"period": period, "date": date})
+        
         if not data:
             return jsonify({"error": "No data found"}), 404
-
+    
     return jsonify({
         "date": date,
         "cost": data["cost"],
         "input_tokens": data["input_tokens"],
         "output_tokens": data["output_tokens"]
     })
-
-
 def register_admin_socketio_events(socketio):
     @socketio.on('admin_join')
     def on_admin_join(data):

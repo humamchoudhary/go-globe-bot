@@ -85,6 +85,7 @@ def auth_user():
     # return jsonify({"error": "Empty users are not allowed."}), 400
 
 
+@min_bp.route('/newchat',defaults={'subject':"Other"}, methods=['GET'])
 @min_bp.route('/newchat/<string:subject>', methods=['GET'])
 @login_required
 def new_chat(subject):
@@ -93,6 +94,8 @@ def new_chat(subject):
     chat_service = ChatService(current_app.db)
     chat = chat_service.create_chat(user.user_id, subject=subject)
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
+
+    current_app.bot.create_chat(chat.room_id)
 
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
@@ -175,7 +178,7 @@ def send_message(chat_id):
     }, room=f'{user.user_id}-{chat_id[:8]}')
 
     if (not chat.admin_required):
-        msg, usage = current_app.bot.responed(message)
+        msg, usage = current_app.bot.responed(message,chat.room_id)
 
         usage_service = UsageService(current_app.db)
         usage_service.add_cost(usage['input'], usage['output'], usage['cost'])

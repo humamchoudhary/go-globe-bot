@@ -14,6 +14,7 @@
 
     <link rel="shortcut icon" href={{ url_for('static', filename='img/logo-desktop-mini.svg' ) }}>
 
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
 
         document.documentElement.setAttribute("data-techwave-skin", '{{settings["theme"]}}');
@@ -125,7 +126,10 @@
                                 style="color: #fff;"></button>
                     </div>
 
-                    <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin">Request Admin</div>
+                <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin" title='Request Admin'
+                    >
+                    <i data-lucide='headset'></i>
+                </div>
                 </div>
             </div>
             {% endif %}
@@ -234,6 +238,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 
 </html>

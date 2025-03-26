@@ -58,12 +58,13 @@ def chat(chat_id):
     print(f'{user.user_id}-{chat_id}')
     chat = chat_service.get_chat_by_room_id(f'{user.user_id}-{chat_id[:8]}')
     print(chat)
+    chats = [chat_service.get_chat_by_id(idx) for idx in user.chat_ids]
     if not chat:
         return redirect(url_for('chat.index'))
     if request.headers.get('HX-Request'):
-        return render_template('user/fragments/chat_page.html', chat=chat, chats=user.chat_ids, username=user.name)
+        return render_template('user/fragments/chat_page.html', chat=chat, chats=chats, username=user.name)
 
-    return render_template('user/index.html', chat=chat, chats=user.chat_ids, username=user.name)
+    return render_template('user/index.html', chat=chat, chats=chats, username=user.name)
 
 
 @chat_bp.route('/chat/<chat_id>/ping_admin', methods=['POST'])
@@ -93,7 +94,7 @@ def ping_admin(chat_id):
     # Notify admins via socketio
     current_app.socketio.emit('admin_required', {
         'room_id': room_id,
-        'chat_id': chat.chat_id
+        'chat_id': chat.chat_id, 'subject': chat.subject
     }, room='admin')
 
     if request.headers.get('HX-Request'):  # HTMX request
@@ -140,7 +141,8 @@ def send_message(chat_id):
         'timestamp': new_message.timestamp.isoformat(),
     }, room=f'{user.user_id}-{chat_id[:8]}')
     if (not chat.admin_required):
-        msg, usage = current_app.bot.responed(message, chat.messages)
+        msg, usage = current_app.bot.responed(
+            message, chat.room_id)
         print(msg)
         print(usage)
 
@@ -175,6 +177,7 @@ def new_chat(subject):
     # Create a new chat with server-generated room_id
     chat = chat_service.create_chat(user.user_id, subject=subject)
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
+    current_app.bot.create_chat(chat.room_id)
 
     if request.headers.get('HX-Request'):  # HTMX request
         return render_template('user/fragments/chat_page.html', chat=chat, chats=user.chat_ids, username=user.name)
