@@ -25,7 +25,7 @@
       hx-trigger="submit"
       hx-indicator="#loading-indicator"
       hx-swap='none'
-      hx-on::after-request="location.reload()">
+      hx-on::after-request="document.getElementById('scrape-msg').classList.remove('hidden')">
     <div 
         onclick="document.getElementById('scrape-model').classList.add('hidden')"
         class='border border-[var(--techwave-hover-color)] absolute top-5 right-5 p-1 hover:cursor-pointer hover:bg-[var(--techwave-border-color)] duration-200 transition-all rounded'>
@@ -43,13 +43,15 @@
         type='submit'
         class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--techwave-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-[var(--techwave-site-bg-color)] hover:bg-white py-2 px-7">
         <span>Scrape</span>
-        <div id="loading-indicator" class="htmx-indicator">
+        <div id="loading-indicator" class="htmx-indicator hidden">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
         </div>
     </button>
+
+    <p id='scrape-msg' class='text-sm hidden'>Urls are being processed in background you can now close this page!</p>
 </form>
 
     </div>

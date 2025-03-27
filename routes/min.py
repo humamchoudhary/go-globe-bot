@@ -85,7 +85,7 @@ def auth_user():
     # return jsonify({"error": "Empty users are not allowed."}), 400
 
 
-@min_bp.route('/newchat',defaults={'subject':"Other"}, methods=['GET'])
+@min_bp.route('/newchat', defaults={'subject': "Other"}, methods=['GET'])
 @min_bp.route('/newchat/<string:subject>', methods=['GET'])
 @login_required
 def new_chat(subject):
@@ -130,6 +130,8 @@ def ping_admin(chat_id):
         if request.headers.get('HX-Request'):
             return "Chat not found", 404
         return jsonify({"error": "Chat not found"}), 404
+    if chat.admin_required:
+        return "", 304
 
     # Mark the chat as requiring admin attention
     chat_service.set_admin_required(chat.room_id, True)
@@ -139,6 +141,14 @@ def ping_admin(chat_id):
         'room_id': room_id,
         'chat_id': chat.chat_id, 'subject': chat.subject
     }, room='admin')
+
+    new_message = chat_service.add_message(
+        chat.room_id, 'SYSTEM', 'Admin has been notified! They will join soon')
+    current_app.socketio.emit('new_message', {
+        'sender': 'SYSTEM',
+        'content': new_message.content,
+        'timestamp': new_message.timestamp.isoformat(),
+    }, room=f'{user.user_id}-{chat_id[:8]}')
 
     if request.headers.get('HX-Request'):  # HTMX request
         return "", 204  # No content response for successful submission
@@ -178,7 +188,7 @@ def send_message(chat_id):
     }, room=f'{user.user_id}-{chat_id[:8]}')
 
     if (not chat.admin_required):
-        msg, usage = current_app.bot.responed(message,chat.room_id)
+        msg, usage = current_app.bot.responed(message, chat.room_id)
 
         usage_service = UsageService(current_app.db)
         usage_service.add_cost(usage['input'], usage['output'], usage['cost'])

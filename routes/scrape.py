@@ -91,6 +91,8 @@ def scrape_with_session(url, cookies=None, headers=None, timeout=30, rotate_user
         response.raise_for_status()
         # print(response.apparent_encoding)
         soup = BeautifulSoup(response.text, 'html.parser')
+        # with open(f'./test/{"".join(response.url.split('/'))}','wb') as f:
+        #     f.write(response.content)
 
         return {
             'status': response.status_code,

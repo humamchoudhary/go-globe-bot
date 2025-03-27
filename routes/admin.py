@@ -1,3 +1,5 @@
+import threading
+from pprint import pprint
 from services.usage_service import UsageService
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
@@ -111,8 +113,6 @@ def send_message(room_id):
     return render_template('admin/fragments/chat_message.html', message=new_message, username="Admin")
 
 
-uploaded_files = ['file1.txt']
-
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -201,6 +201,7 @@ def upload_file():
             continue
 
         original_filename = secure_filename(file.filename)
+        base_filename = os.path.splitext(original_filename)[0]
         file_extension = os.path.splitext(original_filename)[1].lower()
         unique_filename = f"{uuid.uuid4().hex}{file_extension}"
         file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
@@ -213,13 +214,17 @@ def upload_file():
                 images = pdf2image.convert_from_path(temp_path)
 
                 if images:
-                    image_filename = f"{
-                        os.path.splitext(unique_filename)[0]}.png"
-                    image_path = os.path.join(UPLOAD_FOLDER, image_filename)
-                    images[0].save(image_path, 'PNG')
+                    image_filenames = []
+                    # Save each page as a separate image
+                    for i, image in enumerate(images):
+                        image_filename = f"{base_filename}_{i+1}.png"
+                        image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+                        image.save(image_path, 'PNG')
+                        image_filenames.append(image_filename)
+                        file_items.append(render_template(
+                            "admin/fragments/file_item.html", file=image_filename))
+                    
                     os.remove(temp_path)
-                    file_items.append(render_template(
-                        "admin/fragments/file_item.html", file=image_filename))
                 else:
                     file.save(file_path)
                     file_items.append(render_template(
@@ -387,7 +392,29 @@ def set_theme(theme_type):
 #             f.write(lines)
 #
 #     return '', 200
-#
+
+
+def scrape_urls(urls):
+
+    for url in urls:
+        res = scrape_with_session(
+            url,
+            rotate_user_agents=True,
+            random_delay=True
+        )
+        if res and 'text' in res:
+            lines = str(res['text'])
+            # print(lines)
+            lines = re.sub(r"\s+", " ", lines).strip()
+            # Create a filename from the URL
+            filename = '-'.join(res['url'].split('/')[2:])
+            if not filename:
+                # Use domain if path is empty
+                filename = urlparse(res['url']).netloc
+            filepath = f"{os.getcwd()}/files/{filename}.txt"
+            with open(filepath, 'w') as f:
+                # print(f"Saving content to {f.name}")
+                f.write(lines)
 
 
 @admin_bp.route('/scrape', methods=['POST'])
@@ -395,37 +422,15 @@ def set_theme(theme_type):
 def scrape():
     urls = str(request.form.get('url')).rsplit()
     all_urls = []
-
     # Process each URL (could be a sitemap or regular page)
     for url in urls:
         collected_urls = process_url(url)
         all_urls.extend(collected_urls)
 
+    thread = threading.Thread(target=scrape_urls, args=(all_urls,))
+    thread.start()
     # Now scrape all the collected URLs
-    for url in all_urls:
-        res = scrape_with_session(
-            url,
-            rotate_user_agents=True,
-            random_delay=True
-        )
-
-        if res and 'text' in res:
-            lines = str(res['text'])
-            print(lines)
-            lines = re.sub(r"\s+", " ", lines).strip()
-
-            # Create a filename from the URL
-            filename = '-'.join(res['url'].split('/')[2:])
-            if not filename:
-                # Use domain if path is empty
-                filename = urlparse(res['url']).netloc
-
-            filepath = f"{os.getcwd()}/files/{filename}.txt"
-
-            with open(filepath, 'w') as f:
-                print(f"Saving content to {f.name}")
-                f.write(lines)
-
+    pprint(all_urls)
     return '', 200
 
 
@@ -434,30 +439,49 @@ def process_url(url):
     Process a URL which could be a sitemap or a regular page.
     Returns a list of URLs to scrape.
     """
-    result_urls = []
+    # First check if it's likely a sitemap based on URL pattern
+    if is_likely_sitemap(url):
+        return process_sitemap_url(url)
+    return [url]  # Treat as regular URL if not a sitemap
 
+
+def is_likely_sitemap(url):
+    """
+    Check if a URL is likely a sitemap without making a request.
+    Returns True if URL ends with common sitemap extensions or contains 'sitemap' in path.
+    """
+    url_lower = url.lower()
+    return (url_lower.endswith('.xml') or
+            url_lower.endswith('.xml.gz') or
+            'sitemap' in url_lower)
+
+
+def process_sitemap_url(url):
+    """
+    Process a URL that's likely a sitemap.
+    Returns a list of URLs found in the sitemap.
+    """
     try:
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
             print(f"Failed to fetch {url}: Status code {response.status_code}")
             return [url]  # Return original URL if we can't process it
 
-        content_type = response.headers.get('Content-Type', '')
+        content_type = response.headers.get('Content-Type', '').lower()
+        content = response.text
 
-        # Check if it's XML (likely a sitemap)
-        if 'xml' in content_type or url.endswith('.xml') or '<urlset' in response.text or '<sitemapindex' in response.text:
-            # This appears to be a sitemap
-            urls_from_sitemap = extract_urls_from_sitemap(response.text, url)
-            result_urls.extend(urls_from_sitemap)
-        else:
-            # This is a regular URL to scrape
-            result_urls.append(url)
+        # Check if it's actually a sitemap (even if URL suggested it might be)
+        if ('xml' in content_type or
+            '<urlset' in content or
+                '<sitemapindex' in content):
+            return extract_urls_from_sitemap(content, url)
+
+        # If URL suggested sitemap but content isn't, return original URL
+        return [url]
 
     except Exception as e:
         print(f"Error processing {url}: {str(e)}")
-        result_urls.append(url)  # Include the original URL if processing fails
-
-    return result_urls
+        return [url]  # Include the original URL if processing fails
 
 
 def extract_urls_from_sitemap(sitemap_content, base_url):
@@ -466,11 +490,9 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
     Returns a list of URLs.
     """
     urls = []
-
     try:
         # Parse the XML
         root = ET.fromstring(sitemap_content)
-
         # Handle sitemap index (collection of sitemaps)
         if root.tag.endswith('sitemapindex'):
             # This is a sitemap index, we need to process each sitemap
@@ -480,9 +502,8 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
                     # Recursively process this sitemap
                     child_sitemap_url = loc_elem.text.strip()
                     print(f"Found child sitemap: {child_sitemap_url}")
-                    child_urls = process_url(child_sitemap_url)
+                    child_urls = process_sitemap_url(child_sitemap_url)
                     urls.extend(child_urls)
-
         # Handle regular sitemap
         elif root.tag.endswith('urlset'):
             # This is a regular sitemap with URLs
@@ -491,13 +512,11 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
                 if loc_elem is not None and loc_elem.text:
                     page_url = loc_elem.text.strip()
                     urls.append(page_url)
-
     except Exception as e:
         print(f"Error parsing sitemap from {base_url}: {str(e)}")
         # Fall back to regex-based extraction if XML parsing fails
         urls.extend(re.findall(r'<loc>(.*?)</loc>', sitemap_content))
-
-    print(f"Extracted {len(urls)} URLs from sitemap")
+    # print(f"Extracted {len(urls)} URLs from sitemap")
     return urls
 
 
@@ -511,28 +530,33 @@ def get_all_entry(period, collection):
     latest = collection.find({"period": period}, sort=[("date", -1)])
     return latest
 
+
 @admin_bp.route('/usage/')
 @admin_required
 def usage():
     usage_service = UsageService(current_app.db)
-    
+
     # Get all unique dates for each period
-    daily_dates = list(usage_service.collection.distinct("date", {"period": "daily"}))
-    monthly_dates = list(usage_service.collection.distinct("date", {"period": "monthly"}))
-    yearly_dates = list(usage_service.collection.distinct("date", {"period": "yearly"}))
-    
+    daily_dates = list(usage_service.collection.distinct(
+        "date", {"period": "daily"}))
+    monthly_dates = list(usage_service.collection.distinct(
+        "date", {"period": "monthly"}))
+    yearly_dates = list(usage_service.collection.distinct(
+        "date", {"period": "yearly"}))
+
     # Get the latest entries
     latest_daily = get_latest_entry("daily", usage_service.collection)
     latest_monthly = get_latest_entry("monthly", usage_service.collection)
     latest_yearly = get_latest_entry("yearly", usage_service.collection)
-    
+
     return render_template("admin/usage.html",
-                           latest_daily=latest_daily, 
-                           latest_monthly=latest_monthly, 
+                           latest_daily=latest_daily,
+                           latest_monthly=latest_monthly,
                            latest_yearly=latest_yearly,
                            daily_dates=daily_dates,
                            monthly_dates=monthly_dates,
                            yearly_dates=yearly_dates)
+
 
 @admin_bp.route('/api/usage/')
 @admin_required
@@ -541,24 +565,27 @@ def api_usage():
     period = request.args.get("period", "daily")
     date = request.args.get("date", get_latest_entry(
         period, usage_service.collection))
-    
+
     # Find the specific data point
     data = usage_service.collection.find_one({"period": period, "date": date})
-    
+
     # If no data found, fall back to latest entry
     if not data:
         date = get_latest_entry(period, usage_service.collection)
-        data = usage_service.collection.find_one({"period": period, "date": date})
-        
+        data = usage_service.collection.find_one(
+            {"period": period, "date": date})
+
         if not data:
             return jsonify({"error": "No data found"}), 404
-    
+
     return jsonify({
         "date": date,
         "cost": data["cost"],
         "input_tokens": data["input_tokens"],
         "output_tokens": data["output_tokens"]
     })
+
+
 def register_admin_socketio_events(socketio):
     @socketio.on('admin_join')
     def on_admin_join(data):

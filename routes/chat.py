@@ -37,9 +37,11 @@ def index():
     #     if chat:
     #         chats.append(chat.to_dict())
 
+    chat_service = ChatService(current_app.db)
+    chats = [chat_service.get_chat_by_id(idx) for idx in user.chat_ids]
     if request.headers.get('HX_Request'):
-        return render_template('user/fragments/chat_page.html', chats=user.chat_ids, username=user.name)
-    return render_template('user/index.html', chats=user.chat_ids, username=user.name)
+        return render_template('user/fragments/chat_page.html', chats=chats, username=user.name)
+    return render_template('user/index.html', chats=chats, username=user.name)
 
 
 @chat_bp.route('/chat/<chat_id>', methods=['GET'])
@@ -55,9 +57,9 @@ def chat(chat_id):
     user = user_service.get_user_by_id(session['user_id'])
     # if not user:
     #     return redirect(url_for('chat.index'))
-    print(f'{user.user_id}-{chat_id}')
+    # print(f'{user.user_id}-{chat_id}')
     chat = chat_service.get_chat_by_room_id(f'{user.user_id}-{chat_id[:8]}')
-    print(chat)
+    # print(chat)
     chats = [chat_service.get_chat_by_id(idx) for idx in user.chat_ids]
     if not chat:
         return redirect(url_for('chat.index'))
@@ -88,6 +90,8 @@ def ping_admin(chat_id):
             return "Chat not found", 404
         return jsonify({"error": "Chat not found"}), 404
 
+    if chat.admin_required:
+        return "", 304
     # Mark the chat as requiring admin attention
     chat_service.set_admin_required(chat.room_id, True)
 
@@ -96,6 +100,14 @@ def ping_admin(chat_id):
         'room_id': room_id,
         'chat_id': chat.chat_id, 'subject': chat.subject
     }, room='admin')
+
+    new_message = chat_service.add_message(
+        chat.room_id, 'SYSTEM', 'Admin has been notified! They will join soon')
+    current_app.socketio.emit('new_message', {
+        'sender': 'SYSTEM',
+        'content': new_message.content,
+        'timestamp': new_message.timestamp.isoformat(),
+    }, room=f'{user.user_id}-{chat_id[:8]}')
 
     if request.headers.get('HX-Request'):  # HTMX request
         return "", 204  # No content response for successful submission
