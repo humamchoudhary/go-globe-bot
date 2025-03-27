@@ -218,12 +218,13 @@ def upload_file():
                     # Save each page as a separate image
                     for i, image in enumerate(images):
                         image_filename = f"{base_filename}_{i+1}.png"
-                        image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+                        image_path = os.path.join(
+                            UPLOAD_FOLDER, image_filename)
                         image.save(image_path, 'PNG')
                         image_filenames.append(image_filename)
                         file_items.append(render_template(
                             "admin/fragments/file_item.html", file=image_filename))
-                    
+
                     os.remove(temp_path)
                 else:
                     file.save(file_path)
@@ -261,17 +262,6 @@ def dashboard():
     # Convert to dictionary representation
     chats_data = [chat for chat in chats if chat.admin_required]
     return render_template('admin/dashboard.html', chats=chats_data, username="Admin")
-
-
-@admin_bp.route('/chats')
-@admin_required
-def get_chats():
-    chat_service = ChatService(current_app.db)
-    chats = chat_service.get_all_chats()
-
-    # Convert to dictionary representation
-    chats_data = [chat.to_dict() for chat in chats if chat.admin_required]
-    return jsonify(chats_data)
 
 
 @admin_bp.route('/join/<room_id>')
@@ -584,6 +574,36 @@ def api_usage():
         "input_tokens": data["input_tokens"],
         "output_tokens": data["output_tokens"]
     })
+
+# @admin_bp.route('/chats')
+# @admin_required
+# def get_chats():
+#     chat_service = ChatService(current_app.db)
+#     chats = chat_service.get_all_chats()
+#
+#     # Convert to dictionary representation
+#     chats_data = [chat.to_dict() for chat in chats if chat.admin_required]
+#     return jsonify(chats_data)
+
+
+@admin_bp.route('/chats', methods=['GET'])
+# @admin_bp.route('/chats/<string:status>', methods=['GET'])
+@admin_required
+def get_all_chats():
+
+    chat_service = ChatService(current_app.db)
+    chats_objs = chat_service.get_all_chats()
+    user_service = UserService(current_app.db)
+    chats = []
+    for c in chats_objs:
+        chat = c.to_dict()
+        chat['username'] = user_service.get_user_by_id(c.user_id).name
+        chats.append(chat)
+
+    # Convert to dictionary representation
+    pprint(chats)
+    # = [chat.to_dict() for chat in chats if chat.admin_required]
+    return render_template('admin/chats.html', chats=chats)
 
 
 def register_admin_socketio_events(socketio):

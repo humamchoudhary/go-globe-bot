@@ -1,0 +1,107 @@
+{% extends 'admin/template.html' %}{% block content %}
+
+<div class="ml-6 p-4 mt-6">
+  <h2 class="text-2xl font-bold mb-4">Chats</h2>
+  <div class="py-8">
+    <div class="overflow-x-auto shadow-lg rounded-lg">
+      <p class="text-right text-sm mb-1">Total Chats: {{chats|length}}</p>
+      <table id="chatRoomsTable" class="w-full border-collapse">
+        <thead>
+          <tr class="bg-[var(--techwave-header-bg-color)]">
+            {% set headers = [ 'Room ID', 'User Name', 'Subject', 'Number of
+            Messages', 'Admin Required', 'Creation Time', 'Last Update Time' ]
+            %} {% for header in headers %}
+            <th
+              onclick="sortTable({{ loop.index0 }})"
+              class="p-3 text-left border-b border-[var(--techwave-border-color)] text-[var(--techwave-heading-color)] cursor-pointer hover:bg-[rgba(255,88,0,0.2)] transition-colors duration-200 font-semibold uppercase text-sm tracking-wider"
+            >
+              {{ header }}
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for chat in chats %}
+          <tr
+            onclick="window.location.href='/admin/chat/{{chat.room_id}}'"
+            class="
+                        hover:bg-[rgba(0,31,51,0.5)] 
+                        {{ 'bg-[rgba(0,31,51,0.3)]' if loop.index is odd else 'bg-[rgba(0,31,51,0.1)]' }}
+                        border-b border-[var(--techwave-border-color)]"
+          >
+            <td class="p-3">{{ chat.room_id }}</td>
+            <td class="p-3">{{ chat.username }}</td>
+            <td class="p-3">{{ chat.subject }}</td>
+            <td class="p-3">{{ chat.messages|length }}</td>
+            <td class="p-3">
+              <span
+                class="{{ 'text-[var(--techwave-main-color)]' if chat.admin_required else '' }}"
+              >
+                {{ 'Yes' if chat.admin_required else 'No' }}
+              </span>
+            </td>
+            <td class="p-3">
+              {{ chat.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+            </td>
+            <td class="p-3">
+              {{ chat.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  function sortTable(n) {
+    var table,
+      rows,
+      switching,
+      i,
+      x,
+      y,
+      shouldSwitch,
+      dir,
+      switchcount = 0;
+    table = document.getElementById("chatRoomsTable");
+    switching = true;
+    dir = "asc";
+
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+
+      for (i = 1; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+
+        if (dir == "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  }
+</script>
+{% endblock %}
