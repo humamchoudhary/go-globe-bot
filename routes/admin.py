@@ -381,6 +381,7 @@ def subjects(subject):
             pass
         return '', 200
 
+
 def scrape_urls(urls):
 
     for url in urls:
