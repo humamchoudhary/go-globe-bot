@@ -67,6 +67,8 @@ class Bot:
                         text.append(f.read())
                 except:
                     pass
+        if not os.path.exists('./bin/chat/'):
+            os.makedirs('./bin/chat/')
         with open(f'bin/chat/{id}.chatpl', 'wb') as file:
 
             chat = self.active_bot.chats.create(
@@ -81,6 +83,7 @@ class Bot:
         return chat
 
     def _save_chat(self, chat, id):
+
         with open(f"bin/chat/{id}.chatpl", 'wb') as file:
             pickle.dump(chat, file)
 
