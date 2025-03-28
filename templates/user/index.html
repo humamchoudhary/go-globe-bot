@@ -191,9 +191,13 @@
         <h2 class='text-2xl font-semibold'>Start New Chat</h2>
         <div class='flex flex-col gap-2 items-center justify-center'>
             <label class='w-full' for='subject'>Subject</label>
-            <input id='subject' name='subject' placeholder='Please Enter the subject of the chat'  
-                class="text-xl flex w-74 md:w-124 rounded-md border border-[var(--techwave-border-color)] bg-background px-3 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)]"
-            >
+            <select id='subject' name='subject' placeholder='Please Enter the subject of the chat'  
+                class="text-xl flex min-w-74 md:min-w-124 rounded-md border border-[var(--techwave-border-color)] bg-background px-3 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)]"
+                >
+
+                            {% for subject in settings['subjects'] %}
+                            <option>{{subject}}</option> {% endfor %}
+            </select>
         </div>
         <button
             type='submit'

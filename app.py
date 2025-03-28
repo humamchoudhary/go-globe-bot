@@ -49,7 +49,7 @@ def create_app(config_class=Config):
             'small':
             '/static/img/logo-desktop-mini.svg',
         },
-        'subjects': [],
+        'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
         'apiKeys': {
             'claude': os.environ.get('CLAUDE_KEY', ''),
             'openAi': os.environ.get('OPENAI_KEY', ''),
@@ -60,7 +60,9 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def settings():
-        print(app.config['SETTINGS'])
+        # print(app.config['SETTINGS'])
+        app.config['SETTINGS']['subjects'] = sorted(
+            app.config['SETTINGS']['subjects'], key=len,reverse=True)
         return {'settings': app.config['SETTINGS']}
     app.bot = Bot(Config.BOT_NAME, app=app)
 
@@ -113,7 +115,7 @@ def create_app(config_class=Config):
     @app.route('/privacy')
     def privacy():
         return render_template('privacy.html')
-    
+
     @app.route('/terms')
     def terms():
         return render_template('terms.html')

@@ -42,16 +42,9 @@ def generate_random_username():
 
 @min_bp.route('/auth', methods=['POST', 'GET'])
 def auth_user():
-    # print(request.json)
-    # return jsonify({'error':"test error"}),404
     if request.method == "GET":
         sess_user = session.get('user_id')
         return ('', 204) if sess_user else jsonify(False)
-
-    # Check if the user is already authenticated
-    # if 'user_id' in session:
-    #     return ('', 204)
-
     data = request.json or {}
     name = data.get('name')
     email = data.get('email')
@@ -74,15 +67,10 @@ def auth_user():
             return jsonify({"error": "Empty users are not allowed."}), 400
         name = generate_random_username()
 
-    # Store user details in session (replace with DB logic if needed)
-
     session['user_id'] = user.user_id
     session['role'] = "user"
-    # return redirect(url_for('chat.index'))
     print(subject)
     return redirect(url_for('min.new_chat', subject=subject))
-
-    # return jsonify({"error": "Empty users are not allowed."}), 400
 
 
 @min_bp.route('/newchat', defaults={'subject': "Other"}, methods=['GET'])
@@ -112,7 +100,6 @@ def chat(chat_id):
     print(not chat)
     if not chat:
         return redirect(url_for('min.new_chat'))
-    # Get the username from session, fallback to "USER" if not available
     return render_template('user/min-index.html', chat=chat, username=user.name)
 
 
@@ -133,10 +120,8 @@ def ping_admin(chat_id):
     if chat.admin_required:
         return "", 304
 
-    # Mark the chat as requiring admin attention
     chat_service.set_admin_required(chat.room_id, True)
 
-    # Notify admins via socketio
     current_app.socketio.emit('admin_required', {
         'room_id': room_id,
         'chat_id': chat.chat_id, 'subject': chat.subject
@@ -174,12 +159,10 @@ def send_message(chat_id):
             return "Chat not found", 404
         return jsonify({"error": "Chat not found"}), 404
 
-    # Get the username from session, fallback to "USER" if not available
-
     new_message = chat_service.add_message(
         chat.room_id, user.name, message)
 
-    print(f'{session["user_id"]}-{chat_id[:8]}')
+    # print(f'{session["user_id"]}-{chat_id[:8]}')
 
     current_app.socketio.emit('new_message', {
         'sender': user.name,

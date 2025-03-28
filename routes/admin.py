@@ -366,23 +366,20 @@ def set_theme(theme_type):
     return '', 200
 
 
-# @admin_bp.route('/scrape', methods=['POST'])
-# @admin_required
-# def scrape():
-#     urls = str(request.form.get('url')).rsplit()
-#     # time.sleep(2)
-#     for url in urls:
-#         res = scrape_with_session(
-#             url, rotate_user_agents=True, random_delay=True)
-#
-#         lines = str(res['text'])
-#         lines = re.sub(r"\s+", " ", lines).strip()
-#         with open(f"{os.getcwd()}/files/{'-'.join(res['url'].split('/')[2:])}.txt", 'w') as f:
-#             print(f.name)
-#             f.write(lines)
-#
-#     return '', 200
-
+@admin_bp.route('/settings/subject', defaults={'subject': None}, methods=['POST'])
+@admin_bp.route('/settings/subject/<string:subject>', methods=['DELETE'])
+def subjects(subject):
+    if request.method == 'POST':
+        subject = request.form.get('subject')
+        # ADD NEW SUBJECT
+        current_app.config['SETTINGS']['subjects'].add(subject)
+        return '', 200
+    else:
+        try:
+            current_app.config['SETTINGS']['subjects'].remove(subject)
+        except KeyError:
+            pass
+        return '', 200
 
 def scrape_urls(urls):
 

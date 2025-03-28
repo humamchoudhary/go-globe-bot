@@ -113,8 +113,11 @@
 
                     <div class="form__email">
                         <label for="subject">Message Subject</label>
-                        <input type="text" class="input" id="subject" name="subject" placeholder="Enter message subject"
+                        <select type="text" class="input" id="subject" name="subject"
                             autocapitalize="off" autocomplete="off">
+                            {% for subject in settings['subjects'] %}
+                            <option>{{subject}}</option> {% endfor %}
+                        </select>
                     </div>
                     <div class="form__email">
                         <label for="phone">Phone</label>
@@ -171,7 +174,7 @@
                     showError('Email or Phone is required')
                     return
                 }
-                if (!name ||!email) {
+                if (!name || !email) {
                     showError("Please enter both name and email");
                     return;
                 }
