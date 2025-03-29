@@ -27,7 +27,7 @@ def login_required(f):
 @min_bp.route('/')
 @login_required
 def index():
-    return redirect(url_for('min.new_chat'))
+    return redirect(url_for('min.onboard'))
 
 
 @min_bp.route('login', defaults={'subject': None}, methods=['GET'])
