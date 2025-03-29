@@ -30,10 +30,16 @@ def index():
     return redirect(url_for('min.new_chat'))
 
 
-@min_bp.route('login', methods=['GET', 'POST'])
-def login():
+@min_bp.route('login', defaults={'subject': None}, methods=['GET'])
+@min_bp.route('login/<string:subject>', methods=['GET'])
+def login(subject):
     if request.method == "GET":
-        return render_template('user/min-login.html')
+        return render_template('user/min-login.html', default_subject=subject)
+
+
+@min_bp.route('onboarding', methods=['GET'])
+def onboard():
+    return render_template('user/min-onboard.html')
 
 
 def generate_random_username():

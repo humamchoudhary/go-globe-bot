@@ -17,7 +17,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
 
-        document.documentElement.setAttribute("data-techwave-skin", '{{settings["theme"]}}');
+        document.documentElement.setAttribute("data-techwave-skin", 'light');
         if (localStorage.frenify_panel !== '') {
             document.documentElement.classList.add(localStorage.frenify_panel);
         }
@@ -72,17 +72,18 @@
     </script>
 
     <!-- Styles -->
-    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} />
+    <!-- <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/plugins.css' ) }} /> -->
     <link type="text/css" rel="stylesheet" href={{ url_for('static', filename='css/prestyle.css' ) }} />
 
 </head>
 
 <body>
+    <!-- <div class="fixed bg-[var(--techwave-main-color)] z-10 w-full py-4 px-4 top-0"><p class="text-white">Welcome, How can i help you?</p></div> -->
 
     <!-- AI Chat Bot Page -->
     <div class="techwave_fn_aichatbot_page fn__chatbot" style="min-height: 100vh;">
 
-        <div class="chat__page" style="height: 100%;">
+        <div class="chat__page" style="min-height: 100vh;">
             <!-- REPLACE WITH HTMX --->
 
             {% if chat %}
