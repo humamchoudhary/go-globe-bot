@@ -1,15 +1,13 @@
+import multiprocessing
 import threading
 from pprint import pprint
 from services.usage_service import UsageService
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
-from bs4 import BeautifulSoup
 import requests
-from .scrape import scrape_with_session
-from ast import literal_eval
+from .scrape import scrape_web
 import re
 import time
-import copy
 from flask import send_from_directory
 import uuid
 import os
@@ -385,7 +383,7 @@ def subjects(subject):
 def scrape_urls(urls):
 
     for url in urls:
-        res = scrape_with_session(
+        res = scrape_web(
             url,
             rotate_user_agents=True,
             random_delay=True
@@ -402,6 +400,9 @@ def scrape_urls(urls):
             filepath = f"{os.getcwd()}/files/{filename}.txt"
             with open(filepath, 'w') as f:
                 # print(f"Saving content to {f.name}")
+                # if len(lines) > 500:
+                # print(lines)
+                # print(filepath)
                 f.write(lines)
 
 
@@ -410,15 +411,25 @@ def scrape_urls(urls):
 def scrape():
     urls = str(request.form.get('url')).rsplit()
     all_urls = []
+
     # Process each URL (could be a sitemap or regular page)
     for url in urls:
         collected_urls = process_url(url)
         all_urls.extend(collected_urls)
 
-    thread = threading.Thread(target=scrape_urls, args=(all_urls,))
-    thread.start()
-    # Now scrape all the collected URLs
-    pprint(all_urls)
+    # Define a worker function
+    def scrape_worker(urls):
+        # Pin this process to a specific core (e.g., core 2)
+        os.sched_setaffinity(0, {2})
+        scrape_urls(urls)
+
+    # Start the process using multiprocessing
+    process = multiprocessing.Process(target=scrape_worker, args=(all_urls,))
+    process.start()
+
+    # Print collected URLs for debugging
+    # pprint(all_urls)
+
     return '', 200
 
 

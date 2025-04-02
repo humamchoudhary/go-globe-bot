@@ -13,8 +13,6 @@
       <span class="text-xl">{{ file_ext.upper() }}</span>
     </div>
     {% endif %}
-    <p class="text-sm truncate">
-      {{ file[:10] }}{% if file|length>10%}...{{file_ext}}{%endif%}
-    </p>
+    <p class="text-sm line-clamp-2 w-40">{{ file }}</p>
   </div>
 </a>
