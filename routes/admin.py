@@ -1,4 +1,3 @@
-import multiprocessing
 import threading
 from pprint import pprint
 from services.usage_service import UsageService
@@ -411,25 +410,16 @@ def scrape_urls(urls):
 def scrape():
     urls = str(request.form.get('url')).rsplit()
     all_urls = []
-
     # Process each URL (could be a sitemap or regular page)
     for url in urls:
+        # time.sleep(0.5)
         collected_urls = process_url(url)
         all_urls.extend(collected_urls)
 
-    # Define a worker function
-    def scrape_worker(urls):
-        # Pin this process to a specific core (e.g., core 2)
-        os.sched_setaffinity(0, {2})
-        scrape_urls(urls)
-
-    # Start the process using multiprocessing
-    process = multiprocessing.Process(target=scrape_worker, args=(all_urls,))
-    process.start()
-
-    # Print collected URLs for debugging
-    # pprint(all_urls)
-
+    thread = threading.Thread(target=scrape_urls, args=(all_urls,))
+    thread.start()
+    # Now scrape all the collected URLs
+    pprint(all_urls)
     return '', 200
 
 
