@@ -82,7 +82,7 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
 
         # Wait for page to fully load
         time.sleep(3)  # Additional wait to ensure JS content loads
-        print('scraping')
+        # print('scraping')
 
         # Check for and handle common cookie consent popups
         try:
