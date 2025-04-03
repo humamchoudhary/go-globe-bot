@@ -13,21 +13,24 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            return redirect('/min/login')
+            # print(session.get('user_id'))
+            print('No user')
+            return redirect('/')
 
         user_service = UserService(current_app.db)
         user = user_service.get_user_by_id(session['user_id'])
 
         if not user:
-            return redirect('/min/login')
+
+            print('No user')
+            return redirect('/')
         return f(*args, **kwargs)
     return decorated_function
 
 
 @min_bp.route('/')
-@login_required
 def index():
-    return redirect(url_for('min.onboard'))
+    return redirect('/min/onboarding')
 
 
 @min_bp.route('login', defaults={'subject': None}, methods=['GET'])
@@ -51,7 +54,18 @@ def auth_user():
     if request.method == "GET":
         sess_user = session.get('user_id')
         return ('', 204) if sess_user else jsonify(False)
-    data = request.json or {}
+
+    # Check if request is coming from HTMX or regular JSON
+    is_htmx = request.headers.get('HX-Request') == 'true'
+
+    # Handle different content types
+    if request.content_type == 'application/json':
+        data = request.json or {}
+    else:
+        # For form submissions via HTMX
+        data = request.form.to_dict() or {}
+
+    print(data)
     name = data.get('name')
     email = data.get('email')
     phone = data.get('phone')
@@ -59,10 +73,10 @@ def auth_user():
     is_anon = data.get('anonymous')
     user_ip = request.remote_addr  # Automatically fetch IP
     user_service = UserService(current_app.db)
+
     if is_anon:
         name = generate_random_username()
         user = user_service.create_user(name, ip=user_ip)
-
     else:
         user = user_service.create_user(
             name, email=email, phone=phone, ip=user_ip)
@@ -70,12 +84,18 @@ def auth_user():
     if not (name or email or phone):
         # if not ALLOW_EMPTY_USERS:
         if not True:
-            return jsonify({"error": "Empty users are not allowed."}), 400
+            error_message = {"error": "Empty users are not allowed."}
+            if is_htmx:
+                # Return error response compatible with HTMX
+                return jsonify(error_message), 400
+            return jsonify(error_message), 400
         name = generate_random_username()
 
     session['user_id'] = user.user_id
     session['role'] = "user"
     print(subject)
+
+    # Redirect works the same for both HTMX and non-HTMX requests
     return redirect(url_for('min.new_chat', subject=subject))
 
 

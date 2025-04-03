@@ -16,6 +16,8 @@ from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
 
+from flask_cors import CORS
+
 
 def get_font_data():
     # Path to your font directory
@@ -35,14 +37,41 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    CORS(app, origins=["*"],
+         supports_credentials=True,
+         allow_headers=["Content-Type", "X-Requested-With", "Authorization"],
+         expose_headers=["Content-Disposition"],
+         methods=["GET", "POST", "OPTIONS"])
     app.config.from_object(config_class)
 
-    # Setup MongoDB
+# Setup MongoDB
     client = MongoClient(app.config['MONGODB_URI'])
     db = client.get_database()
     app.db = db
     app.config['SESSION_MONGODB'] = client
+
+    app.config['SESSION_TYPE'] = 'mongodb'
     app.config['LOGOS_FOLDER'] = os.path.join(os.getcwd(), 'static/img/')
+
+    # app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Or 'None' if using HTTPS
+    # # Must be True if using 'None' for SameSite
+    # app.config['SESSION_COOKIE_SECURE'] = True
+
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,  # Required for cross-origin iframes with HTTPS
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='None'
+    )
+
+    app.config.update(
+        SESSION_TYPE='mongodb',
+        SESSION_MONGODB=client,  # Ensure this is set
+        SESSION_PERMANENT=False,
+        SESSION_USE_SIGNER=True,  # Helps prevent tampering
+        SESSION_KEY_PREFIX='session:',
+    )
+    print(app.config)
+
     app.config['SETTINGS'] = {
         'logo': {
             'large': '/static/img/logo.svg',
@@ -62,7 +91,7 @@ def create_app(config_class=Config):
     def settings():
         # print(app.config['SETTINGS'])
         app.config['SETTINGS']['subjects'] = sorted(
-            app.config['SETTINGS']['subjects'], key=len,reverse=True)
+            app.config['SETTINGS']['subjects'], key=len, reverse=True)
         return {'settings': app.config['SETTINGS']}
     app.bot = Bot(Config.BOT_NAME, app=app)
 
@@ -70,7 +99,7 @@ def create_app(config_class=Config):
     Session(app)
 
     # Setup SocketIO
-    socketio = SocketIO(app,  async_mode="threading",
+    socketio = SocketIO(app,  async_mode="eventlet",
                         manage_session=False, cors_allowed_origins="*")
     app.socketio = socketio
 
@@ -133,4 +162,4 @@ def create_app(config_class=Config):
 app, socketio = create_app()
 if __name__ == '__main__':
     socketio.run(app, port=5000, host='0.0.0.0',
-                 debug=True, allow_unsafe_werkzeug=True)
+                 debug=True)
