@@ -239,7 +239,7 @@ cython_debug/
 
 # Pyre type checker
 
-# pytype static type analyzer
+# prtype static type analyzer
 
 # Cython debug symbols
 
@@ -261,3 +261,4 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,flask
 files/*
+bin/chat/*
