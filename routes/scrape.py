@@ -12,6 +12,8 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 
+import re
+
 
 def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=True, random_delay=True):
     """
@@ -149,10 +151,10 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
         main_content = None
 
         # First look for semantic elements
-        # for tag in ['main', 'article', 'section']:
-        #     if soup.find(tag):
-        #         main_content = soup.find(tag)
-        #         break
+        for tag in ['main', 'article', 'section']:
+            if soup.find(tag):
+                main_content = soup.find(tag)
+                # break
 
         # If no semantic tags found, look for common content class/id patterns
         if not main_content:
@@ -180,8 +182,39 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
             separator=' ', strip=True) if main_content else soup.get_text(separator=' ', strip=True)
 
         # Clean up extra whitespace
-        import re
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        print(type(clean_text))
+        print(len(clean_text.split()))
+
+        if len(clean_text.split()) < 30:
+            print('LESS TEXT')
+            content_patterns = ['content', 'main',
+                                'post', 'article', 'entry', 'body']
+            for pattern in content_patterns:
+                for element in soup.find_all(['div', 'section'],
+                                             class_=lambda x: x and pattern in x.lower()):
+                    if element.text.strip():  # Make sure there's content
+                        main_content = element
+                        break
+
+                if not main_content:
+                    for element in soup.find_all(['div', 'section'],
+                                                 id=lambda x: x and pattern in x.lower()):
+                        if element.text.strip():  # Make sure there's content
+                            main_content = element
+                            break
+
+                if main_content:
+                    break
+
+            # If we found a main content area, use it; otherwise use the entire body
+            clean_text = main_content.get_text(
+                separator=' ', strip=True) if main_content else soup.get_text(separator=' ', strip=True)
+
+            # Clean up extra whitespace
+            clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        else:
+            print('Not Less')
 
         # Close the driver
         driver.quit()
