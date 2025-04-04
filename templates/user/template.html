@@ -40,13 +40,14 @@
         function loadFonts() {
             fontFiles.forEach(fileName => {
                 // Extract weight and style info from filename
-                let fontWeight = "normal";
+                let fontWeight = "400";
                 let fontStyle = "normal";
 
-                if (fileName.includes("Bold")) fontWeight = "bold";
-                if (fileName.includes("Light")) fontWeight = "300";
-                if (fileName.includes("Thin")) fontWeight = "100";
-                if (fileName.includes("Italic")) fontStyle = "italic";
+                if (fileName.includes("Black")) {fontWeight = "black"; fontStyle = "black"}
+                if (fileName.includes("Bold")) {fontWeight = "bold"; fontStyle = "bold"}
+                if (fileName.includes("Light")) {fontWeight = "300"; fontStyle = 'light'}
+                if (fileName.includes("Thin")) {fontWeight = "100"; fontStyle = 'thin'}
+                // if (fileName.includes("Italic")) fontStyle = "italic";
 
                 // Create font-face declaration
                 const style = document.createElement("style");

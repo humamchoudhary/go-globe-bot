@@ -44,10 +44,11 @@
                 let fontWeight = "400";
                 let fontStyle = "normal";
 
-                if (fileName.includes("Bold")) fontWeight = "bold";
-                if (fileName.includes("Light")) fontWeight = "300";
-                if (fileName.includes("Thin")) fontWeight = "100";
-                if (fileName.includes("Italic")) fontStyle = "italic";
+                if (fileName.includes("Black")) {fontWeight = "black"; fontStyle = "black"}
+                if (fileName.includes("Bold")) {fontWeight = "bold"; fontStyle = "bold"}
+                if (fileName.includes("Light")) {fontWeight = "300"; fontStyle = 'light'}
+                if (fileName.includes("Thin")) {fontWeight = "100"; fontStyle = 'thin'}
+                // if (fileName.includes("Italic")) fontStyle = "italic";
 
                 // Create font-face declaration
                 const style = document.createElement("style");
@@ -183,7 +184,8 @@
                             </li>
 
                             <li>
-                                <a href="/admin/chats" class="menu__item duration-200 transition-all " data-position="right">
+                                <a href="/admin/chats" class="menu__item duration-200 transition-all "
+                                    data-position="right">
                                     <span class="icon">
                                         <!-- <img src={{ url_for('static', filename='svg/home.svg' ) }} alt="" -->
                                         <!--     class="fn__svg"> -->
@@ -208,8 +210,8 @@
                                 <a href="/admin/usage" class="menu__item duration-200 transition-all"
                                     data-position="right">
                                     <span class="icon">
-                                        <img src={{ url_for('static', filename='svg/dollar.svg' ) }}
-                                            alt="" class="fn__svg">
+                                        <img src={{ url_for('static', filename='svg/dollar.svg' ) }} alt=""
+                                            class="fn__svg">
                                         <!-- <i data-lucide='gauge'></i> -->
                                     </span>
                                     <span class="text">Usage</span>
@@ -341,9 +343,9 @@
         })
     </script>
 
-<script>
-  lucide.createIcons();
-</script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 
 </html>
