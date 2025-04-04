@@ -75,6 +75,7 @@ var {
   padding: 0;
   vertical-align: baseline;
   outline: 0;
+  font-weight: normal;
 }
 article,
 aside,
@@ -920,4 +921,3 @@ input[type="button"] {
   .tooltipster-arrow-uncropped {
   left: -6px;
 }
-
