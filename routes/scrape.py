@@ -146,10 +146,10 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
         main_content = None
 
         # First look for semantic elements
-        for tag in ['main', 'article', 'section']:
-            if soup.find(tag):
-                main_content = soup.find(tag)
-                break
+        # for tag in ['main', 'article', 'section']:
+        #     if soup.find(tag):
+        #         main_content = soup.find(tag)
+        #         break
 
         # If no semantic tags found, look for common content class/id patterns
         if not main_content:
