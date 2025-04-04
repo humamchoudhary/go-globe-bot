@@ -21,9 +21,24 @@ class Bot:
         self.cld_key = app.config['SETTINGS']['apiKeys']['claude']
         self.active_bot = None
         self.active_bot_name = ""
-        self.sys_prompt = f"Your name is {
-            name}, you are a general customer service assistant. help the user with the provided data. dont generate information from your own neither give user response that is not related to the content provided, if you dont know about anything tell the user you cant help with that issue please click the request admin button for human help. the attached images are also part of system promtp, also add links to the related file/page at the end where necessary link will be the filename replacing * with / without .txt"
-        # self.default_sys_p = self.sys_prompt
+        self.sys_prompt = f"""
+            Your name is {name}. You are a general customer service assistant. Your role is to assist the user based on the provided data.
+
+           ### Guidelines:
+            - Do NOT generate information beyond the given data.
+            - Do NOT provide responses unrelated to the provided content.
+            - If you cannot assist with a request, inform the user:
+              *"I can't help with that issue. Please click the 'Request Admin' button for human assistance."*
+
+            ### Additional Instructions:
+            - The attached images are part of the system prompt.
+            - Where necessary, include links to relevant files/pages.
+            - Convert filenames into links by replacing `*` with `/` and omitting `.txt`.
+            - Use the modified filename as both the link and its text.
+
+            """
+
+# self.default_sys_p = self.sys_prompt
         self.bot_maps = {"gm_2.0_f": self._gemini}
         self._set_bot('gm_2.0_f')
 
@@ -47,7 +62,7 @@ class Bot:
             raise NotImplementedError('Not Implemented')
 
     def create_chat(self, id):
-        images = []
+        # images = []
         text = []
         history = []
         # history = [types.ModelContent(msg.content) if msg.sender ==
