@@ -111,90 +111,91 @@
 
             <!-- Minimal Markdown Processing -->
             <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Configure marked to render links with target="_blank"
-                    const renderer = new marked.Renderer();
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function to fix all links in HTML content
+        function fixAllLinks(element) {
+            const links = element.querySelectorAll('a');
+            
+            links.forEach(link => {
+                // Add target="_blank" to open in new tab
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+                
+                // Fix URLs without http/https
+                let href = link.getAttribute('href');
+                if (href && !/^https?:\/\//i.test(href)) {
+                    link.setAttribute('href', 'https://' + href);
+                }
+            });
+        }
+        
+        // Apply to existing .md-content elements
+        document.querySelectorAll('.md-content').forEach(el => {
+            // Parse markdown
+            el.innerHTML = marked.parse(el.textContent);
+            
+            // Fix links
+            fixAllLinks(el);
+        });
+        
+        // Rest of your existing socket.io code
+        const roomId = "{{chat.room_id}}";
+        console.log(roomId);
 
-                    // Custom link renderer to add target="_blank"
-                    renderer.link = function (href) {
-                        // Check if the URL starts with http:// or https://
-                        var link = href.href
-                            if (!/^https?:\/\//i.test(link)) {
-                            // If not, prepend https://
-                            link = 'https://' + link;
-                        }
-                        // console.log(href)
+        const socket = io();
 
-                        return `<a href="${link}" target="_blank" rel="noopener noreferrer"${href.title ? ` title="${href.title}"` : ''}>${href.text}</a>`;
-                    };
+        socket.on('connect', function () {
+            console.log('connect');
+            socket.emit('join_min', {room: roomId});
+        });
 
-                    marked.setOptions({
-                        renderer: renderer
-                    });
+        socket.on('new_message', function (data) {
+            console.log(data);
+            appendMessage(data);
+        });
+    });
 
-                    // Function to pre-process text to convert plain URLs to Markdown links
-                    function preprocessMarkdown(text) {
-                        // Regex to find URLs not already part of a Markdown link
-                        // This looks for domain patterns that aren't preceded by "](" which would indicate they're already in a MD link
-                        const urlRegex = /(?<!\]\()(\b(?:www\.)[a-z0-9][\w-]+(\.[a-z0-9][\w-]+)+\b|\b[a-z0-9][\w-]+(\.(com|org|net|io|edu|gov))\b)(?![^\[]*\]\([^\)]*\))/gi;
+    function appendMessage(message) {
+        const messagesContainer = document.getElementById('chat__item');
+        
+        // Create a temporary div for processing
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = marked.parse(message.content);
+        
+        // Fix links in the rendered content
+        fixAllLinks(tempDiv);
 
-                        return text.replace(urlRegex, function (match) {
-                            // Create a markdown link
-                            return `[${match}](${match})`;
-                        });
-                    }
-
-                    // Apply to existing .md-content elements
-                    document.querySelectorAll('.md-content').forEach(el => {
-                        const processedText = preprocessMarkdown(el.textContent);
-                        el.innerHTML = marked.parse(processedText);
-                    });
-
-                    // Rest of your existing socket.io code
-                    const roomId = "{{chat.room_id}}";
-
-                    const socket = io();
-
-                    socket.on('connect', function () {
-                        socket.emit('join_min', {room: roomId});
-                    });
-
-                    socket.on('new_message', function (data) {
-                        appendMessage(data);
-                    });
-                });
-
-                function appendMessage(message) {
-                    const messagesContainer = document.getElementById('chat__item');
-
-                    // Pre-process the message content to convert plain URLs to Markdown links
-                    const processedContent = preprocessMarkdown(message.content);
-
-                    const messageHTML = `
+        const messageHTML = `
             <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
                 <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
                 <div class="chat">
-                    <p>${marked.parse(processedContent)}</p>
+                    <p>${tempDiv.innerHTML}</p>
                 </div>
             </div>
         `;
 
-                    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
-                    scrollToBottom();
-                }
-
-                // Function to pre-process text to convert plain URLs to Markdown links
-                function preprocessMarkdown(text) {
-                    // Regex to find URLs not already part of a Markdown link
-                    const urlRegex = /(?<!\]\()(\b(?:www\.)[a-z0-9][\w-]+(\.[a-z0-9][\w-]+)+\b|\b[a-z0-9][\w-]+(\.(com|org|net|io|edu|gov))\b)(?![^\[]*\]\([^\)]*\))/gi;
-
-                    return text.replace(urlRegex, function (match) {
-                        // Create a markdown link
-                        return `[${match}](${match})`;
-                    });
-                }
-            </script>
+        messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+        scrollToBottom();
+    }
+    
+    // Function to fix all links in HTML content
+    function fixAllLinks(element) {
+        const links = element.querySelectorAll('a');
+        
+        links.forEach(link => {
+            // Add target="_blank" to open in new tab
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+            
+            // Fix URLs without http/https
+            let href = link.getAttribute('href');
+            if (href && !/^https?:\/\//i.test(href)) {
+                link.setAttribute('href', 'https://' + href);
+            }
+        });
+    }
+</script>
         {% endif %}
 
     </div>

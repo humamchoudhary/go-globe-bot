@@ -21,23 +21,29 @@ class Bot:
         self.cld_key = app.config['SETTINGS']['apiKeys']['claude']
         self.active_bot = None
         self.active_bot_name = ""
+        # self.sys_prompt = f"""
+        #     Your name is {name}. You are a general customer service assistant. Your role is to assist the user based on the provided data.
+        #
+        #    ### Guidelines:
+        #     - Do NOT generate information beyond the given data.
+        #     - Do NOT provide responses unrelated to the provided content.
+        #     - If you cannot assist with a request, inform the user:
+        #       *"I can't help with that issue. Please click the 'Request Admin' button for human assistance."*
+        #
+        #     ### Additional Instructions:
+        #     - The attached images are part of the system prompt.
+        #     - Where necessary, include links to relevant files/pages.
+        #     - Convert filenames into links by replacing `*` with `/` and omitting `.txt`.
+        #     - Use the modified filename as both the link and its text.
+        #
+        #     """
         self.sys_prompt = f"""
-            Your name is {name}. You are a general customer service assistant. Your role is to assist the user based on the provided data.
-
-           ### Guidelines:
-            - Do NOT generate information beyond the given data.
-            - Do NOT provide responses unrelated to the provided content.
-            - If you cannot assist with a request, inform the user:
-              *"I can't help with that issue. Please click the 'Request Admin' button for human assistance."*
-
-            ### Additional Instructions:
-            - The attached images are part of the system prompt.
-            - Where necessary, include links to relevant files/pages.
-            - Convert filenames into links by replacing `*` with `/` and omitting `.txt`.
-            - Use the modified filename as both the link and its text.
-
-            """
-
+        You are {name}, a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Admin" button for human assistance.'
+                Incorporate information from any attached images into your responses where relevant.
+                When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.
+                Example: If the filename is 'www.example.com*details.txt', the link should be 'https://www.example.com/details' and the link text should also be 'product/details'.
+                USE VALID MARKUP TEXT, Have proper Formating for links
+                \n\nDONOT HALUCINATE\n\n\n\n"""
 # self.default_sys_p = self.sys_prompt
         self.bot_maps = {"gm_2.0_f": self._gemini}
         self._set_bot('gm_2.0_f')
@@ -51,6 +57,7 @@ class Bot:
     def responed(self, input, id):
 
         res, t = self.bot_maps[self.active_bot_name](input, id)
+        print(res.text)
         return res.text, t
 
     def _set_bot(self, name):
@@ -92,7 +99,9 @@ class Bot:
                 model="gemini-2.0-flash", config=types.GenerateContentConfig(
                     system_instruction=self.sys_prompt
                     + ".\n\n".join(text),
-                    max_output_tokens=1000), history=history)
+                    max_output_tokens=500,
+
+                    temperature=0.5), history=history)
             pickle.dump(chat, file)
 
     def _load_chat(self, id):
