@@ -117,7 +117,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @admin_bp.route('/files/')
 @admin_required
 def files():
-    return render_template('admin/files.html', files=os.listdir(UPLOAD_FOLDER))
+    return render_template('admin/files.html', files=sorted(os.listdir(UPLOAD_FOLDER)))
 
 
 def is_readable_file(file_path):
