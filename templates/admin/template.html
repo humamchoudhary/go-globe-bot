@@ -34,48 +34,12 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        // Font files are injected from Flask context processor
-        const fontFiles = {{font_files| tojson }};
+        const fontFiles = {{font_files | tojson }};
         const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
-
-        function loadFonts() {
-            fontFiles.forEach(fileName => {
-                // Extract weight and style info from filename
-                let fontWeight = "400";
-                let fontStyle = "normal";
-
-                if (fileName.includes("Black")) {fontWeight = "900"; fontStyle = "black"}
-                if (fileName.includes("Bold")) {fontWeight = "700"; fontStyle = "bold"}
-                if (fileName.includes("Light")) {fontWeight = "300"; fontStyle = 'light'}
-                if (fileName.includes("Thin")) {fontWeight = "100"; fontStyle = 'thin'}
-                if (fileName.includes("Semi")) {fontWeight = "800"; fontStyle = 'semibold'}
-                // if (fileName.includes("Italic")) fontStyle = "italic";
-
-                // Create font-face declaration
-                const style = document.createElement("style");
-                style.innerHTML = `
-                    @font-face {
-                        font-family: 'Proxima Nova';
-                        src: url('${fontFolder}/${fileName}') format('${getFormat(fileName)}');
-                        font-weight: ${fontWeight};
-                        font-style: ${fontStyle};
-                    }
-                `;
-                document.head.appendChild(style);
-            });
-
-            console.log(`Loaded ${fontFiles.length} font variations`);
-        }
-
-        function getFormat(fileName) {
-            if (fileName.endsWith(".ttf")) return "truetype";
-            if (fileName.endsWith(".otf")) return "opentype";
-            if (fileName.endsWith(".woff")) return "woff";
-            if (fileName.endsWith(".woff2")) return "woff2";
-            return "truetype"; // default
-        }
-
-        loadFonts();
+    </script>
+    <script src="{{ url_for('static', filename='js/fontLoader.js') }}"></script>
+    <script>
+        loadFonts(fontFiles, fontFolder);
     </script>
 
     <!-- Styles -->
