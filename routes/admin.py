@@ -392,7 +392,11 @@ def scrape_urls(urls):
             # print(lines)
             lines = re.sub(r"\s+", " ", lines).strip()
             # Create a filename from the URL
-            filename = '-'.join(res['url'].split('/')[2:])
+            if res['url'].endswith('/'):
+                res['url'] = res['url'][:-1]
+                print(res['url'])
+            print(res['url'].endswith('/'))
+            filename = '*'.join(res['url'].split('/')[2:])
             if not filename:
                 # Use domain if path is empty
                 filename = urlparse(res['url']).netloc
@@ -419,7 +423,7 @@ def scrape():
     thread = threading.Thread(target=scrape_urls, args=(all_urls,))
     thread.start()
     # Now scrape all the collected URLs
-    pprint(all_urls)
+    # pprint(all_urls)
     return '', 200
 
 

@@ -103,6 +103,9 @@
   --techwave-header-height: 80px;
 }
 
+*::-webkit-scrollbar {
+  display: none;
+}
 @media (min-width: 1041px) {
   .panel-opened:root {
     --techwave-left-panel-width: 76px;

@@ -171,7 +171,6 @@ def ping_admin(chat_id):
 @login_required
 def send_message(chat_id):
     message = request.form.get('message')
-    print(rf'{message}')
     if not message or not len(message):
         return "", 302
 
@@ -195,9 +194,11 @@ def send_message(chat_id):
         'content': message,
         'timestamp': new_message.timestamp.isoformat(),
     }, room=f'{user.user_id}-{chat_id[:8]}')
+    print('hello')
 
     if (not chat.admin_required):
-        msg, usage = current_app.bot.responed(message, chat.room_id)
+        msg, usage = current_app.bot.responed(
+            f"Subject of chat: {chat.subject}\n {message}", chat.room_id)
 
         usage_service = UsageService(current_app.db)
         usage_service.add_cost(usage['input'], usage['output'], usage['cost'])
