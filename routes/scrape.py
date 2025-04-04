@@ -71,6 +71,9 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
         driver.set_page_load_timeout(timeout)
 
         # Navigate to the URL
+
+        url = url if url.startswith(
+            ("http://", "https://")) else "https://" + url
         driver.get(url)
 
         # Add cookies if provided
