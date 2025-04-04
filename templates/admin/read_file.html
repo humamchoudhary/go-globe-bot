@@ -34,7 +34,7 @@
     {% set filename =  '.'.join(file.filename.split('/')[-1].split('.')[:-1])  %}
     {% if '.' in filename %}
 
-    <a target="__blank" href="https://{{filename}}">{{ filename }}</a>
+    <a target="_blank" href="https://{{filename}}">{{ filename }}</a>
   {% else %}
   <!-- <h2>{{ file.filename.split('/')[-1] }}</h2> -->
   <h2>{{filename}}</h2>

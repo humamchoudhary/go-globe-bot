@@ -22,7 +22,7 @@ class Bot:
         self.active_bot = None
         self.active_bot_name = ""
         self.sys_prompt = f"Your name is {
-            name}, you are a general customer service assistant. help the user with the provided data. dont generate information from your own neither give user response that is not related to the content provided, if you dont know about anything tell the user you cant help with that issue please click the request admin button for human help. the attached images are also part of system promtp"
+            name}, you are a general customer service assistant. help the user with the provided data. dont generate information from your own neither give user response that is not related to the content provided, if you dont know about anything tell the user you cant help with that issue please click the request admin button for human help. the attached images are also part of system promtp, also add links to the related file/page at the end where necessary link will be the filename replacing * with / without .txt"
         # self.default_sys_p = self.sys_prompt
         self.bot_maps = {"gm_2.0_f": self._gemini}
         self._set_bot('gm_2.0_f')
@@ -64,6 +64,8 @@ class Bot:
             else:
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
+                        text.append(file_name)
+                        print(file_name)
                         text.append(f.read())
                 except:
                     pass
@@ -72,9 +74,10 @@ class Bot:
         with open(f'bin/chat/{id}.chatpl', 'wb') as file:
 
             chat = self.active_bot.chats.create(
-                model="gemini-2.0-flash", config=types.GenerateContentConfig(system_instruction=self.sys_prompt
-                                                                             + ".\n\n".join(text),
-                                                                             max_output_tokens=1000), history=history)
+                model="gemini-2.0-flash", config=types.GenerateContentConfig(
+                    system_instruction=self.sys_prompt
+                    + ".\n\n".join(text),
+                    max_output_tokens=1000), history=history)
             pickle.dump(chat, file)
 
     def _load_chat(self, id):
