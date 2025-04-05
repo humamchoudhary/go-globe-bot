@@ -14,7 +14,7 @@ class ChatService:
 
         # Add default bot message
         initial_messages = [
-            Message("bot", "Hello! How can I help you today?")
+            Message("bot", "How may I help you")
         ]
 
         chat = Chat(

@@ -163,8 +163,8 @@ body {
 
 .fn__svg {
   fill: var(--techwave-hover-color);
-  width: 18px;
-  height: 18px;
+  width: 100%;
+  height: 100%;
 }
 
 .replaced-svg {
@@ -5649,7 +5649,7 @@ a.fn__like.no_border .fn__svg {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding: 5px;
   transition: all;
   transition-duration: 150ms;
 }

@@ -39,7 +39,7 @@ class Bot:
         #     """
         self.sys_prompt = f"""
         You are {name}, a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Admin" button for human assistance.'
-                Incorporate information from any attached images into your responses where relevant.
+                Incorporate information from any attached images into your responses where relevant. Give consice answers
                 When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.
                 Example: If the filename is 'www.example.com*details.txt', the link should be 'https://www.example.com/details' and the link text should also be 'product/details'.
                 USE VALID MARKUP TEXT, Have proper Formating for links
@@ -99,7 +99,7 @@ class Bot:
                 model="gemini-2.0-flash", config=types.GenerateContentConfig(
                     system_instruction=self.sys_prompt
                     + ".\n\n".join(text),
-                    max_output_tokens=500,
+                    max_output_tokens=50,
 
                     temperature=0.5), history=history)
             pickle.dump(chat, file)
