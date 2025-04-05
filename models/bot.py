@@ -99,7 +99,7 @@ class Bot:
                 model="gemini-2.0-flash", config=types.GenerateContentConfig(
                     system_instruction=self.sys_prompt
                     + ".\n\n".join(text),
-                    max_output_tokens=250,
+                    max_output_tokens=500,
 
                     temperature=0.5), history=history)
             pickle.dump(chat, file)
