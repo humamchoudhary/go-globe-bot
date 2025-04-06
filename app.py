@@ -66,11 +66,10 @@ def create_app(config_class=Config):
     app.config.update(
         SESSION_TYPE='mongodb',
         SESSION_MONGODB=client,  # Ensure this is set
-        SESSION_PERMANENT=False,
+        SESSION_PERMANENT=True,
         SESSION_USE_SIGNER=True,  # Helps prevent tampering
         SESSION_KEY_PREFIX='session:',
     )
-    print(app.config)
 
     app.config['SETTINGS'] = {
         'logo': {
