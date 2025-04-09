@@ -39,7 +39,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     CORS(app, origins=["*"],
          supports_credentials=True,
-         allow_headers=["Content-Type", "X-Requested-With", "Authorization"],
+         allow_headers=["*"],
          expose_headers=["Content-Disposition"],
          methods=["GET", "POST", "OPTIONS"])
     app.config.from_object(config_class)
@@ -83,7 +83,7 @@ def create_app(config_class=Config):
             'openAi': os.environ.get('OPENAI_KEY', ''),
             'gemini': os.environ.get('GEMINI_KEY', '')},
         'theme': 'system',
-        'model': 'gemini',
+        'model': 'gemini', 'backend_url': 'https://192.168.100.4:5000'
     }
 
     @app.context_processor
@@ -161,4 +161,6 @@ def create_app(config_class=Config):
 app, socketio = create_app()
 if __name__ == '__main__':
     socketio.run(app, port=5000, host='0.0.0.0',
-                 debug=True)
+                 debug=True, 
+                 ssl_context='adhoc'
+                 )

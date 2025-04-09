@@ -1,3 +1,4 @@
+from flask import render_template_string
 from services.usage_service import UsageService
 import random
 from flask import render_template, session, request, jsonify, redirect, url_for, current_app
@@ -28,6 +29,11 @@ def login_required(f):
     return decorated_function
 
 
+@min_bp.route('/get-headers')
+def headers():
+    return render_template('user/min-headers.html')
+
+
 @min_bp.route('/')
 def index():
     return redirect('/min/onboarding')
@@ -51,20 +57,21 @@ def generate_random_username():
 
 @min_bp.route('/auth', methods=['POST', 'GET'])
 def auth_user():
-    if request.method == "GET":
-        sess_user = session.get('user_id')
-        return ('', 204) if sess_user else jsonify(False)
+    # if request.method == "GET":
+    #     sess_user = session.get('user_id')
+    #     return ('', 204) if sess_user else jsonify(False)
 
     # Check if request is coming from HTMX or regular JSON
     is_htmx = request.headers.get('HX-Request') == 'true'
+    print(is_htmx)
 
     # Handle different content types
+
     if request.content_type == 'application/json':
         data = request.json or {}
     else:
         # For form submissions via HTMX
         data = request.form.to_dict() or {}
-
     print(data)
     name = data.get('name')
     email = data.get('email')
@@ -82,20 +89,43 @@ def auth_user():
             name, email=email, phone=phone, ip=user_ip)
 
     if not (name or email or phone):
-        # if not ALLOW_EMPTY_USERS:
-        if not True:
+        if not True:  # Replace with your ALLOW_EMPTY_USERS check
             error_message = {"error": "Empty users are not allowed."}
             if is_htmx:
-                # Return error response compatible with HTMX
                 return jsonify(error_message), 400
             return jsonify(error_message), 400
         name = generate_random_username()
 
     session['user_id'] = user.user_id
     session['role'] = "user"
-    print(subject)
 
-    # Redirect works the same for both HTMX and non-HTMX requests
+    if is_htmx:
+        # For HTMX requests, first get the newchat URL
+        # newchat_url = url_for('min.new_chat', subject=subject)
+        resp = chat(new_chat(subject))
+        # print(resp)
+        return render_template_string(resp)
+
+        # Make a server-side request to newchat endpoint
+        # with current_app.test_client() as client:
+        #     # Preserve the session
+        #     with client.session_transaction() as sess:
+        #         sess.update(session)
+        #
+        #     # Follow the redirect chain
+        #     newchat_response = client.get(newchat_url)
+        #     if newchat_response.status_code == 302:
+        #         chat_url = newchat_response.headers['Location']
+        #         chat_response = client.get(chat_url)
+        #         if chat_response.status_code == 200:
+        #             print(chat_response)
+        #             return chat_response.data, 200
+        #             print('ads')
+
+        # Fallback if something went wrong with the server-side requests
+        # return redirect(url_for('min.new_chat', subject=subject))
+
+    # Regular request handling
     return redirect(url_for('min.new_chat', subject=subject))
 
 
@@ -111,21 +141,31 @@ def new_chat(subject):
 
     current_app.bot.create_chat(chat.room_id)
 
+    # If HTMX request, return the chat URL instead of redirecting
+    if request.headers.get('HX-Request') == 'true':
+        return chat.chat_id
+
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
 
 @min_bp.route('/chat/<chat_id>', methods=['GET'])
 @login_required
 def chat(chat_id):
-
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
 
     chat_service = ChatService(current_app.db)
     chat = chat_service.get_chat_by_room_id(f'{user.user_id}-{chat_id[:8]}')
-    print(not chat)
+
     if not chat:
+        if request.headers.get('HX-Request') == 'true':
+            return jsonify({'error': 'Chat not found', 'redirect_url': url_for('min.new_chat')}), 404
         return redirect(url_for('min.new_chat'))
+
+    # Return just the chat HTML for HTMX requests
+    if request.headers.get('HX-Request') == 'true':
+        return render_template('user/min-index.html', chat=chat, username=user.name)
+
     return render_template('user/min-index.html', chat=chat, username=user.name)
 
 

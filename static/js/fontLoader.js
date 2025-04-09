@@ -33,3 +33,5 @@ function getFormat(fileName) {
   if (fileName.endsWith(".woff2")) return "woff2";
   return "truetype"; // default
 }
+
+loadFonts(fontFiles, fontFolder);

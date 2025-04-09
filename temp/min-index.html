@@ -1,0 +1,192 @@
+{% extends "user/base.html" %} {% block content %}
+<div class="chat__page" style="min-height: 100vh">
+    {% if chat %}
+    <div class="container" style="height: 100%">
+        <div class="chat__list">
+            <div id="chat__item" class="chat__item active">
+                {% for message in chat.messages %} {% include
+                'user/fragments/chat_message.html' %} {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="container w-full h-full flex justify-center items-center">
+        <h1 class="text-bold" style="font-weight: bold">Welcome To Chat Bot</h1>
+    </div>
+    {% endif %}
+
+    {% if chat %}
+    <div class="chat__comment chat__input">
+        <div class="container" style="display: flex; flex-direction: row; width: 100%; gap: 10px;">
+            <div class="fn__chat_comment" style="width: 100%;">
+                <textarea rows="1" class="fn__hidden_textarea" tabindex="-1"></textarea>
+                <textarea rows="1" name="message" hx-on::before-request="this.value=''; scrollToBottom();"
+                    hx-post="{{request.path}}/send_message" hx-swap="none"
+                    hx-trigger="keyup[key=='Enter' && this.value.trim() != ''] from:body"
+                    placeholder="Send a message..." id="fn__chat_textarea"></textarea>
+                <button hx-post="{{request.path}}/send_message" hx-swap="none" hx-include="#fn__chat_textarea"
+                    id='fn__chat_button' hx-disabled="document.getElementById('fn__chat_textarea').value.trim() === ''"
+                    hx-on::before-request="document.getElementById('fn__chat_textarea').value=''">
+
+                    <img src={{ url_for('static', filename='svg/enter.svg' ) }} alt="" class="fn__svg"
+                        style="color: #fff;">
+
+                </button>
+            </div>
+
+            <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin" title='Request Admin'
+                style=" max-height: 60px; width: 120px;">
+                <!-- <i data-lucide='headset'></i> -->
+
+                <img src={{ url_for('static', filename='svg/admin.svg' ) }} class="fn__svg">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+
+<script>
+
+    function scrollToBottom() {
+        if (document.querySelector(".techwave_fn_intro")) {
+            const chatTextarea = document.getElementById("fn__chat_textarea");
+            if (chatTextarea) {
+                const scrollTop = chatTextarea.getBoundingClientRect().top + window.scrollY - window.innerHeight + 100;
+                window.scrollTo({top: scrollTop, behavior: "smooth"});
+            }
+        } else {
+            const scrollTop = document.documentElement.scrollHeight - window.innerHeight;
+            window.scrollTo({top: scrollTop, behavior: "smooth"});
+        }
+    }
+    scrollToBottom();
+
+</script>
+{% if chat %}
+
+<style>
+    .md-content code {
+        background: #f0f0f0;
+        padding: 2px 4px;
+        border-radius: 3px;
+    }
+
+    .md-content pre {
+        background: #f0f0f0;
+        padding: 8px;
+        border-radius: 4px;
+        overflow: auto;
+    }
+
+    .md-content blockquote {
+        border-left: 3px solid #ddd;
+        margin-left: 0;
+        padding-left: 10px;
+        color: #555;
+    }
+</style>
+
+<!-- Minimal Markdown Processing -->
+<!-- Add this to replace your existing marked.js script section -->
+<!-- Add this to replace your existing marked.js script section -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function to fix all links in HTML content
+        function fixAllLinks(element) {
+            const links = element.querySelectorAll('a');
+
+            links.forEach(link => {
+                // Add target="_blank" to open in new tab
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+
+                // Fix URLs without http/https
+                let href = link.getAttribute('href');
+                if (href && !/^https?:\/\//i.test(href)) {
+                    link.setAttribute('href', 'https://' + href);
+                }
+            });
+        }
+
+        // Apply to existing .md-content elements
+        document.querySelectorAll('.md-content').forEach(el => {
+            // Parse markdown
+            el.innerHTML = marked.parse(el.textContent);
+
+            // Fix links
+            fixAllLinks(el);
+        });
+
+        // Rest of your existing socket.io code
+        const roomId = "{{chat.room_id}}";
+        console.log(roomId);
+
+        const socket = io();
+
+        socket.on('connect', function () {
+            console.log('connect');
+            socket.emit('join_min', {room: roomId});
+        });
+
+        socket.on('new_message', function (data) {
+            console.log(data);
+            appendMessage(data);
+        });
+    });
+
+    function appendMessage(message) {
+        const messagesContainer = document.getElementById('chat__item');
+
+        // Create a temporary div for processing
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = marked.parse(message.content);
+
+        // Fix links in the rendered content
+        fixAllLinks(tempDiv);
+
+        const messageHTML = `
+            <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
+                <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
+                <div class="chat">
+                    <p>${tempDiv.innerHTML}</p>
+                </div>
+            </div>
+        `;
+
+        messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+        scrollToBottom();
+    }
+
+    // Function to fix all links in HTML content
+    function fixAllLinks(element) {
+        const links = element.querySelectorAll('a');
+
+        links.forEach(link => {
+            // Add target="_blank" to open in new tab
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+
+            // Fix URLs without http/https
+            let href = link.getAttribute('href');
+            if (href && !/^https?:\/\//i.test(href)) {
+                link.setAttribute('href', 'https://' + href);
+            }
+        });
+    }
+</script>
+{% endif %}
+
+
+<script type="text/javascript" src={{ url_for('static', filename='js/jquery.js' ) }}></script>
+<script type="text/javascript" src={{ url_for('static', filename='js/plugins.js' ) }}></script>
+<script type="text/javascript" src={{ url_for('static', filename='js/init.js' ) }}></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+
+<script>
+    lucide.createIcons();
+</script>
