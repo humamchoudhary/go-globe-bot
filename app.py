@@ -162,5 +162,5 @@ app, socketio = create_app()
 if __name__ == '__main__':
     socketio.run(app, port=5000, host='0.0.0.0',
                  debug=True, 
-                 ssl_context='adhoc'
+                 # ssl_context='adhoc'
                  )
