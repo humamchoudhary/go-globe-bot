@@ -228,15 +228,12 @@ loginForm.addEventListener("submit", function (e) {
             return;
         }
 
-        if (isHtmxRequest) {
-            // For HTMX requests, handle the response text directly
-            const text = await response.text();
-            console.log("HTMX Response:", text);
-            const chatbox = document.getElementById('chatbox');
-            if (chatbox) {
-                chatbox.innerHTML = text;
-            }
-        } else {
+if (isHtmxRequest) {
+    const text = await response.text();
+    htmx.swap('#chatbox', text,{swapStyle: 'innerHTML'});  // This will execute scripts automatically
+}
+
+        else {
             // For regular requests, handle redirects
             if (response.redirected) {
                 window.location.href = response.url;

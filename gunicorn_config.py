@@ -24,3 +24,9 @@ accesslog = logfile
 errorlog = logfile
 loglevel = "info"
 
+
+# REMOVE IN PROD
+
+certfile = './server-cert.pem'  # Path to your SSL certificate
+keyfile = './server-key.pem'
+

@@ -9,6 +9,28 @@ from services.chat_service import ChatService
 from functools import wraps
 
 
+@min_bp.before_request
+def before_req():
+    print(f'before req:\n\nPath:{request.path}\n\nHostUrl:{request.host_url}\n\n')
+    if ('last_visit' in session):
+
+        print(f"Session Path: {session['last_visit']}")
+    path = request.path
+    print(path.split("/"))
+    if path.startswith("/min") and (path.split("/")[-1] not in ['auth', 'send_message', 'ping_admin'] and path not in ['/min/', '/min/get-headers']):
+        print(f'Changing Path {path}')
+        session["last_visit"] = path
+
+#
+# @min_bp.after_request
+# def after_request(response):
+#     print("Response status:", response.status)
+#     print("Response headers:", response.headers)
+#     # Be cautious if you're streaming
+#     print("Response data:", response.get_data(as_text=True))
+#     return response
+
+
 # Add a login_required decorator
 def login_required(f):
     @wraps(f)
@@ -36,6 +58,11 @@ def headers():
 
 @min_bp.route('/')
 def index():
+
+    # if 'last_visit' in session:
+    #     print(f" ")
+    if 'last_visit' in session and session['last_visit'] not in ['/min/', '/min/get-headers']:
+        return redirect(session['last_visit'])
     return redirect('/min/onboarding')
 
 
@@ -102,8 +129,11 @@ def auth_user():
     if is_htmx:
         # For HTMX requests, first get the newchat URL
         # newchat_url = url_for('min.new_chat', subject=subject)
-        resp = chat(new_chat(subject))
-        # print(resp)
+        chat_id =new_chat(subject) 
+        resp = chat(chat_id)
+        session['last_visit'] = f"/min/chat/{chat_id}"
+
+        print(session['last_visit'])
         return render_template_string(resp)
 
         # Make a server-side request to newchat endpoint
@@ -169,9 +199,11 @@ def chat(chat_id):
     return render_template('user/min-index.html', chat=chat, username=user.name)
 
 
-@min_bp.route('/chat/<chat_id>/ping_admin', methods=['POST'])
+@min_bp.route('/chat/<chat_id>/ping_admin', methods=['POST', 'GET'])
 @login_required
 def ping_admin(chat_id):
+    if request.method == "GET":
+        return redirect(f'/chat/{chat_id}')
     chat_service = ChatService(current_app.db)
 
     user_service = UserService(current_app.db)
@@ -207,9 +239,12 @@ def ping_admin(chat_id):
     return jsonify({"status": "Admin has been notified"}), 200
 
 
-@min_bp.route('/chat/<chat_id>/send_message', methods=['POST'])
+@min_bp.route('/chat/<chat_id>/send_message', methods=['POST', 'GET'])
 @login_required
 def send_message(chat_id):
+
+    if request.method == "GET":
+        return redirect(f'/chat/{chat_id}')
     message = request.form.get('message')
     if not message or not len(message):
         return "", 302

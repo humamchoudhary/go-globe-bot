@@ -10,7 +10,11 @@
         document.documentElement.classList.add(localStorage.frenify_panel);
       }
     </script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <meta
+      name="htmx-config"
+      content='{"selfRequestsOnly":false,   "withCredentials": true    }'
+    />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script>
       const fontFiles = {{font_files | tojson }};
@@ -51,6 +55,7 @@
         }
       });
     </script>
+    <!-- {{ session.sid }} -->
     {% block content %}{% endblock %}
     <script
       type="text/javascript"

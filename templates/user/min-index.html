@@ -1,31 +1,31 @@
-{% extends 'user/base.html' %} {% block content %}
-<!-- <div class="fixed bg-[var(--techwave-main-color)] z-10 w-full py-4 px-4 top-0"><p class="text-white">Welcome, How can i help you?</p></div> -->
+{% extends 'user/base.html' %} 
+{% block content %}
 <!-- AI Chat Bot Page -->
-<div class="techwave_fn_aichatbot_page fn__chatbot" style="min-height: 100vh">
-  <div class="chat__page" style="min-height: 100vh">
-    <!-- REPLACE WITH HTMX --->
+<div class="techwave_fn_aichatbot_page fn__chatbot" style="min-height: 100%">
+  <div class="  px-2 chat__page" style="min-height: 100%">
+    <!-- Chat Messages -->
     {% if chat %}
-    <div class="container" style="height: 100%">
+    <div class="" style="height: 100%">
       <div class="chat__list">
         <div id="chat__item" class="chat__item active">
-          {% for message in chat.messages %} {% include
-          'user/fragments/chat_message.html' %} {% endfor %}
+          {% for message in chat.messages %} 
+            {% include 'user/fragments/chat_message.html' %} 
+          {% endfor %}
         </div>
       </div>
     </div>
     {% else %}
-    <div class="container w-full h-full flex justify-center items-center">
+    <div class="w-full h-full flex justify-center items-center">
       <h1 class="text-bold" style="font-weight: bold">
-        Welcome To
-        <!-- <span -->
-        <!--     style="color:var(--techwave-main-color);font-style: italic;">GO</span><span style="font-style: italic;">-Globe</span>  -->
-        Chat Bot
+        Welcome To Chat Bot
       </h1>
     </div>
-    {% endif %} {% if chat %}
+    {% endif %} 
+    
+    {% if chat %}
     <div class="chat__comment chat__input">
       <div
-        class="container"
+        class=""
         style="display: flex; flex-direction: row; width: 100%; gap: 10px"
       >
         <div class="fn__chat_comment" style="width: 100%">
@@ -37,20 +37,14 @@
           <textarea
             rows="1"
             name="message"
-            hx-on::before-request="this.value=''; scrollToBottom();"
-            hx-post="{{settings['backend_url']}}/{{request.path}}/send_message"
-            hx-swap="none"
-            hx-trigger="keyup[key=='Enter' && this.value.trim() != ''] from:body"
             placeholder="Send a message..."
             id="fn__chat_textarea"
+            onkeyup="handleKeyPress(event)"
           ></textarea>
           <button
-            hx-post="{{settings['backend_url']}}/{{ request.path }}/send_message"
-            hx-swap="none"
-            hx-include="#fn__chat_textarea"
             id="fn__chat_button"
-            hx-disabled="document.getElementById('fn__chat_textarea').value.trim() === ''"
-            hx-on::before-request="document.getElementById('fn__chat_textarea').value=''"
+            onclick="sendMessage()"
+            disabled="disabled"
           >
             <img
               src="{{ settings['backend_url'] }}{{ url_for('static', filename='svg/enter.svg') }}"
@@ -61,11 +55,11 @@
           </button>
         </div>
         <div
-          hx-post="{{ request.path }}/ping_admin"
-          hx-swap="none"
+          id="ping-admin-btn"
           class="ping-admin"
           title="Request Admin"
           style="max-height: 60px; width: 120px"
+          onclick="pingAdmin()"
         >
           <i data-lucide='headset'></i>
           <img
@@ -76,153 +70,212 @@
       </div>
     </div>
     {% endif %}
-   <script>
+    
+    <script>
+      function scrollToBottom() {
+          const chatContentBox =document.querySelector(".chat-content"); 
+        if (chatContentBox) {
+            chatContentBox.scrollTo({top: chatContentBox.scrollHeight, behavior: "smooth"});
+        } else {
+          const scrollTop = document.documentElement.scrollHeight - window.innerHeight;
+          window.scrollTo({top: scrollTop, behavior: "smooth"});
+        }
+      }
+      scrollToBottom();
+    </script>
 
-                function scrollToBottom() {
-                    if (document.querySelector(".techwave_fn_intro")) {
-                        const chatTextarea = document.getElementById("fn__chat_textarea");
-                        if (chatTextarea) {
-                            const scrollTop = chatTextarea.getBoundingClientRect().top + window.scrollY - window.innerHeight + 100;
-                            window.scrollTo({top: scrollTop, behavior: "smooth"});
-                        }
-                    } else {
-                        const scrollTop = document.documentElement.scrollHeight - window.innerHeight;
-                        window.scrollTo({top: scrollTop, behavior: "smooth"});
-                    }
-                }
-                scrollToBottom();
+    <style>
+      .md-content code {
+        background: #f0f0f0;
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
 
-            </script>
-            {% if chat %}
+      .md-content pre {
+        background: #f0f0f0;
+        padding: 8px;
+        border-radius: 4px;
+        overflow: auto;
+      }
 
-            <style>
-                .md-content code {
-                    background: #f0f0f0;
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-
-                .md-content pre {
-                    background: #f0f0f0;
-                    padding: 8px;
-                    border-radius: 4px;
-                    overflow: auto;
-                }
-
-                .md-content blockquote {
-                    border-left: 3px solid #ddd;
-                    margin-left: 0;
-                    padding-left: 10px;
-                    color: #555;
-                }
-            </style>
-
-            <!-- Minimal Markdown Processing -->
-            <!-- Add this to replace your existing marked.js script section -->
-            <!-- Add this to replace your existing marked.js script section -->
-            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Function to fix all links in HTML content
-                    function fixAllLinks(element) {
-                        const links = element.querySelectorAll('a');
-
-                        links.forEach(link => {
-                            // Add target="_blank" to open in new tab
-                            link.setAttribute('target', '_blank');
-                            link.setAttribute('rel', 'noopener noreferrer');
-
-                            // Fix URLs without http/https
-                            let href = link.getAttribute('href');
-                            if (href && !/^https?:\/\//i.test(href)) {
-                                link.setAttribute('href', 'https://' + href);
-                            }
-                        });
-                    }
-
-                    // Apply to existing .md-content elements
-                    document.querySelectorAll('.md-content').forEach(el => {
-                        // Parse markdown
-                        el.innerHTML = marked.parse(el.textContent);
-
-                        // Fix links
-                        fixAllLinks(el);
-                    });
-
-                    // Rest of your existing socket.io code
-                    const roomId = "{{chat.room_id}}";
-                    console.log(roomId);
-
-                const socket = io('{{settings["backend_url"]}}',{withCredentials: true,});
-
-                    socket.on('connect', function () {
-                        console.log('connect');
-                        socket.emit('join_min', {room: roomId});
-                    });
-
-                    socket.on('new_message', function (data) {
-                        console.log(data);
-                        appendMessage(data);
-                    });
-                });
-
-                function appendMessage(message) {
-                    const messagesContainer = document.getElementById('chat__item');
-
-                    // Create a temporary div for processing
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = marked.parse(message.content);
-
-                    // Fix links in the rendered content
-                    fixAllLinks(tempDiv);
-
-                    const messageHTML = `
-            <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
-                <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
-                <div class="chat">
-                    <p>${tempDiv.innerHTML}</p>
-                </div>
-            </div>
-        `;
-
-                    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
-                    scrollToBottom();
-                }
-
-                // Function to fix all links in HTML content
-                function fixAllLinks(element) {
-                    const links = element.querySelectorAll('a');
-
-                    links.forEach(link => {
-                        // Add target="_blank" to open in new tab
-                        link.setAttribute('target', '_blank');
-                        link.setAttribute('rel', 'noopener noreferrer');
-
-                        // Fix URLs without http/https
-                        let href = link.getAttribute('href');
-                        if (href && !/^https?:\/\//i.test(href)) {
-                            link.setAttribute('href', 'https://' + href);
-                        }
-                    });
-                }
-            </script>
-            {% endif %}
+      .md-content blockquote {
+        border-left: 3px solid #ddd;
+        margin-left: 0;
+        padding-left: 10px;
+        color: #555;
+      }
+    </style>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script>
+  // Handle textarea input to enable/disable send button
+  document.getElementById('fn__chat_textarea').addEventListener('input', function() {
+    document.getElementById('fn__chat_button').disabled = this.value.trim() === '';
+  });
 
-    <script
-      type="text/javascript"
-      src="{{settings['backend_url']}}{{ url_for('static', filename='js/jquery.js' ) }}"
-    ></script>
-    <script
-      type="text/javascript"
-      src="{{settings['backend_url']}}{{ url_for('static', filename='js/plugins.js' ) }}"
-    ></script>
-    <script
-      type="text/javascript"
-      src="{{settings['backend_url']}}{{ url_for('static', filename='js/init.js' ) }}"
-    ></script>
+  // Handle Enter key press
+  function handleKeyPress(event) {
+    if (event.key === 'Enter' && document.getElementById('fn__chat_textarea').value.trim() !== '') {
+      sendMessage();
+    }
+  }
 
+  // Send message function
+  function sendMessage() {
+    const textarea = document.getElementById('fn__chat_textarea');
+    const message = textarea.value.trim();
+    
+    if (!message) return;
+    
+    fetch('{{settings['backend_url']}}/min/chat/{{chat.chat_id}}/send_message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        message: message
+      }),
+      credentials: 'include'
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      textarea.value = '';
+      scrollToBottom();
+    })
+    .catch(error => {
+      console.error('Error sending message:', error);
+    });
+  }
 
+  // Ping admin function
+  function pingAdmin() {
+    fetch('{{settings['backend_url']}}/min/chat/{{chat.room_id}}/ping_admin', {
+      method: 'POST',
+      credentials: 'include'
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to ping admin');
+      }
+      console.log('Admin pinged successfully');
+    })
+    .catch(error => {
+      console.error('Error pinging admin:', error);
+    });
+  }
+
+  {% if chat %}
+  function initChat() {
+    // Function to fix all links in HTML content
+    function fixAllLinks(element) {
+      const links = element.querySelectorAll('a');
+
+      links.forEach(link => {
+        // Add target="_blank" to open in new tab
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+
+        // Fix URLs without http/https
+        let href = link.getAttribute('href');
+        if (href && !/^https?:\/\//i.test(href)) {
+          link.setAttribute('href', 'https://' + href);
+        }
+      });
+    }
+
+    // Apply to existing .md-content elements
+    document.querySelectorAll('.md-content').forEach(el => {
+      // Parse markdown
+      el.innerHTML = marked.parse(el.textContent);
+
+      // Fix links
+      fixAllLinks(el);
+    });
+
+    // Socket.io connection
+    const roomId = "{{chat.room_id}}";
+    console.log(roomId);
+
+    const socket = io('{{settings["backend_url"]}}', {withCredentials: true});
+
+    socket.on('connect', function() {
+      console.log('connect');
+      socket.emit('join_min', {room: roomId});
+    });
+
+    socket.on('new_message', function(data) {
+      console.log(data);
+      appendMessage(data);
+    });
+  }
+
+  function appendMessage(message) {
+    const messagesContainer = document.getElementById('chat__item');
+
+    // Create a temporary div for processing
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = marked.parse(message.content);
+
+    // Fix links in the rendered content
+    fixAllLinks(tempDiv);
+
+    const messageHTML = `
+      <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
+        <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
+        <div class="chat">
+          <p>${tempDiv.innerHTML}</p>
+        </div>
+      </div>
+    `;
+
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+    scrollToBottom();
+  }
+
+  // Function to fix all links in HTML content
+  function fixAllLinks(element) {
+    const links = element.querySelectorAll('a');
+
+    links.forEach(link => {
+      // Add target="_blank" to open in new tab
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+
+      // Fix URLs without http/https
+      let href = link.getAttribute('href');
+      if (href && !/^https?:\/\//i.test(href)) {
+        link.setAttribute('href', 'https://' + href);
+      }
+    });
+  }
+  {% endif %}
+</script>
+
+{% if chat %}
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+  // Initialize chat when the page loads
+    initChat();
+</script>
+{% endif %}
+
+<script
+  type="text/javascript"
+  src="{{settings['backend_url']}}{{ url_for('static', filename='js/jquery.js' ) }}"
+></script>
+<script
+  type="text/javascript"
+  src="{{settings['backend_url']}}{{ url_for('static', filename='js/plugins.js' ) }}"
+></script>
+<script
+  type="text/javascript"
+  src="{{settings['backend_url']}}{{ url_for('static', filename='js/init.js' ) }}"
+></script>
 {% endblock %}
