@@ -83,7 +83,7 @@ def create_app(config_class=Config):
             'openAi': os.environ.get('OPENAI_KEY', ''),
             'gemini': os.environ.get('GEMINI_KEY', '')},
         'theme': 'system',
-        'model': 'gemini', 'backend_url': 'https://192.168.100.4:5000'
+        'model': 'gemini', 'backend_url': os.environ.get('BACKEND_URL')
     }
 
     @app.context_processor
