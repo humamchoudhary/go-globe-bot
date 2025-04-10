@@ -5652,6 +5652,9 @@ a.fn__like.no_border .fn__svg {
   padding: 0px;
   transition: all;
   transition-duration: 150ms;
+
+  height: 60px;
+  width: 60px;
 }
 
 .ping-admin:hover {
