@@ -70,7 +70,8 @@ def create_app(config_class=Config):
         SESSION_USE_SIGNER=True,  # Helps prevent tampering
         SESSION_KEY_PREFIX='session:',
     )
-    @app.before_request()
+
+    @app.before_request
     def test():
         print(request.remote_addr)
     app.config['SETTINGS'] = {
@@ -163,6 +164,6 @@ def create_app(config_class=Config):
 app, socketio = create_app()
 if __name__ == '__main__':
     socketio.run(app, port=5000, host='0.0.0.0',
-                 debug=True, 
+                 debug=True,
                  ssl_context='adhoc'
                  )
