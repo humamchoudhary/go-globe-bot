@@ -59,11 +59,16 @@
                                 style="color: #fff;"></button>
                 </div>
 
-                    <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin" title='Request Admin'  style=" max-height: 60px; width: 120px;" >
+                    <div hx-post="{{request.path}}/ping_admin" hx-swap="none" class="ping-admin" 
+          title="Request Assistance"
+ style=" max-height: 60px; width: 60px;" >
                         <!-- <i data-lucide='headset'></i> -->
 
-                            <img src={{ url_for('static', filename='svg/admin.svg' ) }}
-                                 class="fn__svg" > 
+
+
+          <img
+         class="rounded-full"   src="{{ settings['backend_url'] }}{{ url_for('static', filename='img/ana.jpg') }}"
+          />
                     </div>
             </div>
         </div>

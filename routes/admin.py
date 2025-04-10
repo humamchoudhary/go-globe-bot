@@ -68,9 +68,9 @@ def chat(room_id):
     if not chat:
         return redirect(url_for('admin.dashboard'))
     if request.headers.get('HX-Request'):
-        return render_template('admin/fragments/chat_page.html', chat=chat, username="Admin")
+        return render_template('admin/fragments/chat_page.html', chat=chat, username="Anna")
 
-    return render_template('admin/dashboard.html', chat=chat, chats=chats_data, username="Admin")
+    return render_template('admin/dashboard.html', chat=chat, chats=chats_data, username="Anna")
 
 
 @admin_bp.route('/chat/min/<room_id>', methods=['GET'])
@@ -85,7 +85,7 @@ def chat_mini(room_id):
     # chats_data = [c for c in chats if c.admin_required]
     # if not chat:
     #     return redirect(url_for('admin.dashboard'))
-    return render_template('admin/fragments/chat_mini.html', chat=chat, username="Admin")
+    return render_template('admin/fragments/chat_mini.html', chat=chat, username="Anna")
 
 
 @admin_bp.route('/user/<string:user_id>/details', methods=['GET'])
@@ -108,9 +108,9 @@ def filter_chats(filter):
     chats = chat_service.get_all_chats()
 
     if filter == "all":
-        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(),"username":user_service.get_user_by_id(chat.user_id).name} for chat in chats])
+        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats])
     elif filter == "active":
-        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(),"username":user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.admin_required])
+        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.admin_required])
 
 
 @admin_bp.route('/chat/<room_id>/send_message', methods=['POST'])
@@ -137,7 +137,7 @@ def send_message(room_id):
         return jsonify({"error": "Chat not found"}), 404
 
     new_message = chat_service.add_message(
-        chat.room_id, "Admin", message)
+        chat.room_id, "Anna", message)
     user = user_service.get_user_by_id(chat.user_id)
     if not user:
         return '<p>User Not Found</>'
@@ -147,7 +147,7 @@ def send_message(room_id):
         'timestamp': new_message.timestamp.isoformat()
     }, room=room_id)
 
-    return render_template('admin/fragments/chat_message.html', message=new_message, username="Admin")
+    return render_template('admin/fragments/chat_message.html', message=new_message, username="Anna")
 
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
@@ -298,7 +298,7 @@ def dashboard():
 
     # Convert to dictionary representation
     chats_data = [chat for chat in chats if chat.admin_required]
-    return render_template('admin/dashboard.html', chats=chats_data, username="Admin")
+    return render_template('admin/dashboard.html', chats=chats_data, username="Anna")
 
 
 @admin_bp.route('/join/<room_id>')
@@ -400,6 +400,15 @@ def api_key(api_type):
 def set_theme(theme_type):
     # data = request.json
     current_app.config['SETTINGS']['theme'] = theme_type
+    return '', 200
+
+
+@admin_bp.route('/settings/prompt', methods=['POST'])
+@admin_required
+def set_prompt():
+    prpt = request.form.get('prompt')
+    # ADD NEW SUBJECT
+    current_app.config['SETTINGS']['prompt'] = prpt
     return '', 200
 
 

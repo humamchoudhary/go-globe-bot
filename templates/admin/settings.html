@@ -112,30 +112,53 @@ class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-m
           </div>
         </div>
 
-        <div
-          class="flex flex-col justify-center"
-          style="
-            border: 1px solid var(--techwave-border-color);
-            border-radius: 12px;
-            padding: 24px;
-          "
-        >
-          <h2 style="font-size: 26px">General Settings</h2>
-          <div class='grid grid-cols-1 md:grid-cols-3 items-center justify-center gap-4 h-64 md:h-24 my-6'>
-              {% for theme in ['light','system','dark'] %}
-              <div 
-               hx-post='/admin/settings/theme/{{theme}}'
-    hx-trigger="click"
+<div
+  class="flex flex-col justify-center"
+  style="border: 1px solid var(--techwave-border-color); border-radius: 12px; padding: 24px;"
+>
+  <h2 style="font-size: 26px">General Settings</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 items-center justify-center gap-4 h-64 md:h-24 my-6">
+    {% for theme in ['light','system','dark'] %}
+    <div 
+      hx-post='/admin/settings/theme/{{theme}}'
+      hx-trigger="click"
+      hx-swap="none"
+      hx-on::after-request="window.location.reload()"
+      class="border border-white {% if settings.theme == theme %} active-theme {% endif %} rounded-md flex flex-col h-full hover:bg-gray-700/40 duration-200 transition-all hover:cursor-pointer items-center justify-center"
+    >
+      <i data-lucide="{% if theme == 'light' %}sun{% elif theme == 'dark' %}moon{% else %}laptop{% endif %}" class="size-8"></i>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- System Prompt Textarea + Save Button -->
+  <form 
+    hx-post="/admin/settings/prompt"
     hx-swap="none"
     hx-on::after-request="window.location.reload()"
-                 class=' border border-white {% if settings.theme == theme%} active-theme {% endif %} rounded-md flex flex-col h-full hover:bg-gray-700/40 duration-200 transition-all hover:cursor-pointer items-center justify-center'>
-                  <i data-lucide='{% if theme == 'light' %}sun{% elif theme == 'dark' %}moon{% else %}laptop{% endif %}' class='size-8'></i>
-              </div>
-              {% endfor %}
-          </div>
+    class="flex flex-col gap-4 mt-6"
+  >
+    <label for="system_prompt" class="text-base font-medium">System Prompt</label>
+    <textarea 
+      name="prompt"
+      id="prompt"
+      rows="20"
+      class="w-full rounded-md border border-[var(--techwave-border-color)] bg-background px-3 py-2 text-base outline-none transition-all focus:border-[var(--techwave-main-color)]"
+    >{{ settings.prompt | e }}</textarea>
 
-          <div class='h-0.5 w-full' style="background-color:var(--techwave-border-color)" />
-        </div>
+    <button
+      type="submit"
+      class="inline-flex items-center justify-center gap-2 py-2  whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-[var(--techwave-main-color)] text-white hover:bg-white hover:text-[var(--techwave-site-bg-color)] min-w-[50px] px-7"
+    >
+      <i data-lucide="save" class="size-6"></i> Save
+    </button>
+  </form>
+
+  <div class="h-0.5 w-full mt-6" style="background-color:var(--techwave-border-color)"></div>
+</div>
+
+
+
       </div>
     </div>
   </div>

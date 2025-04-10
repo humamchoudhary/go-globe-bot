@@ -5643,13 +5643,13 @@ a.fn__like.no_border .fn__svg {
 
 .ping-admin {
   border: 2px solid var(--techwave-border-color);
-  border-radius: 8px;
+  border-radius: 10000px;
   text-align: center;
   text-wrap: nowrap;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 5px;
+  padding: 0px;
   transition: all;
   transition-duration: 150ms;
 }

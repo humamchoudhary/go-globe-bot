@@ -227,7 +227,7 @@ def ping_admin(chat_id):
     }, room='admin')
 
     new_message = chat_service.add_message(
-        chat.room_id, 'SYSTEM', 'Admin has been notified! They will join soon')
+        chat.room_id, 'SYSTEM', 'Anna has been notified! They will join soon')
     current_app.socketio.emit('new_message', {
         'sender': 'SYSTEM',
         'content': new_message.content,
@@ -237,7 +237,7 @@ def ping_admin(chat_id):
     if request.headers.get('HX-Request'):  # HTMX request
         return "", 204  # No content response for successful submission
 
-    return jsonify({"status": "Admin has been notified"}), 200
+    return jsonify({"status": "Anna has been notified"}), 200
 
 
 @min_bp.route('/chat/<chat_id>/send_message', methods=['POST', 'GET'])
