@@ -70,7 +70,9 @@ def create_app(config_class=Config):
         SESSION_USE_SIGNER=True,  # Helps prevent tampering
         SESSION_KEY_PREFIX='session:',
     )
-
+    @app.before_request()
+    def test():
+        print(request.remote_addr)
     app.config['SETTINGS'] = {
         'logo': {
             'large': '/static/img/logo.svg',
