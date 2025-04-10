@@ -1,5 +1,6 @@
 import uuid
 from models.user import User
+import requests
 
 
 class UserService:
@@ -9,8 +10,12 @@ class UserService:
 
     def create_user(self, name, ip=None, email=None, phone=None, role="user"):
         user_id = str(uuid.uuid4())
+
+        geo = requests.get(f"https://ipapi.co/{ip}/json/").json()
+        country = geo.get("country_name")
+        city = geo.get("city")
         user = User(name=name, email=email, phone=phone,
-                    user_id=user_id, ip=ip, role=role)
+                    user_id=user_id, ip=ip, role=role,loc=f"{city},{country}")
         self.users_collection.insert_one(user.to_dict())
         return user
 

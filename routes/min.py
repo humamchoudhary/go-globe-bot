@@ -11,7 +11,8 @@ from functools import wraps
 
 @min_bp.before_request
 def before_req():
-    print(f'before req:\n\nPath:{request.path}\n\nHostUrl:{request.host_url}\n\n')
+    print(f'before req:\n\nPath:{
+          request.path}\n\nHostUrl:{request.host_url}\n\n')
     if ('last_visit' in session):
 
         print(f"Session Path: {session['last_visit']}")
@@ -129,7 +130,7 @@ def auth_user():
     if is_htmx:
         # For HTMX requests, first get the newchat URL
         # newchat_url = url_for('min.new_chat', subject=subject)
-        chat_id =new_chat(subject) 
+        chat_id = new_chat(subject)
         resp = chat(chat_id)
         session['last_visit'] = f"/min/chat/{chat_id}"
 

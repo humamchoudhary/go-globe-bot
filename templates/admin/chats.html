@@ -1,60 +1,177 @@
 {% extends 'admin/template.html' %}{% block content %}
+<style>
+.active-filter{
+  border-color: var(--techwave-main-color);
+  color: var(--techwave-main-color);
+}
+.filter{
+  border-color:var(--techwave-hover-color);      
+}
+</style>
+<div class="techwave_fn_aichatbot_page fn__chatbot">
+  <!-- Left panel (already in your template) -->
+  
+  <!-- Chat panel (similar to the image) -->
+  <div class="flex-1 flex flex-col h-screen overflow-y-scroll bg-[#001c2e] border-r-[var(--techwave-border-color)] border-r-4 ">
+    <!-- Chat header -->
+    <div class="sticky flex justify-between items-start flex-col items-center">
+      <div class="flex h-15 items-center">
+        <h2 class="text-xl ml-4 font-medium text-white">Chats</h2>
+      </div>
+      <div class="grid h-10 grid-cols-2 w-full item-center justify-center">
+        <p
+          id="all-tab"
+          hx-get="/admin/chats/all"
+          hx-target="#chat_list_container"
+          hx-trigger="click"
+        
+          class="active-filter border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">All</p>
+        <p 
+          id="active-tab"
+          hx-get="/admin/chats/active"
+          hx-target="#chat_list_container"
+          hx-trigger="click"
+          class="border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">Active</p>
+      </div>
+    </div>
+    
+    <!-- Chat list -->
+    <div class="flex-1 overflow-y-auto">
+      <p class="text-right text-sm text-gray-400 p-2" id="chat-count">Total Chats: <span id="chat-total">{{chats|length}}</span></p>
+      <p id="empty_chat" class="text-center hidden">No Chat</p>
+      
+      <div id="chat_list_container">
+          {% include "admin/fragments/chat_list_container.html" %}
+      </div>
+    </div>
+  </div>
+  
+  <iframe id='chat_container' class="w-230 bg-[var(--techwave-bg-color)] hidden">
+    <body class="bg-[var(--techwave-bg-color)]" style="background-color: #001523"></body>
+  </iframe>
+  
+  <!-- Right panel for client info -->
+<div class="bg-[#001c2e] border-l border-[#132f41] p-4 fixed h-screen right-0 w-64 chat__sidebar">
+  <div class="mb-6">
+    <h3 class="text-lg font-medium text-white mb-3">Client info</h3>
+    <div id="client-info" class="text-sm text-gray-400">
+      <div class="mb-4">
+        <p class="text-gray-500 mb-1">Contact</p>
+        <p id="client-phone" class="text-white">Select a chat to view details</p>
+      </div>
+      
+      <div class="mb-4">
+        <p class="text-gray-500 mb-1">Email</p>
+        <p id="client-email" class="text-white break-all">-</p>
+      </div>
 
-<div class="ml-6 p-4 mt-6">
-  <h2 class="text-2xl font-bold mb-4">Chats</h2>
-  <div class="py-8">
-    <div class="overflow-x-auto shadow-lg rounded-lg">
-      <p class="text-right text-sm mb-1">Total Chats: {{chats|length}}</p>
-      <table id="chatRoomsTable" class="w-full border-collapse">
-        <thead>
-          <tr class="bg-[var(--techwave-header-bg-color)]">
-            {% set headers = [ 'Room ID', 'User Name', 'Subject', 'Number of
-            Messages', 'Admin Required', 'Creation Time', 'Last Update Time' ]
-            %} {% for header in headers %}
-            <th
-              onclick="sortTable({{ loop.index0 }})"
-              class="p-3 text-left border-b border-[var(--techwave-border-color)] text-[var(--techwave-heading-color)] cursor-pointer hover:bg-[rgba(255,88,0,0.2)] transition-colors duration-200 font-semibold uppercase text-sm tracking-wider"
-            >
-              {{ header }}
-            </th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for chat in chats %}
-          <tr
-            onclick="window.location.href='/admin/chat/{{chat.room_id}}'"
-            class="
-                        hover:bg-[rgba(0,31,51,0.5)] 
-                        {{ 'bg-[rgba(0,31,51,0.3)]' if loop.index is odd else 'bg-[rgba(0,31,51,0.1)]' }}
-                        border-b border-[var(--techwave-border-color)]"
-          >
-            <td class="p-3">{{ chat.room_id }}</td>
-            <td class="p-3">{{ chat.username }}</td>
-            <td class="p-3">{{ chat.subject }}</td>
-            <td class="p-3">{{ chat.messages|length }}</td>
-            <td class="p-3">
-              <span
-                class="{{ 'text-[var(--techwave-main-color)]' if chat.admin_required else '' }}"
-              >
-                {{ 'Yes' if chat.admin_required else 'No' }}
-              </span>
-            </td>
-            <td class="p-3">
-              {{ chat.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
-            </td>
-            <td class="p-3">
-              {{ chat.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="mb-4">
+        <p class="text-gray-500 mb-1">Visit Source</p>
+        <p id="client-source" class="text-white">-</p>
+      </div>
+
+      <div class="mb-4">
+        <p class="text-gray-500 mb-1">Visit Details</p>
+        <p id="client-visit" class="text-white text-sm">-</p>
+      </div>
+
+      <div class="mb-4">
+        <p class="text-gray-500 mb-1">Country</p>
+        <p id="client-country" class="text-white">-</p>
+      </div>
+
+      <div class="mb-4">
+        <p class="text-gray-500 mb-1">IP Details</p>
+        <p id="client-ip" class="text-white text-sm">-</p>
+      </div>
     </div>
   </div>
 </div>
+  
+
+
+
+</div>
 
 <script>
+
+ function updateClientInfo(user) {
+    if (!user) {
+      // Reset to default state if no chat selected
+      document.getElementById('client-phone').textContent = 'Select a chat to view details';
+      document.getElementById('client-email').textContent = '-';
+      document.getElementById('client-source').textContent = '-';
+      document.getElementById('client-visit').textContent = '-';
+      document.getElementById('client-country').textContent = '-';
+      document.getElementById('client-ip').textContent = '-';
+      return;
+    }
+
+    // Update client information
+    document.getElementById('client-phone').textContent = user.phone || '-';
+    document.getElementById('client-email').textContent = user.email || '-';
+    document.getElementById('client-source').textContent = user.source || '-';
+    
+    // Format visit details
+    const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
+    document.getElementById('client-visit').textContent = visitDetails;
+    
+    document.getElementById('client-country').textContent = user.country || '-';
+    document.getElementById('client-ip').textContent = user.ip || '-';
+  }
+
+  function renderChat(room_id,user_id) {
+    document.getElementById('chat_container').src = `/admin/chat/min/${room_id}`;
+    document.getElementById('chat_container').classList.remove('hidden');
+    
+    // Fetch chat details and update sidebar
+      fetch(`/admin/user/${user_id}/details`)
+      .then(response => response.json())
+      .then(user => {
+          console.log(user)
+        updateClientInfo(user);
+      })
+      .catch(error => {
+        console.error('Error fetching chat details:', error);
+        updateClientInfo(null);
+      });
+  }
+
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the tab elements
+    const allTab = document.getElementById('all-tab');
+    const activeTab = document.getElementById('active-tab');
+    
+    // Handle HTMX events
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+      if (event.detail.target.id === 'chat_list_container') {
+        const source = event.detail.requestConfig.path;
+        
+        // Update the chat count
+        const chatItems = document.querySelectorAll('.chat-item');
+        document.getElementById('chat-total').textContent = chatItems.length;
+        
+        // Update tab styling
+        if (source.includes('/active')) {
+          activeTab.classList.add('active-filter');
+          allTab.classList.remove('active-filter');
+        } else {
+          allTab.classList.add('active-filter');
+          activeTab.classList.remove('active-filter');
+        }
+        
+        // Show/hide empty message
+        if (chatItems.length > 0) {
+          document.getElementById('empty_chat').classList.add('hidden');
+        } else {
+          document.getElementById('empty_chat').classList.remove('hidden');
+        }
+      }
+    });
+  });
+
   function sortTable(n) {
     var table,
       rows,

@@ -1,0 +1,28 @@
+{% for chat in chats %}
+<div
+  onclick="renderChat('{{ chat.room_id }}','{{ chat.user_id }}')"
+  data-admin-required="{{ 'true' if chat.admin_required else 'false' }}"
+  class="chat-item flex flex-col p-3 border-b border-[#132f41] hover:bg-[#0c2434] cursor-pointer"
+>
+  <div class="flex justify-between items-center">
+    <div class="font-medium text-white">{{ chat.username }}</div>
+    <div class="text-xs text-gray-400">
+      {{ chat.updated_at.strftime("%H:%M") }}
+    </div>
+  </div>
+  <div class="text-sm text-gray-300 truncate mt-1">{{ chat.subject }}</div>
+  <div class="flex justify-between items-center mt-1 text-xs text-gray-400">
+    <p class="truncate text-nowrap w-50">
+      {% set message = chat.messages[-1] %}{{ message.sender }}:{{
+      message.content }}
+    </p>
+    {% if chat.admin_required %}
+    <div
+      class="px-2 py-0.5 rounded-full bg-[rgba(255,88,0,0.2)] text-[#ff5800]"
+    >
+      Admin Required
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}

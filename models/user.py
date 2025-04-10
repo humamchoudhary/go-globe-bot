@@ -2,7 +2,7 @@ from datetime import datetime
 
 
 class User:
-    def __init__(self, name, ip=None, phone=None, email=None, user_id=None, role="user", chat_ids=None):
+    def __init__(self, name, ip=None, phone=None, email=None, user_id=None, loc=None, role="user", chat_ids=None):
         self.user_id = user_id
         self.name = name
         self.role = role
@@ -12,6 +12,7 @@ class User:
         self.email = email
         self.phone = phone
         self.ip = ip
+        self.loc = loc
 
     def to_dict(self):
         return {
@@ -22,7 +23,7 @@ class User:
             "created_at": self.created_at,
             "last_active": self.last_active,
             'email': self.email,
-            'phone': self.phone, 'ip': self.ip
+            'phone': self.phone, 'ip': self.ip, "loc": self.loc
 
         }
 
@@ -33,7 +34,7 @@ class User:
             user_id=data.get("user_id"),
             role=data.get("role", "user"),
             chat_ids=data.get("chat_ids", []),
-            ip=data.get('ip'),
+            ip=data.get('ip'), loc=data.get('loc'),
             email=data.get('email'), phone=data.get('phone')
         )
         user.created_at = data.get("created_at", datetime.utcnow())

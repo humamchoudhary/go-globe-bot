@@ -73,6 +73,46 @@ def chat(room_id):
     return render_template('admin/dashboard.html', chat=chat, chats=chats_data, username="Admin")
 
 
+@admin_bp.route('/chat/min/<room_id>', methods=['GET'])
+@admin_required
+def chat_mini(room_id):
+
+    chat_service = ChatService(current_app.db)
+
+    chat = chat_service.get_chat_by_room_id(room_id)
+    chats = chat_service.get_all_chats()
+
+    # chats_data = [c for c in chats if c.admin_required]
+    # if not chat:
+    #     return redirect(url_for('admin.dashboard'))
+    return render_template('admin/fragments/chat_mini.html', chat=chat, username="Admin")
+
+
+@admin_bp.route('/user/<string:user_id>/details', methods=['GET'])
+@admin_required
+def get_user_details(user_id):
+
+    user_service = UserService(current_app.db)
+    user = user_service.get_user_by_id(user_id)
+
+    return jsonify(user.to_dict())
+
+
+@admin_bp.route('/chats/<string:filter>', methods=['GET'])
+@admin_required
+def filter_chats(filter):
+
+    chat_service = ChatService(current_app.db)
+    user_service = UserService(current_app.db)
+
+    chats = chat_service.get_all_chats()
+
+    if filter == "all":
+        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(),"username":user_service.get_user_by_id(chat.user_id).name} for chat in chats])
+    elif filter == "active":
+        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(),"username":user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.admin_required])
+
+
 @admin_bp.route('/chat/<room_id>/send_message', methods=['POST'])
 @admin_required
 def send_message(room_id):

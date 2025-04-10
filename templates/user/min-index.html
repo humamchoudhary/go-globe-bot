@@ -154,7 +154,7 @@
 
   // Ping admin function
   function pingAdmin() {
-    fetch('{{settings['backend_url']}}/min/chat/{{chat.room_id}}/ping_admin', {
+    fetch('{{settings['backend_url']}}/min/chat/{{chat.chat_id}}/ping_admin', {
       method: 'POST',
       credentials: 'include'
     })
