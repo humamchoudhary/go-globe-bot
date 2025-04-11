@@ -8,11 +8,11 @@
   border-color:var(--techwave-hover-color);      
 }
 </style>
-<div class="techwave_fn_aichatbot_page fn__chatbot">
+<div class="techwave_fn_aichatbot_page fn__chatbot h-[90vh] overflow-auto">
   <!-- Left panel (already in your template) -->
   
   <!-- Chat panel (similar to the image) -->
-  <div class="flex-1 flex flex-col h-screen overflow-y-scroll bg-[#001c2e] border-r-[var(--techwave-border-color)] border-r-4 ">
+  <div class="flex-1 flex flex-col h-full overflow-y-scroll bg-[#001c2e] border-r-[var(--techwave-border-color)] border-r-4 ">
     <!-- Chat header -->
     <div class="sticky flex justify-between items-start flex-col items-center">
       <div class="flex h-15 items-center">
@@ -36,7 +36,7 @@
     </div>
     
     <!-- Chat list -->
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 overflow-y-auto h-[96vh]">
       <p class="text-right text-sm text-gray-400 p-2" id="chat-count">Total Chats: <span id="chat-total">{{chats|length}}</span></p>
       <p id="empty_chat" class="text-center hidden">No Chat</p>
       
@@ -46,7 +46,7 @@
     </div>
   </div>
   
-  <iframe id='chat_container' class="w-230 bg-[var(--techwave-bg-color)] hidden">
+  <iframe id='chat_container' class="w-210 bg-[var(--techwave-bg-color)] hidden">
     <body class="bg-[var(--techwave-bg-color)]" style="background-color: #001523"></body>
   </iframe>
   
