@@ -74,19 +74,28 @@ def create_app(config_class=Config):
     @app.before_request
     def test():
         print(request.remote_addr)
-    app.config['SETTINGS'] = {
-        'logo': {
-            'large': '/static/img/logo.svg',
-            'small':
-            '/static/img/logo-desktop-mini.svg',
-        },
-        'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
-        'apiKeys': {
+
+    conf = db.config.find_one({"id": "settings"})
+    if conf:
+        app.config['SETTINGS'] = conf
+        app.config['SETTINGS']["apiKeys"] = {
             'claude': os.environ.get('CLAUDE_KEY', ''),
             'openAi': os.environ.get('OPENAI_KEY', ''),
-            'gemini': os.environ.get('GEMINI_KEY', '')},
-        'theme': 'system',
-        'model': 'gemini', 'backend_url': os.environ.get('BACKEND_URL'), "prompt": f"""
+            'gemini': os.environ.get('GEMINI_KEY', '')}
+    else:
+        app.config['SETTINGS'] = {
+            'logo': {
+                'large': '/static/img/logo.svg',
+                'small':
+                '/static/img/logo-desktop-mini.svg',
+            },
+            'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
+            'apiKeys': {
+                'claude': os.environ.get('CLAUDE_KEY', ''),
+                'openAi': os.environ.get('OPENAI_KEY', ''),
+                'gemini': os.environ.get('GEMINI_KEY', '')},
+            'theme': 'system',
+            'model': 'gemini', 'backend_url': os.environ.get('BACKEND_URL'), "prompt": f"""
        you are a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Assistance" button for human assistance.'
                 Incorporate information from any attached images into your responses where relevant. Give concise answers
                 When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.
@@ -94,11 +103,15 @@ def create_app(config_class=Config):
                 USE VALID MARKUP TEXT, Have proper Formating for links
 DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THING USER ASKS TO EXPLAIN
                 """
-    }
+        }
 
     @app.context_processor
     def settings():
-        # print(app.config['SETTINGS'])
+        app.config['SETTINGS']['subjects'] = list(
+            app.config['SETTINGS']['subjects'])
+
+        db.config.replace_one({"id": "settings"},
+                              {"id": "settings", **app.config['SETTINGS'], "apiKeys": "removed"}, upsert=True)
         app.config['SETTINGS']['subjects'] = sorted(
             app.config['SETTINGS']['subjects'], key=len, reverse=True)
         return {'settings': app.config['SETTINGS']}
