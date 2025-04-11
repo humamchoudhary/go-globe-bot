@@ -23,10 +23,6 @@
             <!-- Desktop logo would go here -->
             <div class="rounded-lg px-8 pt-4">
                 <div class="mb-8">
-                    <h2
-                        class="text-xl font-bold mb-5 text-[var(--techwave-heading-color)] font-[var(--techwave-heading-font-family)]">
-                        User Authentication
-                    </h2>
                     <p id="error-message" class="text-red-500 hidden"></p>
 
                     <form id="login-form" novalidate>
@@ -49,10 +45,9 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="subject" class="block mb-2 text-[var(--techwave-body-color)]">Message Subject
-                                *</label>
+                            <label for="subject" class="block mb-2 text-[var(--techwave-body-color)]">Message Subject*</label>
                             <select
-                                class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
+                                class="w-full bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
                                 id="subject" name="subject" autocapitalize="off" autocomplete="off" required>
                                 {% for subject in settings['subjects'] %}
                                 <option {% if default_subject and default_subject==subject %} selected='true' {% endif

@@ -102,7 +102,7 @@ def ping_admin(chat_id):
     }, room='admin')
 
     new_message = chat_service.add_message(
-        chat.room_id, 'SYSTEM', 'Anna has been notified! They will join soon')
+        chat.room_id, 'SYSTEM', 'Anna has been notified! She will join soon')
     current_app.socketio.emit('new_message', {
         'sender': 'SYSTEM',
         'content': new_message.content,

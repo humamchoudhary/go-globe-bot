@@ -130,6 +130,8 @@
   --techwave-heading-color: #333;
   --techwave-body-color: #444;
   --techwave-border-color: #ddd;
+
+  --techwave-hover-color: #ddd;
   --techwave-button-bg-color: #f5f5f5;
   --techwave-hover-color: #000;
 }

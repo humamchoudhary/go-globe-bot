@@ -1,7 +1,7 @@
 {% extends 'user/base.html' %} 
 {% block content %}
 <!-- AI Chat Bot Page -->
-<div class="techwave_fn_aichatbot_page fn__chatbot" style="min-height: 100%">
+<div class=" techwave_fn_aichatbot_page fn__chatbot relative" style="min-height: 100%">
   <div class="  px-2 chat__page" style="min-height: 100%">
     <!-- Chat Messages -->
     {% if chat %}
@@ -23,29 +23,21 @@
     {% endif %} 
     
     {% if chat %}
-    <div class="chat__comment chat__input">
+    <div class="chat__comment chat__input" style="padding:10px 0px 0px 0px">
       <div
         class=""
         style="display: flex; flex-direction: row; width: 100%; gap: 10px"
       >
-        <div class="fn__chat_comment" style="width: 100%">
-          <textarea
-            rows="1"
-            class="fn__hidden_textarea"
-            tabindex="-1" 
-
- style="min-height:0px;"          ></textarea>
+        <div class="fn__chat_comment relative" style="width: 100%; height:fit-content">
           <textarea
             rows="1"
             name="message"
             placeholder="Send a message..."
-            id="fn__chat_textarea" style="min-height:0px;"
-            onkeyup="handleKeyPress(event)"
+            id="fn__chat_textarea" style="min-height:0px; margin-bottom:0px"
+  onkeyup="handleKeyPress(event); checkInputValue();"
           ></textarea>
           <button
-            id="fn__chat_button"
             onclick="sendMessage()"
-            disabled="disabled"
           >
             <img
               src="{{ settings['backend_url'] }}{{ url_for('static', filename='svg/enter.svg') }}"
@@ -57,13 +49,15 @@
         </div>
         <div
           id="ping-admin-btn"
-          class="ping-admin relative"
+
+          class="flex items-center justify-center  p-1 hover:bg-[var(--techwave-main-color)] rounded-full duration-200 transition-all hover:cursor-pointer border-0.5 border-[var(--techwave-border-color)] hover:border-[var(--techwave-hover-color)] relative"
           title="Request Assistance"
           onclick="pingAdmin()"
+          style="max-width:65px;"
         >
           <img
 
-  class="rounded-full w-[60px] h-[60px]"             src="{{ settings['backend_url'] }}{{ url_for('static', filename='img/ana.jpg') }}"
+  class="rounded-full w-[60px]"             src="{{ settings['backend_url'] }}{{ url_for('static', filename='img/ana.jpg') }}"
           />
         </div>
       </div>
@@ -103,6 +97,7 @@
         padding-left: 10px;
         color: #555;
       }
+      
     </style>
   </div>
 </div>
@@ -111,6 +106,23 @@
 {% block scripts %}
 <script>
   // Handle textarea input to enable/disable send button
+
+  function checkInputValue() {
+    const textarea = document.getElementById('fn__chat_textarea');
+    const sendBtn = document.getElementById('send-btn');
+console.log(sendBtn)
+    if (textarea.value.trim() !== '') {
+      // Add active styling
+      sendBtn.classList.add('cursor-pointer ');
+      sendBtn.classList.remove('cursor-not-allowed');
+    } else {
+      // Revert to default
+      sendBtn.classList.remove('cursor-pointer');
+
+      sendBtn.classList.add('cursor-not-allowed');
+    }
+  }
+
   document.getElementById('fn__chat_textarea').addEventListener('input', function() {
     document.getElementById('fn__chat_button').disabled = this.value.trim() === '';
   });
@@ -127,6 +139,7 @@
     const textarea = document.getElementById('fn__chat_textarea');
     const message = textarea.value.trim();
     
+      textarea.value = '';
     if (!message) return;
     
     fetch('{{settings['backend_url']}}/min/chat/{{chat.chat_id}}/send_message', {
@@ -143,10 +156,11 @@
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      textarea.value = '';
       scrollToBottom();
     })
     .catch(error => {
+
+      textarea.value = message;
       console.error('Error sending message:', error);
     });
   }
@@ -269,12 +283,12 @@
   type="text/javascript"
   src="{{settings['backend_url']}}{{ url_for('static', filename='js/jquery.js' ) }}"
 ></script>
-<script
-  type="text/javascript"
-  src="{{settings['backend_url']}}{{ url_for('static', filename='js/plugins.js' ) }}"
-></script>
-<script
-  type="text/javascript"
-  src="{{settings['backend_url']}}{{ url_for('static', filename='js/init.js' ) }}"
-></script>
+<!-- <script -->
+<!--   type="text/javascript" -->
+<!--   src="{{settings['backend_url']}}{{ url_for('static', filename='js/plugins.js' ) }}" -->
+<!-- ></script> -->
+<!-- <script -->
+<!--   type="text/javascript" -->
+<!--   src="{{settings['backend_url']}}{{ url_for('static', filename='js/init.js' ) }}" -->
+<!-- ></script> -->
 {% endblock %}
