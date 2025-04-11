@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, session, url_for, jsonify
 
 from flask import render_template,  request, redirect, current_app
@@ -70,6 +71,8 @@ def create_app(config_class=Config):
         SESSION_USE_SIGNER=True,  # Helps prevent tampering
         SESSION_KEY_PREFIX='session:',
     )
+
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
     @app.before_request
     def test():

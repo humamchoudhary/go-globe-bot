@@ -186,7 +186,7 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
         print(type(clean_text))
         print(len(clean_text.split()))
 
-        if len(clean_text.split()) < 30:
+        if len(clean_text.split()) < 500:
             print('LESS TEXT')
             content_patterns = ['content', 'main',
                                 'post', 'article', 'entry', 'body']

@@ -80,10 +80,13 @@ class Bot:
                 # images.append(img)
             else:
                 try:
+                    url = file_name.replace("*", "/").replace(".txt", "")
                     with open(file_path, 'r', encoding='utf-8') as f:
-                        text.append(file_name)
-                        print(file_name)
-                        text.append(f.read())
+                        text.append(f"<url>{url}</url>")
+                        print(f"url: {file_name.replace(
+                            "*", "/").replace(".txt", "")}")
+                        text.append(f"<file url='{url}' >{f.read()}</file>")
+                        print(text)
                 except:
                     pass
         if not os.path.exists('./bin/chat/'):

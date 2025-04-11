@@ -11,15 +11,8 @@ from functools import wraps
 
 @min_bp.before_request
 def before_req():
-    print(f'before req:\n\nPath:{
-          request.path}\n\nHostUrl:{request.host_url}\n\n')
-    if ('last_visit' in session):
-
-        print(f"Session Path: {session['last_visit']}")
     path = request.path
-    print(path.split("/"))
     if path.startswith("/min") and (path.split("/")[-1] not in ['auth', 'send_message', 'ping_admin'] and path not in ['/min/', '/min/get-headers']):
-        print(f'Changing Path {path}')
         session["last_visit"] = path
 
 #
