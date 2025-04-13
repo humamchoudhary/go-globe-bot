@@ -1,5 +1,8 @@
 {% for chat in chats %}
 <div
+  hx-get="/admin/chat/min/{{ chat.room_id }}"
+  hx-target="#chat_container"
+  hx-trigger="click"
   onclick="renderChat('{{ chat.room_id }}','{{ chat.user_id }}')"
   data-admin-required="{{ 'true' if chat.admin_required else 'false' }}"
   class="chat-item flex flex-col p-3 border-b border-[#132f41] hover:bg-[#0c2434] cursor-pointer"

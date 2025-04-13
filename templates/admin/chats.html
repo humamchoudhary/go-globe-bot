@@ -25,13 +25,13 @@
           hx-target="#chat_list_container"
           hx-trigger="click"
         
-          class="active-filter border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">All</p>
+          class="active-filter border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">All Chats</p>
         <p 
           id="active-tab"
           hx-get="/admin/chats/active"
           hx-target="#chat_list_container"
           hx-trigger="click"
-          class="border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">Active</p>
+          class="border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">Admin Chats</p>
       </div>
     </div>
     
@@ -46,9 +46,9 @@
     </div>
   </div>
   
-  <iframe id='chat_container' class="w-210 bg-[var(--techwave-bg-color)] hidden">
-    <body class="bg-[var(--techwave-bg-color)]" style="background-color: #001523"></body>
-  </iframe>
+  <div id='chat_container' class="w-210 bg-[var(--techwave-bg-color)] h-full hidden">
+    <!-- <body class="bg-[var(--techwave-bg-color)]" style="background-color: #001523"></body> -->
+  </div>
   
   <!-- Right panel for client info -->
 <div class="bg-[#001c2e] border-l border-[#132f41] p-4 fixed h-screen right-0 w-64 chat__sidebar">
@@ -121,7 +121,7 @@
   }
 
   function renderChat(room_id,user_id) {
-    document.getElementById('chat_container').src = `/admin/chat/min/${room_id}`;
+  //  document.getElementById('chat_container').src = `/admin/chat/min/${room_id}`;
     document.getElementById('chat_container').classList.remove('hidden');
     
     // Fetch chat details and update sidebar
