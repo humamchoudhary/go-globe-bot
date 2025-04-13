@@ -33,8 +33,8 @@ def get_font_data():
     font_files = [os.path.basename(f) for f in font_files]
 
     return font_files
-t =  os.environ.get('SMTP_SERVER')
-print(t)
+
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     CORS(app, origins=["*"],
