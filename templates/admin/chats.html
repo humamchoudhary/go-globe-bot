@@ -65,25 +65,25 @@
         <p id="client-email" class="text-white break-all">-</p>
       </div>
 
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Visit Source</p>
-        <p id="client-source" class="text-white">-</p>
-      </div>
-
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Visit Details</p>
-        <p id="client-visit" class="text-white text-sm">-</p>
-      </div>
-
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Country</p>
-        <p id="client-country" class="text-white">-</p>
-      </div>
-
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">IP Details</p>
-        <p id="client-ip" class="text-white text-sm">-</p>
-      </div>
+      <!-- <div class="mb-4"> -->
+      <!--   <p class="text-gray-500 mb-1">Visit Source</p> -->
+      <!--   <p id="client-source" class="text-white">-</p> -->
+      <!-- </div> -->
+      <!---->
+      <!-- <div class="mb-4"> -->
+      <!--   <p class="text-gray-500 mb-1">Visit Details</p> -->
+      <!--   <p id="client-visit" class="text-white text-sm">-</p> -->
+      <!-- </div> -->
+      <!---->
+      <!-- <div class="mb-4"> -->
+      <!--   <p class="text-gray-500 mb-1">Country</p> -->
+      <!--   <p id="client-country" class="text-white">-</p> -->
+      <!-- </div> -->
+      <!---->
+      <!-- <div class="mb-4"> -->
+      <!--   <p class="text-gray-500 mb-1">IP Details</p> -->
+      <!--   <p id="client-ip" class="text-white text-sm">-</p> -->
+      <!-- </div> -->
     </div>
   </div>
 </div>
@@ -100,24 +100,24 @@
       // Reset to default state if no chat selected
       document.getElementById('client-phone').textContent = 'Select a chat to view details';
       document.getElementById('client-email').textContent = '-';
-      document.getElementById('client-source').textContent = '-';
-      document.getElementById('client-visit').textContent = '-';
-      document.getElementById('client-country').textContent = '-';
-      document.getElementById('client-ip').textContent = '-';
+    //  document.getElementById('client-source').textContent = '-';
+      //document.getElementById('client-visit').textContent = '-';
+      //document.getElementById('client-country').textContent = '-';
+      //document.getElementById('client-ip').textContent = '-';
       return;
     }
 
     // Update client information
     document.getElementById('client-phone').textContent = user.phone || '-';
     document.getElementById('client-email').textContent = user.email || '-';
-    document.getElementById('client-source').textContent = user.source || '-';
+  //  document.getElementById('client-source').textContent = user.source || '-';
     
     // Format visit details
-    const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
-    document.getElementById('client-visit').textContent = visitDetails;
+   // const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
+   // document.getElementById('client-visit').textContent = visitDetails;
     
-    document.getElementById('client-country').textContent = user.country || '-';
-    document.getElementById('client-ip').textContent = user.ip || '-';
+   // document.getElementById('client-country').textContent = user.country || '-';
+   // document.getElementById('client-ip').textContent = user.ip || '-';
   }
 
   function renderChat(room_id,user_id) {
