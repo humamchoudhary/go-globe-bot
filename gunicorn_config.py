@@ -19,10 +19,10 @@ worker_class = "eventlet"  # OR "gevent"
 
 workers = 1  # Recommended worker count
 
-# logfile = "logs/gunicorn.log"
-# accesslog = logfile
-# errorlog = logfile
-# loglevel = "info"
+logfile = "logs/gunicorn.log"
+accesslog = logfile
+errorlog = logfile
+loglevel = "info"
 
 
 # REMOVE IN PROD
