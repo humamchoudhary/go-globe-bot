@@ -673,22 +673,3 @@ def register_admin_socketio_events(socketio):
         join_room('admin')  # Join the admin room for broadcasts
         print('admin joined')
         emit('status', {'msg': 'Admin has joined the room.'}, room=room)
-
-    @socketio.on('admin_leave')
-    def on_admin_leave(data):
-        if session.get('user') != 'admin':
-            return
-
-        room = data.get('room')
-        chat_id = data.get('chat_id')
-
-        if not room or not chat_id:
-            return
-
-        leave_room(room)
-
-        # Mark admin as no longer present
-        chat_service = ChatService(current_app.db)
-        chat_service.set_admin_present(chat_id, False)
-
-        emit('status', {'msg': 'Admin has left the room.'}, room=room)

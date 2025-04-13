@@ -7,6 +7,7 @@ from . import min_bp
 from services.user_service import UserService
 from services.chat_service import ChatService
 from functools import wraps
+from services.email_service import send_email
 
 
 @min_bp.before_request
@@ -227,9 +228,10 @@ def ping_admin(chat_id):
         'timestamp': new_message.timestamp.isoformat(),
     }, room=f'{user.user_id}-{chat_id[:8]}')
 
+    print("ANNA PINGED")
+    print(send_email('humamchoudhary@gmail.com','test','test'))
     if request.headers.get('HX-Request'):  # HTMX request
         return "", 204  # No content response for successful submission
-
     return jsonify({"status": "Anna has been notified"}), 200
 
 

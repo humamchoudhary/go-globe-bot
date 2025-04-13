@@ -84,7 +84,6 @@
   }
 </style>
 <!-- Minimal Markdown Processing -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 <script>
   function scrollToBottom() {
@@ -107,6 +106,7 @@
   scrollToBottom();
 </script>
 {% if chat %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".md-content").forEach((el) => {

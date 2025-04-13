@@ -52,7 +52,7 @@ class Bot:
     def responed(self, input, id):
 
         res, t = self.bot_maps[self.active_bot_name](input, id)
-        print(res.text)
+        # print(res.text)
         return res.text, t
 
     def _set_bot(self, name):
@@ -86,7 +86,7 @@ class Bot:
                         print(f"url: {file_name.replace(
                             "*", "/").replace(".txt", "")}")
                         text.append(f"<file url='{url}' >{f.read()}</file>")
-                        print(text)
+                        # print(text)
                 except:
                     pass
         if not os.path.exists('./bin/chat/'):

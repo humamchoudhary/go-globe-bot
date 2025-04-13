@@ -220,4 +220,40 @@
     }
   }
 </script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+
+    function fixAllLinks(element) {
+      const links = element.querySelectorAll('a');
+
+      links.forEach(link => {
+        // Add target="_blank" to open in new tab
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+
+        // Fix URLs without http/https
+        let href = link.getAttribute('href');
+        if (href && !/^https?:\/\//i.test(href)) {
+          link.setAttribute('href', 'https://' + href);
+        }
+      });
+    }
+
+
+document.addEventListener('htmx:afterRequest', function(evt) {
+
+     console.log('parse');
+    document.querySelectorAll(".md-content").forEach((el) => {
+      el.innerHTML = marked.parse(el.textContent);
+
+      fixAllLinks(el);
+        
+    });
+    // Put the JS code that you want to execute here
+});
+</script>
+
 {% endblock %}
