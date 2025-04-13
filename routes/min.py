@@ -229,7 +229,7 @@ def ping_admin(chat_id):
     }, room=f'{user.user_id}-{chat_id[:8]}')
 
     print("ANNA PINGED")
-    send_email('humamchoudhary@gmail.com',f'Assitance Required {chat.subject}',f'Admin assitance is required in chat: {current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id}')
+    send_email('sarmad@go-globe.com',f'Assitance Required {chat.subject}',f'Admin assitance is required in chat: {current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id}')
     if request.headers.get('HX-Request'):  # HTMX request
         return "", 204  # No content response for successful submission
     return jsonify({"status": "Anna has been notified"}), 200
