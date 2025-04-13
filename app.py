@@ -16,8 +16,8 @@ import routes.min
 from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
-
 from flask_cors import CORS
+
 
 
 def get_font_data():

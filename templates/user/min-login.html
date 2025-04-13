@@ -234,7 +234,6 @@ if (isHtmxRequest) {
                 window.location.href = response.url;
             } else {
                 const text = await response.text();
-                console.log("Regular Response:", text);
                 // Handle non-redirect successful responses
                 // You might want to update the UI here
             }

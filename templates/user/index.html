@@ -148,17 +148,14 @@
         
         // Rest of your existing socket.io code
         const roomId = "{{chat.room_id}}";
-        console.log(roomId);
 
         const socket = io();
 
         socket.on('connect', function () {
-            console.log('connect');
             socket.emit('join_min', {room: roomId});
         });
 
         socket.on('new_message', function (data) {
-            console.log(data);
             appendMessage(data);
         });
     });

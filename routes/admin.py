@@ -1,3 +1,5 @@
+import json
+from pywebpush import webpush, WebPushException
 import threading
 from pprint import pprint
 from services.usage_service import UsageService
@@ -22,6 +24,14 @@ from werkzeug.utils import secure_filename
 import pdf2image
 
 
+VAPID_PRIVATE_KEY = "./private_key.pem"
+VAPID_PUBLIC_KEY = 'BCDjCwDgl094kCxVV5ByTcnOnhqq95IA_LkK1q1xs0Bc118d54-AzSg1gQOkppKUvriZETaK05VevhNmWWbuoY4'
+
+VAPID_CLAIMS = {
+    "sub": "mailto:humamchoudhary@gmail.com"  # This should be your email
+}
+
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -29,6 +39,65 @@ def admin_required(f):
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+subscriptions = {}
+
+
+@admin_bp.route('/api/get-vapid-public-key')
+def get_vapid_public_key():
+    return VAPID_PUBLIC_KEY
+
+
+@admin_bp.route('/api/save-subscription', methods=['POST'])
+def save_subscription():
+    try:
+        subscription = request.json
+        # Generate a unique ID for this subscription
+        subscription_id = str(int(time.time()))
+        subscriptions[subscription_id] = subscription
+        return jsonify({"success": True, "id": subscription_id}), 201
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@admin_bp.route('/api/trigger-push-notification', methods=['POST'])
+def trigger_push_notification():
+    try:
+        data = request.json
+        if not data or not data.get('message'):
+            return jsonify({"success": False, "error": "No message provided"}), 400
+
+        push_data = {
+            "title": data.get('title', 'New Notification'),
+            "body": data.get('message'),
+            "icon": data.get('icon', '/icon.png'),
+            "data": data.get('data', {})
+        }
+
+        # In production, iterate through subscriptions from a database
+        failed_subscriptions = []
+
+        for subscription_id, subscription in subscriptions.items():
+            try:
+                webpush(
+                    subscription_info=subscription,
+                    data=json.dumps(push_data),
+                    vapid_private_key=VAPID_PRIVATE_KEY,
+                    vapid_claims=VAPID_CLAIMS
+                )
+            except WebPushException as e:
+                # The subscription is no longer valid
+                failed_subscriptions.append(subscription_id)
+                print(f"Subscription {subscription_id} failed: {e}")
+
+        # Remove failed subscriptions
+        for subscription_id in failed_subscriptions:
+            subscriptions.pop(subscription_id, None)
+
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @admin_bp.route('/login', methods=['GET', 'POST'])

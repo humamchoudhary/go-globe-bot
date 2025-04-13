@@ -21,7 +21,6 @@
 </div>
 
 <script>
-    console.log('{{logo}}')
     document
         .getElementById("{{logo_type}}-logo")
         .addEventListener("change", function (e) {
@@ -29,7 +28,6 @@
         });
 
     const logoDropzone{{logo_type}} = document.getElementById("logo-dropzone-{{logo_type}}");
-    // console.log(logoDropzone{{logo_type}})
 
     [("dragenter", "dragover", "dragleave", "drop")].forEach((eventName) => {
        logoDropzone{{logo_type}}.addEventListener(eventName, preventDefaults, false);
@@ -96,11 +94,8 @@
                 method: "POST",
                 body: formData
             })
-        .then(response => {console.log(response)})
-            .then(data => {
-                location.reload()
-                // document.getElementById("response").innerText = data;
-            })
+        .then(response =>  location.reload())
+            
             .catch(error => console.error("Error:", error));
         }
     function removeLogo(type) {

@@ -113,17 +113,14 @@
       el.innerHTML = marked.parse(el.textContent);
     });
     const roomId = "{{chat.room_id}}";
-    console.log(roomId);
 
     const socket = io();
 
     socket.on("connect", function () {
-      console.log("connect");
       socket.emit("admin_join", { room: roomId });
     });
 
     socket.on("new_message", function (data) {
-      console.log(data);
       appendMessage(data);
     });
   });

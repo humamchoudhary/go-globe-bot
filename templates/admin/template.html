@@ -304,12 +304,9 @@
         const socket = io();
         const chatsContainer = document.getElementById("chat_list");
         socket.on("connect", function () {
-          console.log("connect");
           socket.emit("admin_join", { room: "admin" });
         });
         socket.on("admin_required", function (data) {
-          console.log(data);
-
           if (Notification.permission === "granted") {
             new Notification("Admin Required", {
               body: `Chat room ${data.room_id} requires admin attention`,

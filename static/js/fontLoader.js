@@ -23,7 +23,6 @@ function loadFonts(fontFiles, fontFolder) {
     document.head.appendChild(style);
   });
 
-  console.log(`Loaded ${fontFiles.length} font variations`);
 }
 
 function getFormat(fileName) {

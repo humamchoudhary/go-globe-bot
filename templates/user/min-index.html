@@ -110,7 +110,6 @@
   function checkInputValue() {
     const textarea = document.getElementById('fn__chat_textarea');
     const sendBtn = document.getElementById('send-btn');
-console.log(sendBtn)
     if (textarea.value.trim() !== '') {
       // Add active styling
       sendBtn.classList.add('cursor-pointer ');
@@ -175,7 +174,6 @@ console.log(sendBtn)
       if (!response.ok) {
         throw new Error('Failed to ping admin');
       }
-      console.log('Admin pinged successfully');
     })
     .catch(error => {
       console.error('Error pinging admin:', error);
@@ -212,17 +210,14 @@ console.log(sendBtn)
 
     // Socket.io connection
     const roomId = "{{chat.room_id}}";
-    console.log(roomId);
 
     const socket = io('{{settings["backend_url"]}}', {withCredentials: true});
 
     socket.on('connect', function() {
-      console.log('connect');
       socket.emit('join_min', {room: roomId});
     });
 
     socket.on('new_message', function(data) {
-      console.log(data);
       appendMessage(data);
     });
   }

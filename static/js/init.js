@@ -1723,9 +1723,7 @@ var FrenifyTechWaveTime = new Date();
 
       // light and dark mode
       var darklightSwitcher = $(".fn__nav_bar .bar__item_skin .item_opener");
-      console.log(darklightSwitcher);
       darklightSwitcher.off().on("click", function () {
-        console.log("click");
         if ($("html").attr("data-techwave-skin") == "light") {
           $("html").attr("data-techwave-skin", "dark");
           localStorage.frenify_skin = "dark";
