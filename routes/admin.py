@@ -60,8 +60,8 @@ def login():
     session.clear()
     session['role'] = 'admin'
     if next_url:
-        return redirect(next_url)
-        # return jsonify({"status": "success", "redirect": next_url}), 200
+        # return redirect(next_url)
+        return jsonify({"status": "success", "redirect": next_url}), 200
 
     return jsonify({"status": "success"}), 200
 
