@@ -22,7 +22,6 @@ from werkzeug.utils import secure_filename
 import pdf2image
 
 
-
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -57,9 +56,12 @@ def login():
     session['role'] = 'admin'
 
     # Redirect to the stored 'next' URL if available
+
     next_url = session.pop('next', None)
+    print(f"NEXT: {next_url}")
     if next_url:
-        return jsonify({"status": "success", "redirect": next_url}), 200
+        return redirect(next_url)
+        # return jsonify({"status": "success", "redirect": next_url}), 200
 
     return jsonify({"status": "success"}), 200
 
