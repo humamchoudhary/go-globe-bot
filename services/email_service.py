@@ -28,13 +28,13 @@ def send_email(to_email, subject, message):
     msg['To'] = to_email
     msg['Subject'] = subject
     msg.attach(MIMEText(message, 'plain'))
-    print(msg)
+    # print(msg)
 
     # Connect to custom SMTP server
     try:
-        print(SMTP_SERVER)
+        # print(SMTP_SERVER)
         server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, timeout=10)
-        print(server)
+        # print(server)
         server.set_debuglevel(1)  # Optional: show debug output
         server.ehlo()
         # server.starttls()
