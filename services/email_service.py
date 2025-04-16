@@ -4,14 +4,25 @@ from email.mime.multipart import MIMEMultipart
 import os
 import ssl
 # Replace with your custom SMTP server settings
-SMTP_SERVER = os.environ.get('SMTP_SERVER')
-SMTP_PORT = os.environ.get('SMTP_PORT')  # Usually 587 for TLS, 465 for SSL
-SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+# SMTP_SERVER = os.environ.get('SMTP_SERVER')
+# SMTP_PORT = os.environ.get('SMTP_PORT')  # Usually 587 for TLS, 465 for SSL
+# SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
+# SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+
+
+SMTP_SERVER = 'production.go-globe.dev'
+SMTP_PORT = '465'  # Usually 587 for TLS, 465 for SSL
+SMTP_USERNAME = 'mail@production.go-globe.dev'
+SMTP_PASSWORD = 'G0@g!O$l#C0m'
+
 FROM_EMAIL = SMTP_USERNAME
 
 
+print(SMTP_SERVER)
+
+
 def send_email(to_email, subject, message):
+
     if not all([to_email, subject, message]):
         return 'Provide all values'
 
@@ -26,12 +37,11 @@ def send_email(to_email, subject, message):
     # Connect to custom SMTP server
     try:
         print(SMTP_SERVER)
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10)
-        
+        server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, timeout=10)
         print(server)
         server.set_debuglevel(1)  # Optional: show debug output
         server.ehlo()
-        server.starttls()
+        # server.starttls()
         server.ehlo()
         server.login(SMTP_USERNAME, SMTP_PASSWORD)
         server.send_message(msg)
