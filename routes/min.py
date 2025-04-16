@@ -229,8 +229,11 @@ def ping_admin(chat_id):
     }, room=f'{user.user_id}-{chat_id[:8]}')
 
     print("ANNA PINGED")
-    msg = f"Hi Anna,{user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below: {current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id} \n\nAuto Generated Message"
-    send_email('sarmad@go-globe.com',f'Assitance Required {chat.subject}',msg)
+    msg = f"Hi Anna,\n\n{user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below:\n\n{
+        current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id} \n\nAuto Generated Message"
+    SEND_USER = os.environ.get('SMTP_TO')
+    send_email(SEND_USER,
+               f'Assitance Required {chat.subject}', msg)
     if request.headers.get('HX-Request'):  # HTMX request
         return "", 204  # No content response for successful submission
     return jsonify({"status": "Anna has been notified"}), 200

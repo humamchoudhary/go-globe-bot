@@ -5,7 +5,7 @@ from services.user_service import UserService
 from services.usage_service import UsageService
 from services.chat_service import ChatService
 from functools import wraps
-
+import os
 from services.email_service import send_email
 
 def user_required(f):
@@ -110,9 +110,11 @@ def ping_admin(chat_id):
         'timestamp': new_message.timestamp.isoformat(),
     }, room=f'{user.user_id}-{chat_id[:8]}')
 
-    msg = f"Hi Anna,{user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below: {
+    msg = f"Hi Anna,\n\n{user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below:\n\n{
         current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id} \n\nAuto Generated Message"
-    send_email('sarmad@go-globe.com',
+
+    SEND_USER = os.environ.get('SMTP_TO')
+    send_email(SEND_USER,
                f'Assitance Required {chat.subject}', msg)
 
     if request.headers.get('HX-Request'):  # HTMX request
