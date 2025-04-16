@@ -12,7 +12,6 @@ FROM_EMAIL = SMTP_USERNAME
 
 
 def send_email(to_email, subject, message):
-
     if not all([to_email, subject, message]):
         return 'Provide all values'
 
@@ -22,20 +21,15 @@ def send_email(to_email, subject, message):
     msg['To'] = to_email
     msg['Subject'] = subject
     msg.attach(MIMEText(message, 'plain'))
-    print(msg)
 
-    # Connect to custom SMTP server
+    # Connect to custom SMTP server using SSL
     try:
         print(SMTP_SERVER)
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10)
-        print(server)
-        server.set_debuglevel(1)  # Optional: show debug output
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(SMTP_USERNAME, SMTP_PASSWORD)
-        server.send_message(msg)
-        server.quit()
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context, timeout=10) as server:
+            server.set_debuglevel(1)
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(msg)
         print("Email sent successfully.")
     except Exception as e:
         print(f"Failed to send email: {e}")
