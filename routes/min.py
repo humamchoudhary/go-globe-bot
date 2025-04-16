@@ -8,7 +8,7 @@ from services.user_service import UserService
 from services.chat_service import ChatService
 from functools import wraps
 from services.email_service import send_email
-
+import os
 
 @min_bp.before_request
 def before_req():
@@ -232,6 +232,7 @@ def ping_admin(chat_id):
     msg = f"Hi Anna,\n\n{user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below:\n\n{
         current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id} \n\nAuto Generated Message"
     SEND_USER = os.environ.get('SMTP_TO')
+    print(SEND_USER)
     send_email(SEND_USER,
                f'Assitance Required {chat.subject}', msg)
     if request.headers.get('HX-Request'):  # HTMX request
