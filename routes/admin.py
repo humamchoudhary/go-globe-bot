@@ -22,10 +22,13 @@ from werkzeug.utils import secure_filename
 import pdf2image
 
 
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get('role') != 'admin':
+            # Store the original path in session
+            session['next'] = request.path
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -49,9 +52,15 @@ def login():
     stored_hash = current_app.config['ADMIN_PASSWORD']
     if not bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
         return jsonify({"error": "Invalid credentials"}), 401
+
     session.clear()
     session['role'] = 'admin'
-    # session['admin'] = True
+
+    # Redirect to the stored 'next' URL if available
+    next_url = session.pop('next', None)
+    if next_url:
+        return jsonify({"status": "success", "redirect": next_url}), 200
+
     return jsonify({"status": "success"}), 200
 
 
