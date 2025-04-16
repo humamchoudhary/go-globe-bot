@@ -4,16 +4,12 @@ from email.mime.multipart import MIMEMultipart
 import os
 import ssl
 # Replace with your custom SMTP server settings
-# SMTP_SERVER = os.environ.get('SMTP_SERVER')
-# SMTP_PORT = os.environ.get('SMTP_PORT')  # Usually 587 for TLS, 465 for SSL
-# SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
-# SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+SMTP_SERVER = os.environ.get('SMTP_SERVER')
+SMTP_PORT = os.environ.get('SMTP_PORT')  # Usually 587 for TLS, 465 for SSL
+SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
 
 
-SMTP_SERVER = 'production.go-globe.dev'
-SMTP_PORT = '465'  # Usually 587 for TLS, 465 for SSL
-SMTP_USERNAME = 'mail@production.go-globe.dev'
-SMTP_PASSWORD = 'G0@g!O$l#C0m'
 
 FROM_EMAIL = SMTP_USERNAME
 
