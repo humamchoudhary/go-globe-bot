@@ -27,6 +27,7 @@ def send_email(to_email, subject, message):
     try:
         print(SMTP_SERVER)
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10)
+        server.starttls()
         print(server)
         server.set_debuglevel(1)  # Optional: show debug output
         server.ehlo()
