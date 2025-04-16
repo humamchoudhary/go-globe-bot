@@ -28,6 +28,7 @@ def admin_required(f):
         if session.get('role') != 'admin':
             # Store the original path in session
             session['next'] = request.path
+            print(request.path)
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
