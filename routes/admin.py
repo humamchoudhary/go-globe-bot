@@ -53,13 +53,12 @@ def login():
     if not bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
         return jsonify({"error": "Invalid credentials"}), 401
 
-    session['role'] = 'admin'
-
     # Redirect to the stored 'next' URL if available
 
     next_url = session.pop('next', None)
     print(f"NEXT: {next_url}")
     session.clear()
+    session['role'] = 'admin'
     if next_url:
         return redirect(next_url)
         # return jsonify({"status": "success", "redirect": next_url}), 200
