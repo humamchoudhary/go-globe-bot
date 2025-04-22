@@ -43,5 +43,9 @@
   `;
   head.appendChild(style);
 
+  document.documentElement.setAttribute("data-techwave-skin", "light");
+  if (localStorage.frenify_panel !== "") {
+    document.documentElement.classList.add(localStorage.frenify_panel);
+  }
   // Insert main content
 })();
