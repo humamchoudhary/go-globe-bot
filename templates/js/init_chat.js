@@ -42,30 +42,5 @@
     });
 
     // Style resetting logic
-
-    const processChatContentElements = () => {
-      const chatContent = document.querySelector(".chat-content");
-      if (!chatContent) return;
-      chatContent.querySelectorAll("*").forEach(addUnsetClass);
-
-      new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === 1) {
-              addUnsetClass(node);
-              node.querySelectorAll("*").forEach(addUnsetClass);
-            }
-          });
-        });
-      }).observe(chatContent, { childList: true, subtree: true });
-    };
-
-    document.body.addEventListener("htmx:afterSwap", (evt) => {
-      if (evt.detail.target.id === "chatbox") {
-        setTimeout(processChatContentElements, 0);
-      }
-    });
-
-    processChatContentElements();
   });
 })();
