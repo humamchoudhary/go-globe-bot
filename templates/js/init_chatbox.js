@@ -44,13 +44,12 @@
   head.appendChild(style);
 
   const lightModeScript = document.createElement("script");
-  lightModeScript.src = `
-    document.documentElement.setAttribute("data-techwave-skin", "light");
-    if (localStorage.frenify_panel !== "") {
-        document.documentElement.classList.add(localStorage.frenify_panel);
-    }
-
-    `;
+  lightModeScript.innerHTML = `
+  document.documentElement.setAttribute("data-techwave-skin", "light");
+  if (localStorage.frenify_panel && localStorage.frenify_panel !== "") {
+    document.documentElement.classList.add(localStorage.frenify_panel);
+  }
+`;
   head.appendChild(lightModeScript);
   // Insert main content
 })();
