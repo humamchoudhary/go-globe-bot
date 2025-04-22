@@ -56,7 +56,7 @@
       });
     </script>
     <!-- {{ session.sid }} -->
-    {% block content %}{% endblock %}
+    <main data-techwave-skin="light">{% block content %}{% endblock %}</main>
     <script
       type="text/javascript"
       src="{{settings['backend_url']}}{{ url_for('static', filename='js/jquery.js' ) }}"
@@ -70,6 +70,6 @@
       src="{{settings['backend_url']}}{{ url_for('static', filename='js/init.js' ) }}"
     ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
-    <main data-techwave-skin="light">{% block scripts %}{% endblock %}</main>
+    {% block scripts %}{% endblock %}
   </body>
 </html>
