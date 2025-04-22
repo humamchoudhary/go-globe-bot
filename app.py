@@ -156,10 +156,15 @@ DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THIN
         print('fonts called')
         return {'font_files': get_font_data()}
 
-    @app.route('/render')
-    def render_chatbot():
+    @app.route('/init-bot')
+    def init_chatbot():
 
         return Response(render_template('js/init_chatbox.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
+
+    @app.route('/render-bot')
+    def render_chatbot():
+
+        return Response(render_template('js/init_chat.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
 
     @app.route("/site-map")
     def site_map():
