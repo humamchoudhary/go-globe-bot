@@ -4,7 +4,6 @@
   html.classList.add("no-js");
 
   const head = document.head;
-  const body = document.body;
 
   // Load HTMX
   const htmxScript = document.createElement("script");
@@ -25,10 +24,7 @@
   head.appendChild(tailwind);
 
   // Extra CSS
-  [
-    "{{backend_url}}/static/css/prestyle.css",
-    "{{backend_url}}/static/css/output.css",
-  ].forEach((href) => {
+  ["{{backend_url}}/static/css/prestyle.css"].forEach((href) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;

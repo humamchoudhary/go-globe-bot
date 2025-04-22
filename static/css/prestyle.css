@@ -151,7 +151,7 @@ html {
   box-sizing: border-box;
 }
 
-body {
+.chat {
   font-family: var(--techwave-body-font-family);
   font-size: 16px;
   letter-spacing: 0;
