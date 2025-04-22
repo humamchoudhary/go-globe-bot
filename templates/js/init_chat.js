@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="chat-content">
-        <div style="height: 500px !important" id="chatbox" hx-get="{{backend_url}}/min/" hx-trigger="load" hx-target="#chatbox" hx-swap="innerHTML" data-base-url="https://gobot.go-globe.com">Loading...</div>
+        <div style="height: 500px !important" id="chatbox" hx-get="{{backend_url}}/min/" hx-trigger="load" hx-target="#chatbox" hx-swap="innerHTML" data-base-url="{{backend_url}}">Loading...</div>
       </div>
     </div>
   `;
