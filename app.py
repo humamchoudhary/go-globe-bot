@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import Flask, session, url_for, jsonify
+from flask import Flask, session, url_for, jsonify, Response
 
 from flask import render_template,  request, redirect, current_app
 from flask_socketio import SocketIO
@@ -155,6 +155,11 @@ DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THIN
     def inject_font_data():
         print('fonts called')
         return {'font_files': get_font_data()}
+
+    @app.route('/render')
+    def render_chatbot():
+
+        return Response(render_template('js/init_chatbox.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
 
     @app.route("/site-map")
     def site_map():
