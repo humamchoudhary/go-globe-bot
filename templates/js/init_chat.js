@@ -41,8 +41,9 @@
           <div id="close-chat" class="close-chat hover:cursor-pointer">×</div>
         </div>
       </div>
-      <div class="chat-content">
+      <div class="chat-content px-100">
         <div id="chatbox"
+
              hx-get="{{backend_url}}/min/"
              hx-trigger="load"
              hx-target="#chatbox"
