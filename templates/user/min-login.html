@@ -1,83 +1,92 @@
 {% extends 'user/base.html' %} {% block content %}
 <!-- Sign In -->
 
- <style>
-      /* Simple styling for form validation */
-      input:invalid, select:invalid {
-        border-color: #ef4444;
-      }
-      
-      /* Error message styling if you want to add custom messages */
-      .error-text {
-        color: #ef4444;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-      }
-      
-      .hidden {
-        display: none;
-      }
-    </style>  <div
-        class="bg-[var(--techwave-site-bg-color)] text-[var(--techwave-body-color)] font-[var(--techwave-body-font-family)]">
-        <div class="">
-            <!-- Desktop logo would go here -->
-            <div class="rounded-lg px-8 pt-4">
-                <div class="mb-8">
-                    <p id="error-message" class="text-red-500 hidden"></p>
+<style>
+  /* Simple styling for form validation */
+  input:invalid, select:invalid {
+    border-color: #ef4444;
+  }
+  
+  /* Error message styling if you want to add custom messages */
+  .error-text {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  
+  .hidden {
+    display: none;
+  }
+</style>
 
-                    <form id="login-form" novalidate>
-                        <div class="mb-4">
-                            <label for="name" class="block mb-2 text-[var(--techwave-body-color)]">Name *</label>
-                            <input type="text"
-                                class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
-                                id="name" name="name" placeholder="Enter your name" autocapitalize="off"
-                                autocomplete="name" required minlength="2">
-                            <p id="name-error" class="error-text hidden"></p>
-                        </div>
+<div style="background-color: var(--techwave-site-bg-color); color: var(--techwave-body-color); font-family: var(--techwave-body-font-family);">
+    <div>
+        <!-- Desktop logo would go here -->
+        <div style="border-radius: 0.5rem; padding-left: 2rem; padding-right: 2rem; padding-top: 1rem;">
+            <div style="margin-bottom: 2rem;">
+                <p id="error-message" style="color: #ef4444; display: none;"></p>
 
-                        <div class="mb-4">
-                            <label for="email" class="block mb-2 text-[var(--techwave-body-color)]">Email *</label>
-                            <input type="email"
-                                class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
-                                id="email" name="email" placeholder="Enter your email" autocapitalize="off"
-                                autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                            <p id="email-error" class="error-text hidden"></p>
-                        </div>
+                <form id="login-form" novalidate>
+                    <div style="margin-bottom: 1rem;">
+                        <label for="name" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Name *</label>
+                        <input type="text"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="name" name="name" placeholder="Enter your name" autocapitalize="off"
+                            autocomplete="name" required minlength="2"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                        <p id="name-error" class="error-text" style="display: none;"></p>
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="subject" class="block mb-2 text-[var(--techwave-body-color)]">Message Subject*</label>
-                            <select
-                                class="w-full bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
-                                id="subject" name="subject" autocapitalize="off" autocomplete="off" required>
-                                {% for subject in settings['subjects'] %}
-                                <option {% if default_subject and default_subject==subject %} selected='true' {% endif
-                                    %}>
-                                    {{subject}}</option>
-                                {% endfor %}
-                            </select>
-                            <p id="subject-error" class="error-text hidden"></p>
-                        </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label for="email" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Email *</label>
+                        <input type="email"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="email" name="email" placeholder="Enter your email" autocapitalize="off"
+                            autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                        <p id="email-error" class="error-text" style="display: none;"></p>
+                    </div>
 
-                        <div class="mb-6">
-                            <label for="phone" class="block mb-2 text-[var(--techwave-body-color)]">Phone *</label>
-                            <input type="tel"
-                                class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
-                                id="phone" name="phone" placeholder="Enter your phone number" autocapitalize="off"
-                                autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}">
-                            <p id="phone-error" class="error-text hidden"></p>
-                            <p class="text-sm text-gray-500 mt-1">Format: 10-15 digits, may include +, -, (, ), and
-                                spaces</p>
-                        </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label for="subject" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Message Subject*</label>
+                        <select
+                            style="width: 100%; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="subject" name="subject" autocapitalize="off" autocomplete="off" required
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                            {% for subject in settings['subjects'] %}
+                            <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
+                                {{subject}}</option>
+                            {% endfor %}
+                        </select>
+                        <p id="subject-error" class="error-text" style="display: none;"></p>
+                    </div>
 
-                        <button type="submit" id="login-btn"
-                            class="w-full py-3 px-4 bg-[var(--techwave-button-bg-color)] text-[var(--techwave-body-color)] font-bold rounded border border-[var(--techwave-border-color)] transition-all duration-300 hover:bg-[var(--techwave-main-color)] hover:text-[var(--techwave-hover-color)]">
-                            Start Chat
-                        </button>
-                    </form>
-                </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="phone" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Phone *</label>
+                        <input type="tel"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="phone" name="phone" placeholder="Enter your phone number" autocapitalize="off"
+                            autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                        <p id="phone-error" class="error-text" style="display: none;"></p>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p>
+                    </div>
+
+                    <button type="submit" id="login-btn"
+                        style="width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; background-color: var(--techwave-button-bg-color); color: var(--techwave-body-color); font-weight: 700; border-radius: 0.25rem; border: 1px solid var(--techwave-border-color); transition: all 300ms;"
+                        onmouseover="this.style.backgroundColor='var(--techwave-main-color)'; this.style.color='var(--techwave-hover-color)';"
+                        onmouseout="this.style.backgroundColor='var(--techwave-button-bg-color)'; this.style.color='var(--techwave-body-color)';">
+                        Start Chat
+                    </button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 <!-- !Sign In -->
 
 {% endblock %}
