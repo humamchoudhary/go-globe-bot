@@ -43,7 +43,6 @@
     // Style resetting logic
     const addUnsetClass = (el) => {
       if (el.className && typeof el.className === "string") {
-        // el.className = `all-[unset] ${el.className}`;
       }
     };
 
