@@ -78,6 +78,7 @@
       htmx.process(chatbox);
     });
 
+    htmx.process(shadow);
     // HTMX handling inside the shadow DOM isn't automatic
     shadow.addEventListener("htmx:afterSwap", (evt) => {
       if (evt.target.id === "chatbox") {
