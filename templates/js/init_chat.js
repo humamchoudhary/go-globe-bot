@@ -21,6 +21,7 @@
 
   // Tailwind CDN - only loaded in shadow root!
   const tailwindCdn = `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>`;
+  const htmxCdn = `<script src="https://unpkg.com/htmx.org@2.0.4"></script>`;
 
   // Chatbox HTML (Tailwind classes only here!)
   const chatboxHtml = `
