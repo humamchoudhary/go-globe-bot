@@ -17,10 +17,10 @@
   head.appendChild(htmxMeta);
 
   // TailwindCSS
-  const tailwind = document.createElement("script");
-  // tailwind.rel = "stylesheet";
-  tailwind.src = "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4";
-  head.appendChild(tailwind);
+  // const tailwind = document.createElement("script");
+  // // tailwind.rel = "stylesheet";
+  // tailwind.src = "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4";
+  // head.appendChild(tailwind);
 
   // Extra CSS
   ["{{backend_url}}/static/css/prestyle.css"].forEach((href) => {
