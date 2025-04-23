@@ -55,7 +55,7 @@
     </div>
   `;
   shadow.innerHTML = chatboxHtml;
-
+  htmx.process(chatHost);
   setTimeout(() => {
     const chatContainer = shadow.getElementById("chat-container");
     const chatbox = shadow.getElementById("chatbox");
