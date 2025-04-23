@@ -24,7 +24,9 @@
 
   const chatboxHtml = `
     ${tailwindCdn}
-    <style>
+
+<script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.js" integrity="sha384-oeUn82QNXPuVkGCkcrInrS1twIxKhkZiFfr2TdiuObZ3n3yIeMiqcRzkIcguaof1" crossorigin="anonymous"></script>
+        <style>
       .hidden { display: none; }
       .chat-container { background: #111; border-radius: 8px; padding: 12px; width: 300px; }
       .chat-header { display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 8px; }
