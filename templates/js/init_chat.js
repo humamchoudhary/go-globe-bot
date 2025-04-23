@@ -41,11 +41,11 @@
       </div>
       <div class="chat-content">
         <div id="chatbox"
-             hx-get="${chatHost.dataset.backendUrl}/min/"
+             hx-get="${backend_url}/min/"
              hx-trigger="load"
              hx-target="#chatbox"
              hx-swap="innerHTML"
-             data-base-url="${chatHost.dataset.backendUrl}">
+             data-base-url="${backend_url}">
           Loading...
         </div>
       </div>
