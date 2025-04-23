@@ -53,7 +53,6 @@
   `;
   shadow.innerHTML = chatboxHtml;
 
-  htmx.process(shadow); // Setup chat behavior once Shadow DOM is populated
   setTimeout(() => {
     const chatContainer = shadow.getElementById("chat-container");
     const chatbox = shadow.getElementById("chatbox");
@@ -75,10 +74,8 @@
       );
       chatbox.setAttribute("hx-trigger", "load");
       chatbox.innerHTML = "Refreshing...";
-      htmx.process(shadow);
     });
 
-    htmx.process(shadow);
     // HTMX handling inside the shadow DOM isn't automatic
     shadow.addEventListener("htmx:afterSwap", (evt) => {
       if (evt.target.id === "chatbox") {
