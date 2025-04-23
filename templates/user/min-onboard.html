@@ -6,7 +6,7 @@
     <div style="padding-left: 1.5rem; padding-right: 1.5rem; height: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.5rem;">
       {% for subject in settings['subjects'] %}
       
-        style="font-family: var(--techwave-body-font-family) !important; 
+        style=`font-family: var(--techwave-body-font-family) !important; 
                font-size: 14px !important; 
                padding: 5px 10px; 
                border-top-left-radius: 1.5rem; 
@@ -16,7 +16,7 @@
                border: 2px solid var(--techwave-border-color); 
                transition-duration: 150ms; 
                transition-property: all; 
-               cursor: pointer;"
+               cursor: pointer;`
         href="/min/login/{{subject}}"
       >
         {{subject}}
