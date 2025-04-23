@@ -6,16 +6,14 @@
     </a>
     <div id="chat-container" class="chat-container hidden">
       <div class="chat-header">
-        <h3 class="text-white" style='font-size:16px'>Welcome, How can we help you?</h3>
+        <h3 class="text-white" style='font-size:16px' >Welcome, How can we help you?</h3>
         <div style="display: flex; flex-direction: row; gap: 16px; align-items: center;">
           <div class="hover:cursor-pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">↺</div>
           <div id="close-chat" class="close-chat hover:cursor-pointer">×</div>
         </div>
       </div>
       <div class="chat-content">
-        <div style="height: 500px !important" id="chatbox" hx-get="{{backend_url}}/min/" hx-trigger="load" hx-target="#chatbox" hx-swap="innerHTML" data-base-url="https://gobot.go-globe.com">
-          Loading...
-        </div>
+        <div style="height: 500px !important" id="chatbox" hx-get="{{backend_url}}/min/" hx-trigger="load" hx-target="#chatbox" hx-swap="innerHTML" data-base-url="https://gobot.go-globe.com">Loading...</div>
       </div>
     </div>
   `;
@@ -30,62 +28,8 @@
     closeBtn.onclick = () => chatContainer.classList.add("hidden");
 
     document.body.addEventListener("htmx:afterSwap", (evt) => {
-      if (evt.detail.target.id === "chatbox") {
-        setTimeout(() => {
-          const chatbox = document.getElementById("chatbox");
-
-          // Create mount point for shadow DOM
-          let mount = document.getElementById("gobot-shadow-mount");
-          if (!mount) {
-            mount = document.createElement("div");
-            mount.id = "gobot-shadow-mount";
-            chatbox.innerHTML = ""; // optional clear
-            chatbox.appendChild(mount);
-          }
-
-          const shadow = mount.attachShadow({ mode: "open" });
-
-          // Tailwind CDN
-          const tailwind = document.createElement("link");
-          tailwind.rel = "stylesheet";
-          tailwind.href =
-            "https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css";
-          shadow.appendChild(tailwind);
-
-          // Optional Gobot styles
-          const prestyle = document.createElement("link");
-          prestyle.rel = "stylesheet";
-          prestyle.href = "https://gobot.go-globe.com/static/css/prestyle.css";
-          shadow.appendChild(prestyle);
-
-          const output = document.createElement("link");
-          output.rel = "stylesheet";
-          output.href = "https://gobot.go-globe.com/static/css/output.css";
-          shadow.appendChild(output);
-
-          // HTMX header injection
-          const htmxDiv = document.createElement("div");
-          htmxDiv.setAttribute(
-            "hx-get",
-            "https://gobot.go-globe.com/min/get-headers",
-          );
-          htmxDiv.setAttribute("hx-target", "head");
-          htmxDiv.setAttribute("hx-swap", "beforeend");
-          htmxDiv.setAttribute("hx-trigger", "load");
-          shadow.appendChild(htmxDiv);
-
-          // Gobot main script
-          const script = document.createElement("script");
-          script.src = "https://gobot.go-globe.com/render-bot";
-          shadow.appendChild(script);
-        }, 0);
-      }
-    });
-
-    // Rewrite internal links inside chatbox to HTMX calls
-    document.body.addEventListener("htmx:afterSwap", (evt) => {
-      if (evt.detail.target.id === "chatbox") {
-        const anchors = evt.detail.target.querySelectorAll("a[href^='/']");
+      if (evt.target.id === "chatbox") {
+        const anchors = evt.target.querySelectorAll("a[href^='/']");
         anchors.forEach((a) => {
           const original = a.getAttribute("href");
           a.setAttribute("hx-get", baseURL + original);
@@ -95,5 +39,37 @@
         });
       }
     });
+
+    // Style resetting logic
+    const addUnsetClass = (el) => {
+      if (el.className && typeof el.className === "string") {
+      }
+    };
+
+    const processChatContentElements = () => {
+      const chatContent = document.querySelector(".chat-content");
+      if (!chatContent) return;
+      chatContent.querySelectorAll("*").forEach(addUnsetClass);
+
+      new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+              addUnsetClass(node);
+              node.querySelectorAll("*").forEach(addUnsetClass);
+            }
+          });
+        });
+      }).observe(chatContent, { childList: true, subtree: true });
+    };
+
+    document.body.addEventListener("htmx:afterSwap", (evt) => {
+      if (evt.detail.target.id === "chatbox") {
+        setTimeout(processChatContentElements, 0);
+      }
+    });
+
+    processChatContentElements();
   });
+  // Chat behavior
 })();
