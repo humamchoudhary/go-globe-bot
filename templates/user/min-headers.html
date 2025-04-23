@@ -6,7 +6,7 @@
     document.documentElement.classList.add(localStorage.frenify_panel);
   }
 </script>
-<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+<!-- <script src="https://unpkg.com/htmx.org@2.0.4"></script> -->
 <script>
   const fontFiles = {{font_files | tojson }};
   const fontFolder = "{{settings['backend_url']}}{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";

@@ -6,15 +6,15 @@
   const head = document.head;
 
   // Load HTMX
-  const htmxScript = document.createElement("script");
-  htmxScript.src = "https://unpkg.com/htmx.org@2.0.4";
-  head.appendChild(htmxScript);
+  // const htmxScript = document.createElement("script");
+  // htmxScript.src = "https://unpkg.com/htmx.org@2.0.4";
+  // head.appendChild(htmxScript);
 
   // HTMX config meta
-  const htmxMeta = document.createElement("meta");
-  htmxMeta.name = "htmx-config";
-  htmxMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
-  head.appendChild(htmxMeta);
+  // const htmxMeta = document.createElement("meta");
+  // htmxMeta.name = "htmx-config";
+  // htmxMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
+  // head.appendChild(htmxMeta);
 
   // TailwindCSS
   // const tailwind = document.createElement("script");
