@@ -53,7 +53,7 @@
   `;
   shadow.innerHTML = chatboxHtml;
 
-  // Setup chat behavior once Shadow DOM is populated
+  htmx.process(shadow); // Setup chat behavior once Shadow DOM is populated
   setTimeout(() => {
     const chatContainer = shadow.getElementById("chat-container");
     const chatbox = shadow.getElementById("chatbox");
