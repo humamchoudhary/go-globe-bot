@@ -17,10 +17,9 @@
   head.appendChild(htmxMeta);
 
   // TailwindCSS
-  const tailwind = document.createElement("link");
-  tailwind.rel = "stylesheet";
-  tailwind.href =
-    "https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css";
+  const tailwind = document.createElement("script");
+  // tailwind.rel = "stylesheet";
+  tailwind.src = "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4";
   head.appendChild(tailwind);
 
   // Extra CSS
