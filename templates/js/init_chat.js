@@ -19,6 +19,7 @@
   `;
 
   // Chat behavior
+
   window.addEventListener("DOMContentLoaded", function () {
     const baseURL = "{{backend_url}}";
     const chatBtn = document.getElementById("chat-button");
@@ -44,7 +45,7 @@
     // Style resetting logic
     const addUnsetClass = (el) => {
       if (el.className && typeof el.className === "string") {
-        el.className = `all-[unset] ${el.className}`;
+        // el.className = `all-[unset] ${el.className}`;
       }
     };
 
