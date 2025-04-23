@@ -75,7 +75,7 @@
       );
       chatbox.setAttribute("hx-trigger", "load");
       chatbox.innerHTML = "Refreshing...";
-      htmx.process(chatbox);
+      htmx.process(shadow);
     });
 
     htmx.process(shadow);
