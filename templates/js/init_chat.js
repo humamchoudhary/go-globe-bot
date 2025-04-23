@@ -1,4 +1,3 @@
-<script>
 (function () {
   // Create chat button
   const chatBtn = document.createElement("a");
@@ -70,7 +69,10 @@
     });
 
     refreshBtn.addEventListener("click", () => {
-      chatbox.setAttribute("hx-get", `${chatHost.dataset.backendUrl}/min/onboarding`);
+      chatbox.setAttribute(
+        "hx-get",
+        `${chatHost.dataset.backendUrl}/min/onboarding`,
+      );
       chatbox.setAttribute("hx-trigger", "load");
       chatbox.innerHTML = "Refreshing...";
       htmx.process(chatbox);
@@ -90,7 +92,5 @@
         });
       }
     });
-
   }, 100); // Delay to ensure elements are in DOM
 })();
-</script>
