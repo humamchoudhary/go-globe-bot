@@ -6,7 +6,7 @@
     </a>
     <div id="chat-container" class="chat-container hidden">
       <div class="chat-header">
-        <h3 class="text-white" style='font-size:14px' >Welcome, How can we help you?</h3>
+        <h3 class="text-white" style='font-size:16px' >Welcome, How can we help you?</h3>
         <div style="display: flex; flex-direction: row; gap: 16px; align-items: center;">
           <div class="hover:cursor-pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">↺</div>
           <div id="close-chat" class="close-chat hover:cursor-pointer">×</div>
