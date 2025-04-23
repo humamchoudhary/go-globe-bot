@@ -18,7 +18,7 @@
   const shadow = chatHost.attachShadow({ mode: "open" });
 
   // Tailwind CDN - only loaded in shadow root!
-  const tailwindCdn = `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4">`;
+  const tailwindCdn = `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>`;
 
   // Chatbox HTML (Tailwind classes only here!)
   const chatboxHtml = `
