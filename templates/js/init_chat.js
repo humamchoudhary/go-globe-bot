@@ -12,7 +12,7 @@
       </div>
     </div>
     <div style="flex: 1; overflow: auto;">
-      <div style="height: 500px !important; display: flex; justify-content: center; align-items: center;" id="chatbox" hx-get="{{backend_url}}/min/" hx-trigger="load" hx-target="#chatbox" hx-swap="innerHTML" data-base-url="https://gobot.go-globe.com">
+      <div style="height: 500px !important;" id="chatbox" hx-get="{{backend_url}}/min/" hx-trigger="load" hx-target="#chatbox" hx-swap="innerHTML" data-base-url="https://gobot.go-globe.com">
         <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #ff5800; border-radius: 50%; animation: spin 1s linear infinite;"></div>
       </div>
     </div>
