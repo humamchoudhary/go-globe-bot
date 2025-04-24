@@ -66,9 +66,9 @@
     <script>
       function scrollToBottom() {
           const chatContentBox = document.querySelector(".chat__page"); 
-          console.log(chatContentBox)
+          console.log(chatContentBox.scrollHeight);
         if (chatContentBox) {
-            chatContentBox.scrollTo({top: chatContentBox.scrollHeight, behavior: "smooth"});
+            chatContentBox.scrollBy({top: chatContentBox.scrollHeight, behavior: "smooth"});
         } 
       }
       scrollToBottom();
