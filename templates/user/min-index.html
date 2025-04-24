@@ -71,7 +71,7 @@ function scrollToBottom() {
   if (chatList && chatBoxes.length > 0) {
     const lastChatBox = chatBoxes[chatBoxes.length - 1];
     // Calculate position with extra pixels (e.g., 50px)
-    const scrollPosition = lastChatBox.offsetTop + lastChatBox.offsetHeight + 50;
+    const scrollPosition =  chatList.scrollHeight + lastChatBox.offsetTop + lastChatBox.offsetHeight + 50;
     
     chatList.scrollTo({
       top: scrollPosition,
