@@ -70,7 +70,7 @@
         if (chatContentBox) {
             console.log('scroll')
             console.log(chatContentBox.scrollHeight)
-            chatContentBox.scroll({bottom: chatContentBox.scrollHeight, behavior: "smooth"});
+            chatContentBox.scrollTo({bottom: chatContentBox.scrollHeight, behavior: "smooth"});
         } 
       }
       scrollToBottom();
