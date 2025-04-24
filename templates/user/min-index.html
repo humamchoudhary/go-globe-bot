@@ -66,11 +66,22 @@
     <script>
       function scrollToBottom() {
           const chatContentBox = document.querySelector(".chat__page"); 
+          console.log('start')
           console.log(chatContentBox.scrollHeight);
+          console.log(chatContentBox.scrollTop);
         if (chatContentBox) {
 
-chatContentBox.scrollTop = chatContentBox.scrollHeight;
             chatContentBox.scrollBy({top: chatContentBox.scrollHeight, behavior: "smooth"});
+            console.log('mid')
+
+          console.log(chatContentBox.scrollHeight);
+          console.log(chatContentBox.scrollTop);
+              chatContentBox.scrollTop = chatContentBox.scrollHeight;
+
+            console.log('end')
+
+          console.log(chatContentBox.scrollHeight);
+          console.log(chatContentBox.scrollTop);
         } 
       }
       scrollToBottom();
