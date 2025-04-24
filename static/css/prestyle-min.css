@@ -84,7 +84,6 @@
 /*	01) ROOT
 /*------------------------------------------------------------------*/
 :root {
-  color-scheme: dark;
   --techwave-site-bg-color: #001523;
   --techwave-header-bg-color: #001f33;
   --techwave-some-r-bg-color: #001f33;
@@ -103,7 +102,7 @@
   --techwave-header-height: 80px;
 }
 
-[data-techwave-skin="light"]:root {
+:root {
   color-scheme: light;
   --techwave-site-bg-color: #fff;
   --techwave-header-bg-color: #f5f5f5;
