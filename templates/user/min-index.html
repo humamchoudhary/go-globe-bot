@@ -71,7 +71,8 @@
           console.log(chatContentBox.scrollTop);
         if (chatContentBox) {
 
-            chatContentBox.scrollBy({top: chatContentBox.scrollHeight, behavior: "smooth"});
+            //chatContentBox.scrollBy({top: chatContentBox.scrollHeight, behavior: "smooth"});
+            chatContentBox.scrollIntoView({block:'end', behavior: "smooth"});
             console.log('mid')
 
           console.log(chatContentBox.scrollHeight);
