@@ -64,13 +64,17 @@
     {% endif %}
     
     <script>
-      function scrollToBottom() {
-          const chatContentBox = document.querySelector(".chat__list"); 
-          console.log(chatContentBox)
-        if (chatContentBox) {
-            chatContentBox.scrollTo({top: chatContentBox.scrollHeight+500, behavior: "smooth"});
-        } 
-      }
+function scrollToBottom() {
+  const chatBoxes = document.querySelectorAll('.chat__box');
+  if (chatBoxes.length > 0) {
+    const lastChatBox = chatBoxes[chatBoxes.length - 1];
+      consle.log(lastChatBox)
+    lastChatBox.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
+    });
+  }
+}
       scrollToBottom();
     </script>
 
