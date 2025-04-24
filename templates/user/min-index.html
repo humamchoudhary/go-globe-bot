@@ -64,21 +64,13 @@
     {% endif %}
     
     <script>
-function scrollToBottom() {
-  const chatList = document.querySelector('.chat__list');
-  const chatBoxes = document.querySelectorAll('.chat__box');
-  
-  if (chatList && chatBoxes.length > 0) {
-    const lastChatBox = chatBoxes[chatBoxes.length - 1];
-    // Calculate position with extra pixels (e.g., 50px)
-    const scrollPosition =  chatList.scrollHeight + lastChatBox.offsetTop + lastChatBox.offsetHeight + 50;
-    
-    chatList.scrollTo({
-      top: scrollPosition,
-      behavior: 'smooth'
-    });
-  }
-}
+      function scrollToBottom() {
+          const chatContentBox = document.querySelector(".chat__page"); 
+          console.log(chatContentBox)
+        if (chatContentBox) {
+            chatContentBox.scrollTo({top: chatContentBox.scrollHeight, behavior: "smooth"});
+        } 
+      }
       scrollToBottom();
     </script>
 
