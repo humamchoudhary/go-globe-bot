@@ -224,6 +224,8 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 <script>
 
     function fixAllLinks(element) {
@@ -245,13 +247,32 @@
 
 document.addEventListener('htmx:afterRequest', function(evt) {
 
-     console.log('parse');
+console.log(evt)
+ const url = evt.detail.pathInfo.requestPath;
+  
+    if(  url.startsWith('/admin/chat/min/')){
+
+        const roomId = url.split('/').splice(-1)[0]
+
+                    const socket = io();
+
+                    socket.on("connect", function () {
+                        socket.emit("admin_join", {room: roomId});
+                    });
+
+                    socket.on("new_message", function (data) {
+                        appendMessage(data);
+                    });
+    }
     document.querySelectorAll(".md-content").forEach((el) => {
       el.innerHTML = marked.parse(el.textContent);
 
       fixAllLinks(el);
         
     });
+
+
+
     // Put the JS code that you want to execute here
 });
 </script>
