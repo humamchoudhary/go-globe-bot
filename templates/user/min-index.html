@@ -65,12 +65,10 @@
     <script>
       function scrollToBottom() {
           const chatContentBox = document.querySelector(".chat__list"); 
+          console.log(chatContentBox)
         if (chatContentBox) {
             chatContentBox.scrollTo({top: chatContentBox.scrollHeight, behavior: "smooth"});
-        } else {
-          const scrollTop = document.documentElement.scrollHeight - window.innerHeight;
-          window.scrollTo({top: scrollTop, behavior: "smooth"});
-        }
+        } 
       }
       scrollToBottom();
     </script>
