@@ -68,6 +68,8 @@
           const chatContentBox = document.querySelector(".chat__page"); 
           console.log(chatContentBox.scrollHeight);
         if (chatContentBox) {
+
+chatContentBox.scrollTop = chatContentBox.scrollHeight;
             chatContentBox.scrollBy({top: chatContentBox.scrollHeight, behavior: "smooth"});
         } 
       }
