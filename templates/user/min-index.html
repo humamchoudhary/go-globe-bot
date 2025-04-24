@@ -65,13 +65,17 @@
     
     <script>
 function scrollToBottom() {
+  const chatList = document.querySelector('.chat__list');
   const chatBoxes = document.querySelectorAll('.chat__box');
-  if (chatBoxes.length > 0) {
+  
+  if (chatList && chatBoxes.length > 0) {
     const lastChatBox = chatBoxes[chatBoxes.length - 1];
-      console.log(lastChatBox)
-    lastChatBox.scrollIntoView({
-      behavior: 'smooth',
-      block: 'end'
+    // Calculate position with extra pixels (e.g., 50px)
+    const scrollPosition = lastChatBox.offsetTop + lastChatBox.offsetHeight + 50;
+    
+    chatList.scrollTo({
+      top: scrollPosition,
+      behavior: 'smooth'
     });
   }
 }
