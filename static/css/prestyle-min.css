@@ -83,7 +83,7 @@
 /*------------------------------------------------------------------*/
 /*	01) ROOT
 /*------------------------------------------------------------------*/
-:root {
+.techwave_fn_aichatbot_page * {
   --techwave-site-bg-color: #001523;
   --techwave-header-bg-color: #001f33;
   --techwave-some-r-bg-color: #001f33;
@@ -102,7 +102,7 @@
   --techwave-header-height: 80px;
 }
 
-:root {
+.techwave_fn_aichatbot_page * {
   color-scheme: light;
   --techwave-site-bg-color: #fff;
   --techwave-header-bg-color: #f5f5f5;
