@@ -83,6 +83,43 @@
 /*------------------------------------------------------------------*/
 /*	01) ROOT
 /*------------------------------------------------------------------*/
+:root {
+  color-scheme: dark;
+  --techwave-site-bg-color: #001523;
+  --techwave-header-bg-color: #001f33;
+  --techwave-some-r-bg-color: #001f33;
+  --techwave-some-a-bg-color: #001523;
+  --techwave-main-color: #ff5800;
+  --techwave-main-color1: #ff5800;
+  --techwave-main-color2: #ff5800;
+  --techwave-heading-color: #c0bcca;
+  --techwave-body-color: #c0bcca;
+  --techwave-border-color: #253239;
+  --techwave-button-bg-color: #001f33;
+  --techwave-hover-color: #fff;
+  --techwave-heading-font-family: "Proxima Nova", sans-serif;
+  --techwave-body-font-family: "Proxima Nova", sans-serif;
+  --techwave-left-panel-width: 250px;
+  --techwave-header-height: 80px;
+}
+
+[data-techwave-skin="light"]:root {
+  color-scheme: light;
+  --techwave-site-bg-color: #fff;
+  --techwave-header-bg-color: #f5f5f5;
+  --techwave-some-r-bg-color: #f5f5f5;
+  --techwave-some-a-bg-color: #e7e7e7;
+  --techwave-main-color: #ff5800;
+  --techwave-main-color1: #ff5800;
+  --techwave-main-color2: #ff5800;
+  --techwave-heading-color: #333;
+  --techwave-body-color: #444;
+  --techwave-border-color: #ddd;
+
+  --techwave-hover-color: #ddd;
+  --techwave-button-bg-color: #f5f5f5;
+  --techwave-hover-color: #000;
+}
 
 .fn__svg {
   fill: var(--techwave-hover-color);
