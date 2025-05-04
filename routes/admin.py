@@ -427,8 +427,13 @@ def set_prompt():
 @admin_bp.route('/settings/subject/<string:subject>', methods=['DELETE'])
 def subjects(subject):
     if request.method == 'POST':
+        print("SUBJECT")
+        print(current_app.config['SETTINGS']['subjects'])
         subject = request.form.get('subject')
         # ADD NEW SUBJECT
+        current_app.config['SETTINGS']['subjects'] = set(
+            current_app.config['SETTINGS']['subjects'])
+
         current_app.config['SETTINGS']['subjects'].add(subject)
         return '', 200
     else:
