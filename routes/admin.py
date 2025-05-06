@@ -1,3 +1,4 @@
+from datetime import datetime, time
 import threading
 from pprint import pprint
 from services.usage_service import UsageService
@@ -17,7 +18,7 @@ from functools import wraps
 from . import admin_bp
 from services.chat_service import ChatService
 from services.user_service import UserService
-
+import pytz
 from werkzeug.utils import secure_filename
 import pdf2image
 
@@ -337,16 +338,31 @@ def join_chat(room_id):
 @admin_bp.route('/settings', methods=['GET'])
 @admin_required
 def settings():
-
     config = dict(current_app.config)
-    print(os.path.join(os.getcwd(),
-          current_app.config['SETTINGS']['logo']['large'][1:]))
-    config['SETTINGS']['logo']['large'] = current_app.config['SETTINGS']['logo']['large'] if os.path.exists(
-        os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['large'][1:])) else ''
-    config['SETTINGS']['logo']['small'] = current_app.config['SETTINGS']['logo']['small'] if os.path.exists(
-        os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['small'][1:])) else ''
-    print(config)
-    return render_template('admin/settings.html', settings=config['SETTINGS'])
+
+    # Validate logo paths
+    config['SETTINGS']['logo']['large'] = (
+        current_app.config['SETTINGS']['logo']['large']
+        if os.path.exists(os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['large'][1:]))
+        else ''
+    )
+    config['SETTINGS']['logo']['small'] = (
+        current_app.config['SETTINGS']['logo']['small']
+        if os.path.exists(os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['small'][1:]))
+        else ''
+    )
+
+    # Define day order and sort timings without converting timezones
+    day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
+                 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
+
+    if current_app.config['SETTINGS'].get('timings'):
+        config['SETTINGS']['timings'] = sorted(
+            current_app.config['SETTINGS']['timings'],
+            key=lambda time: day_order[time['day']]
+        )
+
+    return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=pytz.all_timezones)
 
 
 def save_settings(settings):
@@ -387,6 +403,50 @@ def upload_logo(file_name):
         return f"File saved at {file_path}", 200
 
     return "Invalid file type", 400
+
+
+@admin_bp.route('/settings/timing', methods=['POST'])
+def add_timing():
+    day = request.form.get('meetingDay')
+    start_time = request.form.get('startTime')  # Expected format: "HH:MM"
+    end_time = request.form.get('endTime')
+    timezone = request.form.get('timezone')
+
+    # Just store the received times directly
+    timings = current_app.config['SETTINGS'].get('timings', [])
+
+    # Remove existing entry for that day
+    timings = [t for t in timings if t['day'] != day]
+
+    # Add new timing entry as-is
+    timings.append({
+        "day": day,
+        "startTime": start_time,
+        "endTime": end_time
+    })
+
+    # Sort by weekday
+    current_app.config['SETTINGS']['timezone'] = timezone
+    day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
+                 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
+    timings.sort(key=lambda t: day_order[t['day']])
+
+    current_app.config['SETTINGS']['timings'] = timings
+
+    return "added", 200
+
+
+@admin_bp.route('/settings/timing/<int:id>', methods=['DELETE'])
+def delete_timing(id):
+    print(id)
+    timings = current_app.config['SETTINGS'].get('timings', [])
+    day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
+                 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
+    timings = sorted(timings, key=lambda time: day_order[time["day"]])
+    timings.pop(id)
+
+    current_app.config['SETTINGS']['timings'] = timings
+    return "delete", 200
 
 
 @admin_bp.route('/settings/api/<api_type>', methods=['POST', 'DELETE'])

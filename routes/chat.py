@@ -8,6 +8,7 @@ from functools import wraps
 import os
 from services.email_service import send_email
 
+
 def user_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -70,18 +71,35 @@ def chat(chat_id):
     return render_template('user/index.html', chat=chat, chats=chats, username=user.name)
 
 
-@chat_bp.route('/chat/<chat_id>/ping_admin', methods=['POST'])
+@chat_bp.route('/chat/<chat_id>/ping_admin', methods=['POST', 'GET'])
 @user_required
 def ping_admin(chat_id):
+    from datetime import datetime
 
-    if 'user_id' not in session:
-        if request.headers.get('HX-Request'):
-            return "Please log in first", 401
-        return jsonify({"error": "Unauthorized"}), 401
+    if request.method == "GET":
+        return redirect(f'/chat/{chat_id}')
 
-    user_service = UserService(current_app.db)
+    # Step 1: Check if current time falls within allowed timings
+    now = datetime.now()
+    current_day = now.strftime('%A').lower()
+    current_time = now.strftime('%H:%M')
+
+    timings = current_app.config['SETTINGS'].get('timings', [])
+    timezone = current_app.config['SETTINGS'].get('timezone', "UTC")
+
+    available = any(
+        t['day'].lower() == current_day and t['startTime'] <= current_time <= t['endTime']
+        for t in timings
+    )
+
+    # if not available:
+    #     if request.headers.get('HX-Request'):
+    #         return "Anna is currently unavailable", 200
+    #     return jsonify({"error": "Anna is currently unavailable"}), 200
+
+    # Proceed with ping logic
     chat_service = ChatService(current_app.db)
-
+    user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     room_id = f"{user.user_id}-{chat_id[:8]}"
     chat = chat_service.get_chat_by_room_id(room_id)
@@ -93,32 +111,61 @@ def ping_admin(chat_id):
 
     if chat.admin_required:
         return "", 304
-    # Mark the chat as requiring admin attention
+
     chat_service.set_admin_required(chat.room_id, True)
 
-    # Notify admins via socketio
     current_app.socketio.emit('admin_required', {
         'room_id': room_id,
-        'chat_id': chat.chat_id, 'subject': chat.subject
+        'chat_id': chat.chat_id,
+        'subject': chat.subject
     }, room='admin')
 
-    new_message = chat_service.add_message(
-        chat.room_id, 'SYSTEM', 'Anna has been notified! She will join soon')
-    current_app.socketio.emit('new_message', {
-        'sender': 'SYSTEM',
-        'content': new_message.content,
-        'timestamp': new_message.timestamp.isoformat(),
-    }, room=f'{user.user_id}-{chat_id[:8]}')
+    if not available:
 
-    msg = f"Hi Anna,\n\n{user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below:\n\n{
-        current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id} \n\nAuto Generated Message"
+        formatted_timings = "\n".join(
+            f"• {t['day'].capitalize()}: {t['startTime']} - {t['endTime']} {timezone}\n" for t in timings
+        )
+
+        message_content = (
+            "Anna has been notified, but she is currently unavailable.\n\n"
+            "You can reach her during the following times:\n\n"
+            f"{formatted_timings}"
+        )
+
+        new_message = chat_service.add_message(
+            chat.room_id, 'SYSTEM', message_content
+        )
+
+        current_app.socketio.emit('new_message', {
+            'sender': 'SYSTEM',
+            'content': new_message.content,
+            'timestamp': new_message.timestamp.isoformat(),
+        }, room=room_id)
+    else:
+        new_message = chat_service.add_message(
+            chat.room_id, 'SYSTEM', 'Anna has been notified! She will join soon'
+        )
+        current_app.socketio.emit('new_message', {
+            'sender': 'SYSTEM',
+            'content': new_message.content,
+            'timestamp': new_message.timestamp.isoformat(),
+        }, room=room_id)
+
+    print("ANNA PINGED")
+    msg = f"""Hi Anna,
+
+{user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below:
+
+{current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id}
+
+Auto Generated Message"""
 
     SEND_USER = os.environ.get('SMTP_TO')
-    send_email(SEND_USER,
-               f'Assitance Required {chat.subject}', msg)
+    print(SEND_USER)
+    send_email(SEND_USER, f'Assistance Required: {chat.subject}', msg)
 
-    if request.headers.get('HX-Request'):  # HTMX request
-        return "", 204  # No content response for successful submission
+    if request.headers.get('HX-Request'):
+        return "", 204
 
     return jsonify({"status": "Anna has been notified"}), 200
 

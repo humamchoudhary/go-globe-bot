@@ -18,12 +18,79 @@
         border:3px solid var(--techwave-main-color);
         color:var(--techwave-main-color);
     }
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 8px;
+  margin:5px 0;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  left: 0px;
+  bottom: -4px;
+  border:0.5px solid lightgray;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--techwave-main-color);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px  var(--techwave-main-color);
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
+
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
 </style>
 
 
-<div class="techwave_fn_aichatbot_page fn__chatbot" style="margin-inline: 34px">
+<div class="techwave_fn_aichatbot_page fn__chatbot" style="margin-inline: 34px; margin-bottom: 16px">
   <div class="chat__page">
-    <h1>Settings</h1>
+    <h1 class="mb-2 text-xl font-bold" >Settings</h1>
     <div class="grid  grid-cols-1 md:grid-cols-2 gap-10">
       <div class="gap-4 flex flex-col">
         <div
@@ -63,7 +130,7 @@
            class="flex h-10 w-full rounded-md border border-[var(--techwave-border-color)] bg-background px-3 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)] "
            />
           <button 
-class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--techwave-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-[var(--techwave-site-bg-color)] hover:bg-white min-w-[50px] px-7"
+class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--techwave-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-black hover:bg-white min-w-[50px] px-7"
            ><i data-lucide='plus' class="size-10" ></i> Add</button>
           </form>
         <div class='flex flex-col justify-center gap-4'>
@@ -75,13 +142,74 @@ class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-m
                     hx-trigger="click"
                     hx-swap="none"
                     hx-on::after-request="window.location.reload()"
-                    class="inline-flex items-center justify-center py-2 gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--techwave-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-[var(--techwave-site-bg-color)] hover:bg-white min-w-[50px] px-7"
+                    class="inline-flex items-center justify-center py-2 gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--techwave-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-black hover:bg-white min-w-[50px] px-7"
                   >
                     <i data-lucide="trash" class="size-10"></i> Remove
                   </button>
             </div>
               {% endfor %}
         </div>
+        <div class="w-full h-[1px] bg-[var(--techwave-border-color)]" ></div>
+          <h2 style="font-size: 26px">Timings</h2>
+
+<form id="meetingTimeForm" hx-post="/admin/settings/timing" hx-trigger="submit" 
+    hx-swap="none"   
+
+                    hx-on::after-request="window.location.reload()"
+    class="flex flex-col gap-2" >
+
+<div>
+  <label for="timezone" class="mb-2">Select Timezone:</label>
+  <select id="timezone" name="timezone" required>
+    <option value="">-- Select a timezone --</option>
+    {% for tz in tzs %}
+      <option value="{{ tz }}">{{ tz }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+
+  <div>
+    <label for="meetingDay" class="mb-2">Select Day:</label>
+<select id="meetingDay" name="meetingDay" required>
+  <option value="">-- Select a day --</option>
+  {% set selected_days = settings.timings | map(attribute='day') | list %}
+  {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
+    <option value="{{ day }}" {% if day in selected_days %}disabled{% endif %}>
+      {{ day.capitalize() }}
+    </option>
+  {% endfor %}
+</select>
+  </div>
+  <div class="flex flex-col md:flex-row w-full justify-between flex-nowrap gap-7 items-center">
+      <div class="flex flex-row justify-between w-full items-center">
+    <label for="startTime" class="text-nowrap">Start Time:</label>
+    <input type="time" id="startTime" name="startTime" 
+           class="h-10 rounded-md border border-[var(--techwave-border-color)] bg-background px-5 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)] "
+    required>
+    </div>
+    <div  class="flex flex-row justify-between w-full items-center" >
+    <label for="endTime" class="text-nowrap">End Time:</label>
+    <input 
+
+           class=" h-10   rounded-md border border-[var(--techwave-border-color)] bg-background px-5 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--techwave-main-color)] "
+    type="time" id="endTime" name="endTime" required>
+    </div>
+  </div>
+
+  <button type="submit"
+
+                    class="inline-flex items-center justify-center py-2 gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background  transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--techwave-main-color)] text-white hover:text-black duration-200 transition-all hover:cursor-pointer  hover:bg-white min-w-[50px] px-7"
+      >Add Timing</button>
+</form>
+
+          <div class="flex flex-col gap-2">
+              {% for t in settings.timings %}
+              {% set id = loop.index0 %}
+                  {% include 'admin/fragments/timing.html' %}
+              {% endfor %}
+
+          </div>
         </div>
       </div>
 
@@ -148,7 +276,7 @@ class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-m
 
     <button
       type="submit"
-      class="inline-flex items-center justify-center gap-2 py-2  whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-[var(--techwave-main-color)] text-white hover:bg-white hover:text-[var(--techwave-site-bg-color)] min-w-[50px] px-7"
+      class="inline-flex items-center justify-center gap-2 py-2  whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-[var(--techwave-main-color)] text-white hover:bg-white hover:text-black min-w-[50px] px-7"
     >
       <i data-lucide="save" class="size-6"></i> Save
     </button>
