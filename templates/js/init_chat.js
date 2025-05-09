@@ -78,7 +78,7 @@
 </a>
 
 <div id="chat-container">
- <div style="padding: 20px 15px; background-color: #ff5800; color: white; display: flex; justify-content: space-between; align-items: center;">
+ <div style="padding: 10px 15px; background-color: #ff5800; color: white; display: flex; justify-content: space-between; align-items: center;">
       <h3 style="color: white; font-size:16px">Welcome, How can we help you?</h3>
       <div style="display: flex; flex-direction: row; gap: 16px; align-items: center;">
         <div style="cursor: pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">↺</div>
