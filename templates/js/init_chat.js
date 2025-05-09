@@ -78,13 +78,13 @@
 </a>
 
 <div id="chat-container">
-  <div class="chat-header">
-    <h3 style="font-size: 16px;">Welcome, How can we help you?</h3>
-    <div style="display: flex; gap: 16px;">
-      <div style="cursor: pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">↺</div>
-      <div id="close-chat" style="font-size: 24px; cursor: pointer;">×</div>
+ <div style="padding: 20px 15px; background-color: #ff5800; color: white; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="color: white; font-size:16px">Welcome, How can we help you?</h3>
+      <div style="display: flex; flex-direction: row; gap: 16px; align-items: center;">
+        <div style="cursor: pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">↺</div>
+        <div id="close-chat" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">×</div>
+      </div>
     </div>
-  </div>
   <div id="chatbox"
        hx-get="{{backend_url}}/min/"
        hx-trigger="load"
