@@ -121,7 +121,15 @@ def auth_user():
 
     session['user_id'] = user.user_id
     session['role'] = "user"
+    try:
+        r = request.post("https://example.com", json={"name": name,
+                                                      "email": email,
+                                                      "phone": phone,
+                                                      "subject": subject})
 
+        print("Request send")
+    except Exception as e:
+        print(e)
     if is_htmx:
         # For HTMX requests, first get the newchat URL
         # newchat_url = url_for('min.new_chat', subject=subject)
