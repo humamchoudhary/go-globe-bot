@@ -21,7 +21,7 @@ class UserService:
             geo = requests.get(f"https://ipwhois.app/json/{ip}")
             print(geo)
             geo = geo.json()
-            country = geo.get("country_name", None)
+            country = geo.get("country", None)
             city = geo.get("city")
         user = User(name=name, email=email, phone=phone,
                     user_id=user_id, ip=ip, role=role, loc=f"{city},{country}")
