@@ -102,7 +102,7 @@ def auth_user():
     subject = data.get('subject')
     is_anon = data.get('anonymous')
     user_ip = request.headers.get(
-        "X_Real-IP", request.remote_addr)  # Automatically fetch IP
+        "X_Real-IP", request.remote_addr).split(",")[0]  # Automatically fetch IP
     user_service = UserService(current_app.db)
 
     if is_anon:
