@@ -8,7 +8,7 @@ class UserService:
         self.db = db
         self.users_collection = db.users
 
-    def create_user(self, name, ip=None, email=None, phone=None, role="user"):
+    def create_user(self, name, desg=None, ip=None, email=None, phone=None, role="user"):
         user_id = str(uuid.uuid4())
 
         geo = requests.get(f"https://ipapi.co/{ip}/json/")
@@ -24,7 +24,7 @@ class UserService:
             country = geo.get("country", None)
             city = geo.get("city")
         user = User(name=name, email=email, phone=phone,
-                    user_id=user_id, ip=ip, role=role, loc=f"{city},{country}")
+                    user_id=user_id, ip=ip, role=role, loc=f"{city},{country}", desg=desg)
         self.users_collection.insert_one(user.to_dict())
         return user
 

@@ -100,9 +100,11 @@ def auth_user():
     email = data.get('email')
     phone = data.get('phone')
     subject = data.get('subject')
+    desg = data.get('desg')
     is_anon = data.get('anonymous')
     user_ip = request.headers.get(
-        "X_Real-IP", request.remote_addr).split(",")[0]  # Automatically fetch IP
+        # Automatically fetch IP
+        "X_Real-IP", request.remote_addr).split(",")[0]
     user_service = UserService(current_app.db)
 
     if is_anon:
@@ -110,7 +112,7 @@ def auth_user():
         user = user_service.create_user(name, ip=user_ip)
     else:
         user = user_service.create_user(
-            name, email=email, phone=phone, ip=user_ip)
+            name, email=email, phone=phone, ip=user_ip,desg=desg)
 
     if not (name or email or phone):
         if not True:  # Replace with your ALLOW_EMPTY_USERS check
