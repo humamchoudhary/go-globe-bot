@@ -111,6 +111,7 @@
     const nameInput = document.getElementById("name");
     const emailInput = document.getElementById("email");
     const subjectInput = document.getElementById("subject");
+    const desgInput = document.getElementById("desg");
     const phoneInput = document.getElementById("phone");
     const errorMessage = document.getElementById("error-message");
 
@@ -219,6 +220,7 @@ loginForm.addEventListener("submit", function (e) {
     const email = emailInput.value.trim();
     const phone = phoneInput.value.trim();
     const subject = subjectInput.value.trim();
+    const desg = desgInput.value.trim();
 
     const isHtmxRequest = document.getElementById("chatbox") !== null;
     
@@ -233,7 +235,7 @@ loginForm.addEventListener("submit", function (e) {
             name: name,
             email: email,
             phone: phone,
-            subject: subject,
+            subject: subject,desg:desg
         }),
     })
     .then(async (response) => {
