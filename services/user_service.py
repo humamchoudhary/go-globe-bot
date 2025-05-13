@@ -14,10 +14,17 @@ class UserService:
         geo = requests.get(f"https://ipapi.co/{ip}/json/")
         print(geo)
         geo = geo.json()
-        country = geo.get("country_name")
+        country = geo.get("country_name", None)
         city = geo.get("city")
+        if not country:
+
+            geo = requests.get(f"https://ipwhois.app/json/{ip}")
+            print(geo)
+            geo = geo.json()
+            country = geo.get("country_name", None)
+            city = geo.get("city")
         user = User(name=name, email=email, phone=phone,
-                    user_id=user_id, ip=ip, role=role,loc=f"{city},{country}")
+                    user_id=user_id, ip=ip, role=role, loc=f"{city},{country}")
         self.users_collection.insert_one(user.to_dict())
         return user
 
