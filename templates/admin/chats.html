@@ -116,7 +116,7 @@
    // const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
    // document.getElementById('client-visit').textContent = visitDetails;
     
-    document.getElementById('client-country').textContent = user.country || '-';
+    document.getElementById('client-country').textContent = user.loc || '-';
     document.getElementById('client-ip').textContent = user.ip || '-';
   }
 
