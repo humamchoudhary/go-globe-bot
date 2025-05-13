@@ -75,7 +75,7 @@ def create_app(config_class=Config):
 
     @app.before_request
     def test():
-        print(request.remote_addr)
+        print(request.headers.get("X-Real-IP"))
 
     conf = db.config.find_one({"id": "settings"})
     if conf:
