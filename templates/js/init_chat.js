@@ -152,6 +152,7 @@
     };
 
     document.body.addEventListener("htmx:afterSwap", (evt) => {
+      console.log(evt);
       if (evt.detail.target.id === "chatbox") {
         setTimeout(processChatContentElements, 0);
       }
