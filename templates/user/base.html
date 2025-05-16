@@ -35,26 +35,26 @@
     <!--   hx-swap="beforeend" -->
     <!--   hx-trigger="load" -->
     <!-- ></div> -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Check if the script is already present in the head
-        if (
-          !document.querySelector(
-            'script[src="{{ settings["backend_url"] }}/min/get-headers"]',
-          )
-        ) {
-          // If not present, trigger the htmx request to add the script
-          const triggerElement = document.getElementById("loadScriptTrigger");
-          triggerElement.setAttribute(
-            "hx-get",
-            "{{ settings['backend_url'] }}/min/get-headers",
-          );
-          triggerElement.setAttribute("hx-trigger", "load");
-          // Optionally, if you want to display a loading spinner or something while it loads
-          htmx.trigger(triggerElement, "load");
-        }
-      });
-    </script>
+    <!-- <script> -->
+    <!--   document.addEventListener("DOMContentLoaded", function () { -->
+    <!--     // Check if the script is already present in the head -->
+    <!--     if ( -->
+    <!--       !document.querySelector( -->
+    <!--         'script[src="{{ settings["backend_url"] }}/min/get-headers"]', -->
+    <!--       ) -->
+    <!--     ) { -->
+    <!--       // If not present, trigger the htmx request to add the script -->
+    <!--       const triggerElement = document.getElementById("loadScriptTrigger"); -->
+    <!--       triggerElement.setAttribute( -->
+    <!--         "hx-get", -->
+    <!--         "{{ settings['backend_url'] }}/min/get-headers", -->
+    <!--       ); -->
+    <!--       triggerElement.setAttribute("hx-trigger", "load"); -->
+    <!--       // Optionally, if you want to display a loading spinner or something while it loads -->
+    <!--       htmx.trigger(triggerElement, "load"); -->
+    <!--     } -->
+    <!--   }); -->
+    <!-- </script> -->
     <!-- {{ session.sid }} -->
     {% block content %}{% endblock %}
     <!-- <script -->
