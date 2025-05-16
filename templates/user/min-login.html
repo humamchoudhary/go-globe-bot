@@ -1,97 +1,113 @@
-{% extends 'user/base.html' %}
-{% block content %}
+{% extends 'user/base.html' %} {% block content %}
+<!-- Sign In -->
 
 <style>
+  /* Simple styling for form validation */
   input:invalid, select:invalid {
     border-color: #ef4444;
   }
-
+  
+  /* Error message styling if you want to add custom messages */
   .error-text {
     color: #ef4444;
     font-size: 0.875rem;
     margin-top: 0.25rem;
   }
-
+  
   .hidden {
-    display: none !important;
-  }
-
-  .input-error {
-    border-color: #ef4444 !important;
+    display: none;
   }
 </style>
 
 <div style="background-color: var(--techwave-site-bg-color); color: var(--techwave-body-color); font-family: var(--techwave-body-font-family);">
-  <div>
-    <div style="border-radius: 0.5rem; padding: 2rem 2rem 0;">
-      <p id="error-message" class="error-text hidden"></p>
+    <div>
+        <!-- Desktop logo would go here -->
+        <div style="border-radius: 0.5rem; padding-left: 2rem; padding-right: 2rem; padding-top: 1rem;">
+            <div style="margin-bottom: 2rem;">
+                <p id="error-message" style="color: #ef4444; display: none;"></p>
 
-      <form id="login-form" novalidate>
-        <!-- Name -->
-        <div style="margin-bottom: 1rem;">
-          <label for="name">Name *</label>
-          <input type="text" id="name" name="name" required minlength="2"
-            style="width: 100%; padding: 0.75rem; border: 1px solid var(--techwave-border-color); border-radius: 0.25rem;"
-            placeholder="Enter your name">
-          <p id="name-error" class="error-text hidden"></p>
+                <form id="login-form">
+                    <div style="margin-bottom: 1rem;">
+                        <label for="name" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Name *</label>
+                        <input type="text"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="name" name="name" placeholder="Enter your name" autocapitalize="off"
+                            autocomplete="name" required minlength="2"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                        <p id="name-error" class="error-text" style="display: none;"></p>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label for="email" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Email *</label>
+                        <input type="email"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="email" name="email" placeholder="Enter your email" autocapitalize="off"
+                            autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                        <p id="email-error" class="error-text" style="display: none;"></p>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label for="subject" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Message Subject*</label>
+                        <select
+                            style="width: 100%; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="subject" name="subject" autocapitalize="off" autocomplete="off" required
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                            {% for subject in settings['subjects'] %}
+                            <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
+                                {{subject}}</option>
+                            {% endfor %}
+                        </select>
+                        <p id="subject-error" class="error-text" style="display: none;"></p>
+                    </div>
+
+
+                    <div style="margin-bottom: 1rem;">
+                        <label for="desg" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Designation*</label>
+                        <input type="text"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="desg" name="desg" placeholder="Enter your designation" autocapitalize="off"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                        <!-- <p id="s-error" class="error-text" style="display: none;"></p> -->
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="phone" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Phone *</label>
+                        <input type="tel"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            id="phone" name="phone" placeholder="Enter your phone number" autocapitalize="off"
+                            autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+                        <p id="phone-error" class="error-text" style="display: none;"></p>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p>
+                    </div>
+
+                    <button type="submit" id="login-btn"
+                        style="width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; background-color: var(--techwave-button-bg-color); color: var(--techwave-body-color); font-weight: 700; border-radius: 0.25rem; border: 1px solid var(--techwave-border-color); transition: all 300ms;"
+                        onmouseover="this.style.backgroundColor='var(--techwave-main-color)'; this.style.color='var(--techwave-hover-color)';"
+                        onmouseout="this.style.backgroundColor='var(--techwave-button-bg-color)'; this.style.color='var(--techwave-body-color)';">
+                        Start Chat
+                    </button>
+                </form>
+            </div>
         </div>
-
-        <!-- Email -->
-        <div style="margin-bottom: 1rem;">
-          <label for="email">Email *</label>
-          <input type="email" id="email" name="email" required
-            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-            style="width: 100%; padding: 0.75rem; border: 1px solid var(--techwave-border-color); border-radius: 0.25rem;"
-            placeholder="Enter your email">
-          <p id="email-error" class="error-text hidden"></p>
-        </div>
-
-        <!-- Subject -->
-        <div style="margin-bottom: 1rem;">
-          <label for="subject">Message Subject*</label>
-          <select id="subject" name="subject" required
-            style="width: 100%; padding: 0.75rem; border: 1px solid var(--techwave-border-color); border-radius: 0.25rem;">
-            {% for subject in settings['subjects'] %}
-              <option {% if default_subject == subject %} selected {% endif %}>{{ subject }}</option>
-            {% endfor %}
-          </select>
-          <p id="subject-error" class="error-text hidden"></p>
-        </div>
-
-        <!-- Designation -->
-        <div style="margin-bottom: 1rem;">
-          <label for="desg">Designation*</label>
-          <input type="text" id="desg" name="desg"
-            style="width: 100%; padding: 0.75rem; border: 1px solid var(--techwave-border-color); border-radius: 0.25rem;"
-            placeholder="Enter your designation">
-        </div>
-
-        <!-- Phone -->
-        <div style="margin-bottom: 1.5rem;">
-          <label for="phone">Phone *</label>
-          <input type="tel" id="phone" name="phone" required pattern="[0-9+\-\s()]{10,15}"
-            style="width: 100%; padding: 0.75rem; border: 1px solid var(--techwave-border-color); border-radius: 0.25rem;"
-            placeholder="Enter your phone number">
-          <p id="phone-error" class="error-text hidden"></p>
-          <p style="font-size: 0.875rem; color: #6b7280;">Format: 10-15 digits, may include +, -, (, ), and spaces</p>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit" id="login-btn"
-          style="width: 100%; padding: 0.75rem; background-color: var(--techwave-button-bg-color); color: var(--techwave-body-color); font-weight: 700; border-radius: 0.25rem;">
-          Start Chat
-        </button>
-      </form>
     </div>
-  </div>
 </div>
+<!-- !Sign In -->
 
 {% endblock %}
-
 {% block scripts %}
+
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+
+ function initForm () {
     const loginForm = document.getElementById("login-form");
+    const loginBtn = document.getElementById("login-btn");
     const nameInput = document.getElementById("name");
     const emailInput = document.getElementById("email");
     const subjectInput = document.getElementById("subject");
@@ -99,13 +115,81 @@
     const phoneInput = document.getElementById("phone");
     const errorMessage = document.getElementById("error-message");
 
+    // Error message elements
     const nameError = document.getElementById("name-error");
     const emailError = document.getElementById("email-error");
     const subjectError = document.getElementById("subject-error");
     const phoneError = document.getElementById("phone-error");
 
+    // Email validation regex
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // Phone validation regex - allows digits, +, -, (, ), and spaces
     const phoneRegex = /^[0-9+\-\s()]{10,15}$/;
+
+    // Form validation
+    function validateForm() {
+      let isValid = true;
+
+      // Reset all errors
+      hideError(errorMessage);
+      hideError(nameError);
+      hideError(emailError);
+      hideError(phoneError);
+      hideError(subjectError);
+
+      nameInput.classList.remove("input-error");
+      emailInput.classList.remove("input-error");
+      phoneInput.classList.remove("input-error");
+      subjectInput.classList.remove("input-error");
+
+      // Validate name
+      if (!nameInput.value.trim()) {
+        showInputError(nameInput, nameError, "Name is required");
+        isValid = false;
+      } else if (nameInput.value.trim().length < 2) {
+        showInputError(
+          nameInput,
+          nameError,
+          "Name must be at least 2 characters",
+        );
+        isValid = false;
+      }
+
+      // Validate email
+      if (!emailInput.value.trim()) {
+        showInputError(emailInput, emailError, "Email is required");
+        isValid = false;
+      } else if (!emailRegex.test(emailInput.value.trim())) {
+        showInputError(
+          emailInput,
+          emailError,
+          "Please enter a valid email address",
+        );
+        isValid = false;
+      }
+
+      // Validate phone
+      if (!phoneInput.value.trim()) {
+        showInputError(phoneInput, phoneError, "Phone number is required");
+        isValid = false;
+      } else if (!phoneRegex.test(phoneInput.value.trim())) {
+        showInputError(
+          phoneInput,
+          phoneError,
+          "Please enter a valid phone number (10-15 digits)",
+        );
+        isValid = false;
+      }
+
+      // Validate subject
+      if (!subjectInput.value.trim()) {
+        showInputError(subjectInput, subjectError, "Subject is required");
+        isValid = false;
+      }
+
+      return isValid;
+    }
 
     function showInputError(inputElement, errorElement, message) {
       inputElement.classList.add("input-error");
@@ -123,105 +207,107 @@
       errorMessage.classList.remove("hidden");
     }
 
-    function validateForm() {
-      let isValid = true;
+    // Form submission
+// Form submission
+loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-      hideError(errorMessage);
-      hideError(nameError);
-      hideError(emailError);
-      hideError(subjectError);
-      hideError(phoneError);
-
-      nameInput.classList.remove("input-error");
-      emailInput.classList.remove("input-error");
-      subjectInput.classList.remove("input-error");
-      phoneInput.classList.remove("input-error");
-
-      if (!nameInput.value.trim()) {
-        showInputError(nameInput, nameError, "Name is required");
-        isValid = false;
-      } else if (nameInput.value.trim().length < 2) {
-        showInputError(nameInput, nameError, "Name must be at least 2 characters");
-        isValid = false;
-      }
-
-      if (!emailInput.value.trim()) {
-        showInputError(emailInput, emailError, "Email is required");
-        isValid = false;
-      } else if (!emailRegex.test(emailInput.value.trim())) {
-        showInputError(emailInput, emailError, "Please enter a valid email address");
-        isValid = false;
-      }
-
-      if (!subjectInput.value.trim()) {
-        showInputError(subjectInput, subjectError, "Subject is required");
-        isValid = false;
-      }
-
-      if (!phoneInput.value.trim()) {
-        showInputError(phoneInput, phoneError, "Phone number is required");
-        isValid = false;
-      } else if (!phoneRegex.test(phoneInput.value.trim())) {
-        showInputError(phoneInput, phoneError, "Enter valid phone number (10-15 digits)");
-        isValid = false;
-      }
-
-      return isValid;
+    if (!validateForm()) {
+        return;
     }
 
-    loginForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      if (!validateForm()) return;
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const subject = subjectInput.value.trim();
+    const desg = desgInput.value.trim();
 
-      const isHtmxRequest = document.getElementById("chatbox") !== null;
-
-      fetch("{{ settings['backend_url'] }}/min/auth", {
-        method: "POST",
+    const isHtmxRequest = document.getElementById("chatbox") !== null;
+    
+    fetch("{{settings['backend_url']}}/min/auth", {
+        method: "POST" ,
         headers: {
-          "Content-Type": "application/json",
-          "HX-Request": isHtmxRequest
+            "Content-Type": "application/json",
+            "HX-Request": isHtmxRequest
         },
         credentials: "include",
         body: JSON.stringify({
-          name: nameInput.value.trim(),
-          email: emailInput.value.trim(),
-          phone: phoneInput.value.trim(),
-          subject: subjectInput.value.trim(),
-          desg: desgInput.value.trim()
-        })
-      })
-        .then(async (response) => {
-          if (!response.ok) {
+            name: name,
+            email: email,
+            phone: phone,
+            subject: subject,desg:desg
+        }),
+    })
+    .then(async (response) => {
+        if (!response.ok) {
             const data = await response.json();
             showError(data.error || "Login failed");
             return;
-          }
+        }
 
-          const text = await response.text();
+if (isHtmxRequest) {
+    const text = await response.text();
+    htmx.swap('#chatbox', text,{swapStyle: 'innerHTML'});  // This will execute scripts automatically
+}
 
-          if (isHtmxRequest) {
-            htmx.swap('#chatbox', text, { swapStyle: 'innerHTML' });
-          } else {
+        else {
+            // For regular requests, handle redirects
             if (response.redirected) {
-              window.location.href = response.url;
+                window.location.href = response.url;
             } else {
-              // Handle success
+                const text = await response.text();
+                // Handle non-redirect successful responses
+                // You might want to update the UI here
             }
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          showError("An error occurred. Please try again.");
-        });
+        }
+    })
+    .catch((error) => {
+        console.error("Error:", error);
+        showError("An error occurred. Please try again.");
+    });
+});
+
+    // Real-time validation on input fields
+    nameInput.addEventListener("input", function () {
+      nameInput.classList.remove("input-error");
+      hideError(nameError);
     });
 
-    // Real-time error removal
-    [nameInput, emailInput, subjectInput, phoneInput].forEach(input => {
-      input.addEventListener("input", () => {
-        input.classList.remove("input-error");
-        hideError(document.getElementById(`${input.id}-error`));
-      });
+    emailInput.addEventListener("input", function () {
+      emailInput.classList.remove("input-error");
+      hideError(emailError);
+
+      // Optional: Show validation status as user types
+      if (
+        emailInput.value.trim() &&
+        !emailRegex.test(emailInput.value.trim())
+      ) {
+        showInputError(
+          emailInput,
+          emailError,
+          "Please enter a valid email address",
+        );
+      }
     });
-  });
+
+    phoneInput.addEventListener("input", function () {
+      phoneInput.classList.remove("input-error");
+      hideError(phoneError);
+
+      // Optional: Show validation status as user types
+      if (
+        phoneInput.value.trim() &&
+        !phoneRegex.test(phoneInput.value.trim())
+      ) {
+        showInputError(
+          phoneInput,
+          phoneError,
+          "Please enter a valid phone number (10-15 digits)",
+        );
+      }
+    });
+  };
+ initForm()
 </script>
+
 {% endblock %}
