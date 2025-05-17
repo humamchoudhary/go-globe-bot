@@ -53,6 +53,15 @@ def create_app(config_class=Config):
     app.config['SESSION_TYPE'] = 'mongodb'
     app.config['LOGOS_FOLDER'] = os.path.join(os.getcwd(), 'static/img/')
 
+    def is_mobile(user_agent):
+        mobile_keywords = ['mobile', 'android',
+                           'iphone', 'ipad', 'blackberry', 'iemobile']
+        # print(user_agent.__dict__)
+        user_agent_lower = user_agent.string.lower()
+        return any(keyword in user_agent_lower for keyword in mobile_keywords)
+
+    app.jinja_env.tests['mobile'] = is_mobile
+
     # app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Or 'None' if using HTTPS
     # # Must be True if using 'None' for SameSite
     # app.config['SESSION_COOKIE_SECURE'] = True

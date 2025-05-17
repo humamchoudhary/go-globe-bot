@@ -1,5 +1,6 @@
 import uuid
 from models.chat import Chat, Message
+import os
 
 
 class ChatService:
@@ -32,6 +33,12 @@ class ChatService:
         if chat_data:
             return Chat.from_dict(chat_data)
         return None
+
+    def delete(self, chat_ids):
+        self.chats_collection.delete_many({"room_id": {'$in': chat_ids}})
+        for id in chat_ids:
+            print(id)
+            os.remove(f"./bin/chat/{id}.chatpl")
 
     def get_chat_by_room_id(self, room_id):
         chat_data = self.chats_collection.find_one({"room_id": room_id})

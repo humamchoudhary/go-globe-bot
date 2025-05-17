@@ -1,4 +1,6 @@
+  <!-- Chat panel (similar to the image) -->
 {% extends 'admin/template.html' %}{% block content %}
+
 <style>
 .active-filter{
   border-color: var(--techwave-main-color);
@@ -7,16 +9,39 @@
 .filter{
   border-color:var(--techwave-hover-color);      
 }
+.delete-checkbox {
+  display: none;
+  margin-right: 8px;
+}
+.delete-mode .delete-checkbox {
+  display: block;
+}
+.delete-mode .chat-item {
+  padding-left: 8px;
+}
 </style>
+
 <div class="techwave_fn_aichatbot_page fn__chatbot h-[90vh] overflow-auto">
   <!-- Left panel (already in your template) -->
-  
+
   <!-- Chat panel (similar to the image) -->
-  <div class="flex-1 flex flex-col h-full overflow-y-scroll bg-[#001c2e] border-r-[var(--techwave-border-color)] border-r-4 ">
+
+  <div id="chat_panel" class="flex-1 flex flex-col h-full overflow-y-scroll bg-[#001c2e] border-r-[var(--techwave-border-color)] border-r-4 ">
     <!-- Chat header -->
     <div class="sticky flex justify-between items-start flex-col items-center">
-      <div class="flex h-15 items-center">
+      <div class="flex h-15 items-center w-full justify-between">
         <h2 class="text-xl ml-4 font-medium text-white">Chats</h2>
+        <div class="flex items-center mr-4">
+          <button id="toggle-delete" class="text-sm text-red-400 hover:text-red-300 hidden" onclick="toggleDeleteMode()">
+            Delete Chats
+          </button>
+          <button id="cancel-delete" class="text-sm text-gray-400 hover:text-white hidden mr-2" onclick="cancelDeleteMode()">
+            Cancel
+          </button>
+          <button id="confirm-delete" class="text-sm bg-red-600 text-white px-3 py-1 rounded hidden disabled:bg-gray-500" onclick="deleteSelectedChats()">
+            Delete Selected
+          </button>
+        </div>
       </div>
       <div class="grid h-10 grid-cols-2 w-full item-center justify-center">
         <p
@@ -24,7 +49,6 @@
           hx-get="/admin/chats/all"
           hx-target="#chat_list_container"
           hx-trigger="click"
-        
           class="active-filter border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">All Chats</p>
         <p 
           id="active-tab"
@@ -34,7 +58,7 @@
           class="border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">Admin Chats</p>
       </div>
     </div>
-    
+
     <!-- Chat list -->
     <div class="flex-1 overflow-y-auto h-[96vh]">
       <p class="text-right text-sm text-gray-400 p-2" id="chat-count">Total Chats: <span id="chat-total">{{chats|length}}</span></p>
@@ -45,13 +69,15 @@
       </div>
     </div>
   </div>
+
+  <!-- Rest of your existing code remains the same -->
   
-  <div id='chat_container' class="w-210 bg-[var(--techwave-bg-color)] h-full hidden">
+  <div id='chat_container' class="w-screen md:w-210 bg-[var(--techwave-bg-color)] z-0 h-[20vh] relative md:h-full hidden">
     <!-- <body class="bg-[var(--techwave-bg-color)]" style="background-color: #001523"></body> -->
   </div>
   
   <!-- Right panel for client info -->
-<div class="bg-[#001c2e] border-l border-[#132f41] p-4 fixed h-screen right-0 w-64 chat__sidebar">
+<div class="bg-[#001c2e] border-l border-[#132f41] p-4 fixed h-min hidden md:flex  md:h-screen right-0 w-64 chat__sidebar">
   <div class="mb-6">
     <h3 class="text-lg font-medium text-white mb-3">Client info</h3>
     <div id="client-info" class="text-sm text-gray-400">
@@ -100,6 +126,83 @@
 
 <script>
 
+function toggleDeleteMode() {
+  document.body.classList.add('delete-mode');
+  document.getElementById('toggle-delete').classList.add('hidden');
+  document.getElementById('cancel-delete').classList.remove('hidden');
+  document.getElementById('confirm-delete').classList.remove('hidden');
+  updateDeleteButton();
+}
+
+function cancelDeleteMode() {
+  document.body.classList.remove('delete-mode');
+  document.getElementById('toggle-delete').classList.remove('hidden');
+  document.getElementById('cancel-delete').classList.add('hidden');
+  document.getElementById('confirm-delete').classList.add('hidden');
+  
+  // Uncheck all checkboxes
+  document.querySelectorAll('.delete-checkbox').forEach(checkbox => {
+    checkbox.checked = false;
+  });
+}
+
+function updateDeleteButton() {
+  const checkedCount = document.querySelectorAll('.delete-checkbox:checked').length;
+  const deleteButton = document.getElementById('confirm-delete');
+  
+  if (checkedCount > 0) {
+    deleteButton.textContent = `Delete (${checkedCount})`;
+    deleteButton.disabled = false;
+  } else {
+    deleteButton.textContent = 'Delete';
+    deleteButton.disabled = true;
+  }
+}
+
+function deleteSelectedChats() {
+  const selectedChats = Array.from(document.querySelectorAll('.delete-checkbox:checked'))
+    .map(checkbox => checkbox.value);
+    
+  if (selectedChats.length === 0) return;
+  
+  if (confirm(`Are you sure you want to delete ${selectedChats.length} chat(s)?`)) {
+    fetch('/admin/chats/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ chat_ids: selectedChats })
+    })
+    .then(data => {
+        console.log(data)
+      if (data.status == 200) {
+        // Refresh the chat list
+        htmx.trigger('#all-tab', 'click');
+        cancelDeleteMode();
+        location.reload()
+      } else {
+        alert('Error deleting chats: ' + (data.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error deleting chats');
+    });
+  }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const chatItems = document.querySelectorAll('.chat-item');
+  const toggleDeleteBtn = document.getElementById('toggle-delete');
+  
+  if (chatItems.length > 0) {
+    toggleDeleteBtn.classList.remove('hidden');
+  }
+});
+
+
+
  function updateClientInfo(user) {
     if (!user) {
       // Reset to default state if no chat selected
@@ -132,6 +235,8 @@
   function renderChat(room_id,user_id) {
   //  document.getElementById('chat_container').src = `/admin/chat/min/${room_id}`;
     document.getElementById('chat_container').classList.remove('hidden');
+    document.getElementById('chat_panel').classList.add('max-md:hidden');
+      
     
     // Fetch chat details and update sidebar
       fetch(`/admin/user/${user_id}/details`)
@@ -173,8 +278,17 @@
         // Show/hide empty message
         if (chatItems.length > 0) {
           document.getElementById('empty_chat').classList.add('hidden');
-        } else {
+
+ toggleDeleteBtn.classList.remove('hidden');        } else {
           document.getElementById('empty_chat').classList.remove('hidden');
+
+
+ toggleDeleteBtn.classList.add('hidden');
+      // Also cancel delete mode if no chats
+      if (document.body.classList.contains('delete-mode')) {
+        cancelDeleteMode();
+      }
+
         }
       }
     });
@@ -256,7 +370,6 @@
 
 document.addEventListener('htmx:afterRequest', function(evt) {
 
-console.log(evt)
  const url = evt.detail.pathInfo.requestPath;
   
     if(  url.startsWith('/admin/chat/min/')){

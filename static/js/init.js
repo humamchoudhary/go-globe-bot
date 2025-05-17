@@ -1689,6 +1689,7 @@ var FrenifyTechWaveTime = new Date();
       $(".techwave_fn_leftpanel .mobile_closer")
         .off()
         .on("click", function () {
+          console.log(wrapper);
           if (wrapper.hasClass("mobile-panel-opened")) {
             wrapper.removeClass("mobile-panel-opened");
           } else {

@@ -1,10 +1,16 @@
 <div class="fn__title_holder">
-  <div class="container">
+  <div class="container flex flex-col md:flex-row gap-2 justify-between">
     <!-- Active chat title -->
     {% if chat and chat.title %}
     <h1 class="title">{{ chat.title if chat else 'New Chat' }}</h1>
+    <a href="/admin/chat/{{ chat.room_id }}/user" class="md:hidden text-nowrap"
+      >user</a
+    >
     {% elif chat and chat.chat_id %}
     <h1 class="title">{{ chat.chat_id if chat else 'New Chat' }}</h1>
+    <a href="/admin/chat/{{ chat.room_id }}/user" class="md:hidden text-nowrap"
+      >user</a
+    >
     {% endif %}
     <!-- !Active chat title -->
   </div>

@@ -229,8 +229,8 @@ def ping_admin(chat_id):
 
     # if not available:
     #     if request.headers.get('HX-Request'):
-    #         return "Anna is currently unavailable", 200
-    #     return jsonify({"error": "Anna is currently unavailable"}), 200
+    #         return "Ana is currently unavailable", 200
+    #     return jsonify({"error": "Ana is currently unavailable"}), 200
 
     # Proceed with ping logic
     chat_service = ChatService(current_app.db)
@@ -262,7 +262,7 @@ def ping_admin(chat_id):
         )
 
         message_content = (
-            "Anna has been notified, but she is currently unavailable.\n\n"
+            "Ana has been notified, but she is currently unavailable.\n\n"
             "You can reach her during the following times:\n\n"
             f"{formatted_timings}"
         )
@@ -278,7 +278,7 @@ def ping_admin(chat_id):
         }, room=room_id)
     else:
         new_message = chat_service.add_message(
-            chat.room_id, 'SYSTEM', 'Anna has been notified! She will join soon'
+            chat.room_id, 'SYSTEM', 'Ana has been notified! She will join soon'
         )
         current_app.socketio.emit('new_message', {
             'sender': 'SYSTEM',
@@ -287,7 +287,7 @@ def ping_admin(chat_id):
         }, room=room_id)
 
     print("ANNA PINGED")
-    msg = f"""Hi Anna,
+    msg = f"""Hi Ana,
 
 {user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below:
 
@@ -302,7 +302,7 @@ Auto Generated Message"""
     if request.headers.get('HX-Request'):
         return "", 204
 
-    return jsonify({"status": "Anna has been notified"}), 200
+    return jsonify({"status": "Ana has been notified"}), 200
 
 
 @min_bp.route('/chat/<chat_id>/send_message', methods=['POST', 'GET'])

@@ -80,9 +80,24 @@ def chat(room_id):
     if not chat:
         return redirect(url_for('admin.dashboard'))
     if request.headers.get('HX-Request'):
-        return render_template('admin/fragments/chat_page.html', chat=chat, username="Anna")
+        return render_template('admin/fragments/chat_page.html', chat=chat, username="Ana")
 
-    return render_template('admin/dashboard.html', chat=chat, chats=chats_data, username="Anna")
+    return render_template('admin/dashboard.html', chat=chat, chats=chats_data, username="Ana")
+
+
+@admin_bp.route('/chat/<room_id>/user')
+def chat_user(room_id):
+    chat_service = ChatService(current_app.db)
+
+    user_service = UserService(current_app.db)
+    user = user_service.get_user_by_id(
+        chat_service.get_chat_by_room_id(room_id).user_id)
+
+    return render_template("admin/user.html", user=user.to_dict())
+    # with current_app.test_client() as client:
+    #     response = client.get('/internal-data')
+    #     data = response.get_json()
+    #     pass
 
 
 @admin_bp.route('/chat/min/<room_id>', methods=['GET'])
@@ -97,7 +112,7 @@ def chat_mini(room_id):
     # chats_data = [c for c in chats if c.admin_required]
     # if not chat:
     #     return redirect(url_for('admin.dashboard'))
-    return render_template('admin/fragments/chat_mini.html', chat=chat, username="Anna")
+    return render_template('admin/fragments/chat_mini.html', chat=chat, username="Ana")
 
 
 @admin_bp.route('/user/<string:user_id>/details', methods=['GET'])
@@ -149,7 +164,7 @@ def send_message(room_id):
         return jsonify({"error": "Chat not found"}), 404
 
     new_message = chat_service.add_message(
-        chat.room_id, "Anna", message)
+        chat.room_id, "Ana", message)
     user = user_service.get_user_by_id(chat.user_id)
     if not user:
         return '<p>User Not Found</>'
@@ -159,7 +174,7 @@ def send_message(room_id):
         'timestamp': new_message.timestamp.isoformat()
     }, room=room_id)
 
-    return render_template('admin/fragments/chat_message.html', message=new_message, username="Anna")
+    return render_template('admin/fragments/chat_message.html', message=new_message, username="Ana")
 
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
@@ -310,7 +325,7 @@ def dashboard():
 
     # Convert to dictionary representation
     chats_data = [chat for chat in chats if chat.admin_required]
-    return render_template('admin/dashboard.html', chats=chats_data, username="Anna")
+    return render_template('admin/dashboard.html', chats=chats_data, username="Ana")
 
 
 @admin_bp.route('/join/<room_id>')
@@ -732,6 +747,25 @@ def get_all_chats():
     pprint(chats)
     # = [chat.to_dict() for chat in chats if chat.admin_required]
     return render_template('admin/chats.html', chats=chats)
+
+
+@admin_bp.route("/chats/delete", methods=["POST"])
+def delete_chat():
+
+    data = request.get_json()
+    if not data.get("chat_ids"):
+        return "", 200
+    chats = data["chat_ids"]
+    print(chats)
+    try:
+        chat_service = ChatService(current_app.db)
+        chat_service.delete(chats)
+        return "", 200
+    except Exception as e:
+        print(e)
+        return "Error"
+    # for i in chats:
+    #     print(i)
 
 
 def register_admin_socketio_events(socketio):

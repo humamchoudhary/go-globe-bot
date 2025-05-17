@@ -387,13 +387,13 @@ hr[data-h="10"] {
   max-width: 980px;
 }
 
-.container:after,
-.clearfix:after,
-.clearfix:before {
-  content: "";
-  clear: both;
-  display: table;
-}
+/* .container:after, */
+/* .clearfix:after, */
+/* .clearfix:before { */
+/*   content: ""; */
+/*   clear: both; */
+/*   display: table; */
+/* } */
 
 @media (max-width: 1040px) {
   .container {
@@ -2196,7 +2196,7 @@ frenify_typing span {
 .techwave_fn_pagetitle .title {
   margin: 0;
   padding: 0;
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.364;
   font-weight: 600;
   color: var(--techwave-heading-color);
@@ -2596,8 +2596,10 @@ frenify_typing span {
 .fn__title_holder .title {
   margin: 0;
   padding: 0;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
+
+  text-wrap: nowrap;
 }
 
 /*------------------------------------------------------------------*/
