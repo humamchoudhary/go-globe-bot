@@ -465,6 +465,15 @@ def delete_timing(id):
     return "delete", 200
 
 
+@admin_bp.route('/settings/model/', methods=['POST'])
+def update_model():
+    model = request.form.get('model')
+    current_app.config['SETTINGS']['model'] = model
+
+    current_app.bot._set_bot(model)
+    return "", 200
+
+
 @admin_bp.route('/settings/api/<api_type>', methods=['POST', 'DELETE'])
 @admin_required
 def api_key(api_type):

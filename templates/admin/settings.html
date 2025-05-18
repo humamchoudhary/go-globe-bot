@@ -284,6 +284,28 @@
           <h2 style="font-size: 26px">General Settings</h2>
           <div class="flex flex-col gap-3">
               <p>Model Selection</p>
+
+
+<form
+  hx-post="/admin/settings/model"
+  hx-trigger="change"
+  hx-target="this"
+  hx-swap="none"
+  hx-on::after-request="window.location.reload()"
+>
+  <select
+    name="model"
+    class="bg-gray-800 text-white border border-white rounded-md p-2"
+  >
+    {% for label, value in bots() %}
+    <option value="{{ value }}" {% if settings.model == value %}selected{% endif %}>
+      {{ label }}
+    </option>
+    {% endfor %}
+  </select>
+</form>
+
+
           </div>
 
           <div

@@ -62,6 +62,8 @@ def create_app(config_class=Config):
 
     app.jinja_env.tests['mobile'] = is_mobile
 
+    app.jinja_env.globals['bots'] = Bot.get_bots
+
     # app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Or 'None' if using HTTPS
     # # Must be True if using 'None' for SameSite
     # app.config['SESSION_COOKIE_SECURE'] = True
@@ -93,7 +95,7 @@ def create_app(config_class=Config):
             'claude': os.environ.get('CLAUDE_KEY', ''),
             'openAi': os.environ.get('OPENAI_KEY', ''),
 
-                'deepseek': os.environ.get('DEEPSEEK_KEY', ''),
+            'deepseek': os.environ.get('DEEPSEEK_KEY', ''),
             'gemini': os.environ.get('GEMINI_KEY', '')}
     else:
         app.config['SETTINGS'] = {
@@ -109,7 +111,7 @@ def create_app(config_class=Config):
                 'deepseek': os.environ.get('DEEPSEEK_KEY', ''),
                 'gemini': os.environ.get('GEMINI_KEY', '')},
             'theme': 'system',
-            'model': 'gemini', 'backend_url': os.environ.get('BACKEND_URL'), "prompt": f"""
+            'model': 'gm_2_0_f', 'backend_url': os.environ.get('BACKEND_URL'), "prompt": f"""
        you are a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Assistance" button for human assistance.'
                 Incorporate information from any attached images into your responses where relevant. Give concise answers
                 When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.

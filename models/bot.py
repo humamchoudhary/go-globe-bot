@@ -50,15 +50,18 @@ class Bot:
             "gpt-4": self._gpt,
             "dp-chat": self._deepseek
         }
-        self._set_bot('gm_2_0_f')
+        self._set_bot(app.config['SETTINGS']['model'])
 
-    def get_bots(self):
-        return ['Gemini 2.0 Flash (gm_2_0_f)',
-                'Claude 3 (claude-3)',
-                'GPT-4 (gpt-4)',
-                'Deepseek (dp-chat)']
+    @classmethod
+    def get_bots(cls):
+        return [('Gemini 2.0 Flash (gm_2_0_f)', "gm_2_0_f"),
+                ('Claude 3 (claude-3)', 'claude-3'),
+                ('GPT-4 (gpt-4)', 'gpt-4'),
+                ('Deepseek (dp-chat)', 'dp-chat')]
 
     def responed(self, input, id):
+        # This now sets the correct active bot
+        chat_state = self._load_chat(id)
         if self.active_bot_name not in self.bot_maps:
             raise ValueError(f"Unsupported bot: {self.active_bot_name}")
         return self.bot_maps[self.active_bot_name](input, id)
@@ -89,8 +92,20 @@ class Bot:
             self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
         chat_state = init_method(text_content, images)
 
+        # Store the model name in the chat state
+        chat_state["model_name"] = self.active_bot_name
+        chat_state["model_config"] = self._get_model_config()
+
         with open(f'bin/chat/{id}.chatpl', 'wb') as file:
             pickle.dump(chat_state, file)
+
+    def _get_model_config(self):
+        return {
+            "gm_2_0_f": "gemini-2.0-flash",
+            "claude-3": "claude-3-opus-20240229",
+            "gpt-4": "gpt-4-vision-preview",
+            "dp-chat": "deepseek-chat"
+        }.get(self.active_bot_name, "unknown")
 
     def _process_files(self):
         text_content = []
@@ -210,10 +225,11 @@ class Bot:
             "client": self.active_bot,
             "config": {
                 "model": "deepseek-chat",
-                "history": [{
+                "messages": [{
                     "role": "system",
                     "content": f"{self.sys_prompt}\n{text_content}"
-                }]
+                }],
+                "temperature": 0.7
             }
         }
 
@@ -264,43 +280,66 @@ class Bot:
 
     def _deepseek(self, input, id):
         chat_state = self._load_chat(id)
-        chat_state["config"]["messages"].append(
-            {"role": "user", "content": input})
 
-        response = chat_state["client"].chat(
-            **chat_state["config"]
-        )
+        if "messages" not in chat_state["config"]:
+            chat_state["config"]["messages"] = []
 
-        tokens = self._count_tokens(response)
         chat_state["config"]["messages"].append({
-            "role": "assistant",
-            "content": response["choices"][0]["message"]["content"]
+            "role": "user",
+            "content": input
         })
-        self._save_chat(chat_state, id)
-        return response["choices"][0]["message"]["content"], tokens
 
-    # Utility methods
+        try:
+            response = chat_state["client"].chat(
+                messages=chat_state["config"]["messages"],
+                temperature=chat_state["config"].get("temperature", 0.7)
+            )
+
+            if not isinstance(response, dict) or "choices" not in response:
+                raise ValueError("Invalid response format from Deepseek API")
+
+            assistant_message = response["choices"][0]["message"]["content"]
+
+            chat_state["config"]["messages"].append({
+                "role": "assistant",
+                "content": assistant_message
+            })
+
+            tokens = self._count_tokens(response)
+            self._save_chat(chat_state, id)
+            return assistant_message, tokens
+
+        except Exception as e:
+            print(f"Deepseek API error: {str(e)}")
+            chat_state["config"]["messages"].pop()
+            raise
+
     def _load_chat(self, id):
         try:
             with open(f"bin/chat/{id}.chatpl", 'rb') as file:
-                return pickle.load(file)
+                chat_state = pickle.load(file)
+                # Set the active bot based on stored model
+                if "model_name" in chat_state:
+                    self._set_bot(chat_state["model_name"])
+                else:
+                    self._set_bot('gm_2_0_f')
+                return chat_state
         except FileNotFoundError:
             raise ValueError(f"No chat session found for id {id}")
 
     def _save_chat(self, chat_state, id):
+        # Ensure current model info is saved
+        chat_state["model_name"] = self.active_bot_name
+        chat_state["model_config"] = self._get_model_config()
         with open(f"bin/chat/{id}.chatpl", 'wb') as file:
             pickle.dump(chat_state, file)
 
     def _count_tokens(self, response):
         pricing = {
-            # $ per 1K tokens
-            "gm_2_0_f": {"input": 0.000125, "output": 0.000375},
-            # $ per 1M tokens
+            "gm_2_0_f": {"input": 0, "output": 0},
             "claude-3": {"input": 15, "output": 75},
-            # $ per 1K tokens
             "gpt-4": {"input": 0.03, "output": 0.06},
-            # $ per 1K tokens
-            "dp-chat": {"input": 0.0001, "output": 0.0002}
+            "dp-chat": {"input": 0.27, "output": 1.10}
         }
 
         bot_name = self.active_bot_name
@@ -321,13 +360,8 @@ class Bot:
         else:
             input_tokens = output_tokens = 0
 
-        # Calculate costs based on pricing model
-        if bot_name == "claude-3":
-            input_cost = (input_tokens * costs["input"]) / 1000000
-            output_cost = (output_tokens * costs["output"]) / 1000000
-        else:
-            input_cost = (input_tokens * costs["input"]) / 1000
-            output_cost = (output_tokens * costs["output"]) / 1000
+        input_cost = (input_tokens * costs["input"]) / 1000000
+        output_cost = (output_tokens * costs["output"]) / 1000000
 
         return {
             "input": input_tokens,
@@ -338,7 +372,6 @@ class Bot:
 
 
 if __name__ == "__main__":
-    # Example usage
     from flask import Flask
     app = Flask(__name__)
     app.config['SETTINGS'] = {
@@ -348,17 +381,18 @@ if __name__ == "__main__":
             'claude': os.getenv('CLAUDE_API_KEY'),
             'deepseek': os.getenv('DEEPSEEK_API_KEY')
         },
-        'prompt': "You are a helpful AI assistant."
+        'prompt': "You are a helpful AI assistant.",
+        'model': 'gm_2_0_f'
     }
 
     bot = Bot('test', app)
 
     # Test each bot
-    for bot_name in bot.get_bots():
+    for bot_name, bot_code in bot.get_bots():
         print(f"\nTesting {bot_name}...")
-        bot._set_bot(bot_name.split(' ')[-1].strip('()'))
-        bot.create_chat('test_session')
-        response, tokens = bot.responed(
-            "Hello! What can you do?", 'test_session')
+        bot._set_bot(bot_code)
+        chat_id = f"test_{bot_code}"
+        bot.create_chat(chat_id)
+        response, tokens = bot.responed("Hello! What can you do?", chat_id)
         print(f"Response: {response[:100]}...")
         print(f"Tokens used: {tokens}")
