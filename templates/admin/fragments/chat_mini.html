@@ -7,7 +7,7 @@
     <!--<![endif]-->
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="description" content="TechWave" />
+        <meta name="description" content="GoGlobe" />
         <meta name="author" content="SRBThemes" />
         <meta name="viewport"
               content="width=device-width, initial-scale=1, maximum-scale=1" />
@@ -18,7 +18,7 @@
               href="{{ url_for('static', filename='img/logo-desktop-mini.svg') }}" />
         <script>
         document.documentElement.setAttribute(
-            "data-techwave-skin",
+            "data-goglobe-skin",
             '{{settings["theme"]}}',
         );
         if (localStorage.frenify_panel !== "") {
@@ -45,7 +45,7 @@
         <!-- !Styles -->
     </head>
     <body>
-        <div class="techwave_fn_aichatbot_page fn__chatbot h-[90vh] overflow-y-scroll">
+        <div class="goglobe_fn_aichatbot_page fn__chatbot h-[90vh] overflow-y-scroll">
             <div class="chat__page">
                 <div class="fn__title_holder">
                     <div class="container mb-4">
@@ -74,7 +74,7 @@
                         <h1 class="text-bold text-4xl" style="font-weight: bold">
                             Welcome To
                             <!-- <span -->
-                            <!--     style="color:var(--techwave-main-color);font-style: italic;">GO</span><span style="font-style: italic;">-Globe</span>  -->
+                            <!--     style="color:var(--goglobe-main-color);font-style: italic;">GO</span><span style="font-style: italic;">-Globe</span>  -->
                             Chat Bot
                         </h1>
                     </div>
@@ -134,7 +134,7 @@
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
                 <script>
                 function scrollToBottom() {
-                    if (document.querySelector(".techwave_fn_intro")) {
+                    if (document.querySelector(".goglobe_fn_intro")) {
                         const chatTextarea = document.getElementById("fn__chat_textarea");
                         if (chatTextarea) {
                             const scrollTop =

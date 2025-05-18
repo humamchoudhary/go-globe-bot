@@ -1,14 +1,14 @@
 {% extends 'user/base.html' %} {% block content %}
 <!-- Sign In -->
 <div
-  class="bg-[var(--techwave-site-bg-color)] text-[var(--techwave-body-color)] font-[var(--techwave-body-font-family)]"
+  class="bg-[var(--goglobe-site-bg-color)] text-[var(--goglobe-body-color)] font-[var(--goglobe-body-font-family)]"
 >
   <div class="max-w-md mx-auto">
     <!-- Desktop logo would go here -->
     <div class="rounded-lg px-8 pt-4">
       <div class="mb-8">
         <h2
-          class="text-xl font-bold mb-5 text-[var(--techwave-heading-color)] font-[var(--techwave-heading-font-family)]"
+          class="text-xl font-bold mb-5 text-[var(--goglobe-heading-color)] font-[var(--goglobe-heading-font-family)]"
         >
           User Authentication
         </h2>
@@ -18,12 +18,12 @@
           <div class="mb-4">
             <label
               for="name"
-              class="block mb-2 text-[var(--techwave-body-color)]"
+              class="block mb-2 text-[var(--goglobe-body-color)]"
               >Name *</label
             >
             <input
               type="text"
-              class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
+              class="w-full p-3 bg-[var(--goglobe-site-bg-color)] border border-[var(--goglobe-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--goglobe-main-color)] text-[var(--goglobe-body-color)]"
               id="name"
               name="name"
               placeholder="Enter your name"
@@ -38,12 +38,12 @@
           <div class="mb-4">
             <label
               for="email"
-              class="block mb-2 text-[var(--techwave-body-color)]"
+              class="block mb-2 text-[var(--goglobe-body-color)]"
               >Email *</label
             >
             <input
               type="email"
-              class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
+              class="w-full p-3 bg-[var(--goglobe-site-bg-color)] border border-[var(--goglobe-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--goglobe-main-color)] text-[var(--goglobe-body-color)]"
               id="email"
               name="email"
               placeholder="Enter your email"
@@ -58,11 +58,11 @@
           <div class="mb-4">
             <label
               for="subject"
-              class="block mb-2 text-[var(--techwave-body-color)]"
+              class="block mb-2 text-[var(--goglobe-body-color)]"
               >Message Subject *</label
             >
             <select
-              class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
+              class="w-full p-3 bg-[var(--goglobe-site-bg-color)] border border-[var(--goglobe-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--goglobe-main-color)] text-[var(--goglobe-body-color)]"
               id="subject"
               name="subject"
               autocapitalize="off"
@@ -93,12 +93,12 @@
           <div class="mb-6">
             <label
               for="phone"
-              class="block mb-2 text-[var(--techwave-body-color)]"
+              class="block mb-2 text-[var(--goglobe-body-color)]"
               >Phone *</label
             >
             <input
               type="tel"
-              class="w-full p-3 bg-[var(--techwave-site-bg-color)] border border-[var(--techwave-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--techwave-main-color)] text-[var(--techwave-body-color)]"
+              class="w-full p-3 bg-[var(--goglobe-site-bg-color)] border border-[var(--goglobe-border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--goglobe-main-color)] text-[var(--goglobe-body-color)]"
               id="phone"
               name="phone"
               placeholder="Enter your phone number"
@@ -116,7 +116,7 @@
           <button
             type="submit"
             id="login-btn"
-            class="w-full py-3 px-4 bg-[var(--techwave-button-bg-color)] text-[var(--techwave-body-color)] font-bold rounded border border-[var(--techwave-border-color)] transition-all duration-300 hover:bg-[var(--techwave-main-color)] hover:text-[var(--techwave-hover-color)]"
+            class="w-full py-3 px-4 bg-[var(--goglobe-button-bg-color)] text-[var(--goglobe-body-color)] font-bold rounded border border-[var(--goglobe-border-color)] transition-all duration-300 hover:bg-[var(--goglobe-main-color)] hover:text-[var(--goglobe-hover-color)]"
           >
             Submit
           </button>
@@ -173,7 +173,7 @@
         showInputError(
           nameInput,
           nameError,
-          "Name must be at least 2 characters",
+          "Name must be at least 2 characters"
         );
         isValid = false;
       }
@@ -186,7 +186,7 @@
         showInputError(
           emailInput,
           emailError,
-          "Please enter a valid email address",
+          "Please enter a valid email address"
         );
         isValid = false;
       }
@@ -199,7 +199,7 @@
         showInputError(
           phoneInput,
           phoneError,
-          "Please enter a valid phone number (10-15 digits)",
+          "Please enter a valid phone number (10-15 digits)"
         );
         isValid = false;
       }
@@ -290,7 +290,7 @@
         showInputError(
           emailInput,
           emailError,
-          "Please enter a valid email address",
+          "Please enter a valid email address"
         );
       }
     });
@@ -307,7 +307,7 @@
         showInputError(
           phoneInput,
           phoneError,
-          "Please enter a valid phone number (10-15 digits)",
+          "Please enter a valid phone number (10-15 digits)"
         );
       }
     });

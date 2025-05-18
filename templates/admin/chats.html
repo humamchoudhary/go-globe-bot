@@ -1,44 +1,59 @@
-  <!-- Chat panel (similar to the image) -->
+<!-- Chat panel (similar to the image) -->
 {% extends 'admin/template.html' %}{% block content %}
 
 <style>
-.active-filter{
-  border-color: var(--techwave-main-color);
-  color: var(--techwave-main-color);
-}
-.filter{
-  border-color:var(--techwave-hover-color);      
-}
-.delete-checkbox {
-  display: none;
-  margin-right: 8px;
-}
-.delete-mode .delete-checkbox {
-  display: block;
-}
-.delete-mode .chat-item {
-  padding-left: 8px;
-}
+  .active-filter {
+    border-color: var(--goglobe-main-color);
+    color: var(--goglobe-main-color);
+  }
+  .filter {
+    border-color: var(--goglobe-hover-color);
+  }
+  .delete-checkbox {
+    display: none;
+    margin-right: 8px;
+  }
+  .delete-mode .delete-checkbox {
+    display: block;
+  }
+  .delete-mode .chat-item {
+    padding-left: 8px;
+  }
 </style>
 
-<div class="techwave_fn_aichatbot_page fn__chatbot h-[90vh] overflow-auto">
+<div class="goglobe_fn_aichatbot_page fn__chatbot h-[90vh] overflow-auto">
   <!-- Left panel (already in your template) -->
 
   <!-- Chat panel (similar to the image) -->
 
-  <div id="chat_panel" class="flex-1 flex flex-col h-full overflow-y-scroll bg-[#001c2e] border-r-[var(--techwave-border-color)] border-r-4 ">
+  <div
+    id="chat_panel"
+    class="flex-1 flex flex-col h-full overflow-y-scroll bg-[#001c2e] border-r-[var(--goglobe-border-color)] border-r-4"
+  >
     <!-- Chat header -->
     <div class="sticky flex justify-between items-start flex-col items-center">
       <div class="flex h-15 items-center w-full justify-between">
         <h2 class="text-xl ml-4 font-medium text-white">Chats</h2>
         <div class="flex items-center mr-4">
-          <button id="toggle-delete" class="text-sm text-red-400 hover:text-red-300 hidden" onclick="toggleDeleteMode()">
+          <button
+            id="toggle-delete"
+            class="text-sm text-red-400 hover:text-red-300 hidden"
+            onclick="toggleDeleteMode()"
+          >
             Delete Chats
           </button>
-          <button id="cancel-delete" class="text-sm text-gray-400 hover:text-white hidden mr-2" onclick="cancelDeleteMode()">
+          <button
+            id="cancel-delete"
+            class="text-sm text-gray-400 hover:text-white hidden mr-2"
+            onclick="cancelDeleteMode()"
+          >
             Cancel
           </button>
-          <button id="confirm-delete" class="text-sm bg-red-600 text-white px-3 py-1 rounded hidden disabled:bg-gray-500" onclick="deleteSelectedChats()">
+          <button
+            id="confirm-delete"
+            class="text-sm bg-red-600 text-white px-3 py-1 rounded hidden disabled:bg-gray-500"
+            onclick="deleteSelectedChats()"
+          >
             Delete Selected
           </button>
         </div>
@@ -49,260 +64,270 @@
           hx-get="/admin/chats/all"
           hx-target="#chat_list_container"
           hx-trigger="click"
-          class="active-filter border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">All Chats</p>
-        <p 
+          class="active-filter border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--goglobe-hover-color)]/10"
+        >
+          All Chats
+        </p>
+        <p
           id="active-tab"
           hx-get="/admin/chats/active"
           hx-target="#chat_list_container"
           hx-trigger="click"
-          class="border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--techwave-hover-color)]/10">Admin Chats</p>
+          class="border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--goglobe-hover-color)]/10"
+        >
+          Admin Chats
+        </p>
       </div>
     </div>
 
     <!-- Chat list -->
     <div class="flex-1 overflow-y-auto h-[96vh]">
-      <p class="text-right text-sm text-gray-400 p-2" id="chat-count">Total Chats: <span id="chat-total">{{chats|length}}</span></p>
+      <p class="text-right text-sm text-gray-400 p-2" id="chat-count">
+        Total Chats: <span id="chat-total">{{chats|length}}</span>
+      </p>
       <p id="empty_chat" class="text-center hidden">No Chat</p>
-      
+
       <div id="chat_list_container">
-          {% include "admin/fragments/chat_list_container.html" %}
+        {% include "admin/fragments/chat_list_container.html" %}
       </div>
     </div>
   </div>
 
   <!-- Rest of your existing code remains the same -->
-  
-  <div id='chat_container' class="w-screen md:w-210 bg-[var(--techwave-bg-color)] z-0 h-[20vh] relative md:h-full hidden">
-    <!-- <body class="bg-[var(--techwave-bg-color)]" style="background-color: #001523"></body> -->
+
+  <div
+    id="chat_container"
+    class="w-screen md:w-210 bg-[var(--goglobe-bg-color)] z-0 h-[20vh] relative md:h-full hidden"
+  >
+    <!-- <body class="bg-[var(--goglobe-bg-color)]" style="background-color: #001523"></body> -->
   </div>
-  
+
   <!-- Right panel for client info -->
-<div class="bg-[#001c2e] border-l border-[#132f41] p-4 fixed h-min hidden md:flex  md:h-screen right-0 w-64 chat__sidebar">
-  <div class="mb-6">
-    <h3 class="text-lg font-medium text-white mb-3">Client info</h3>
-    <div id="client-info" class="text-sm text-gray-400">
+  <div
+    class="bg-[#001c2e] border-l border-[#132f41] p-4 fixed h-min hidden md:flex md:h-screen right-0 w-64 chat__sidebar"
+  >
+    <div class="mb-6">
+      <h3 class="text-lg font-medium text-white mb-3">Client info</h3>
+      <div id="client-info" class="text-sm text-gray-400">
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">Name</p>
+          <p id="client-name" class="text-white">
+            Select a chat to view details
+          </p>
+        </div>
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">Contact</p>
+          <p id="client-phone" class="text-white">-</p>
+        </div>
 
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Name</p>
-        <p id="client-name" class="text-white">Select a chat to view details</p>
-      </div>
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Contact</p>
-        <p id="client-phone" class="text-white">-</p>
-      </div>
-      
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Email</p>
-        <p id="client-email" class="text-white break-all">-</p>
-      </div>
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">Email</p>
+          <p id="client-email" class="text-white break-all">-</p>
+        </div>
 
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Desgnation</p>
-        <p id="client-desg" class="text-white break-all">-</p>
-      </div>
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">Desgnation</p>
+          <p id="client-desg" class="text-white break-all">-</p>
+        </div>
 
-      <!-- <div class="mb-4"> -->
-      <!--   <p class="text-gray-500 mb-1">Visit Source</p> -->
-      <!--   <p id="client-source" class="text-white">-</p> -->
-      <!-- </div> -->
-      <!---->
-      <!-- <div class="mb-4"> -->
-      <!--   <p class="text-gray-500 mb-1">Visit Details</p> -->
-      <!--   <p id="client-visit" class="text-white text-sm">-</p> -->
-      <!-- </div> -->
-      <!---->
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">Country</p>
-        <p id="client-country" class="text-white">-</p>
-      </div>
+        <!-- <div class="mb-4"> -->
+        <!--   <p class="text-gray-500 mb-1">Visit Source</p> -->
+        <!--   <p id="client-source" class="text-white">-</p> -->
+        <!-- </div> -->
+        <!---->
+        <!-- <div class="mb-4"> -->
+        <!--   <p class="text-gray-500 mb-1">Visit Details</p> -->
+        <!--   <p id="client-visit" class="text-white text-sm">-</p> -->
+        <!-- </div> -->
+        <!---->
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">Country</p>
+          <p id="client-country" class="text-white">-</p>
+        </div>
 
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">City</p>
-        <p id="client-city" class="text-white">-</p>
-      </div>
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">City</p>
+          <p id="client-city" class="text-white">-</p>
+        </div>
 
-      <div class="mb-4">
-        <p class="text-gray-500 mb-1">IP Details</p>
-        <p id="client-ip" class="text-white text-sm">-</p>
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">IP Details</p>
+          <p id="client-ip" class="text-white text-sm">-</p>
+        </div>
       </div>
     </div>
   </div>
 </div>
-  
-
-
-
-</div>
 
 <script>
-
-function toggleDeleteMode() {
-  document.body.classList.add('delete-mode');
-  document.getElementById('toggle-delete').classList.add('hidden');
-  document.getElementById('cancel-delete').classList.remove('hidden');
-  document.getElementById('confirm-delete').classList.remove('hidden');
-  updateDeleteButton();
-}
-
-function cancelDeleteMode() {
-  document.body.classList.remove('delete-mode');
-  document.getElementById('toggle-delete').classList.remove('hidden');
-  document.getElementById('cancel-delete').classList.add('hidden');
-  document.getElementById('confirm-delete').classList.add('hidden');
-  
-  // Uncheck all checkboxes
-  document.querySelectorAll('.delete-checkbox').forEach(checkbox => {
-    checkbox.checked = false;
-  });
-}
-
-function updateDeleteButton() {
-  const checkedCount = document.querySelectorAll('.delete-checkbox:checked').length;
-  const deleteButton = document.getElementById('confirm-delete');
-  
-  if (checkedCount > 0) {
-    deleteButton.textContent = `Delete (${checkedCount})`;
-    deleteButton.disabled = false;
-  } else {
-    deleteButton.textContent = 'Delete';
-    deleteButton.disabled = true;
+  function toggleDeleteMode() {
+    document.body.classList.add("delete-mode");
+    document.getElementById("toggle-delete").classList.add("hidden");
+    document.getElementById("cancel-delete").classList.remove("hidden");
+    document.getElementById("confirm-delete").classList.remove("hidden");
+    updateDeleteButton();
   }
-}
 
-function deleteSelectedChats() {
-  const selectedChats = Array.from(document.querySelectorAll('.delete-checkbox:checked'))
-    .map(checkbox => checkbox.value);
-    
-  if (selectedChats.length === 0) return;
-  
-  if (confirm(`Are you sure you want to delete ${selectedChats.length} chat(s)?`)) {
-    fetch('/admin/chats/delete', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ chat_ids: selectedChats })
-    })
-    .then(data => {
-        console.log(data)
-      if (data.status == 200) {
-        // Refresh the chat list
-        htmx.trigger('#all-tab', 'click');
-        cancelDeleteMode();
-        location.reload()
-      } else {
-        alert('Error deleting chats: ' + (data.message || 'Unknown error'));
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error deleting chats');
+  function cancelDeleteMode() {
+    document.body.classList.remove("delete-mode");
+    document.getElementById("toggle-delete").classList.remove("hidden");
+    document.getElementById("cancel-delete").classList.add("hidden");
+    document.getElementById("confirm-delete").classList.add("hidden");
+
+    // Uncheck all checkboxes
+    document.querySelectorAll(".delete-checkbox").forEach((checkbox) => {
+      checkbox.checked = false;
     });
   }
-}
 
+  function updateDeleteButton() {
+    const checkedCount = document.querySelectorAll(
+      ".delete-checkbox:checked"
+    ).length;
+    const deleteButton = document.getElementById("confirm-delete");
 
-document.addEventListener('DOMContentLoaded', function() {
-  const chatItems = document.querySelectorAll('.chat-item');
-  const toggleDeleteBtn = document.getElementById('toggle-delete');
-  
-  if (chatItems.length > 0) {
-    toggleDeleteBtn.classList.remove('hidden');
+    if (checkedCount > 0) {
+      deleteButton.textContent = `Delete (${checkedCount})`;
+      deleteButton.disabled = false;
+    } else {
+      deleteButton.textContent = "Delete";
+      deleteButton.disabled = true;
+    }
   }
-});
 
+  function deleteSelectedChats() {
+    const selectedChats = Array.from(
+      document.querySelectorAll(".delete-checkbox:checked")
+    ).map((checkbox) => checkbox.value);
 
+    if (selectedChats.length === 0) return;
 
- function updateClientInfo(user) {
+    if (
+      confirm(
+        `Are you sure you want to delete ${selectedChats.length} chat(s)?`
+      )
+    ) {
+      fetch("/admin/chats/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chat_ids: selectedChats }),
+      })
+        .then((data) => {
+          console.log(data);
+          if (data.status == 200) {
+            // Refresh the chat list
+            htmx.trigger("#all-tab", "click");
+            cancelDeleteMode();
+            location.reload();
+          } else {
+            alert("Error deleting chats: " + (data.message || "Unknown error"));
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Error deleting chats");
+        });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const chatItems = document.querySelectorAll(".chat-item");
+    const toggleDeleteBtn = document.getElementById("toggle-delete");
+
+    if (chatItems.length > 0) {
+      toggleDeleteBtn.classList.remove("hidden");
+    }
+  });
+
+  function updateClientInfo(user) {
     if (!user) {
       // Reset to default state if no chat selected
-      document.getElementById('client-name').textContent = 'Select a chat to view details';
-      document.getElementById('client-phone').textContent = '-';
-      document.getElementById('client-email').textContent = '-';
+      document.getElementById("client-name").textContent =
+        "Select a chat to view details";
+      document.getElementById("client-phone").textContent = "-";
+      document.getElementById("client-email").textContent = "-";
 
-    document.getElementById('client-desg').textContent ='-';
-    //  document.getElementById('client-source').textContent = '-';
+      document.getElementById("client-desg").textContent = "-";
+      //  document.getElementById('client-source').textContent = '-';
       //document.getElementById('client-visit').textContent = '-';
-      document.getElementById('client-country').textContent = '-';
-      document.getElementById('client-city').textContent = '-';
-      document.getElementById('client-ip').textContent = '-';
+      document.getElementById("client-country").textContent = "-";
+      document.getElementById("client-city").textContent = "-";
+      document.getElementById("client-ip").textContent = "-";
       return;
     }
 
     // Update client information
-    document.getElementById('client-name').textContent = user.name || '-';
-    document.getElementById('client-phone').textContent = user.phone || '-';
-    document.getElementById('client-email').textContent = user.email || '-';
+    document.getElementById("client-name").textContent = user.name || "-";
+    document.getElementById("client-phone").textContent = user.phone || "-";
+    document.getElementById("client-email").textContent = user.email || "-";
 
-    document.getElementById('client-desg').textContent = user.desg || '-';
-  //  document.getElementById('client-source').textContent = user.source || '-';
-    
+    document.getElementById("client-desg").textContent = user.desg || "-";
+    //  document.getElementById('client-source').textContent = user.source || '-';
+
     // Format visit details
-   // const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
-   // document.getElementById('client-visit').textContent = visitDetails;
-    
-    document.getElementById('client-country').textContent = user.country || '-';
-    document.getElementById('client-city').textContent = user.city || '-';
-    document.getElementById('client-ip').textContent = user.ip || '-';
+    // const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
+    // document.getElementById('client-visit').textContent = visitDetails;
+
+    document.getElementById("client-country").textContent = user.country || "-";
+    document.getElementById("client-city").textContent = user.city || "-";
+    document.getElementById("client-ip").textContent = user.ip || "-";
   }
 
-  function renderChat(room_id,user_id) {
-  //  document.getElementById('chat_container').src = `/admin/chat/min/${room_id}`;
-    document.getElementById('chat_container').classList.remove('hidden');
-    document.getElementById('chat_panel').classList.add('max-md:hidden');
-      
-    
+  function renderChat(room_id, user_id) {
+    //  document.getElementById('chat_container').src = `/admin/chat/min/${room_id}`;
+    document.getElementById("chat_container").classList.remove("hidden");
+    document.getElementById("chat_panel").classList.add("max-md:hidden");
+
     // Fetch chat details and update sidebar
-      fetch(`/admin/user/${user_id}/details`)
-      .then(response => response.json())
-      .then(user => {
+    fetch(`/admin/user/${user_id}/details`)
+      .then((response) => response.json())
+      .then((user) => {
         updateClientInfo(user);
       })
-      .catch(error => {
-        console.error('Error fetching chat details:', error);
+      .catch((error) => {
+        console.error("Error fetching chat details:", error);
         updateClientInfo(null);
       });
   }
 
-
-
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // Get the tab elements
-    const allTab = document.getElementById('all-tab');
-    const activeTab = document.getElementById('active-tab');
-    
+    const allTab = document.getElementById("all-tab");
+    const activeTab = document.getElementById("active-tab");
+
     // Handle HTMX events
-    document.body.addEventListener('htmx:afterSwap', function(event) {
-      if (event.detail.target.id === 'chat_list_container') {
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+      if (event.detail.target.id === "chat_list_container") {
         const source = event.detail.requestConfig.path;
-        
+
         // Update the chat count
-        const chatItems = document.querySelectorAll('.chat-item');
-        document.getElementById('chat-total').textContent = chatItems.length;
-        
+        const chatItems = document.querySelectorAll(".chat-item");
+        document.getElementById("chat-total").textContent = chatItems.length;
+
         // Update tab styling
-        if (source.includes('/active')) {
-          activeTab.classList.add('active-filter');
-          allTab.classList.remove('active-filter');
+        if (source.includes("/active")) {
+          activeTab.classList.add("active-filter");
+          allTab.classList.remove("active-filter");
         } else {
-          allTab.classList.add('active-filter');
-          activeTab.classList.remove('active-filter');
+          allTab.classList.add("active-filter");
+          activeTab.classList.remove("active-filter");
         }
-        
+
         // Show/hide empty message
         if (chatItems.length > 0) {
-          document.getElementById('empty_chat').classList.add('hidden');
+          document.getElementById("empty_chat").classList.add("hidden");
 
- toggleDeleteBtn.classList.remove('hidden');        } else {
-          document.getElementById('empty_chat').classList.remove('hidden');
+          toggleDeleteBtn.classList.remove("hidden");
+        } else {
+          document.getElementById("empty_chat").classList.remove("hidden");
 
-
- toggleDeleteBtn.classList.add('hidden');
-      // Also cancel delete mode if no chats
-      if (document.body.classList.contains('delete-mode')) {
-        cancelDeleteMode();
-      }
-
+          toggleDeleteBtn.classList.add("hidden");
+          // Also cancel delete mode if no chats
+          if (document.body.classList.contains("delete-mode")) {
+            cancelDeleteMode();
+          }
         }
       }
     });
@@ -358,59 +383,50 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 </script>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 <script>
+  function fixAllLinks(element) {
+    const links = element.querySelectorAll("a");
 
-    function fixAllLinks(element) {
-      const links = element.querySelectorAll('a');
+    links.forEach((link) => {
+      // Add target="_blank" to open in new tab
+      link.setAttribute("target", "_blank");
+      link.setAttribute("rel", "noopener noreferrer");
 
-      links.forEach(link => {
-        // Add target="_blank" to open in new tab
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener noreferrer');
+      // Fix URLs without http/https
+      let href = link.getAttribute("href");
+      if (href && !/^https?:\/\//i.test(href)) {
+        link.setAttribute("href", "https://" + href);
+      }
+    });
+  }
 
-        // Fix URLs without http/https
-        let href = link.getAttribute('href');
-        if (href && !/^https?:\/\//i.test(href)) {
-          link.setAttribute('href', 'https://' + href);
-        }
+  document.addEventListener("htmx:afterRequest", function (evt) {
+    const url = evt.detail.pathInfo.requestPath;
+
+    if (url.startsWith("/admin/chat/min/")) {
+      const roomId = url.split("/").splice(-1)[0];
+
+      const socket = io();
+
+      socket.on("connect", function () {
+        socket.emit("admin_join", { room: roomId });
       });
-    }
 
-
-document.addEventListener('htmx:afterRequest', function(evt) {
-
- const url = evt.detail.pathInfo.requestPath;
-  
-    if(  url.startsWith('/admin/chat/min/')){
-
-        const roomId = url.split('/').splice(-1)[0]
-
-                    const socket = io();
-
-                    socket.on("connect", function () {
-                        socket.emit("admin_join", {room: roomId});
-                    });
-
-                    socket.on("new_message", function (data) {
-                        appendMessage(data);
-                    });
+      socket.on("new_message", function (data) {
+        appendMessage(data);
+      });
     }
     document.querySelectorAll(".md-content").forEach((el) => {
       el.innerHTML = marked.parse(el.textContent);
 
       fixAllLinks(el);
-        
     });
 
-
-
     // Put the JS code that you want to execute here
-});
+  });
 </script>
 
 {% endblock %}

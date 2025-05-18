@@ -29,7 +29,7 @@
   <h1 class="text-bold text-4xl" style="font-weight: bold">
     Welcome To
     <!-- <span -->
-    <!--     style="color:var(--techwave-main-color);font-style: italic;">GO</span><span style="font-style: italic;">-Globe</span>  -->
+    <!--     style="color:var(--goglobe-main-color);font-style: italic;">GO</span><span style="font-style: italic;">-Globe</span>  -->
     Chat Bot
   </h1>
 </div>
@@ -93,7 +93,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 <script>
   function scrollToBottom() {
-    if (document.querySelector(".techwave_fn_intro")) {
+    if (document.querySelector(".goglobe_fn_intro")) {
       const chatTextarea = document.getElementById("fn__chat_textarea");
       if (chatTextarea) {
         const scrollTop =
@@ -135,8 +135,12 @@
     const messagesContainer = document.getElementById("chat__item");
 
     const messageHTML = `
-            <div class="chat__box ${message.sender === "{{username}}" ? "your__chat" : "bot__chat"}">
-            <div class="author"><span>${message.sender === "{{username}}" ? "You" : message.sender}</span></div>
+            <div class="chat__box ${
+              message.sender === "{{username}}" ? "your__chat" : "bot__chat"
+            }">
+            <div class="author"><span>${
+              message.sender === "{{username}}" ? "You" : message.sender
+            }</span></div>
             <div class="chat">
                     <p>${marked.parse(message.content)}</p>
             </div>

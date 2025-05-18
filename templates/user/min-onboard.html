@@ -1,26 +1,48 @@
 {% extends 'user/base.html' %} {% block content %}
 <!-- AI Chat Bot Page -->
-<div class="techwave_fn_aichatbot_page fn__chatbot" style="min-height: 100%">
-  <div class="chat__page" style="min-height: 100%; display: flex; justify-content: flex-end; padding-bottom: 2.5rem;">
+<div class="goglobe_fn_aichatbot_page fn__chatbot" style="min-height: 100%">
+  <div
+    class="chat__page"
+    style="
+      min-height: 100%;
+      display: flex;
+      justify-content: flex-end;
+      padding-bottom: 2.5rem;
+    "
+  >
     <!-- REPLACE WITH HTMX --->
-    <div style="padding-left: 1.5rem; padding-right: 1.5rem; height: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.5rem;">
+    <div
+      style="
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: flex-end;
+        gap: 0.5rem;
+      "
+    >
       {% for subject in settings['subjects'] %}
-      
- <a       style="font-family: var(--techwave-body-font-family) !important; 
-               font-size: 14px !important; 
-               padding: 5px 10px; 
-               border-top-left-radius: 1.5rem; 
-               border-top-right-radius: 1.5rem; 
-               border-bottom-left-radius: 1.5rem; 
-               font-size: 1.5rem; 
-               border: 2px solid var(--techwave-border-color); 
-               transition-duration: 150ms; 
-               transition-property: all; 
-               cursor: pointer;"
+
+      <a
+        style="
+          font-family: var(--goglobe-body-font-family) !important;
+          font-size: 14px !important;
+          padding: 5px 10px;
+          border-top-left-radius: 1.5rem;
+          border-top-right-radius: 1.5rem;
+          border-bottom-left-radius: 1.5rem;
+          font-size: 1.5rem;
+          border: 2px solid var(--goglobe-border-color);
+          transition-duration: 150ms;
+          transition-property: all;
+          cursor: pointer;
+        "
         href="/min/login/{{subject}}"
-        onmouseover="this.style.borderColor='var(--techwave-main-color)'; this.style.backgroundColor='rgba(255, 88, 0, 0.5)';"
-        onmouseout="this.style.borderColor='var(--techwave-border-color)'; this.style.backgroundColor='';"
-        onmousedown="this.style.color='white'; this.style.backgroundColor='var(--techwave-main-color)';"
+        onmouseover="this.style.borderColor='var(--goglobe-main-color)'; this.style.backgroundColor='rgba(255, 88, 0, 0.5)';"
+        onmouseout="this.style.borderColor='var(--goglobe-border-color)'; this.style.backgroundColor='';"
+        onmousedown="this.style.color='white'; this.style.backgroundColor='var(--goglobe-main-color)';"
         onmouseup="this.style.color=''; this.style.backgroundColor='';"
       >
         {{subject}}

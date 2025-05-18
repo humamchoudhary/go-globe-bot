@@ -1,29 +1,25 @@
-{% extends 'admin/template.html' %} 
-
-{% block header_script %}
+{% extends 'admin/template.html' %} {% block header_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% endblock %} 
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="p-6 flex flex-col rounded-lg shadow-lg w-full">
   <h1 class="text-2xl font-bold mb-4 text-center">Token Usage Graph</h1>
 
   <!-- Selector for Daily, Monthly, Yearly -->
   <div class="flex justify-end gap-4 mb-4">
     <button
-      class="selector-btn px-4 py-2 rounded bg-[var(--techwave-main-color)] text-[var(--techwave-hover-color)]"
+      class="selector-btn px-4 py-2 rounded bg-[var(--goglobe-main-color)] text-[var(--goglobe-hover-color)]"
       data-period="daily"
     >
       Daily
     </button>
     <button
-      class="selector-btn px-4 py-2 rounded bg-[var(--techwave-body-color)] text-[var(--techwave-site-bg-color)]"
+      class="selector-btn px-4 py-2 rounded bg-[var(--goglobe-body-color)] text-[var(--goglobe-site-bg-color)]"
       data-period="monthly"
     >
       Monthly
     </button>
     <button
-      class="selector-btn px-4 py-2 rounded bg-[var(--techwave-body-color)] text-[var(--techwave-site-bg-color)]"
+      class="selector-btn px-4 py-2 rounded bg-[var(--goglobe-body-color)] text-[var(--goglobe-site-bg-color)]"
       data-period="yearly"
     >
       Yearly
@@ -32,7 +28,9 @@
 
   <!-- Dropdown for selecting date -->
   <div class="mb-4 w-full md:w-128 self-end">
-    <label for="date-selector" class="block text-lg font-medium">Select Time:</label>
+    <label for="date-selector" class="block text-lg font-medium"
+      >Select Time:</label
+    >
     <select id="date-selector" class="p-2 rounded duration-200 transition-all">
       <!-- Options will be dynamically populated -->
     </select>
@@ -71,12 +69,12 @@
       const option = document.createElement('option');
       option.value = date;
       option.text = date;
-      
+
       // Set default selected to latest date
       if (date === defaultDates[period]) {
         option.selected = true;
       }
-      
+
       dateSelector.appendChild(option);
     });
 
@@ -90,23 +88,23 @@
       // Reset button styles
       document.querySelectorAll(".selector-btn").forEach((btn) => {
         btn.classList.replace(
-          "bg-[var(--techwave-main-color)]",
-          "bg-[var(--techwave-body-color)]"
+          "bg-[var(--goglobe-main-color)]",
+          "bg-[var(--goglobe-body-color)]"
         );
         btn.classList.replace(
-          "text-[var(--techwave-hover-color)]",
-          "text-[var(--techwave-site-bg-color)]"
+          "text-[var(--goglobe-hover-color)]",
+          "text-[var(--goglobe-site-bg-color)]"
         );
       });
 
       // Style selected button
       button.classList.replace(
-        "bg-[var(--techwave-body-color)]",
-        "bg-[var(--techwave-main-color)]"
+        "bg-[var(--goglobe-body-color)]",
+        "bg-[var(--goglobe-main-color)]"
       );
       button.classList.replace(
-        "text-[var(--techwave-site-bg-color)]",
-        "text-[var(--techwave-hover-color)]"
+        "text-[var(--goglobe-site-bg-color)]",
+        "text-[var(--goglobe-hover-color)]"
       );
 
       // Update period
@@ -124,7 +122,7 @@
   let chart;
   async function fetchData() {
     let date = dateSelector.value;
-    
+
     let response = await fetch(
       `/admin/api/usage?period=${period}&date=${date}`
     );

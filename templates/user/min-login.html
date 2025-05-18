@@ -19,7 +19,7 @@
   }
 </style>
 
-<div style="background-color: var(--techwave-site-bg-color); color: var(--techwave-body-color); font-family: var(--techwave-body-font-family);">
+<div style="background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family);">
     <div>
         <!-- Desktop logo would go here -->
         <div style="border-radius: 0.5rem; padding-left: 2rem; padding-right: 2rem; padding-top: 1rem;">
@@ -28,33 +28,33 @@
 
                 <form id="login-form">
                     <div style="margin-bottom: 1rem;">
-                        <label for="name" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Name *</label>
+                        <label for="name" style="display: block; margin-bottom: 0.5rem; color: var(--goglobe-body-color);">Name *</label>
                         <input type="text"
-                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--goglobe-site-bg-color); border: 1px solid var(--goglobe-border-color); border-radius: 0.25rem; text-color: var(--goglobe-body-color); outline: none;"
                             id="name" name="name" placeholder="Enter your name" autocapitalize="off"
                             autocomplete="name" required minlength="2"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
                             onblur="this.style.boxShadow = '';">
                         <p id="name-error" class="error-text" style="display: none;"></p>
                     </div>
 
                     <div style="margin-bottom: 1rem;">
-                        <label for="email" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Email *</label>
+                        <label for="email" style="display: block; margin-bottom: 0.5rem; color: var(--goglobe-body-color);">Email *</label>
                         <input type="email"
-                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--goglobe-site-bg-color); border: 1px solid var(--goglobe-border-color); border-radius: 0.25rem; text-color: var(--goglobe-body-color); outline: none;"
                             id="email" name="email" placeholder="Enter your email" autocapitalize="off"
                             autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
                             onblur="this.style.boxShadow = '';">
                         <p id="email-error" class="error-text" style="display: none;"></p>
                     </div>
 
                     <div style="margin-bottom: 1rem;">
-                        <label for="subject" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Message Subject*</label>
+                        <label for="subject" style="display: block; margin-bottom: 0.5rem; color: var(--goglobe-body-color);">Message Subject*</label>
                         <select
-                            style="width: 100%; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            style="width: 100%; background-color: var(--goglobe-site-bg-color); border: 1px solid var(--goglobe-border-color); border-radius: 0.25rem; text-color: var(--goglobe-body-color); outline: none;"
                             id="subject" name="subject" autocapitalize="off" autocomplete="off" required
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
                             onblur="this.style.boxShadow = '';">
                             {% for subject in settings['subjects'] %}
                             <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
@@ -66,31 +66,31 @@
 
 
                     <div style="margin-bottom: 1rem;">
-                        <label for="desg" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Designation*</label>
+                        <label for="desg" style="display: block; margin-bottom: 0.5rem; color: var(--goglobe-body-color);">Designation*</label>
                         <input type="text"
-                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--goglobe-site-bg-color); border: 1px solid var(--goglobe-border-color); border-radius: 0.25rem; text-color: var(--goglobe-body-color); outline: none;"
                             id="desg" name="desg" placeholder="Enter your designation" autocapitalize="off"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
                             onblur="this.style.boxShadow = '';">
                         <!-- <p id="s-error" class="error-text" style="display: none;"></p> -->
                     </div>
 
                     <div style="margin-bottom: 1.5rem;">
-                        <label for="phone" style="display: block; margin-bottom: 0.5rem; color: var(--techwave-body-color);">Phone *</label>
+                        <label for="phone" style="display: block; margin-bottom: 0.5rem; color: var(--goglobe-body-color);">Phone *</label>
                         <input type="tel"
-                            style="width: 100%; padding: 0.75rem; background-color: var(--techwave-site-bg-color); border: 1px solid var(--techwave-border-color); border-radius: 0.25rem; text-color: var(--techwave-body-color); outline: none;"
+                            style="width: 100%; padding: 0.75rem; background-color: var(--goglobe-site-bg-color); border: 1px solid var(--goglobe-border-color); border-radius: 0.25rem; text-color: var(--goglobe-body-color); outline: none;"
                             id="phone" name="phone" placeholder="Enter your phone number" autocapitalize="off"
                             autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--techwave-main-color)';"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
                             onblur="this.style.boxShadow = '';">
                         <p id="phone-error" class="error-text" style="display: none;"></p>
                         <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p>
                     </div>
 
                     <button type="submit" id="login-btn"
-                        style="width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; background-color: var(--techwave-button-bg-color); color: var(--techwave-body-color); font-weight: 700; border-radius: 0.25rem; border: 1px solid var(--techwave-border-color); transition: all 300ms;"
-                        onmouseover="this.style.backgroundColor='var(--techwave-main-color)'; this.style.color='var(--techwave-hover-color)';"
-                        onmouseout="this.style.backgroundColor='var(--techwave-button-bg-color)'; this.style.color='var(--techwave-body-color)';">
+                        style="width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; background-color: var(--goglobe-button-bg-color); color: var(--goglobe-body-color); font-weight: 700; border-radius: 0.25rem; border: 1px solid var(--goglobe-border-color); transition: all 300ms;"
+                        onmouseover="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.color='var(--goglobe-hover-color)';"
+                        onmouseout="this.style.backgroundColor='var(--goglobe-button-bg-color)'; this.style.color='var(--goglobe-body-color)';">
                         Start Chat
                     </button>
                 </form>

@@ -1,32 +1,40 @@
 {% extends 'admin/template.html' %} {% block content %}
 
-<div class="techwave_fn_sign">
-
-    <div class="sign__content">
-        <h1 class="logo">Designed by Frenify</h1>
-        <form class="signup">
-            <div class="form__content">
-                <div class="form__title">Sign Up</div>
-                <div class="form__name">
-                    <label for="name">Name</label>
-                    <input type="text" class="input" id="name" placeholder="Full Name">
-                </div>
-                <div class="form__username">
-                    <label for="username">Username</label>
-                    <input type="text" class="input" id="username" placeholder="Username">
-                </div>
-                <div class="form__pass">
-                    <label for="user_password">Password</label>
-                    <input type="password" id="user_password" autocomplete="current-password" spellcheck="false">
-                </div>
-                <div class="form__submit">
-                    <label class="fn__submit">
-                        <input type="submit" name="submit" value="Create Admin">
-                    </label>
-                </div>
-            </div>
-        </form>
-    </div>
-
+<div class="goglobe_fn_sign">
+  <div class="sign__content">
+    <h1 class="logo">Designed by Frenify</h1>
+    <form class="signup">
+      <div class="form__content">
+        <div class="form__title">Sign Up</div>
+        <div class="form__name">
+          <label for="name">Name</label>
+          <input type="text" class="input" id="name" placeholder="Full Name" />
+        </div>
+        <div class="form__username">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            class="input"
+            id="username"
+            placeholder="Username"
+          />
+        </div>
+        <div class="form__pass">
+          <label for="user_password">Password</label>
+          <input
+            type="password"
+            id="user_password"
+            autocomplete="current-password"
+            spellcheck="false"
+          />
+        </div>
+        <div class="form__submit">
+          <label class="fn__submit">
+            <input type="submit" name="submit" value="Create Admin" />
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

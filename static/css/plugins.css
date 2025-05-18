@@ -161,32 +161,32 @@ table {
   border-collapse: collapse;
   border-spacing: 0px;
   margin-bottom: 15px;
-  color: var(--techwave-body-color);
-  border: 1px solid var(--techwave-border-color);
+  color: var(--goglobe-body-color);
+  border: 1px solid var(--goglobe-border-color);
 }
 table tr {
-  border: 1px solid var(--techwave-border-color);
+  border: 1px solid var(--goglobe-border-color);
 }
 table th {
   vertical-align: top;
-  color: var(--techwave-heading-color);
+  color: var(--goglobe-heading-color);
   background: 0 0;
   font-size: 16px;
   font-weight: 400;
   padding: 15px 10px;
-  border: 1px solid var(--techwave-border-color);
+  border: 1px solid var(--goglobe-border-color);
 }
 table td {
   vertical-align: top;
   padding: 10px;
-  border: 1px solid var(--techwave-border-color);
+  border: 1px solid var(--goglobe-border-color);
 }
 code,
 pre {
   padding: 10px;
-  border-left: 3px solid var(--techwave-main-color);
+  border-left: 3px solid var(--goglobe-main-color);
   border-bottom: 1px solid transparent;
-  background: var(--techwave-some-a-bg-color);
+  background: var(--goglobe-some-a-bg-color);
   overflow-x: auto;
 }
 pre {
@@ -200,9 +200,9 @@ pre code {
 textarea {
   outline: none;
   font-size: 16px;
-  color: var(--techwave-heading-color);
+  color: var(--goglobe-heading-color);
   resize: vertical;
-  font-family: var(--techwave-heading-font-family);
+  font-family: var(--goglobe-heading-font-family);
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   -ms-box-sizing: border-box;
@@ -211,7 +211,7 @@ textarea {
   padding: 10px;
   width: 100%;
   border-radius: 5px;
-  border: 2px solid var(--techwave-border-color);
+  border: 2px solid var(--goglobe-border-color);
   -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
   -ms-transition: all 0.3s ease;
@@ -236,18 +236,18 @@ input[type="url"],
 input[type="week"] {
   font-size: 16px;
   min-width: 220px;
-  color: var(--techwave-heading-color);
+  color: var(--goglobe-heading-color);
   letter-spacing: 0.5px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   -ms-box-sizing: border-box;
   box-sizing: border-box;
-  font-family: var(--techwave-heading-font-family);
+  font-family: var(--goglobe-heading-font-family);
   line-height: 1.6;
   padding: 10px 20px;
   height: 40px;
   vertical-align: middle;
-  border: 2px solid var(--techwave-border-color);
+  border: 2px solid var(--goglobe-border-color);
   -webkit-transition: all 0.3s ease;
   -moz-transition: all 0.3s ease;
   -ms-transition: all 0.3s ease;
@@ -273,7 +273,7 @@ input[type="time"]:focus,
 input[type="url"]:focus,
 input[type="week"]:focus,
 textarea:focus {
-  border-color: var(--techwave-main-color);
+  border-color: var(--goglobe-main-color);
 }
 input[type="submit"] {
   padding: 13px 15px;
@@ -299,7 +299,7 @@ input[type="submit"]:hover {
 }
 select {
   padding: 8px;
-  border: 2px solid var(--techwave-border-color);
+  border: 2px solid var(--goglobe-border-color);
 }
 input[type="button"] {
   cursor: pointer;
@@ -828,7 +828,7 @@ input[type="button"] {
 .tooltipster-sidetip.tooltipster-punk .tooltipster-box {
   border-radius: 5px;
   border: none;
-  border-bottom: 3px solid var(--techwave-main-color);
+  border-bottom: 3px solid var(--goglobe-main-color);
   background: #2a2a2a;
 }
 .tooltipster-sidetip.tooltipster-punk.tooltipster-top .tooltipster-box {
@@ -855,7 +855,7 @@ input[type="button"] {
 }
 .tooltipster-sidetip.tooltipster-punk.tooltipster-top
   .tooltipster-arrow-border {
-  border-top-color: var(--techwave-main-color);
+  border-top-color: var(--goglobe-main-color);
 }
 
 .tooltipster-sidetip.tooltipster-shadow .tooltipster-box {

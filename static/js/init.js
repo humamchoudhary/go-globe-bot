@@ -11,22 +11,22 @@ $.fn.frenifyMoveCursorToEnd = function () {
   this.val("").val($thisVal);
   return this;
 };
-var FrenifyTechWaveTime = new Date();
+var FrenifyGoGlobeTime = new Date();
 
 (function ($) {
   "use strict";
 
-  var TechwaveSelectedCount = 0;
+  var GoGlobeSelectedCount = 0;
 
-  var TechwaveFeedFilterLoading = false;
-  var TechwaveModelFilterLoading = false;
+  var GoGlobeFeedFilterLoading = false;
+  var GoGlobeModelFilterLoading = false;
 
-  var TechwaveInputText = "";
-  var TechwaveUserQuestion = "";
+  var GoGlobeInputText = "";
+  var GoGlobeUserQuestion = "";
 
-  var TechwaveUserMessageCount = 0;
+  var GoGlobeUserMessageCount = 0;
 
-  var FrenifyTechWave = {
+  var FrenifyGoGlobe = {
     init: function () {
       this.marquee();
       this.tooltip();
@@ -86,7 +86,7 @@ var FrenifyTechWaveTime = new Date();
 
     popupMobile: function () {
       if (window.matchMedia("(max-width: 767px)").matches) {
-        var wrapperW = $(".techwave_fn_wrapper").width();
+        var wrapperW = $(".goglobe_fn_wrapper").width();
         var padding = 10;
         var maxWidth = 300;
         $(".item__popup,.fn__nav_bar .item_popup").each(function () {
@@ -135,7 +135,7 @@ var FrenifyTechWaveTime = new Date();
           animationDuration: 0,
           animation: "fade", // 'fade', 'grow', 'swing', 'slide', 'fall'
           delay: 0,
-          theme: "tooltipster-techwave",
+          theme: "tooltipster-goglobe",
           side: position,
         };
         if (element.hasClass("menu__item")) {
@@ -149,7 +149,7 @@ var FrenifyTechWaveTime = new Date();
       });
       //			$( ".fn__tooltip" ).each(function(){
       //				$(this).tooltipster({
-      //					theme: 'tooltipster-techwave',
+      //					theme: 'tooltipster-goglobe',
       //					animation: 'fade', // 'fade', 'grow', 'swing', 'slide', 'fall'
       //					side: 'bottom',
       //					maxWidth: 300,
@@ -161,7 +161,7 @@ var FrenifyTechWaveTime = new Date();
     },
 
     fontDialog: function () {
-      var dialog = $(".techwave_fn_font");
+      var dialog = $(".goglobe_fn_font");
       $(".font__trigger")
         .off()
         .on("click", function () {
@@ -191,7 +191,7 @@ var FrenifyTechWaveTime = new Date();
           $("body").append(
             '<style type="text/css" class="fn__chat_font_size_style">frenify_typing h3,.fn__chatbot .chat{font-size: ' +
               $("#font_size").find(":selected").val() +
-              "px;}</style>",
+              "px;}</style>"
           );
           dialog.removeClass("opened");
           return false;
@@ -200,15 +200,15 @@ var FrenifyTechWaveTime = new Date();
 
     modelTabs: function () {
       // tab filter
-      $(".techwave_fn_models .fn__tabs a")
+      $(".goglobe_fn_models .fn__tabs a")
         .off()
         .on("click", function () {
           var element = $(this);
-          if (!element.hasClass("active") && !TechwaveModelFilterLoading) {
-            TechwaveModelFilterLoading = true;
+          if (!element.hasClass("active") && !GoGlobeModelFilterLoading) {
+            GoGlobeModelFilterLoading = true;
             element.siblings().removeClass("active");
             element.addClass("active");
-            var parent = element.closest(".techwave_fn_models");
+            var parent = element.closest(".goglobe_fn_models");
             parent.find(".models__results").addClass("loading");
 
             // do your ajax here
@@ -222,7 +222,7 @@ var FrenifyTechWaveTime = new Date();
               parent.find(".models__results").removeClass("loading");
               parent.find(".tab__item.active").removeClass("active");
               $(element.attr("href")).addClass("active");
-              TechwaveModelFilterLoading = false;
+              GoGlobeModelFilterLoading = false;
             }, 1500);
           }
           return false;
@@ -266,7 +266,7 @@ var FrenifyTechWaveTime = new Date();
                   .slideUp(500);
               } else {
                 $(".fn_contact_form .returnmessage").append(
-                  "<span class='contact_success'>" + success + "</span>",
+                  "<span class='contact_success'>" + success + "</span>"
                 );
                 $(".fn_contact_form .returnmessage")
                   .slideDown(500)
@@ -277,7 +277,7 @@ var FrenifyTechWaveTime = new Date();
               if (data === "") {
                 $("#fn_contact_form")[0].reset(); //To reset form fields on success
               }
-            },
+            }
           );
         }
         return false;
@@ -287,18 +287,18 @@ var FrenifyTechWaveTime = new Date();
     negativePrompt: function () {
       $("#negative_prompt").on("change", function () {
         if (this.checked) {
-          $(".techwave_fn_image_generation_page .exclude_area").slideDown(200);
+          $(".goglobe_fn_image_generation_page .exclude_area").slideDown(200);
         } else {
-          $(".techwave_fn_image_generation_page .exclude_area").slideUp(200);
+          $(".goglobe_fn_image_generation_page .exclude_area").slideUp(200);
         }
       });
     },
 
     imageGenerationSidebar: function () {
-      $(".techwave_fn_image_generation_page .sidebar__trigger")
+      $(".goglobe_fn_image_generation_page .sidebar__trigger")
         .off()
         .on("click", function () {
-          $(".techwave_fn_wrapper").toggleClass("fn__has_sidebar");
+          $(".goglobe_fn_wrapper").toggleClass("fn__has_sidebar");
           return false;
         });
     },
@@ -373,19 +373,19 @@ var FrenifyTechWaveTime = new Date();
     },
 
     anchor: function () {
-      $(".techwave_fn_doc_page .docsidebar li.menu-item-has-children > a")
+      $(".goglobe_fn_doc_page .docsidebar li.menu-item-has-children > a")
         .off()
         .on("click", function () {
           $(this).siblings("ul").slideToggle();
           return false;
         });
       if ($().onePageNav) {
-        $(".techwave_fn_doc_page .docsidebar > ul").onePageNav();
+        $(".goglobe_fn_doc_page .docsidebar > ul").onePageNav();
       }
     },
 
     // aiChatBot__chat: function () {
-    //   if ($("#fn__chat_textarea").length && !$(".techwave_fn_intro").length) {
+    //   if ($("#fn__chat_textarea").length && !$(".goglobe_fn_intro").length) {
     //     $("#fn__chat_textarea").focus();
     //   }
     //   $("#fn__chat_textarea").keypress(function (e) {
@@ -406,7 +406,7 @@ var FrenifyTechWaveTime = new Date();
     //         return;
     //       } else {
     //         text = text.replace(/\n\r?/g, "<br />");
-    //         TechwaveUserQuestion = text;
+    //         GoGlobeUserQuestion = text;
     //         var activeChatItem = $(".fn__chatbot .chat__item.active");
     //         var newText =
     //           '<div class="chat__box your__chat"><div class="author"><span>You</span></div><div class="chat"><p>' +
@@ -439,16 +439,16 @@ var FrenifyTechWaveTime = new Date();
     //                 "</ul></div>",
     //             );
     //           }
-    //           FrenifyTechWave.imgToSVG();
-    //           FrenifyTechWave.aiChatBotOptions();
+    //           FrenifyGoGlobe.imgToSVG();
+    //           FrenifyGoGlobe.aiChatBotOptions();
     //         } else {
     //           activeChatItem.append(newText);
     //         }
     //         textarea.val("");
     //         textarea.siblings(".fn__hidden_textarea").val("");
-    //         FrenifyTechWave.aiChatBotTextareaHeight();
+    //         FrenifyGoGlobe.aiChatBotTextareaHeight();
     //
-    //         if ($(".techwave_fn_intro").length) {
+    //         if ($(".goglobe_fn_intro").length) {
     //           $("html, body").animate({
     //             scrollTop: textarea.offset().top - $(window).height() + 100,
     //           });
@@ -463,7 +463,7 @@ var FrenifyTechWaveTime = new Date();
     //       // do your ajax here to answer the chat via AI
     //
     //       // you can remove frenify chat bot here
-    //       //				FrenifyTechWave.frenifyChat();
+    //       //				FrenifyGoGlobe.frenifyChat();
     //
     //       // don't remove this
     //       return false;
@@ -474,8 +474,8 @@ var FrenifyTechWaveTime = new Date();
       var append = true;
       var commands = "";
 
-      TechwaveUserMessageCount = $(
-        ".fn__chatbot .chat__item.active .chat__box",
+      GoGlobeUserMessageCount = $(
+        ".fn__chatbot .chat__item.active .chat__box"
       ).length;
 
       // all avaliable commands
@@ -506,23 +506,23 @@ var FrenifyTechWaveTime = new Date();
         },
         doc: {
           type: "url",
-          description: "visit online documentation for TechWave HTML template",
+          description: "visit online documentation for GoGlobe HTML template",
           append: false,
-          url: "https://frenify.com/work/envato/frenify/html/techwave/doc",
+          url: "https://frenify.com/work/envato/frenify/html/goglobe/doc",
         },
         support: {
           type: "url",
           description:
-            "if you have any questions regarding TechWave HTML template feel free and contact us by this command",
+            "if you have any questions regarding GoGlobe HTML template feel free and contact us by this command",
           append: false,
-          url: "https://themeforest.net/item/techwave-ai-html-dashboard-for-image-generation-chat-bot/46197058/support/contact",
+          url: "https://themeforest.net/item/goglobe-ai-html-dashboard-for-image-generation-chat-bot/46197058/support/contact",
         },
         purchase: {
           type: "url",
           description:
             "open the template description page on themeforest to purchase it",
           append: false,
-          url: "https://themeforest.net/item/techwave-ai-html-dashboard-for-image-generation-chat-bot/46197058",
+          url: "https://themeforest.net/item/goglobe-ai-html-dashboard-for-image-generation-chat-bot/46197058",
         },
         youtube: {
           type: "url",
@@ -834,11 +834,11 @@ var FrenifyTechWaveTime = new Date();
 
       // answer
       var unknownCommand = false;
-      if (TechwaveUserMessageCount === 1) {
+      if (GoGlobeUserMessageCount === 1) {
         botText = welcomeText;
       } else {
-        if (TechwaveUserQuestion.slice(0, 1) === "/") {
-          var question = TechwaveUserQuestion.substring(1);
+        if (GoGlobeUserQuestion.slice(0, 1) === "/") {
+          var question = GoGlobeUserQuestion.substring(1);
           var regex = /pass \d/i;
           var countpass = 15;
           if (regex.test(question)) {
@@ -869,10 +869,10 @@ var FrenifyTechWaveTime = new Date();
               }
               for (var i = 0; i < countpass; i++) {
                 password += possible.charAt(
-                  Math.floor(Math.random() * possible.length),
+                  Math.floor(Math.random() * possible.length)
                 );
               }
-              password = FrenifyTechWave.escapeHTML(password);
+              password = FrenifyGoGlobe.escapeHTML(password);
               botText += "<frenify_uselect>" + password + "</frenify_uselect>";
             } else if (type === "time") {
               var dt = new Date();
@@ -886,7 +886,7 @@ var FrenifyTechWaveTime = new Date();
               $(".fn__chatbot .chat__item.active").html("");
             } else if (type === "joke") {
               if (countjoke > 1) {
-                var shuffled = FrenifyTechWave.shuffleArray(allJokes);
+                var shuffled = FrenifyGoGlobe.shuffleArray(allJokes);
                 var selected = shuffled.slice(0, countjoke);
                 botText = "<ul>";
                 if (countjoke >= 1 && countjoke <= allJokes.length) {
@@ -911,7 +911,7 @@ var FrenifyTechWaveTime = new Date();
       }
       if (unknownCommand) {
         botText =
-          '<p>I only understand some commands. Of course, this is a fixable problem. Buy this template and implement AI and that\'s it. Go to the template site where you can buy? Visit item\'s website: <a href="https://themeforest.net/user/frenify/portfolio" target="_blank">TechWave</a></p><p>Write <frenify_main>/commands</frenify_main> to list all available commands.';
+          '<p>I only understand some commands. Of course, this is a fixable problem. Buy this template and implement AI and that\'s it. Go to the template site where you can buy? Visit item\'s website: <a href="https://themeforest.net/user/frenify/portfolio" target="_blank">GoGlobe</a></p><p>Write <frenify_main>/commands</frenify_main> to list all available commands.';
       }
 
       // answer to question
@@ -919,9 +919,9 @@ var FrenifyTechWaveTime = new Date();
         $(".fn__chat_comment button").addClass("disabled");
         setTimeout(function () {
           $(".fn__chatbot .chat__item.active").append(
-            '<div class="chat__box bot__chat"><div class="author"><span>Frenify Bot</span></div><div class="chat"><frenify_typing><h3><span>Typing...</frenify></h3></div></div>',
+            '<div class="chat__box bot__chat"><div class="author"><span>Frenify Bot</span></div><div class="chat"><frenify_typing><h3><span>Typing...</frenify></h3></div></div>'
           );
-          if ($(".techwave_fn_intro").length) {
+          if ($(".goglobe_fn_intro").length) {
             $("html, body").animate({
               scrollTop:
                 $("#fn__chat_textarea").offset().top - $(window).height() + 100,
@@ -934,10 +934,10 @@ var FrenifyTechWaveTime = new Date();
         }, 100);
         setTimeout(function () {
           $(
-            ".fn__chatbot .chat__item.active .chat__box.bot__chat:last-child .chat",
+            ".fn__chatbot .chat__item.active .chat__box.bot__chat:last-child .chat"
           ).html(botText);
           $(".fn__chat_comment button").removeClass("disabled");
-          if ($(".techwave_fn_intro").length) {
+          if ($(".goglobe_fn_intro").length) {
             $("html, body").animate({
               scrollTop:
                 $("#fn__chat_textarea").offset().top - $(window).height() + 100,
@@ -992,13 +992,13 @@ var FrenifyTechWaveTime = new Date();
             $(".fn__chatbot .chat__item.active").removeClass("active");
             element.addClass("active");
             $(element.attr("href")).addClass("active");
-            TechwaveUserMessageCount = $(element.attr("href")).find(
-              ".chat__box",
+            GoGlobeUserMessageCount = $(element.attr("href")).find(
+              ".chat__box"
             ).length;
             $(".fn__new_chat_link").removeClass("active");
             $(".fn__chat_comment").removeClass("neww");
             $(".fn__chatbot .fn__title_holder .title").text(
-              element.find(".text").text(),
+              element.find(".text").text()
             );
             if ($(element.attr("href")).html() === "") {
               $(".fn__chat_comment").addClass("neww");
@@ -1016,7 +1016,7 @@ var FrenifyTechWaveTime = new Date();
       //       $(".fn__chatbot .chat__item.active").removeClass("active");
       //       element.addClass("active");
       //       $(element.attr("href")).addClass("active");
-      //       TechwaveUserMessageCount = 0;
+      //       GoGlobeUserMessageCount = 0;
       //       $(".fn__chatbot .fn__title_holder .title").text("New Chat");
       //     }
       //     $(".fn__chat_comment").addClass("neww");
@@ -1048,7 +1048,7 @@ var FrenifyTechWaveTime = new Date();
             parent = element.closest(".fn__chat_link"),
             input = parent.find("input");
           parent.addClass("live_edit").removeClass("opened");
-          TechwaveInputText = input.val();
+          GoGlobeInputText = input.val();
           setTimeout(function () {
             input.frenifyMoveCursorToEnd();
           }, 100);
@@ -1062,7 +1062,7 @@ var FrenifyTechWaveTime = new Date();
             parent = e.closest(".fn__chat_link"),
             input = parent.find("input");
           parent.removeClass("live_edit");
-          input.val(TechwaveInputText);
+          input.val(GoGlobeInputText);
           return false;
         });
 
@@ -1074,8 +1074,8 @@ var FrenifyTechWaveTime = new Date();
             input = parent.find("input");
           // do your ajax here
           parent.removeClass("live_edit");
-          TechwaveInputText = input.val();
-          parent.find(".text").text(TechwaveInputText);
+          GoGlobeInputText = input.val();
+          parent.find(".text").text(GoGlobeInputText);
           return false;
         });
 
@@ -1143,7 +1143,7 @@ var FrenifyTechWaveTime = new Date();
     },
 
     billingProgress: function () {
-      $(".techwave_fn_user_billing .progress").each(function () {
+      $(".goglobe_fn_user_billing .progress").each(function () {
         var element = $(this);
         element.waypoint({
           handler: function () {
@@ -1199,7 +1199,7 @@ var FrenifyTechWaveTime = new Date();
     },
 
     pricingTab: function () {
-      $(".techwave_fn_pricing .toggle_in").each(function () {
+      $(".goglobe_fn_pricing .toggle_in").each(function () {
         var element = $(this),
           active = element.find(".active");
         var offset = active.offset().left - element.offset().left;
@@ -1207,13 +1207,13 @@ var FrenifyTechWaveTime = new Date();
           .find(".bg")
           .css({ left: offset, width: active.outerWidth(true, true) });
       });
-      $(".techwave_fn_pricing .toggle_in a")
+      $(".goglobe_fn_pricing .toggle_in a")
         .off()
         .on("click", function () {
           var element = $(this);
           if (!element.hasClass("active")) {
             var parent = element.closest(".toggle_in");
-            var pricing = element.closest(".techwave_fn_pricing");
+            var pricing = element.closest(".goglobe_fn_pricing");
             var offset = element.offset().left - parent.offset().left;
             pricing.find(".pricing__tab.active").removeClass("active");
             $(element.attr("href")).addClass("active");
@@ -1229,11 +1229,11 @@ var FrenifyTechWaveTime = new Date();
 
     feedFilters: function () {
       // Enable/disable selecting items
-      $('.techwave_fn_feed .filter__select input[type="checkbox"]').change(
+      $('.goglobe_fn_feed .filter__select input[type="checkbox"]').change(
         function () {
           var element = $(this);
           var checked = element.is(":checked");
-          var feed = element.closest(".techwave_fn_feed");
+          var feed = element.closest(".goglobe_fn_feed");
           var items = feed.find(".fn__gallery_items .item");
           if (checked) {
             items.addClass("select__ready");
@@ -1242,7 +1242,7 @@ var FrenifyTechWaveTime = new Date();
             items.removeClass("select__ready");
             feed.find(".fn__selection_box").slideUp(200);
           }
-        },
+        }
       );
 
       // select/deselect items
@@ -1250,27 +1250,27 @@ var FrenifyTechWaveTime = new Date();
         .off()
         .on("click", function () {
           var element = $(this),
-            page = element.closest(".techwave_fn_community_page"),
+            page = element.closest(".goglobe_fn_community_page"),
             items = page.find(".fn__gallery_items .item");
           if (element.hasClass("selected")) {
             element.removeClass("selected");
-            TechwaveSelectedCount--;
+            GoGlobeSelectedCount--;
           } else {
             element.addClass("selected");
-            TechwaveSelectedCount++;
+            GoGlobeSelectedCount++;
           }
-          page.find(".fn__selection_box .count").text(TechwaveSelectedCount);
+          page.find(".fn__selection_box .count").text(GoGlobeSelectedCount);
           return false;
         });
 
       // tab filter
-      $(".techwave_fn_feed .fn__tabs a").on("click", function () {
+      $(".goglobe_fn_feed .fn__tabs a").on("click", function () {
         var element = $(this);
-        if (!element.hasClass("active") && !TechwaveFeedFilterLoading) {
-          TechwaveFeedFilterLoading = true;
+        if (!element.hasClass("active") && !GoGlobeFeedFilterLoading) {
+          GoGlobeFeedFilterLoading = true;
           element.siblings().removeClass("active");
           element.addClass("active");
-          var feed = element.closest(".techwave_fn_feed");
+          var feed = element.closest(".goglobe_fn_feed");
           feed.find(".feed__results").addClass("loading");
 
           // do your ajax here
@@ -1282,21 +1282,21 @@ var FrenifyTechWaveTime = new Date();
           setTimeout(function () {
             // here you have to insert your feeds into the filter's content and feed content
             feed.find(".feed__results").removeClass("loading");
-            TechwaveFeedFilterLoading = false;
-            FrenifyTechWave.galleryIsotope();
+            GoGlobeFeedFilterLoading = false;
+            FrenifyGoGlobe.galleryIsotope();
           }, 1500);
         }
         return false;
       });
 
       // Trending&New Filter
-      $(".techwave_fn_feed .filter__sorting a").on("click", function () {
+      $(".goglobe_fn_feed .filter__sorting a").on("click", function () {
         var element = $(this);
-        if (!element.hasClass("enabled") && !TechwaveFeedFilterLoading) {
-          TechwaveFeedFilterLoading = true;
+        if (!element.hasClass("enabled") && !GoGlobeFeedFilterLoading) {
+          GoGlobeFeedFilterLoading = true;
           element.siblings().removeClass("enabled").addClass("disabled");
           element.removeClass("disabled").addClass("enabled");
-          var feed = element.closest(".techwave_fn_feed");
+          var feed = element.closest(".goglobe_fn_feed");
           feed.find(".feed__results").addClass("loading");
 
           // do your ajax here
@@ -1308,7 +1308,7 @@ var FrenifyTechWaveTime = new Date();
           setTimeout(function () {
             // here you have to insert new feeds into the results' content
             feed.find(".feed__results").removeClass("loading");
-            TechwaveFeedFilterLoading = false;
+            GoGlobeFeedFilterLoading = false;
           }, 1500);
         }
 
@@ -1316,11 +1316,11 @@ var FrenifyTechWaveTime = new Date();
       });
 
       // Upscaled Filter
-      $('.techwave_fn_feed .filter__upscaled input[type="checkbox"]').change(
+      $('.goglobe_fn_feed .filter__upscaled input[type="checkbox"]').change(
         function () {
           var element = $(this);
           var checked = element.is(":checked");
-          var feed = element.closest(".techwave_fn_feed");
+          var feed = element.closest(".goglobe_fn_feed");
           feed.find(".feed__results").addClass("loading");
 
           // do your ajax here
@@ -1333,13 +1333,13 @@ var FrenifyTechWaveTime = new Date();
             // here you have to insert new feeds into the results' content
             feed.find(".feed__results").removeClass("loading");
           }, 1500);
-        },
+        }
       );
 
       // search filter
-      $(".techwave_fn_feed .filter__search a").on("click", function () {
-        if (!TechwaveFeedFilterLoading) {
-          var feed = $(this).closest(".techwave_fn_feed");
+      $(".goglobe_fn_feed .filter__search a").on("click", function () {
+        if (!GoGlobeFeedFilterLoading) {
+          var feed = $(this).closest(".goglobe_fn_feed");
           feed.find(".feed__results").addClass("loading");
 
           // do your ajax here
@@ -1351,7 +1351,7 @@ var FrenifyTechWaveTime = new Date();
           setTimeout(function () {
             // here you have to insert new feeds into the results' content
             feed.find(".feed__results").removeClass("loading");
-            TechwaveFeedFilterLoading = false;
+            GoGlobeFeedFilterLoading = false;
           }, 1500);
         }
 
@@ -1360,7 +1360,7 @@ var FrenifyTechWaveTime = new Date();
     },
 
     report: function () {
-      var reportbox = $(".techwave_fn_report");
+      var reportbox = $(".goglobe_fn_report");
       $(".fn__report")
         .off()
         .on("click", function () {
@@ -1467,9 +1467,10 @@ var FrenifyTechWaveTime = new Date();
           if (!element.hasClass("select__ready")) {
             lightbox.scrollTop(0);
             // with this id you can create ajax to call this image into the lightbox
-            scrollY = document.documentElement.style.getPropertyValue(
-              "--techwave-scroll-y",
-            );
+            scrollY =
+              document.documentElement.style.getPropertyValue(
+                "--goglobe-scroll-y"
+              );
             body.css({ position: "fixed", top: scrollY });
 
             body.addClass("fn__lightbox_mode");
@@ -1478,7 +1479,7 @@ var FrenifyTechWaveTime = new Date();
 
           return false;
         });
-      var lightbox = $(".techwave_fn_img_lightbox");
+      var lightbox = $(".goglobe_fn_img_lightbox");
 
       lightbox
         .find(".fn__closer")
@@ -1489,7 +1490,7 @@ var FrenifyTechWaveTime = new Date();
           body.css({ position: "relative", top: "" });
           setTimeout(function () {
             window.scrollTo({ top: 300, left: 0, behavior: "instant" });
-            FrenifyTechWave.galleryIsotope();
+            FrenifyGoGlobe.galleryIsotope();
           }, 1);
         });
     },
@@ -1529,13 +1530,13 @@ var FrenifyTechWaveTime = new Date();
     },
 
     accordion: function () {
-      $(".techwave_fn_accordion").each(function () {
+      $(".goglobe_fn_accordion").each(function () {
         $(this).find(".opened .acc__content").slideDown(300);
       });
-      $(".techwave_fn_accordion .acc__header").on("click", function () {
+      $(".goglobe_fn_accordion .acc__header").on("click", function () {
         var element = $(this),
           parent = element.closest(".acc__item"),
-          accordion = element.closest(".techwave_fn_accordion"),
+          accordion = element.closest(".goglobe_fn_accordion"),
           content = parent.find(".acc__content"),
           type = accordion.data("type");
         if (parent.hasClass("opened")) {
@@ -1553,7 +1554,7 @@ var FrenifyTechWaveTime = new Date();
     },
 
     search: function () {
-      var searchBar = $(".techwave_fn_searchbar");
+      var searchBar = $(".goglobe_fn_searchbar");
       var input = searchBar.find(".search__input");
       var resultsBar = searchBar.find(".search__results");
       var searchOpener = $(".fn__nav_bar .bar__item_search .item_opener");
@@ -1632,9 +1633,9 @@ var FrenifyTechWaveTime = new Date();
     },
 
     movingSubMenuForLeftPanel: function () {
-      var fixedsub = $(".techwave_fn_fixedsub");
-      var li = $(".techwave_fn_leftpanel .group__list > li");
-      var rightpart = $(".techwave_fn_content");
+      var fixedsub = $(".goglobe_fn_fixedsub");
+      var li = $(".goglobe_fn_leftpanel .group__list > li");
+      var rightpart = $(".goglobe_fn_content");
 
       li.on("mouseenter", function () {
         var parentLi = $(this);
@@ -1656,7 +1657,7 @@ var FrenifyTechWaveTime = new Date();
           parentLi.removeClass("hovered").parent().removeClass("hovered");
         }
         var topOffSet = parentLi.offset().top;
-        var menuBar = $(".techwave_fn_leftpanel .leftpanel_content");
+        var menuBar = $(".goglobe_fn_leftpanel .leftpanel_content");
         var menuBarOffSet = menuBar.offset().top;
         var asd = topOffSet - menuBarOffSet;
 
@@ -1674,7 +1675,7 @@ var FrenifyTechWaveTime = new Date();
 
     panelResize: function () {
       var wrapper = $("html");
-      $(".techwave_fn_leftpanel .desktop_closer")
+      $(".goglobe_fn_leftpanel .desktop_closer")
         .off()
         .on("click", function () {
           if (wrapper.hasClass("panel-opened")) {
@@ -1686,7 +1687,7 @@ var FrenifyTechWaveTime = new Date();
           }
           return false;
         });
-      $(".techwave_fn_leftpanel .mobile_closer")
+      $(".goglobe_fn_leftpanel .mobile_closer")
         .off()
         .on("click", function () {
           console.log(wrapper);
@@ -1725,17 +1726,17 @@ var FrenifyTechWaveTime = new Date();
       // light and dark mode
       var darklightSwitcher = $(".fn__nav_bar .bar__item_skin .item_opener");
       darklightSwitcher.off().on("click", function () {
-        if ($("html").attr("data-techwave-skin") == "light") {
-          $("html").attr("data-techwave-skin", "dark");
+        if ($("html").attr("data-goglobe-skin") == "light") {
+          $("html").attr("data-goglobe-skin", "dark");
           localStorage.frenify_skin = "dark";
         } else {
-          $("html").attr("data-techwave-skin", "light");
+          $("html").attr("data-goglobe-skin", "light");
           localStorage.frenify_skin = "light";
         }
 
         // close lightboxes
         $(
-          ".bar__item_user,.bar__item_language,.bar__item_notification",
+          ".bar__item_user,.bar__item_language,.bar__item_notification"
         ).removeClass("opened");
         return false;
       });
@@ -1819,7 +1820,7 @@ var FrenifyTechWaveTime = new Date();
             document.documentElement.mozRequestFullScreen();
           } else if (document.documentElement.webkitRequestFullscreen) {
             document.documentElement.webkitRequestFullscreen(
-              Element.ALLOW_KEYBOARD_INPUT,
+              Element.ALLOW_KEYBOARD_INPUT
             );
           }
         }
@@ -1828,7 +1829,7 @@ var FrenifyTechWaveTime = new Date();
     },
 
     navSubMenu: function () {
-      $(".techwave_fn_leftpanel .menu-item-has-children > a")
+      $(".goglobe_fn_leftpanel .menu-item-has-children > a")
         .off()
         .on("click", function () {
           var e = $(this),
@@ -1845,10 +1846,10 @@ var FrenifyTechWaveTime = new Date();
     },
 
     preloader: function () {
-      var preloader = $(".techwave_fn_preloader");
+      var preloader = $(".goglobe_fn_preloader");
 
       var date2 = new Date();
-      var difference = date2 - FrenifyTechWaveTime;
+      var difference = date2 - FrenifyGoGlobeTime;
       var waitTime = 4000;
       if (difference < waitTime) {
         waitTime -= difference;
@@ -1881,7 +1882,7 @@ var FrenifyTechWaveTime = new Date();
             }
             img.replaceWith(svg);
           },
-          "xml",
+          "xml"
         );
       });
     },
@@ -1901,38 +1902,38 @@ var FrenifyTechWaveTime = new Date();
 
   // READY Functions
   $(document).ready(function () {
-    FrenifyTechWave.init();
-    $(":root").css("--techwave-scroll-y", window.scrollY * -1 + "px");
+    FrenifyGoGlobe.init();
+    $(":root").css("--goglobe-scroll-y", window.scrollY * -1 + "px");
     setTimeout(function () {
-      FrenifyTechWave.galleryIsotope();
+      FrenifyGoGlobe.galleryIsotope();
     }, 500);
   });
 
   // RESIZE Functions
   $(window).on("resize", function () {
-    FrenifyTechWave.popupMobile();
-    FrenifyTechWave.redetectFullScreen();
-    FrenifyTechWave.galleryIsotope();
+    FrenifyGoGlobe.popupMobile();
+    FrenifyGoGlobe.redetectFullScreen();
+    FrenifyGoGlobe.galleryIsotope();
   });
 
   //	$(window).load( function(){
-  //		FrenifyTechWave.preloader();
-  //		FrenifyTechWave.galleryIsotope();
+  //		FrenifyGoGlobe.preloader();
+  //		FrenifyGoGlobe.galleryIsotope();
   //		setTimeout(function(){
-  //			FrenifyTechWave.galleryIsotope();
+  //			FrenifyGoGlobe.galleryIsotope();
   //		},1000);
   //	});
 
   // LOAD Functions
   $(window).on("load", function () {
-    FrenifyTechWave.preloader();
-    FrenifyTechWave.galleryIsotope();
+    FrenifyGoGlobe.preloader();
+    FrenifyGoGlobe.galleryIsotope();
     setTimeout(function () {
-      FrenifyTechWave.galleryIsotope();
+      FrenifyGoGlobe.galleryIsotope();
     }, 1000);
   });
 
   $(window).on("scroll", function () {
-    $(":root").css("--techwave-scroll-y", window.scrollY * -1 + "px");
+    $(":root").css("--goglobe-scroll-y", window.scrollY * -1 + "px");
   });
 })(jQuery);
