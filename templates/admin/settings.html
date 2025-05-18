@@ -247,10 +247,17 @@
           "
         >
           <h2 style="font-size: 26px">API Keys</h2>
-          {% set api_type = 'gemini' %} {% include
-          'admin/fragments/api-components.html' %} {% set api_type = 'openAi' %}
-          {% include 'admin/fragments/api-components.html' %} {% set api_type =
+          {% set api_type = 'gemini' %} 
+          {% include
+          'admin/fragments/api-components.html' %} 
+          {% set api_type = 'openAi' %}
+          {% include 'admin/fragments/api-components.html' %} 
+          {% set api_type =
           'claude' %} {% include 'admin/fragments/api-components.html' %}
+
+ {% set api_type =
+          'deepseek' %} {% include 'admin/fragments/api-components.html' %}
+
 
           <p style="margin-top: 2rem">
             Your API keys are stored on runtime and never shared with third
@@ -260,7 +267,7 @@
             <i data-lucide="triangle-alert" class="text-yellow-200"></i>
 
             <p class="">
-              API Keys will be reset to default upon resart of server to
+              API Keys will be reset to default upon restart of server to
               maintain security
             </p>
           </div>
@@ -275,6 +282,10 @@
           "
         >
           <h2 style="font-size: 26px">General Settings</h2>
+          <div class="flex flex-col gap-3">
+              <p>Model Selection</p>
+          </div>
+
           <div
             class="grid grid-cols-1 md:grid-cols-3 items-center justify-center gap-4 h-64 md:h-24 my-6"
           >

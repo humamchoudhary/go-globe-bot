@@ -92,6 +92,8 @@ def create_app(config_class=Config):
         app.config['SETTINGS']["apiKeys"] = {
             'claude': os.environ.get('CLAUDE_KEY', ''),
             'openAi': os.environ.get('OPENAI_KEY', ''),
+
+                'deepseek': os.environ.get('DEEPSEEK_KEY', ''),
             'gemini': os.environ.get('GEMINI_KEY', '')}
     else:
         app.config['SETTINGS'] = {
@@ -104,6 +106,7 @@ def create_app(config_class=Config):
             'apiKeys': {
                 'claude': os.environ.get('CLAUDE_KEY', ''),
                 'openAi': os.environ.get('OPENAI_KEY', ''),
+                'deepseek': os.environ.get('DEEPSEEK_KEY', ''),
                 'gemini': os.environ.get('GEMINI_KEY', '')},
             'theme': 'system',
             'model': 'gemini', 'backend_url': os.environ.get('BACKEND_URL'), "prompt": f"""
