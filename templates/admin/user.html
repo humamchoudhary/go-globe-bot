@@ -8,6 +8,12 @@
     <div class="mb-6">
       <h3 class="text-lg font-medium text-white mb-3">Client info</h3>
       <div id="client-info" class="text-sm text-gray-400">
+
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">
+          Name</p>
+          <p id="client-phone" class="text-white">{{ user.name or "-" }}</p>
+        </div>
         <div class="mb-4">
           <p class="text-gray-500 mb-1">Contact</p>
           <p id="client-phone" class="text-white">{{ user.phone or "-" }}</p>
@@ -26,7 +32,12 @@
         </div>
         <div class="mb-4">
           <p class="text-gray-500 mb-1">Country</p>
-          <p id="client-country" class="text-white">{{ user.loc or "-" }}</p>
+          <p id="client-country" class="text-white">{{ user.country or "-" }}</p>
+        </div>
+
+        <div class="mb-4">
+          <p class="text-gray-500 mb-1">City</p>
+          <p id="client-city" class="text-white">{{ user.city or "-" }}</p>
         </div>
         <div class="mb-4">
           <p class="text-gray-500 mb-1">IP Details</p>
@@ -36,39 +47,4 @@
     </div>
   </div>
 </div>
-<script>
-  //   document.addEventListener('DOMContentLoaded', function () {
-  //       updateClientInfo({{user}})
-  // });
-
-  function updateClientInfo(user) {
-    if (!user) {
-      // Reset to default state if no chat selected
-      document.getElementById("client-phone").textContent =
-        "Select a chat to view details";
-      document.getElementById("client-email").textContent = "-";
-
-      document.getElementById("client-desg").textContent = "-";
-      //  document.getElementById('client-source').textContent = '-';
-      //document.getElementById('client-visit').textContent = '-';
-      document.getElementById("client-country").textContent = "-";
-      document.getElementById("client-ip").textContent = "-";
-      return;
-    }
-
-    // Update client information
-    document.getElementById("client-phone").textContent = user.phone || "-";
-    document.getElementById("client-email").textContent = user.email || "-";
-
-    document.getElementById("client-desg").textContent = user.desg || "-";
-    //  document.getElementById('client-source').textContent = user.source || '-';
-
-    // Format visit details
-    // const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
-    // document.getElementById('client-visit').textContent = visitDetails;
-
-    document.getElementById("client-country").textContent = user.loc || "-";
-    document.getElementById("client-ip").textContent = user.ip || "-";
-  }
-</script>
 {% endblock %}

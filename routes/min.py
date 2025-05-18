@@ -112,7 +112,7 @@ def auth_user():
         user = user_service.create_user(name, ip=user_ip)
     else:
         user = user_service.create_user(
-            name, email=email, phone=phone, ip=user_ip,desg=desg)
+            name, email=email, phone=phone, ip=user_ip, desg=desg)
 
     if not (name or email or phone):
         if not True:  # Replace with your ALLOW_EMPTY_USERS check
@@ -293,6 +293,14 @@ def ping_admin(chat_id):
 
 {current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id}
 
+User Information:
+    Name: {user.name}
+    Email: {user.email}
+    Phone #: {user.phone}
+    Designation: {user.desg}
+    IP: {user.ip}
+    Country: {user.country}
+    City: {user.city}\n\n
 Auto Generated Message"""
 
     SEND_USER = os.environ.get('SMTP_TO')

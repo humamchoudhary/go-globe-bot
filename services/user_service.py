@@ -11,9 +11,11 @@ class UserService:
     def create_user(self, name, desg=None, ip=None, email=None, phone=None, role="user"):
         user_id = str(uuid.uuid4())
 
-        geo = requests.get(f"https://ipapi.co/{ip}/json/")
+        geo = requests.get(f"http://ip-api.com/json/{ip}")
         print(geo)
         geo = geo.json()
+
+        print(geo)
         country = geo.get("country_name", None)
         city = geo.get("city")
         if not country:
@@ -21,10 +23,12 @@ class UserService:
             geo = requests.get(f"https://ipwhois.app/json/{ip}")
             print(geo)
             geo = geo.json()
+            print(geo)
             country = geo.get("country", None)
             city = geo.get("city")
+        print(f"City: {city}, Country: {country}")
         user = User(name=name, email=email, phone=phone,
-                    user_id=user_id, ip=ip, role=role, loc=f"{city},{country}", desg=desg)
+                    user_id=user_id, ip=ip, role=role, city=city, country=country, desg=desg)
         self.users_collection.insert_one(user.to_dict())
         return user
 

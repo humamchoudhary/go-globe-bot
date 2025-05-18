@@ -121,6 +121,7 @@ def get_user_details(user_id):
 
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(user_id)
+    print(user.to_dict())
 
     return jsonify(user.to_dict())
 
