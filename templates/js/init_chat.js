@@ -159,5 +159,12 @@
     });
 
     processChatContentElements();
+
+    setTimeout(() => {
+      const chatContainer = document.getElementById("chat-container");
+      if (chatContainer) {
+        chatContainer.style.display = "flex"; // or "block" depending on your layout needs
+      }
+    }, 4000); // 4000ms = 4 seconds
   });
 })();
