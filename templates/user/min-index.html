@@ -244,12 +244,13 @@
 
      // Fix links in the rendered content
      fixAllLinks(tempDiv);
+       console.log(tempDiv)
 
      const messageHTML = `
        <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
          <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
-         <div class="chat text-lg">
-           <p>${tempDiv.innerHTML}</p>
+         <div class="chat">
+           ${tempDiv.innerHTML}
          </div>
        </div>
      `;
