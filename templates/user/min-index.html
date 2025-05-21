@@ -231,6 +231,9 @@
      });
 
      socket.on('new_message', function(data) {
+
+        const audio = new Audio("{{backend_url}}/static/sounds/message.wav");
+        audio.play();
        appendMessage(data);
      });
    }
