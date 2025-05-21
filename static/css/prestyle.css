@@ -86,8 +86,8 @@
 :root {
   color-scheme: dark;
   --goglobe-site-bg-color: #1a2732;
-  --goglobe-header-bg-color: #001f33;
-  --goglobe-some-r-bg-color: #001f33;
+  --goglobe-header-bg-color: #253239;
+  --goglobe-some-r-bg-color: #253239;
   --goglobe-some-a-bg-color: #1a2732;
   --goglobe-main-color: #ff5800;
   --goglobe-main-color1: #ff5800;
@@ -95,7 +95,7 @@
   --goglobe-heading-color: #c0bcca;
   --goglobe-body-color: #c0bcca;
   --goglobe-border-color: #253239;
-  --goglobe-button-bg-color: #001f33;
+  --goglobe-button-bg-color: #253239;
   --goglobe-hover-color: #fff;
   --goglobe-heading-font-family: "Proxima Nova", sans-serif;
   --goglobe-body-font-family: "Proxima Nova", sans-serif;
