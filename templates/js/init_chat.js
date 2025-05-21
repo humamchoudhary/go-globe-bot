@@ -82,7 +82,9 @@
  <div style="padding: 10px 15px; background-color: var(--goglobe-site-bg-color); color: white; display: flex; justify-content: space-between; align-items: center;">
       <h3 style="color: white; font-size:16px">Welcome, How can we help you?</h3>
       <div style="display: flex; flex-direction: row; gap: 16px; align-items: center;">
-        <div style="cursor: pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">↺</div>
+        <div style="cursor: pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">
+
+<i data-lucide="undo-2"></i>        </div>
         <div id="close-chat" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">×</div>
       </div>
     </div>
