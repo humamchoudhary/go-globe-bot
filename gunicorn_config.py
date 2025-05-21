@@ -12,9 +12,9 @@
 #
 # import multiprocessing
 import os
-port = os.environ.get('SVR_PORT')
-bind = f"0.0.0.0:{port}"
-print(f"Server running at: {bind}")
+# port = os.environ.get('SVR_PORT')
+# bind = f"0.0.0.0:{port}"
+# print(f"Server running at: {bind}")
 
 # Use eventlet or gevent for WebSockets
 worker_class = "eventlet"  # OR "gevent"
