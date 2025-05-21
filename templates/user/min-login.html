@@ -39,6 +39,17 @@
                     </div>
 
                     <div style="margin-bottom: 1rem;">
+                        <input type="text"
+                            style="width: 100%; border-radius: 0.25rem; outline: none;"
+                            class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
+                            id="desg" name="desg" placeholder="Enter your designation" autocapitalize="off"
+                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
+                            onblur="this.style.boxShadow = '';">
+
+                            <p id="desg-error" class="error-text"></p>                    
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
                         <input type="email"
                             style="width: 100%; border-radius: 0.25rem; outline: none;"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
@@ -49,7 +60,7 @@
                         <p id="email-error" class="error-text"></p>
                     </div>
 
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1rem;" class="hidden">
                         <select
                             style="width: 100%; border-radius: 0.25rem; outline: none;"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold !px-6 !py-4 text-white text-bold transition-all duration-200 !bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
@@ -65,15 +76,6 @@
                     </div>
 
 
-                    <div style="margin-bottom: 1rem;">
-                        <input type="text"
-                            style="width: 100%; border-radius: 0.25rem; outline: none;"
-                            class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
-                            id="desg" name="desg" placeholder="Enter your designation" autocapitalize="off"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
-                            onblur="this.style.boxShadow = '';">
-
-<p id="desg-error" class="error-text"></p>                    </div>
 
                     <div style="margin-bottom: 1.5rem;">
                         <input type="tel"
