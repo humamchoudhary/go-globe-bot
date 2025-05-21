@@ -11,8 +11,9 @@
 # loglevel = "info"
 #
 # import multiprocessing
+import os 
 
-bind = "0.0.0.0:5000"
+bind = f"0.0.0.0:{os.environ.get('SVR_PORT')}"
 
 # Use eventlet or gevent for WebSockets
 worker_class = "eventlet"  # OR "gevent"
