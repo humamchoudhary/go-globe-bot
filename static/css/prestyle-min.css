@@ -5541,7 +5541,7 @@ a.fn__like.no_border .fn__svg {
 
 .goglobe_fn_aichatbot_page .chat__page {
   width: 100%;
-  padding-top: 38px;
+  /* padding-top: 38px; */
   display: -webkit-flex;
   display: -moz-flex;
   display: -ms-flex;
