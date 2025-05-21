@@ -10,14 +10,26 @@
     accept="audio/*"
     class="hidden"
   />
+  {% if audio_file %}
+  <i
+    data-lucide="music"
+    class="size-12 mb-4 text-[var(--goglobe-main-color)]"
+  ></i>
+  <p>{{ audio_type | replace('-', ' ') | title }} audio already uploaded</p>
+  <audio controls class="mt-2 w-full max-w-xs">
+    <source src="{{ audio_file }}" type="audio/wav" />
+    Your browser does not support the audio element.
+  </audio>
+  {% else %}
   <i data-lucide="upload" class="size-12 mb-4"></i>
-  <p>Drag and drop your {{ audio_type.replace('-', ' ') }} audio here</p>
+  <p>Drag and drop your {{ audio_type | replace('-', ' ') }} audio here</p>
   <p>MP3 or WAV (recommended)</p>
   <button
     class="mt-6 border px-6 py-3 rounded-md hover:bg-[var(--goglobe-main-color)] duration-200 transition-all hover:cursor-pointer hover:text-[var(--goglobe-site-bg-color)]"
   >
     Select File
   </button>
+  {% endif %}
 </div>
 <script>
   const audioTypes = ["message", "pop-up"];
