@@ -44,7 +44,7 @@
 
   const lightModeScript = document.createElement("script");
   lightModeScript.innerHTML = `
-  document.documentElement.setAttribute("data-goglobe-skin", "light");
+  document.documentElement.setAttribute("data-goglobe-skin", "dark");
   if (localStorage.frenify_panel && localStorage.frenify_panel !== "") {
     document.documentElement.classList.add(localStorage.frenify_panel);
   }

@@ -101,6 +101,7 @@
   --goglobe-body-font-family: "Proxima Nova", sans-serif;
   --goglobe-left-panel-width: 250px;
   --goglobe-header-height: 80px;
+  --goglobe-input-color: #475864;
 }
 
 *::-webkit-scrollbar {
@@ -225,21 +226,22 @@ select:focus {
   border-color: var(--goglobe-main-color);
 }
 
-select {
-  display: block;
-  height: 40px;
-  width: 100%;
-  padding: 0 14px;
-  background-color: var(--goglobe-some-a-bg-color);
-  border: 2px solid var(--goglobe-border-color);
-  border-radius: 5px;
-  outline: none;
-  color: var(--goglobe-heading-color);
-  font-family: var(--goglobe-heading-font-family);
-  font-size: 16px;
-  position: relative;
-  line-height: 40px;
-}
+/* select { */
+/*   display: block; */
+/*   /* height: 40px; */
+*/
+/*   /* width: 100%; */ */
+/*   /* padding: 0 14px; */ */
+/*   /* background-color: var(--goglobe-some-a-bg-color); */ */
+/*   /* border: 2px solid var(--goglobe-border-color); */ */
+/*   border-radius: 5px; */
+/*   outline: none; */
+/*   color: var(--goglobe-heading-color); */
+/*   font-family: var(--goglobe-heading-font-family); */
+/*   font-size: 16px; */
+/*   position: relative; */
+/*   line-height: 40px; */
+/* } */
 
 hr {
   outline: none;
@@ -459,9 +461,11 @@ frenify_typing span {
   overflow: hidden;
   border-right: 2px solid var(--goglobe-main-color);
   white-space: nowrap;
-  -webkit-animation: frenify_typing_animation 1s steps(150, end),
+  -webkit-animation:
+    frenify_typing_animation 1s steps(150, end),
     frenify_blink_caret 0.5s step-end infinite;
-  animation: frenify_typing_animation 1s steps(150, end),
+  animation:
+    frenify_typing_animation 1s steps(150, end),
     frenify_blink_caret 0.5s step-end infinite;
 }
 
@@ -766,7 +770,9 @@ frenify_typing span {
       var(--goglobe-main-color2)
     )
     border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
   -webkit-mask-composite: source-out;
   mask-composite: exclude;
@@ -6789,7 +6795,9 @@ a.fn__like.no_border .fn__svg {
   border-radius: 20px;
   border: 2px solid transparent;
 
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
   -webkit-mask-composite: source-out;
   mask-composite: exclude;
@@ -7268,7 +7276,9 @@ a.fn__like.no_border .fn__svg {
       var(--goglobe-main-color2)
     )
     border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
   -webkit-mask-composite: source-out;
   mask-composite: exclude;

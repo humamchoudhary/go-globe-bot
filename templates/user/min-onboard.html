@@ -6,7 +6,7 @@
     style="
       min-height: 100%;
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
       padding-bottom: 2.5rem;
     "
   >
@@ -18,7 +18,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        align-items: flex-end;
+        align-items: flex-start;
         justify-content: flex-end;
         gap: 0.5rem;
       "
@@ -28,22 +28,17 @@
       <a
         style="
           font-family: var(--goglobe-body-font-family) !important;
-          font-size: 14px !important;
-          padding: 5px 10px;
-          border-top-left-radius: 1.5rem;
-          border-top-right-radius: 1.5rem;
-          border-bottom-left-radius: 1.5rem;
+          font-size: 18px !important;
+          padding: 12px 24px;
+          border-radius:6px;
           font-size: 1.5rem;
           border: 2px solid var(--goglobe-border-color);
           transition-duration: 150ms;
           transition-property: all;
           cursor: pointer;
-        "
+        " class="font-bold bg-[var(--goglobe-main-color)] text-white"
         href="/min/login/{{subject}}"
-        onmouseover="this.style.borderColor='var(--goglobe-main-color)'; this.style.backgroundColor='rgba(255, 88, 0, 0.5)';"
-        onmouseout="this.style.borderColor='var(--goglobe-border-color)'; this.style.backgroundColor='';"
-        onmousedown="this.style.color='white'; this.style.backgroundColor='var(--goglobe-main-color)';"
-        onmouseup="this.style.color=''; this.style.backgroundColor='';"
+
       >
         {{subject}}
       </a>

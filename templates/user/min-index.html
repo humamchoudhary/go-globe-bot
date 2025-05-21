@@ -45,13 +45,14 @@
             style="min-height: 0px; margin-bottom: 0px"
             onkeyup="handleKeyPress(event); checkInputValue();"
           ></textarea>
-          <button id="send-btn" onclick="sendMessage()">
+          <button id="send-btn" class='!bg-[var(--goglobe-main-color)]' onclick="sendMessage()">
             <img
               src="{{ settings['backend_url'] }}{{ url_for('static', filename='svg/enter.svg') }}"
               alt=""
-              class="fn__svg"
+              class="fn__svg invert"
               style="color: #fff"
             />
+            <!-- <i class="color-white size-6 z-100" data-lucide="corner-down-left" ></i> -->
           </button>
         </div>
         <div
@@ -247,7 +248,7 @@
      const messageHTML = `
        <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
          <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
-         <div class="chat">
+         <div class="chat text-lg">
            <p>${tempDiv.innerHTML}</p>
          </div>
        </div>
