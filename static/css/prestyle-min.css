@@ -84,7 +84,7 @@
 /*	01) ROOT
 /*------------------------------------------------------------------*/
 :root {
-  color-scheme: dark;
+  /* color-scheme: dark; */
   --goglobe-site-bg-color: #001523;
   --goglobe-header-bg-color: #001f33;
   --goglobe-some-r-bg-color: #001f33;
@@ -119,23 +119,23 @@
   }
 }
 
-[data-goglobe-skin="light"]:root {
-  color-scheme: light;
-  --goglobe-site-bg-color: #fff;
-  --goglobe-header-bg-color: #f5f5f5;
-  --goglobe-some-r-bg-color: #f5f5f5;
-  --goglobe-some-a-bg-color: #e7e7e7;
-  --goglobe-main-color: #ff5800;
-  --goglobe-main-color1: #ff5800;
-  --goglobe-main-color2: #ff5800;
-  --goglobe-heading-color: #333;
-  --goglobe-body-color: #444;
-  --goglobe-border-color: #ddd;
-
-  --goglobe-hover-color: #ddd;
-  --goglobe-button-bg-color: #f5f5f5;
-  --goglobe-hover-color: #000;
-}
+/* [data-goglobe-skin="light"]:root { */
+/*   color-scheme: light; */
+/*   --goglobe-site-bg-color: #fff; */
+/*   --goglobe-header-bg-color: #f5f5f5; */
+/*   --goglobe-some-r-bg-color: #f5f5f5; */
+/*   --goglobe-some-a-bg-color: #e7e7e7; */
+/*   --goglobe-main-color: #ff5800; */
+/*   --goglobe-main-color1: #ff5800; */
+/*   --goglobe-main-color2: #ff5800; */
+/*   --goglobe-heading-color: #333; */
+/*   --goglobe-body-color: #444; */
+/*   --goglobe-border-color: #ddd; */
+/**/
+/*   --goglobe-hover-color: #ddd; */
+/*   --goglobe-button-bg-color: #f5f5f5; */
+/*   --goglobe-hover-color: #000; */
+/* } */
 
 /*------------------------------------------------------------------*/
 /*	02) Base
