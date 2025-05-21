@@ -232,8 +232,6 @@
 
      socket.on('new_message', function(data) {
 
-        const audio = new Audio("{{backend_url}}/static/sounds/message.wav");
-        audio.play();
        appendMessage(data);
      });
    }
@@ -248,6 +246,11 @@
      // Fix links in the rendered content
      fixAllLinks(tempDiv);
        console.log(tempDiv)
+       if(message.sender !== '{{username}}'){
+
+        const audio = new Audio("{{backend_url}}/static/sounds/message.wav");
+        audio.play();
+       }
 
      const messageHTML = `
        <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
