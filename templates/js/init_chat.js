@@ -167,6 +167,9 @@
       const chatContainer = document.getElementById("chat-container");
       if (chatContainer) {
         chatContainer.style.display = "flex"; // or "block" depending on your layout needs
+
+        const audio = new Audio("{{backend_url}/pop-up.wav");
+        audio.play();
       }
     }, 4000); // 4000ms = 4 seconds
   });
