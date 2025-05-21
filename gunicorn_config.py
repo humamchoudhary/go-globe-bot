@@ -11,9 +11,10 @@
 # loglevel = "info"
 #
 # import multiprocessing
-import os 
-
-bind = f"0.0.0.0:{os.environ.get('SVR_PORT')}"
+import os
+port = os.environ.get('SVR_PORT')
+bind = f"0.0.0.0:{port}"
+print(f"Server running at: {bind}")
 
 # Use eventlet or gevent for WebSockets
 worker_class = "eventlet"  # OR "gevent"
@@ -30,4 +31,3 @@ loglevel = "info"
 
 # certfile = './server-cert.pem'  # Path to your SSL certificate
 # keyfile = './server-key.pem'
-
