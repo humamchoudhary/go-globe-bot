@@ -92,11 +92,11 @@ def create_app(config_class=Config):
     if conf:
         app.config['SETTINGS'] = conf
         app.config['SETTINGS']["apiKeys"] = {
-            'claude': os.environ.get('CLAUDE_KEY', ''),
-            'openAi': os.environ.get('OPENAI_KEY', ''),
-
-            'deepseek': os.environ.get('DEEPSEEK_KEY', ''),
-            'gemini': os.environ.get('GEMINI_KEY', '')}
+            'claude': Config.CLAUDE_KEY,
+            'openAi': Config.OPENAI_KEY,
+            'deepseek': Config.DEEPSEEK_KEY,
+            'gemini': Config.GEMINI_KEY
+        }
     else:
         app.config['SETTINGS'] = {
             'logo': {
@@ -106,12 +106,15 @@ def create_app(config_class=Config):
             },
             'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
             'apiKeys': {
-                'claude': os.environ.get('CLAUDE_KEY', ''),
-                'openAi': os.environ.get('OPENAI_KEY', ''),
-                'deepseek': os.environ.get('DEEPSEEK_KEY', ''),
-                'gemini': os.environ.get('GEMINI_KEY', '')},
+                'claude': Config.CLAUDE_KEY,
+                'openAi': Config.OPENAI_KEY,
+                'deepseek': Config.DEEPSEEK_KEY,
+                'gemini': Config.GEMINI_KEY
+            },
             'theme': 'system',
-            'model': 'gm_2_0_f', 'backend_url': os.environ.get('BACKEND_URL'), "prompt": f"""
+            'model': 'gm_2_0_f',
+            'backend_url': Config.BACKEND_URL,
+            "prompt": """
        you are a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Assistance" button for human assistance.'
                 Incorporate information from any attached images into your responses where relevant. Give concise answers
                 When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.
@@ -213,7 +216,7 @@ DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THIN
 
 app, socketio = create_app()
 if __name__ == '__main__':
-    socketio.run(app, port=5000, host='0.0.0.0',
+    socketio.run(app, port=Config.PORT, host='0.0.0.0',
                  debug=True,
                  ssl_context='adhoc'
                  )
