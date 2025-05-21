@@ -46,6 +46,10 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@min_bp.route('/test')
+def test_model():
+    return render_template('user/test.html')
+
 
 @min_bp.route('/get-headers')
 def headers():

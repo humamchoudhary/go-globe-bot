@@ -39,7 +39,7 @@
 
   #chat-container .chat-header {
     padding: 1rem;
-    background-color: #ff5800;
+    background-color: #001523;
     color: white;
     display: flex;
     justify-content: space-between;
@@ -91,7 +91,7 @@
        hx-target="#chatbox"
        hx-swap="innerHTML"
        data-base-url="{{backend_url}}">
-    <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #ff5800; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-radius: 50%; animation: spin 1s linear infinite;"></div>
   </div>
 </div>
   `;

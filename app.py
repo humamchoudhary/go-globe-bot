@@ -133,7 +133,7 @@ DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THIN
         return {'settings': app.config['SETTINGS']}
     app.bot = Bot(Config.BOT_NAME, app=app)
 
-    app.config['SETTINGS']['backend_url'] = 'https://192.168.22.249:5000'
+    # app.config['SETTINGS']['backend_url'] = 'https://192.168.22.249:5000'
 
     # Setup Flask-Session
     Session(app)

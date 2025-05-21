@@ -35,7 +35,7 @@
   style.innerHTML = `/* All your chat styles (from .chat-button to .hidden) */ 
     .chat-button { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background-color: #ff5800; color: white; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); cursor: pointer; z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 24px; }
     .chat-container { position: fixed; bottom: 90px; right: 20px; width: 400px; height: 600px; background-color: white; border-radius: 10px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); z-index: 1000; display: flex; flex-direction: column; overflow: hidden; }
-    .chat-header { padding: 20px 15px; background-color: #ff5800; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .chat-header { padding: 20px 15px; background-color: #001523; color: white; display: flex; justify-content: space-between; align-items: center; }
     .close-chat { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
     .chat-content { flex: 1; overflow: auto; }
     .hidden { display: none; }
