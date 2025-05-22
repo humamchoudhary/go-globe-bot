@@ -219,12 +219,12 @@ def ping_admin(chat_id):
         return redirect(f'/chat/{chat_id}')
 
     # Step 1: Check if current time falls within allowed timings
-    now = datetime.now()
-    current_day = now.strftime('%A').lower()
-    current_time = now.strftime('%H:%M')
 
     timings = current_app.config['SETTINGS'].get('timings', [])
     timezone = current_app.config['SETTINGS'].get('timezone', "UTC")
+    now = datetime.now(timezone)
+    current_day = now.strftime('%A').lower()
+    current_time = now.strftime('%H:%M')
 
     available = any(
         t['day'].lower() == current_day and t['startTime'] <= current_time <= t['endTime']
