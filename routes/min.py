@@ -9,7 +9,7 @@ from services.chat_service import ChatService
 from functools import wraps
 from services.email_service import send_email
 import os
-
+import pytz
 
 @min_bp.before_request
 def before_req():
@@ -222,7 +222,9 @@ def ping_admin(chat_id):
 
     timings = current_app.config['SETTINGS'].get('timings', [])
     timezone = current_app.config['SETTINGS'].get('timezone', "UTC")
-    now = datetime.now(timezone)
+
+    tz = pytz.timezone(timezone)
+    now = datetime.now(tz)
     current_day = now.strftime('%A').lower()
     current_time = now.strftime('%H:%M')
 
