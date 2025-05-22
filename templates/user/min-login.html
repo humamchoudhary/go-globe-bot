@@ -238,7 +238,9 @@ else if (desgInput  && !desgInput.value.trim()) {
         const email = emailInput.value.trim();
         const phone = phoneInput.value.trim();
         const subject = subjectInput.value.trim();
-        const desg = desgInput.value.trim();
+        if(desgInput){
+            const desg = desgInput.value.trim();
+        }
 
         const isHtmxRequest = document.getElementById("chatbox") !== null;
         
