@@ -82,7 +82,7 @@ def create_app(config_class=Config):
         SESSION_KEY_PREFIX='session:',
     )
 
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=3)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
 
     @app.before_request
     def test():

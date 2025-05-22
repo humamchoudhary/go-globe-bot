@@ -81,9 +81,6 @@
  <div style="padding: 10px 15px; background-color: var(--goglobe-site-bg-color); color: white; display: flex; justify-content: space-between; align-items: center;">
       <h3 style="color: white; font-size:16px">Welcome, How can we help you?</h3>
       <div style="display: flex; flex-direction: row; gap: 9px; align-items: center;">
-        <div style="cursor: pointer" hx-get="{{backend_url}}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML">
-
-<svg xmlns="http://www.w3.org/2000/svg" color="#ff5800" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2-icon lucide-undo-2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>       </div>
         <div id="close-chat" style="background: none; border: none; color: #ff5800; font-size: 24px; cursor: pointer;">
 
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>        </div>
