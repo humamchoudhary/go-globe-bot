@@ -140,13 +140,17 @@ hideError(nameError);
 hideError(emailError);
 hideError(phoneError);
 hideError(subjectError);
-hideError(desgError);
+        if (desgError){
+            hideError(desgError);
+        }
 
 nameInput.classList.remove("input-error");
 emailInput.classList.remove("input-error");
 phoneInput.classList.remove("input-error");
 subjectInput.classList.remove("input-error");
-desgInput.classList.remove("input-error");
+        if(desgInput){
+            desgInput.classList.remove("input-error");
+        }
 
 
       // Validate name
