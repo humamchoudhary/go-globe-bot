@@ -97,6 +97,17 @@
     <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-radius: 50%; animation: spin 1s linear infinite;"></div>
   </div>
 </div>
+
+
+<audio autoplay class="hidden" id="messageAudio">
+    <source src="audio/source.mp3">
+</audio>
+
+<audio autoplay class="hidden"  id="messageAudio">
+    <source src="audio/source.mp3">
+</audio>
+
+
   `;
 
   document.body.insertAdjacentHTML("beforeend", insertHtml);
@@ -110,6 +121,8 @@
     chatBtn.onclick = () => {
       const currentDisplay = chatContainer.style.display;
       chatContainer.style.display = currentDisplay === "none" ? "flex" : "none";
+      const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
+      audio.play();
     };
 
     closeBtn.onclick = () => {
@@ -166,8 +179,6 @@
     setTimeout(() => {
       const chatContainer = document.getElementById("chat-container");
       if (chatContainer) {
-        const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
-        audio.play();
         chatContainer.style.display = "flex"; // or "block" depending on your layout needs
       }
     }, 4000); // 4000ms = 4 seconds
