@@ -106,10 +106,6 @@
   document.body.insertAdjacentHTML("beforeend", insertHtml);
 
   window.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("body span").forEach((span) => {
-      span.className = "";
-    });
-
     const baseURL = "{{backend_url}}";
     const chatBtn = document.getElementById("chat-button");
     const chatContainer = document.getElementById("chat-container");
@@ -183,5 +179,10 @@
         chatContainer.style.display = "flex"; // or "block" depending on your layout needs
       }
     }, 4000); // 4000ms = 4 seconds
+
+    document.querySelectorAll("body span").forEach((span) => {
+      console.log(span);
+      span.className = "";
+    });
   });
 })();
