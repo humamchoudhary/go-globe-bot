@@ -29,23 +29,23 @@
                 <form id="login-form" novalidate>
                     <div style="margin-bottom: 1rem;">
                         <input type="text"
-                            style="width: 100%; border-radius: 0.25rem; outline: none;"
+                            style="width: 100%; border-radius: 0.25rem; outline: none; border:  1px solid var(--goglobe-site-bg-color)"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="name" name="name" placeholder="Your Name*" autocapitalize="off"
                             autocomplete="name" required minlength="2"
 onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-onblur="this.style.border = '';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
                         <p id="name-error" class="error-text"></p>
                     </div>
                     {% if default_subject.lower() != "job" %}
                     <div style="margin-bottom: 1rem;">
                         <input type="text"
-                            style="width: 100%; border-radius: 0.25rem; outline: none;"
+                            style="width: 100%; border-radius: 0.25rem; outline: none; border:  1px solid var(--goglobe-site-bg-color)"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="desg" name="desg" placeholder="Designation*" autocapitalize="off"
 onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-onblur="this.style.border = '';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
 
                             <p id="desg-error" class="error-text"></p>                    
@@ -54,23 +54,23 @@ onblur="this.style.border = '';"
 
                     <div style="margin-bottom: 1rem;">
                         <input type="email"
-                            style="width: 100%; border-radius: 0.25rem; outline: none;"
+                            style="width: 100%; border-radius: 0.25rem; outline: none; border:  1px solid var(--goglobe-site-bg-color)"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="email" name="email" placeholder="Email Address*" autocapitalize="off"
                             autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
 onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-onblur="this.style.border = '';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
                         <p id="email-error" class="error-text"></p>
                     </div>
 
                     <div style="margin-bottom: 1rem;" class="hidden">
                         <select
-                            style="width: 100%; border-radius: 0.25rem; outline: none;"
+                            style="width: 100%; border-radius: 0.25rem; outline: none; border: 1px solid var(--goglobe-site-bg-color)"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold !px-6 !py-4 text-white text-bold transition-all duration-200 !bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="subject" name="subject" autocapitalize="off" autocomplete="off" required
 onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-onblur="this.style.border = '';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
                             {% for subject in settings['subjects'] %}
                             <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
