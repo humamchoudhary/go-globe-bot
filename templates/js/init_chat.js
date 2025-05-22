@@ -106,6 +106,10 @@
   document.body.insertAdjacentHTML("beforeend", insertHtml);
 
   window.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("body span").forEach((span) => {
+      span.className = "";
+    });
+
     const baseURL = "{{backend_url}}";
     const chatBtn = document.getElementById("chat-button");
     const chatContainer = document.getElementById("chat-container");
