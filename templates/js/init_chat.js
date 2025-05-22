@@ -39,7 +39,7 @@
 
   #chat-container .chat-header {
     padding: 1rem;
-    background-color: #1A2732;
+    background-color: #001523;
     color: white;
     display: flex;
     justify-content: space-between;
