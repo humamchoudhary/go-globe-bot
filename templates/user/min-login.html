@@ -84,12 +84,12 @@ onblur="this.style.border = '';"
 
                     <div style="margin-bottom: 1.5rem;">
                         <input type="tel"
-                            style="width: 100%; border-radius: 0.25rem; outline: none;"
+                            style="width: 100%; border-radius: 0.25rem; outline: none;border: 1px solid var(--goglobe-site-bg-color)"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="phone" name="phone" placeholder="Phone Number*" autocapitalize="off"
                             autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}"
 onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-onblur="this.style.border = '';"
+onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
                             >
                         <p id="phone-error" class="error-text"></p>
                         <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p>
