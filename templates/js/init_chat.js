@@ -114,8 +114,8 @@
     chatBtn.onclick = () => {
       const currentDisplay = chatContainer.style.display;
       chatContainer.style.display = currentDisplay === "none" ? "flex" : "none";
-      const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
-      audio.play();
+      // const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
+      // audio.play();
     };
 
     closeBtn.onclick = () => {
