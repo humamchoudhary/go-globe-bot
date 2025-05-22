@@ -269,8 +269,8 @@ def ping_admin(chat_id):
 
         message_content = (
             "Ana has been notified, but she is currently unavailable.\n\n"
-            "You can reach her during the following times:\n\n"
-            f"{formatted_timings}"
+            "You can reach her during the following times: \n\n"
+            f"{formatted_timings} \n\n time now{now}"
         )
 
         new_message = chat_service.add_message(
