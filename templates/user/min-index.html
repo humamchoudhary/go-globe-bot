@@ -248,7 +248,7 @@
        console.log(tempDiv)
        if(message.sender !== '{{username}}'){
 
-        const audio = new Audio("{{backend_url}}/static/sounds/message.wav");
+           const audio = new Audio("{{settings["backend_url"]}}/static/sounds/message.wav");
         audio.play();
        }
 
