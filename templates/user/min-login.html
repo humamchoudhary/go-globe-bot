@@ -182,7 +182,7 @@ desgInput.classList.remove("input-error");
         isValid = false;
       }
         
-else if (!desgInput.value.trim()) {
+else if (desgInput  && !desgInput.value.trim()) {
   showInputError(desgInput, desgError, "Designation is required");
   isValid = false;
 }
@@ -250,7 +250,7 @@ else if (!desgInput.value.trim()) {
                 email: email,
                 phone: phone,
                 subject: subject,
-                desg: desg
+                desg: desg? desg:"None"
             }),
         })
         .then(async (response) => {
