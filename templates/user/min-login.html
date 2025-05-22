@@ -92,16 +92,26 @@ onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
 onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
                             >
                         <p id="phone-error" class="error-text"></p>
-                        <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p>
+                        <!-- <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p> -->
                     </div>
 
                     <p id="error-message" style="color: #ef4444; margin-bottom: 1rem; display:none;"></p>
-                    <button type="submit" id="login-btn"
-                        style="width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; background-color: var(--goglobe-button-bg-color); color: var(--goglobe-body-color); font-weight: 700; border-radius: 0.25rem; border: 1px solid var(--goglobe-border-color); transition: all 300ms;"
-                        onmouseover="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.color='var(--goglobe-hover-color)';"
-                        onmouseout="this.style.backgroundColor='var(--goglobe-button-bg-color)'; this.style.color='var(--goglobe-body-color)';">
-                        Start Chat
-                    </button>
+<button
+  type="submit"
+  id="login-btn"
+  class="w-full py-3 px-4 font-bold rounded border transition-all"
+  style="
+    background-color: var(--goglobe-main-color);
+    color: var(--goglobe-body-color);
+    border-color: var(--goglobe-border-color);
+  "
+  onmouseover="this.style.backgroundColor='var(--goglobe-site-bg)'; this.style.color='var(--goglobe-hover-color)'"
+  onmouseout="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.color='var(--goglobe-body-color)'"
+  onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
+  onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'"
+>
+  Start Chat
+</button>
                 </form>
             </div>
         </div>
