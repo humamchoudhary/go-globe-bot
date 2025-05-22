@@ -99,13 +99,6 @@
 </div>
 
 
-<audio autoplay class="hidden" id="messageAudio">
-    <source src="audio/source.mp3">
-</audio>
-
-<audio autoplay class="hidden"  id="messageAudio">
-    <source src="audio/source.mp3">
-</audio>
 
 
   `;
