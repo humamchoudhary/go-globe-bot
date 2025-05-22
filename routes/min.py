@@ -1,3 +1,4 @@
+from services.timezone import UTCZoneManager
 from flask import render_template_string
 from services.usage_service import UsageService
 import random
@@ -10,6 +11,7 @@ from functools import wraps
 from services.email_service import send_email
 import os
 import pytz
+
 
 @min_bp.before_request
 def before_req():
@@ -45,6 +47,7 @@ def login_required(f):
             return redirect('/')
         return f(*args, **kwargs)
     return decorated_function
+
 
 @min_bp.route('/test')
 def test_model():
@@ -223,8 +226,9 @@ def ping_admin(chat_id):
     timings = current_app.config['SETTINGS'].get('timings', [])
     timezone = current_app.config['SETTINGS'].get('timezone', "UTC")
 
-    tz = pytz.timezone(timezone)
-    now = datetime.now(tz)
+    # tz = pytz.timezone(timezone)
+    # now = datetime.now(tz)
+    now = UTCZoneManager().get_current_date(timezone)
     current_day = now.strftime('%A').lower()
     current_time = now.strftime('%H:%M')
 
@@ -270,7 +274,7 @@ def ping_admin(chat_id):
         message_content = (
             "Ana has been notified, but she is currently unavailable.\n\n"
             "You can reach her during the following times: \n\n"
-            f"{formatted_timings} \n\n time now{now}"
+            f"{formatted_timings}"
         )
 
         new_message = chat_service.add_message(

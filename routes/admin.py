@@ -1,3 +1,4 @@
+from services.timezone import UTCZoneManager
 from datetime import datetime, time
 import threading
 from pprint import pprint
@@ -378,7 +379,7 @@ def settings():
             key=lambda time: day_order[time['day']]
         )
 
-    return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=pytz.all_timezones)
+    return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones())
 
 
 def save_settings(settings):
