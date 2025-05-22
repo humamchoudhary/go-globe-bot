@@ -24,7 +24,7 @@
     position: fixed;
     bottom: 90px;
     right: 20px;
-    width: 320px;
+    width: 350px;
  height: 450px;
     background-color: white;
     border-radius: 10px;
