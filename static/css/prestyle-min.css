@@ -86,6 +86,7 @@
 :root {
   /* color-scheme: dark; */
   --goglobe-site-bg-color: #001523;
+  --test: "";
   --goglobe-header-bg-color: #001f33;
   --goglobe-some-r-bg-color: #001f33;
   --goglobe-some-a-bg-color: #001523;
