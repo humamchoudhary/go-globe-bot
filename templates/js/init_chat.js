@@ -179,10 +179,5 @@
         chatContainer.style.display = "flex"; // or "block" depending on your layout needs
       }
     }, 4000); // 4000ms = 4 seconds
-
-    document.querySelectorAll("body span").forEach((span) => {
-      console.log(span);
-      span.className = "";
-    });
   });
 })();
