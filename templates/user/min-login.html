@@ -33,8 +33,9 @@
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="name" name="name" placeholder="Your Name*" autocapitalize="off"
                             autocomplete="name" required minlength="2"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
-                            onblur="this.style.boxShadow = '';">
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = '';"
+                            >
                         <p id="name-error" class="error-text"></p>
                     </div>
                     {% if default_subject.lower() != "job" %}
@@ -43,8 +44,9 @@
                             style="width: 100%; border-radius: 0.25rem; outline: none;"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="desg" name="desg" placeholder="Designation*" autocapitalize="off"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
-                            onblur="this.style.boxShadow = '';">
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = '';"
+                            >
 
                             <p id="desg-error" class="error-text"></p>                    
                     </div>
@@ -56,7 +58,9 @@
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="email" name="email" placeholder="Email Address*" autocapitalize="off"
                             autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                            onblur="this.style.boxShadow = '';">
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = '';"
+                            >
                         <p id="email-error" class="error-text"></p>
                     </div>
 
@@ -65,8 +69,9 @@
                             style="width: 100%; border-radius: 0.25rem; outline: none;"
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold !px-6 !py-4 text-white text-bold transition-all duration-200 !bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="subject" name="subject" autocapitalize="off" autocomplete="off" required
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
-                            onblur="this.style.boxShadow = '';">
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = '';"
+                            >
                             {% for subject in settings['subjects'] %}
                             <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
                                 {{subject}}</option>
@@ -83,8 +88,9 @@
                             class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="phone" name="phone" placeholder="Phone Number*" autocapitalize="off"
                             autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}"
-                            onfocus="this.style.boxShadow = '0 0 0 1px var(--goglobe-main-color)';"
-                            onblur="this.style.boxShadow = '';">
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = '';"
+                            >
                         <p id="phone-error" class="error-text"></p>
                         <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p>
                     </div>
