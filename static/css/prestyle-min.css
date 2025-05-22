@@ -5900,7 +5900,7 @@ a.fn__like.no_border .fn__svg {
 .goglobe_fn_aichatbot_page .chat__comment {
   margin-top: auto;
   position: sticky;
-  bottom: 0;
+  bottom: -8px;
   padding: 20px 0;
   background-color: var(--goglobe-site-bg-color);
 }
