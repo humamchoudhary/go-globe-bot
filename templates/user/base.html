@@ -56,7 +56,9 @@
     <!--   }); -->
     <!-- </script> -->
     <!-- {{ session.sid }} -->
-    <div class="flex chatbot-body">{% block content %}{% endblock %}</div>
+    <div class="flex chatbot-body" style="min-height: 100%">
+      {% block content %}{% endblock %}
+    </div>
     <!-- <script -->
     <!--   type="text/javascript" -->
     <!--   src="{{settings['backend_url']}}{{ url_for('static', filename='js/jquery.js' ) }}" -->
