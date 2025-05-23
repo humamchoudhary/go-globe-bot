@@ -1,7 +1,18 @@
 (function () {
   const insertHtml = `
 <style>
-#chat-button {
+   0% {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 88, 0, 0.4);
+    }
+    50% {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 30px rgba(255, 88, 0, 0.7);
+    }
+    100% {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 88, 0, 0.4);
+    }
+  }
+
+  #chat-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -11,60 +22,22 @@
     background-color: #ff5800;
     color: white;
     border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 88, 0, 0.4);
     cursor: pointer;
     z-index: 999;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 24px;
-
-    /* Glow animation */
-    box-shadow: 0 0 10px rgba(255, 88, 0, 0.6),
-                0 0 20px rgba(255, 88, 0, 0.6),
-                0 0 30px rgba(255, 88, 0, 0.4);
-    animation: glowPulse 2s infinite;
-    transition: box-shadow 0.3s ease;
+    animation: pulse-glow 2s ease-in-out infinite;
+    transition: all 0.3s ease;
   }
 
   #chat-button:hover {
-    box-shadow: 0 0 12px rgba(255, 88, 0, 0.8),
-                0 0 24px rgba(255, 88, 0, 0.8),
-                0 0 36px rgba(255, 88, 0, 0.6);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 88, 0, 0.9);
+    transform: scale(1.05);
   }
 
-  @keyframes glowPulse {
-    0% {
-      box-shadow: 0 0 10px rgba(255, 88, 0, 0.6),
-                  0 0 20px rgba(255, 88, 0, 0.6),
-                  0 0 30px rgba(255, 88, 0, 0.4);
-    }
-    50% {
-      box-shadow: 0 0 14px rgba(255, 88, 0, 0.8),
-                  0 0 28px rgba(255, 88, 0, 0.8),
-                  0 0 40px rgba(255, 88, 0, 0.5);
-    }
-    100% {
-      box-shadow: 0 0 10px rgba(255, 88, 0, 0.6),
-                  0 0 20px rgba(255, 88, 0, 0.6),
-                  0 0 30px rgba(255, 88, 0, 0.4);
-    }
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 480px) {
-    #chat-container {
-      right: 10px;
-      bottom: 80px;
-      width: 95vw;
-      height: 65vh;
-    }
-
-    #chat-button {
-      width: 50px;
-      height: 50px;
-      font-size: 20px;
-    }
-  }
   #chat-container {
     position: fixed;
     bottom: 90px;
