@@ -45,7 +45,7 @@
     bottom: 90px;
     right: 20px;
     width: 350px;
- height: 450px;
+    height: 450px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
@@ -69,7 +69,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 10px;
-      background-color:var(--goglobe-site-bg-color)
+    background-color:var(--goglobe-site-bg-color)
   }
 
   @media (max-width: 480px) {
@@ -91,6 +91,68 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+  @keyframes slideOutRight {
+    0% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100px) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInRight {
+    0% {
+      transform: translateX(100px) scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUpFromBottom {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDownToBottom {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  .chat-button-hidden {
+    animation: slideOutRight 0.3s ease-out forwards;
+  }
+
+  .chat-button-visible {
+    animation: slideInRight 0.3s ease-out forwards;
+  }
+
+  .chat-container-open {
+    display: flex !important;
+    animation: slideUpFromBottom 0.4s ease-out forwards;
+  }
+
+  .chat-container-closing {
+    animation: slideDownToBottom 0.3s ease-out forwards;
+  }
+
 </style>
 
 <a id="chat-button">
@@ -102,7 +164,6 @@
       <h3 style="color: white; font-size:16px">Welcome, How can we help you?</h3>
       <div style="display: flex; flex-direction: row; gap: 9px; align-items: center;">
         
-    
 
         <div id="close-chat" style="background: none; border: none; color: #ff5800; font-size: 24px; cursor: pointer;">
 
@@ -131,18 +192,44 @@
     const chatBtn = document.getElementById("chat-button");
     const chatContainer = document.getElementById("chat-container");
     const closeBtn = document.getElementById("close-chat");
+    let isChatOpen = false;
 
     chatBtn.onclick = () => {
-      const currentDisplay = chatContainer.style.display;
-      chatContainer.style.display = currentDisplay === "none" ? "flex" : "none";
-      if (chatContainer.style.display === "flex") {
-        const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
-        audio.play();
+      if (!isChatOpen) {
+        // Hide chat button with animation
+        chatBtn.classList.add("chat-button-hidden");
+
+        // Show chat container with animation after button starts hiding
+        setTimeout(() => {
+          chatContainer.classList.add("chat-container-open");
+          isChatOpen = true;
+          const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
+          audio.play();
+        }, 150);
       }
     };
 
     closeBtn.onclick = () => {
-      chatContainer.style.display = "none";
+      if (isChatOpen) {
+        // Hide chat container with animation
+        chatContainer.classList.add("chat-container-closing");
+
+        // Show chat button after container starts closing
+        setTimeout(() => {
+          chatBtn.classList.remove("chat-button-hidden");
+          chatBtn.classList.add("chat-button-visible");
+        }, 150);
+
+        // Clean up classes after animations complete
+        setTimeout(() => {
+          chatContainer.classList.remove(
+            "chat-container-open",
+            "chat-container-closing",
+          );
+          chatBtn.classList.remove("chat-button-visible");
+          isChatOpen = false;
+        }, 400);
+      }
     };
 
     document.body.addEventListener("htmx:afterSwap", (evt) => {
@@ -194,10 +281,16 @@
 
     setTimeout(() => {
       const chatContainer = document.getElementById("chat-container");
-      if (chatContainer) {
-        const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
-        audio.play();
-        chatContainer.style.display = "flex"; // or "block" depending on your layout needs
+      if (chatContainer && !isChatOpen) {
+        // Auto-open chat with animations after 4 seconds
+        chatBtn.classList.add("chat-button-hidden");
+
+        setTimeout(() => {
+          chatContainer.classList.add("chat-container-open");
+          isChatOpen = true;
+          const audio = new Audio("{{backend_url}}/static/sounds/pop-up.wav");
+          audio.play();
+        }, 150);
       }
     }, 4000); // 4000ms = 4 seconds
   });
