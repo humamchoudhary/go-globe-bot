@@ -7,9 +7,9 @@ module.exports = {
     "focus:bg-[var(--goglobe-site-bg-color)]",
     // add other dynamic classes here
   ],
-  corePlugins: {
-    preflight: false, // This disables Tailwind's global base/reset styles
-  },
+  // corePlugins: {
+  //   preflight: false, // This disables Tailwind's global base/reset styles
+  // },
   theme: {
     extend: {},
   },
