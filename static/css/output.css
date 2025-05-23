@@ -155,6 +155,9 @@
 .flex-nowrap {
   flex-wrap: nowrap;
 }
+.flex-wrap {
+  flex-wrap: wrap;
+}
 .items-center {
   align-items: center;
 }
