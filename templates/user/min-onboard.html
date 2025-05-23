@@ -1,4 +1,4 @@
-{% extends 'user/base.html' %} {% block content %}
+{% extends 'user/base-min.html' %} {% block content %}
 <!-- AI Chat Bot Page -->
 <div class="goglobe_fn_aichatbot_page fn__chatbot" style="min-height: 100%">
   <div
@@ -36,7 +36,10 @@
           transition-duration: 150ms;
           transition-property: all;
           cursor: pointer;
-        " class="!font-bold !bg-[var(--goglobe-main-color)] !text-white"
+          font-weight:bold; background:var(--goglobe-main-color);
+          color:white;
+          text-decoration:none;
+        "
         href="/min/login/{{subject}}"
 
       >
