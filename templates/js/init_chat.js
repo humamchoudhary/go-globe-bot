@@ -1,7 +1,9 @@
 (function () {
   const insertHtml = `
 <style>
-   0% {
+
+  @keyframes pulse-glow {
+      0% {
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 88, 0, 0.4);
     }
     50% {
