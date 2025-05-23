@@ -1,6 +1,5 @@
-{% extends 'user/base-min.html' %} {% block content %}
+{% extends 'user/base.html' %} {% block content %}
 <!-- Sign In -->
-
 
 <style>
   /* Simple styling for form validation */
@@ -22,31 +21,31 @@
   }
 </style>
 
-<div style="overflow-x: hidden; background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family); width: 100%;">
+<div style=" overflow-x:hidden; background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family);" class="w-full">
         <!-- Desktop logo would go here -->
-        <div style="border-radius: 0.5rem; padding-left: 1rem; padding-right: 1rem; padding-top: 0.5rem;">
+        <div style="border-radius: 0.5rem;" class="px-4 pt-2">
             <div style="margin-bottom: 2rem;">
 
                 <form id="login-form" novalidate>
                     <div style="margin-bottom: 1rem;">
                         <input type="text"
-                            style="width: fit-content; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); color: white; font-weight: bold; padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 200ms; background-color: var(--goglobe-input-color);"
-                            placeholder="Your Name*" 
-                            id="name" name="name" autocapitalize="off"
+                            style="width: 100%; border-radius: 6px; outline: none; border:  1px solid var(--goglobe-site-bg-color)"
+                            class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
+                            id="name" name="name" placeholder="Your Name*" autocapitalize="off"
                             autocomplete="name" required minlength="2"
-                            onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                            onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
                         <p id="name-error" class="error-text"></p>
                     </div>
                     {% if default_subject.lower() != "job" %}
                     <div style="margin-bottom: 1rem;">
                         <input type="text"
-                            style="width: fit-content; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); color: white; font-weight: bold; padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 200ms; background-color: var(--goglobe-input-color);"
-                            placeholder="Designation*" 
-                            id="desg" name="desg" autocapitalize="off"
-                            onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                            onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
+                            style="width: 100%; border-radius: 6px; outline: none; border:  1px solid var(--goglobe-site-bg-color)"
+                            class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
+                            id="desg" name="desg" placeholder="Designation*" autocapitalize="off"
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
 
                             <p id="desg-error" class="error-text"></p>                    
@@ -55,22 +54,23 @@
 
                     <div style="margin-bottom: 1rem;">
                         <input type="email"
-                            style="width: fit-content; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); color: white; font-weight: bold; padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 200ms; background-color: var(--goglobe-input-color);"
-                            placeholder="Email Address*" 
-                            id="email" name="email" autocapitalize="off"
+                            style="width: 100%; border-radius: 6px; outline: none; border:  1px solid var(--goglobe-site-bg-color)"
+                            class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
+                            id="email" name="email" placeholder="Email Address*" autocapitalize="off"
                             autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                            onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                            onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
                         <p id="email-error" class="error-text"></p>
                     </div>
 
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1rem;" class="hidden">
                         <select
-                            style="width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); color: white; font-weight: bold; padding-left: 1.5rem !important; padding-right: 1.5rem !important; padding-top: 1rem !important; padding-bottom: 1rem !important; transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 200ms; background-color: var(--goglobe-input-color) !important;"
+                            style="width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color)"
+                            class='placeholder-[var(--goglobe-body-color)] placeholder-bold !px-6 !py-4 text-white text-bold transition-all duration-200 !bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
                             id="subject" name="subject" autocapitalize="off" autocomplete="off" required
-                            onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                            onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = ' 1px solid var(--goglobe-site-bg-color)';"
                             >
                             {% for subject in settings['subjects'] %}
                             <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
@@ -80,25 +80,34 @@
                         <p id="subject-error" class="error-text"></p>
                     </div>
 
+
+
                     <div style="margin-bottom: 1.5rem;">
                         <input type="tel"
-                            style="width: fit-content; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); color: white; font-weight: bold; padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 200ms; background-color: var(--goglobe-input-color);"
-                            placeholder="Phone Number*" 
-                            id="phone" name="phone" autocapitalize="off"
+                            style="width: 100%; border-radius: 6px; outline: none;border: 1px solid var(--goglobe-site-bg-color)"
+                            class='placeholder-[var(--goglobe-body-color)] placeholder-bold px-6 py-4 text-white text-bold transition-all duration-200 bg-[var(--goglobe-input-color)] focus:bg-[var(--goglobe-site-bg-color)]'
+                            id="phone" name="phone" placeholder="Phone Number*" autocapitalize="off"
                             autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}"
-                            onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                            onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
+onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';"
                             >
                         <p id="phone-error" class="error-text"></p>
+                        <!-- <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Format: 10-15 digits, may include +, -, (, ), and spaces</p> -->
                     </div>
 
                     <p id="error-message" style="color: #ef4444; margin-bottom: 1rem; display:none;"></p>
 <button
   type="submit"
   id="login-btn"
-  style="width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; font-weight: bold; border-radius: 0.25rem; border-width: 1px; transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); color: white; transition-duration: 300ms; background-color: var(--goglobe-main-color); border-color: var(--goglobe-border-color);"
-  onmouseover="this.style.backgroundColor='var(--goglobe-site-bg)'"
-  onmouseout="this.style.backgroundColor='var(--goglobe-main-color)'"
+  class="w-full py-3 px-4 font-bold rounded border transition-all"
+  style="
+    background-color: var(--goglobe-main-color);
+    color: var(--goglobe-body-color);
+    border-color: var(--goglobe-border-color);
+    text-color: white ;
+  "
+  onmouseover="this.style.backgroundColor='var(--goglobe-site-bg)'; this.style.color='var(--goglobe-hover-color)'"
+  onmouseout="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.color='var(--goglobe-body-color)'"
   onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
   onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'"
 >
