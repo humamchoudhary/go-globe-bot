@@ -2,9 +2,9 @@
 module.exports = {
   content: ["./templates/*.html"],
 
-  corePlugins: {
-    preflight: false, // This disables Tailwind's global base/reset styles
-  },
+  // corePlugins: {
+  //   preflight: false, // This disables Tailwind's global base/reset styles
+  // },
   theme: {
     extend: {},
   },
