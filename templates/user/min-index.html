@@ -256,7 +256,9 @@
        <div class="chat__box ${message.sender === '{{username}}' ? 'your__chat' : 'bot__chat'}">
          <div class="author"><span>${message.sender === '{{username}}' ? 'You' : message.sender}</span></div>
          <div class="chat">
+         <p class="md-content" >
            ${tempDiv.innerHTML}
+         </p>
          </div>
        </div>
      `;
