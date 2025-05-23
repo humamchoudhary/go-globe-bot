@@ -53,7 +53,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    display: flex;
+    display: none;
   }
 
   #chat-container .chat-header {
