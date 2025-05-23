@@ -83,12 +83,6 @@
 /*------------------------------------------------------------------*/
 /*	01) ROOT
 /*------------------------------------------------------------------*/
-
-#chatbot-body {
-  contain: style layout paint;
-  all: initial;
-}
-
 :root {
   /* color-scheme: dark; */
   --goglobe-site-bg-color: #001f33;
