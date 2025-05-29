@@ -495,6 +495,25 @@
                 </li>
                 <li>
                   <a
+                    href="/admin/logs"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_usage' %}active{% endif %} items-center"
+                    data-position="right"
+                    title="Usage"
+                    data-page="/admin/logs"
+                  >
+                    <span class="icon">
+                      <!-- <img -->
+                      <!--   src="{{ url_for('static', filename='svg/dollar.svg') }}" -->
+                      <!--   alt="" -->
+                      <!--   class="fn__svg" -->
+                      <!-- /> -->
+                      <i data-lucide="logs" class="size-5"></i>
+                    </span>
+                    <span class="text">Logs</span>
+                  </a>
+                </li>
+                <li>
+                  <a
                     href="/admin/pricing/"
                     class="fn__tooltip menu__item {% if request.endpoint == 'admin_faq' %}active{% endif %}"
                     data-position="right"
