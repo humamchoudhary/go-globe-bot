@@ -228,6 +228,16 @@ def new_chat(subject):
     return redirect(url_for('chat.chat', chat_id=chat.chat_id))
 
 
+@chat_bp.route('/pricing')
+def pricing_page():
+    return render_template('user/pricing.html')
+
+
+@chat_bp.route('/faq')
+def faq_page():
+    return render_template('user/faq.html')
+
+
 def register_socketio_events(socketio):
     @socketio.on('join')
     def on_join(data):

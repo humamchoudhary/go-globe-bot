@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!--[if lt IE 7]><html class="ie ie6" lang="en"> <![endif]-->
 <!--[if IE 7]><html class="ie ie7" lang="en"> <![endif]-->
 <!--[if IE 8]><html class="ie ie8" lang="en"> <![endif]-->
@@ -21,7 +21,7 @@
     <script>
       document.documentElement.setAttribute(
         "data-goglobe-skin",
-        '{{settings["theme"]}}'
+        '{{settings["theme"]}}',
       );
       if (localStorage.frenify_panel !== "") {
         document.documentElement.classList.add(localStorage.frenify_panel);
@@ -33,6 +33,7 @@
     {% block header_script %}{% endblock %}
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script>
       const fontFiles = {{font_files | tojson }};
       const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
@@ -47,11 +48,283 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/prestyle.css') }}"
     />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!--[if lt IE 9]>
+      <script
+        type="text/javascript"
+        src="{{ url_for('static', filename='js/modernizr.custom.js') }}"
+      ></script>
+    <![endif]-->
     <!-- !Styles -->
+    <style>
+      /* Interactive enhancements using the root color variables */
+      .menu__item {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .menu__item::before {
+        content: "";
+        position: absolute;
+        left: -100%;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--goglobe-main-color),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .menu__item:hover::before {
+        left: 100%;
+      }
+
+      .menu__item:hover {
+        color: var(--goglobe-hover-color);
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(255, 88, 0, 0.3);
+      }
+
+      .menu__item:hover .icon {
+        transform: scale(1.1);
+        filter: brightness(1.3);
+      }
+
+      .menu__item .icon {
+        transition:
+          transform 0.3s ease,
+          filter 0.3s ease;
+      }
+
+      /* Active page indicator styles */
+      .menu__item.active {
+        background: linear-gradient(
+          135deg,
+          var(--goglobe-main-color),
+          rgba(255, 88, 0, 0.8)
+        );
+        color: var(--goglobe-hover-color);
+        transform: translateX(8px);
+        border-radius: 0 25px 25px 0;
+        box-shadow: 0 4px 20px rgba(255, 88, 0, 0.5);
+        border-left: 4px solid var(--goglobe-hover-color);
+        position: relative;
+      }
+
+      .menu__item.active::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 10px solid var(--goglobe-main-color);
+        border-top: 15px solid transparent;
+        border-bottom: 15px solid transparent;
+      }
+
+      .menu__item.active .icon {
+        transform: scale(1.15);
+        filter: brightness(1.5);
+      }
+
+      .menu__item.active .text {
+        font-weight: 600;
+      }
+
+      .menu__item.active:hover {
+        transform: translateX(10px);
+        box-shadow: 0 6px 25px rgba(255, 88, 0, 0.6);
+      }
+
+      /* Active indicator dot */
+      .menu__item.active::before {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        background: var(--goglobe-hover-color);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--goglobe-hover-color);
+        animation: pulse-dot 2s infinite;
+      }
+
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+          transform: translateY(-50%) scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: translateY(-50%) scale(1.2);
+        }
+      }
+
+      .fn__closer {
+        transition: all 0.3s ease;
+      }
+
+      .fn__closer:hover {
+        transform: rotate(180deg) scale(1.1);
+        background-color: var(--goglobe-main-color);
+        border-radius: 50%;
+      }
+
+      .leftpanel_logo .fn_logo {
+        transition: transform 0.3s ease;
+      }
+
+      .leftpanel_logo .fn_logo:hover {
+        transform: scale(1.05);
+      }
+
+      .fn__nav_bar {
+        transition: all 0.3s ease;
+      }
+
+      .goglobe_fn_leftpanel {
+        transition: transform 0.3s ease;
+      }
+
+      .group__list li {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        margin: 2px 0;
+      }
+
+      .group__list li:hover:not(.active) {
+        background-color: rgba(255, 88, 0, 0.1);
+        border-left: 3px solid var(--goglobe-main-color);
+      }
+
+      .footer .menu_items a {
+        transition: color 0.3s ease;
+      }
+
+      .footer .menu_items a:hover {
+        color: var(--goglobe-main-color);
+      }
+
+      /* Preloader animation enhancement */
+      .goglobe_fn_preloader svg circle {
+        stroke: var(--goglobe-main-color);
+        animation: pulse 2s infinite ease-in-out;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Responsive touch interactions */
+      @media (max-width: 768px) {
+        .menu__item:active {
+          background-color: rgba(255, 88, 0, 0.2);
+          transform: scale(0.95);
+        }
+
+        .menu__item.active {
+          transform: translateX(5px);
+        }
+
+        .menu__item.active:hover {
+          transform: translateX(6px);
+        }
+      }
+
+      /* Subtle animations for page load */
+      .goglobe_fn_page {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Header interactive elements */
+      .header__left,
+      .header__right {
+        transition: all 0.3s ease;
+      }
+
+      /* Interactive feedback for clickable elements */
+      .fn__icon_button {
+        transition: all 0.2s ease;
+      }
+
+      .fn__icon_button:active {
+        transform: scale(0.9);
+      }
+
+      /* Flash messages styling */
+      .flash-messages {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+      }
+
+      .alert {
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        animation: slideInRight 0.3s ease-out;
+      }
+
+      .alert-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
+      .alert-error {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+
+      .alert-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+
+      .alert-info {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+    </style>
   </head>
-  <body>
-    <!-- {% include '/admin/fragments/file_upload_success_toast.html' %} -->
+  <body class="admin">
     {% with messages = get_flashed_messages(with_categories=true) %} {% if
     messages %}
     <div class="flash-messages">
@@ -151,8 +424,10 @@
                 <li>
                   <a
                     href="/admin"
-                    class="menu__item duration-200 transition-all"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_home' %}active{% endif %}"
                     data-position="right"
+                    title="Home"
+                    data-page="/admin"
                   >
                     <span class="icon">
                       <img
@@ -167,12 +442,12 @@
                 <li>
                   <a
                     href="/admin/chats"
-                    class="menu__item duration-200 transition-all"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_chats' %}active{% endif %}"
                     data-position="right"
+                    title="Chats"
+                    data-page="/admin/chats"
                   >
                     <span class="icon">
-                      <!-- <img src={{ url_for('static', filename='svg/home.svg' ) }} alt="" -->
-                      <!--     class="fn__svg"> -->
                       <i
                         data-lucide="message-square"
                         class="size-5 color-white"
@@ -184,8 +459,10 @@
                 <li>
                   <a
                     href="/admin/files"
-                    class="menu__item duration-200 transition-all"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_files' %}active{% endif %}"
                     data-position="right"
+                    title="Upload File"
+                    data-page="/admin/files"
                   >
                     <span class="icon">
                       <img
@@ -200,8 +477,10 @@
                 <li>
                   <a
                     href="/admin/usage"
-                    class="menu__item duration-200 transition-all"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_usage' %}active{% endif %}"
                     data-position="right"
+                    title="Usage"
+                    data-page="/admin/usage"
                   >
                     <span class="icon">
                       <img
@@ -209,7 +488,6 @@
                         alt=""
                         class="fn__svg"
                       />
-                      <!-- <i data-lucide='gauge'></i> -->
                     </span>
                     <span class="text">Usage</span>
                   </a>
@@ -217,8 +495,10 @@
                 <li>
                   <a
                     href="/admin/settings"
-                    class="menu__item duration-200 transition-all"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_settings' %}active{% endif %}"
                     data-position="right"
+                    title="Settings"
+                    data-page="/admin/settings"
                   >
                     <span class="icon">
                       <img
@@ -239,8 +519,9 @@
                 <li>
                   <a
                     href="/admin/logout"
-                    class="menu__item duration-200 transition-all"
+                    class="fn__tooltip menu__item"
                     data-position="right"
+                    title="Log Out"
                   >
                     <span class="icon">
                       <img
@@ -265,19 +546,26 @@
           <div class="goglobe_fn_page">{% block content %}{% endblock %}</div>
           <!-- !PAGE (all pages go inside this div) -->
           <!-- FOOTER (inside the content) -->
-          <!-- <footer class="goglobe_fn_footer"> -->
-          <!--     <div class="goglobe_fn_footer_content"> -->
-          <!--         <div class="copyright"> -->
-          <!--             <p>© 2005 - 2025 GO-Globe ™ | CUSTOM DEVELOPMENT. All rights reserved. </p> -->
-          <!--         </div> -->
-          <!--         <div class="menu_items"> -->
-          <!--             <ul> -->
-          <!--                 <li><a href="/terms">Terms of Service</a></li> -->
-          <!--                 <li><a href="/privacy">Privacy Policy</a></li> -->
-          <!--             </ul> -->
-          <!--         </div> -->
-          <!--     </div> -->
-          <!-- </footer> -->
+          <footer class="goglobe_fn_footer">
+            <div class="goglobe_fn_footer_content">
+              <div class="copyright">
+                <p>
+                  © 2005 - 2025 GO-Globe ™ | CUSTOM DEVELOPMENT. All rights
+                  reserved.
+                </p>
+              </div>
+              <div class="menu_items">
+                <ul>
+                  <li>
+                    <a href="/terms">Terms of Service</a>
+                  </li>
+                  <li>
+                    <a href="/privacy">Privacy Policy</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </footer>
           <!-- !FOOTER (inside the content) -->
         </div>
         <!-- !CONTENT -->
@@ -300,12 +588,114 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
     <!-- !Scripts -->
     <script>
+      lucide.createIcons();
+
+      // Enhanced interactivity
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add ripple effect to menu items
+        const menuItems = document.querySelectorAll(".menu__item");
+
+        menuItems.forEach((item) => {
+          item.addEventListener("click", function (e) {
+            // Don't add ripple to active items
+            if (this.classList.contains("active")) return;
+
+            const ripple = document.createElement("span");
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.cssText = `
+              position: absolute;
+              border-radius: 50%;
+              background: rgba(255, 88, 0, 0.6);
+              transform: scale(0);
+              animation: ripple 0.6s linear;
+              width: ${size}px;
+              height: ${size}px;
+              left: ${x}px;
+              top: ${y}px;
+              pointer-events: none;
+            `;
+
+            this.appendChild(ripple);
+
+            setTimeout(() => {
+              ripple.remove();
+            }, 600);
+          });
+        });
+
+        // Add hover sound effect simulation (visual feedback)
+        menuItems.forEach((item) => {
+          item.addEventListener("mouseenter", function () {
+            if (!this.classList.contains("active")) {
+              this.style.boxShadow = "0 4px 20px rgba(255, 88, 0, 0.4)";
+            }
+          });
+
+          item.addEventListener("mouseleave", function () {
+            if (!this.classList.contains("active")) {
+              this.style.boxShadow = "";
+            }
+          });
+        });
+
+        // Alternative active page detection based on current URL
+        const currentPath = window.location.pathname;
+        menuItems.forEach((item) => {
+          const linkPath = item.getAttribute("href");
+          if (linkPath === currentPath) {
+            item.classList.add("active");
+          }
+        });
+
+        // Auto-hide flash messages after 5 seconds
+        const flashMessages = document.querySelectorAll(".alert");
+        flashMessages.forEach((message) => {
+          setTimeout(() => {
+            message.style.animation = "slideOutRight 0.3s ease-in forwards";
+            setTimeout(() => {
+              message.remove();
+            }, 300);
+          }, 5000);
+        });
+      });
+
+      // Add CSS for ripple animation and slide out effect
+      const style = document.createElement("style");
+      style.textContent = `
+        @keyframes ripple {
+          to {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes slideOutRight {
+          to {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+        }
+        
+        .menu__item {
+          position: relative;
+          overflow: hidden;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Socket.IO functionality
       document.addEventListener("DOMContentLoaded", function () {
         const socket = io();
         const chatsContainer = document.getElementById("chat_list");
+
         socket.on("connect", function () {
           socket.emit("admin_join", { room: "admin" });
         });
+
         socket.on("admin_required", function (data) {
           if (Notification.permission === "granted") {
             new Notification("Admin Required", {
@@ -315,23 +705,20 @@
           } else {
             Notification.requestPermission();
           }
-          // {% set chat=room_id %}
+
           const chat_list = `
+            <li class="group__item">
+              <a href="/admin/chat/${data.room_id}" class="fn__chat_link">
+                <p class="text text-clip">${data.subject}</p>
+              </a>
+            </li>
+          `;
 
-<li class="group__item">
-  <a href="/admin/chat/${data.room_id}" class="fn__chat_link {{'active' if request.path.split('/')[-1] == chat }}">
-    <p class="text text-clip">${data.subject}</p>
-  </a>
-</li>
-
-
-                `;
-          chatsContainer.insertAdjacentHTML("afterbegin", chat_list);
+          if (chatsContainer) {
+            chatsContainer.insertAdjacentHTML("afterbegin", chat_list);
+          }
         });
       });
-    </script>
-    <script>
-      lucide.createIcons();
     </script>
   </body>
 </html>
