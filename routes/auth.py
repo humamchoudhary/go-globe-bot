@@ -1,7 +1,11 @@
 import random
 from flask import url_for, redirect, session, request, jsonify, render_template, current_app
 from . import auth_bp
-from services.user_service import UserService
+from services.tempuser_service import TempUserService
+
+
+def generate_random_username():
+    return f"user_{random.randint(1000, 9999)}"
 
 
 @auth_bp.route('/set-username', methods=['POST'])
@@ -12,81 +16,65 @@ def set_username():
     if not name:
         return jsonify({"error": "Name is required"}), 400
 
-    user_service = UserService(current_app.db)
+    temp_user_service = TempUserService()
 
     # If user already has a session, update their name
-    if 'user_id' in session:
-        user = user_service.get_user_by_id(session['user_id'])
+    if 'temp_user_id' in session:
+        user = temp_user_service.get_user_by_id(session['temp_user_id'])
         if user:
             user.name = name
-            current_app.db.users.update_one(
-                {'user_id': user.user_id},
-                {'$set': {'name': name}}
-            )
+            temp_user_service.update_user(user)
             return jsonify({"user_id": user.user_id, "name": name}), 200
 
-    # Create a new user
-    user = user_service.create_user(name)
-    session['user_id'] = user.user_id
-    session['admin'] = False
+    # Create a new anonymous user
+    user = temp_user_service.create_user(name)
+    session['temp_user_id'] = user.user_id
+    session['role'] = 'user'
     session.permanent = True
 
     return jsonify({"user_id": user.user_id, "name": name}), 201
 
 
-def generate_random_username():
-    return f"user_{random.randint(1000, 9999)}"
-
-
 @auth_bp.route('/login', methods=['GET'])
 def login():
-    return render_template('user/login.html')
+    # Skip login page, directly create anonymous user and redirect
+    return redirect(url_for('auth.create_anonymous_user'))
 
 
-@auth_bp.route('/auth', methods=['POST', 'GET'])
-def auth_user():
-    # print(request.json)
-    # return jsonify({'error':"test error"}),404
-    if request.method == "GET":
-        sess_user = session.get('user_id')
-        return ('', 204) if sess_user else jsonify(False)
-
-    # Check if the user is already authenticated
-    # if 'user_id' in session:
-    #     return ('', 204)
-
-    data = request.json or {}
-    name = data.get('name')
-    email = data.get('email')
-    phone = data.get('phone')
-    is_anon = data.get('anonymous')
-    user_ip = request.remote_addr  # Automatically fetch IP
-    user_service = UserService(current_app.db)
-    if is_anon:
-        name = generate_random_username()
-        user = user_service.create_user(name, ip=user_ip)
-
-    else:
-        user = user_service.create_user(
-            name, email=email, phone=phone, ip=user_ip)
-
-    if not (name or email or phone):
-        # if not ALLOW_EMPTY_USERS:
-        if not True:
-            return jsonify({"error": "Empty users are not allowed."}), 400
-        name = generate_random_username()
-
-    # Store user details in session (replace with DB logic if needed)
-
-    session['user_id'] = user.user_id
+@auth_bp.route('/create_anonymous_user', methods=['GET'])
+def create_anonymous_user():
+    # Always create anonymous user
+    temp_user_service = TempUserService()
+    
+    # Generate random username
+    name = generate_random_username()
+    user_ip = request.remote_addr
+    
+    user = temp_user_service.create_user(name, ip=user_ip)
+    
+    # Store user details in session
+    session['temp_user_id'] = user.user_id
     session['role'] = "user"
+    session.permanent = True
+    
     if request.args.get('redir'):
         return redirect(url_for(request.args.get('redir')))
     else:
         return redirect(url_for('chat.index'))
 
 
+@auth_bp.route('/auth', methods=['POST', 'GET'])
+def auth_user():
+    if request.method == "GET":
+        sess_user = session.get('temp_user_id')
+        return ('', 204) if sess_user else jsonify(False)
+
+    # For POST requests, create anonymous user
+    return redirect(url_for('auth.create_anonymous_user'))
+
+
 @auth_bp.route('/logout')
 def logout():
+    # Clear session and create new anonymous user
     session.clear()
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('auth.create_anonymous_user'))

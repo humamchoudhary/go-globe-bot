@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!--[if lt IE 7]><html class="ie ie6" lang="en"> <![endif]-->
 <!--[if IE 7]><html class="ie ie7" lang="en"> <![endif]-->
 <!--[if IE 8]><html class="ie ie8" lang="en"> <![endif]-->
@@ -21,7 +21,7 @@
     <script>
       document.documentElement.setAttribute(
         "data-goglobe-skin",
-        '{{settings["theme"]}}'
+        '{{settings["theme"]}}',
       );
       if (localStorage.frenify_panel !== "") {
         document.documentElement.classList.add(localStorage.frenify_panel);
@@ -153,13 +153,31 @@
                     data-position="right"
                     title="Home"
                   >
-                    <span class="icon"
-                      ><img
+                    <span class="icon">
+                      <img
                         src="{{ url_for('static', filename='svg/home.svg') }}"
                         alt=""
                         class="fn__svg"
-                    /></span>
+                      />
+                    </span>
                     <span class="text">Home</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/pricing"
+                    class="fn__tooltip menu__item"
+                    data-position="right"
+                    title="Home"
+                  >
+                    <span class="icon">
+                      <img
+                        src="{{ url_for('static', filename='svg/dollar.svg') }}"
+                        alt=""
+                        class="fn__svg"
+                      />
+                    </span>
+                    <span class="text">Pricing</span>
                   </a>
                 </li>
               </ul>
@@ -173,12 +191,13 @@
                     data-position="right"
                     title="Log Out"
                   >
-                    <span class="icon"
-                      ><img
+                    <span class="icon">
+                      <img
                         src="{{ url_for('static', filename='svg/logout.svg') }}"
                         alt=""
                         class="fn__svg"
-                    /></span>
+                      />
+                    </span>
                     <span class="text">Log Out</span>
                   </a>
                 </li>
