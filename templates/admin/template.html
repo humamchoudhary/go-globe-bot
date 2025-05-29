@@ -423,11 +423,11 @@
               <ul class="group__list">
                 <li>
                   <a
-                    href="/admin"
+                    href="/admin/"
                     class="fn__tooltip menu__item {% if request.endpoint == 'admin_home' %}active{% endif %}"
                     data-position="right"
                     title="Home"
-                    data-page="/admin"
+                    data-page="/admin/"
                   >
                     <span class="icon">
                       <img
@@ -458,11 +458,11 @@
                 </li>
                 <li>
                   <a
-                    href="/admin/files"
+                    href="/admin/files/"
                     class="fn__tooltip menu__item {% if request.endpoint == 'admin_files' %}active{% endif %}"
                     data-position="right"
                     title="Upload File"
-                    data-page="/admin/files"
+                    data-page="/admin/files/"
                   >
                     <span class="icon">
                       <img
@@ -476,11 +476,30 @@
                 </li>
                 <li>
                   <a
-                    href="/admin/usage"
-                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_usage' %}active{% endif %}"
+                    href="/admin/usage/"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_usage' %}active{% endif %} items-center"
                     data-position="right"
                     title="Usage"
-                    data-page="/admin/usage"
+                    data-page="/admin/usage/"
+                  >
+                    <span class="icon">
+                      <!-- <img -->
+                      <!--   src="{{ url_for('static', filename='svg/dollar.svg') }}" -->
+                      <!--   alt="" -->
+                      <!--   class="fn__svg" -->
+                      <!-- /> -->
+                      <i data-lucide="chart-area" class="size-5"></i>
+                    </span>
+                    <span class="text">Usage</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/admin/pricing/"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_faq' %}active{% endif %}"
+                    data-position="right"
+                    title="Pricing"
+                    data-page="/admin/pricing/"
                   >
                     <span class="icon">
                       <img
@@ -489,7 +508,44 @@
                         class="fn__svg"
                       />
                     </span>
-                    <span class="text">Usage</span>
+                    <span class="text">Pricing</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/admin/faq/"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_faq' %}active{% endif %}"
+                    data-position="right"
+                    title="FAQ"
+                    data-page="/admin/faq/"
+                  >
+                    <span class="icon">
+                      <img
+                        src="{{ url_for('static', filename='svg/question.svg') }}"
+                        alt=""
+                        class="fn__svg"
+                      />
+                    </span>
+                    <span class="text">FAQs</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/admin/change-logs"
+                    class="fn__tooltip menu__item {% if request.endpoint == 'admin_usage' %}active{% endif %} items-center"
+                    data-position="right"
+                    title="Pricing"
+                    data-page="/admin/change-logs"
+                  >
+                    <span class="icon">
+                      <!-- <img -->
+                      <!--   src="{{ url_for('static', filename='svg/dollar.svg') }}" -->
+                      <!--   alt="" -->
+                      <!--   class="fn__svg" -->
+                      <!-- /> -->
+                      <i data-lucide="square-pen" class="size-5"></i>
+                    </span>
+                    <span class="text">ChangeLogs</span>
                   </a>
                 </li>
                 <li>

@@ -1,5 +1,4 @@
 from services.timezone import UTCZoneManager
-from datetime import datetime, time
 import threading
 from pprint import pprint
 from services.usage_service import UsageService
@@ -8,20 +7,22 @@ import xml.etree.ElementTree as ET
 import requests
 from .scrape import scrape_web
 import re
-import time
 from flask import send_from_directory
 import uuid
 import os
 from flask import render_template, session, request, jsonify, redirect, url_for, current_app, flash
-from flask_socketio import join_room, leave_room, emit
+from flask_socketio import join_room,  emit
 import bcrypt
 from functools import wraps
 from . import admin_bp
 from services.chat_service import ChatService
 from services.user_service import UserService
-import pytz
 from werkzeug.utils import secure_filename
 import pdf2image
+from services.logs_service import LogsService
+
+from datetime import datetime
+from models.log import LogLevel, LogTag
 
 
 def admin_required(f):
@@ -34,6 +35,133 @@ def admin_required(f):
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+@admin_bp.route('/pricing/')
+@admin_required
+def pricing_page():
+    return render_template('admin/pricing.html')
+
+
+@admin_bp.route('/faq/')
+@admin_required
+def faq_page():
+    return render_template('admin/faq.html')
+
+
+@admin_bp.route('/change-logs')
+@admin_required
+def changelogs_page():
+    return render_template('admin/change-logs.html')
+
+
+@admin_bp.route('/logs/')
+@admin_required
+def view_logs():
+    """Main logs page"""
+    logs_service = LogsService(current_app.db)
+    logs = logs_service.get_recent_logs(None)
+    return render_template('admin/logs.html', logs=logs, selected_log=None)
+
+
+@admin_bp.route('/logs/filter')
+@admin_required
+def filter_logs():
+    """Filter logs with HTMX"""
+    logs_service = LogsService(current_app.db)
+
+    # Get filter parameters
+    levels = request.args.getlist('level')  # Multiple levels
+    tags = request.args.getlist('tag')      # Multiple tags
+    user_id = request.args.get('user_id', '').strip()
+    admin_id = request.args.get('admin_id', '').strip()
+    message_search = request.args.get(
+        'message_search', '').strip()  # New message filter
+    sort_order = request.args.get('sort', 'timestamp_desc')
+    limit = request.args.get('limit', None)
+
+    # Parse dates
+    start_date = None
+    end_date = None
+    start_date_str = request.args.get('start_date', '').strip()
+    end_date_str = request.args.get('end_date', '').strip()
+
+    try:
+        if start_date_str:
+            start_date = datetime.fromisoformat(start_date_str)
+        if end_date_str:
+            end_date = datetime.fromisoformat(end_date_str)
+    except ValueError:
+        pass  # Invalid date format, ignore
+
+    # Convert levels and tags to enums if provided
+    level_enums = []
+    tag_enums = []
+
+    for level in levels:
+        try:
+            if level:
+                level_enums.append(LogLevel(level))
+        except ValueError:
+            pass
+
+    for tag in tags:
+        try:
+            if tag:
+                tag_enums.append(LogTag(tag))
+        except ValueError:
+            pass
+
+    # Search with filters
+    logs = logs_service.search_logs_advanced(
+        levels=level_enums if level_enums else None,
+        tags=tag_enums if tag_enums else None,
+        user_id=user_id if user_id else None,
+        admin_id=admin_id if admin_id else None,
+        message_search=message_search if message_search else None,
+        start_date=start_date,
+        end_date=end_date,
+        limit=limit
+    )
+
+    # Apply sorting
+    if sort_order == 'timestamp_asc':
+        logs.sort(key=lambda x: x.timestamp)
+    elif sort_order == 'level_desc':
+        level_priority = {'CRITICAL': 5, 'ERROR': 4,
+                          'WARNING': 3, 'INFO': 2, 'DEBUG': 1}
+        logs.sort(key=lambda x: level_priority.get(
+            x.level.value, 0), reverse=True)
+    elif sort_order == 'level_asc':
+        level_priority = {'CRITICAL': 5, 'ERROR': 4,
+                          'WARNING': 3, 'INFO': 2, 'DEBUG': 1}
+        logs.sort(key=lambda x: level_priority.get(x.level.value, 0))
+    # timestamp_desc is default (already sorted by service)
+
+    return render_template('admin/logs_table.html', logs=logs)
+
+
+@admin_bp.route('/log/<string:log_id>')
+@admin_required
+def view_log_detail(log_id):
+    """View individual log details"""
+    logs_service = LogsService(current_app.db)
+    log = logs_service.get_log_by_id(log_id)
+
+    if not log:
+        if request.headers.get('HX-Request') == 'true':
+            return '<div class="p-4 text-red-500">Log not found</div>', 404
+        else:
+            return "Log not found", 404
+
+    # Check if it's an HTMX request
+    if request.headers.get('HX-Request') == 'true':
+        return render_template('admin/log_detail.html', log=log)
+    else:
+        # Full page load - redirect to logs page with detail
+        logs_service = LogsService(current_app.db)
+        logs = logs_service.get_recent_logs(limit=100)
+        return render_template('admin/logs.html', logs=logs, selected_log=log)
 
 
 @admin_bp.route('/login', methods=['GET', 'POST'])

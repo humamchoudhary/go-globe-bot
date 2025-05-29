@@ -17,7 +17,7 @@ from services.email_service import send_email
 def user_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'temp_user_id' not in session:
+        if 'user_id' not in session:
             return redirect(url_for('auth.create_anonymous_user'))
         return f(*args, **kwargs)
     return decorated_function
@@ -29,7 +29,7 @@ def index():
     temp_user_service = TempUserService()
     temp_chat_service = TempChatService()
 
-    user = temp_user_service.get_user_by_id(session['temp_user_id'])
+    user = temp_user_service.get_user_by_id(session['user_id'])
     if not user:
         return redirect(url_for('auth.create_anonymous_user'))
 
@@ -47,7 +47,7 @@ def chat(chat_id):
     temp_user_service = TempUserService()
     temp_chat_service = TempChatService()
 
-    user = temp_user_service.get_user_by_id(session['temp_user_id'])
+    user = temp_user_service.get_user_by_id(session['user_id'])
     if not user:
         return redirect(url_for('auth.create_anonymous_user'))
 
@@ -87,7 +87,7 @@ def ping_admin(chat_id):
     temp_chat_service = TempChatService()
     temp_user_service = TempUserService()
 
-    user = temp_user_service.get_user_by_id(session['temp_user_id'])
+    user = temp_user_service.get_user_by_id(session['user_id'])
     chat = temp_chat_service.get_chat_by_id(chat_id)
 
     if not chat or chat.user_id != user.user_id:
@@ -165,7 +165,7 @@ def send_message(chat_id):
     temp_user_service = TempUserService()
     temp_chat_service = TempChatService()
 
-    user = temp_user_service.get_user_by_id(session['temp_user_id'])
+    user = temp_user_service.get_user_by_id(session['user_id'])
     if not user:
         if request.headers.get('HX-Request'):
             return "User not found", 404
@@ -212,7 +212,7 @@ def new_chat(subject):
     temp_user_service = TempUserService()
     temp_chat_service = TempChatService()
 
-    user = temp_user_service.get_user_by_id(session['temp_user_id'])
+    user = temp_user_service.get_user_by_id(session['user_id'])
     if not user:
         return redirect(url_for('auth.create_anonymous_user'))
 
@@ -233,6 +233,11 @@ def pricing_page():
     return render_template('user/pricing.html')
 
 
+@chat_bp.route('/change-logs')
+def changelogs_page():
+    return render_template('user/change-logs.html')
+
+
 @chat_bp.route('/faq')
 def faq_page():
     return render_template('user/faq.html')
@@ -242,7 +247,7 @@ def register_socketio_events(socketio):
     @socketio.on('join')
     def on_join(data):
         room = data.get('room')
-        temp_user_id = session.get('temp_user_id')
+        temp_user_id = session.get('user_id')
 
         if not room or not temp_user_id:
             return
@@ -260,7 +265,7 @@ def register_socketio_events(socketio):
     @socketio.on('leave')
     def on_leave(data):
         room = data.get('room')
-        temp_user_id = session.get('temp_user_id')
+        temp_user_id = session.get('user_id')
 
         if not room or not temp_user_id:
             return

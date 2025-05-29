@@ -1,6 +1,6 @@
 from datetime import timedelta
-from flask import Flask, session, url_for, jsonify, Response
-
+from flask import Flask, session, url_for, jsonify, Response, g
+import uuid
 from flask import render_template,  request, redirect, current_app
 from flask_socketio import SocketIO
 from flask_session import Session
@@ -17,7 +17,11 @@ from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
 from flask_cors import CORS
-
+from services.logs_service import LogsService
+from models.log import LogLevel, LogTag, LogEntry
+import traceback
+from datetime import datetime
+import json
 
 def get_font_data():
     # Path to your font directory
@@ -44,11 +48,18 @@ def create_app(config_class=Config):
          methods=["GET", "POST", "OPTIONS"])
     app.config.from_object(config_class)
 
-# Setup MongoDB
+    # Setup MongoDB
     client = MongoClient(app.config['MONGODB_URI'])
     db = client.get_database()
     app.db = db
     app.config['SESSION_MONGODB'] = client
+
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+    # Add JSON filter to Jinja
+    @app.template_filter('tojson')
+    def to_json_filter(value, indent=None):
+        return json.dumps(value, indent=indent, default=str)
 
     app.config['SESSION_TYPE'] = 'mongodb'
     app.config['LOGOS_FOLDER'] = os.path.join(os.getcwd(), 'static/img/')
@@ -83,11 +94,160 @@ def create_app(config_class=Config):
     )
 
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=3)
+    IGNORE_PATHS = {'static',
+                    'socket.io',
+                    'favicon.ico',
+                    'healthcheck',
+                    'robots.txt'}
+
+    SENSITIVE_HEADERS = {
+        'Authorization',
+        'Cookie',
+        'X-Api-Key',
+        'X-CSRFToken'
+    }
+    logs_service = LogsService(app.db)
 
     @app.before_request
-    def test():
-        print(request.headers.get("X-Real-IP"))
+    def log_request():
+        """Comprehensive request logging middleware"""
+        try:
+            path = request.path.strip(
+                '/').split('/')[0] if request.path else 'root'
 
+            # Skip ignored paths
+            if path in IGNORE_PATHS:
+                return
+
+            # Prepare request data
+            request_id = str(uuid.uuid4())
+            g.request_id = request_id  # Store in Flask's g for later use
+
+            # Redact sensitive headers
+            headers = dict(request.headers)
+            for header in SENSITIVE_HEADERS:
+                if header in headers:
+                    headers[header] = '[REDACTED]'
+
+            # Get user/agent information
+            user_id = session.get('user_id')
+            admin_id = session.get('admin_id')
+            ip_address = request.headers.get(
+                'X-Forwarded-For', request.remote_addr)
+            user_agent = request.headers.get('User-Agent')
+
+            # Determine log level based on path
+            if path.startswith('admin'):
+                log_level = LogLevel.INFO
+                log_tag = LogTag.ADMIN
+            elif path.startswith('api'):
+                log_level = LogLevel.DEBUG
+                log_tag = LogTag.ACCESS
+            else:
+                log_level = LogLevel.INFO
+                log_tag = LogTag.ACCESS
+
+            # Create request data payload
+            request_data = {
+                'request_id': request_id,
+                'method': request.method,
+                'path': request.path,
+                'endpoint': request.endpoint,
+                'args': dict(request.args),
+                'headers': headers,
+                'ip': ip_address,
+                'user_agent': user_agent,
+                'content_type': request.content_type,
+                'content_length': request.content_length
+            }
+
+            # For form data
+            if request.form:
+                request_data['form_data'] = dict(request.form)
+
+            # For JSON data
+            if request.is_json:
+                try:
+                    request_data['json_data'] = request.get_json()
+                except Exception as e:
+                    request_data['json_data_error'] = f'Invalid JSON payload: {
+                        str(e)}'
+
+            # Create the log entry
+            log_entry = logs_service.create_log(
+                level=log_level,
+                tag=log_tag,
+                message=f"{request.method} {request.path}",
+                user_id=user_id,
+                admin_id=admin_id,
+                data={
+                    'request': request_data,
+                    'session': {
+                        'session_id': session.get('_id'),
+                        'session_data': {k: v for k, v in session.items()
+                                         if not k.startswith('_')}
+                    }
+                }
+            )
+
+            # Store log ID for potential error correlation
+            g.log_id = log_entry.log_id
+
+        except Exception as e:
+            app.logger.error(f"Failed to log request: {
+                             str(e)}\n{traceback.format_exc()}")
+
+    @app.after_request
+    def log_response(response):
+        """Log response information"""
+        try:
+            if hasattr(g, 'log_id') and hasattr(g, 'request_id'):
+                logs_service.logs_collection.update_one(
+                    {'log_id': g.log_id},
+                    {'$set': {
+                        'response': {
+                            'status_code': response.status_code,
+                            'content_length': response.content_length,
+                            'content_type': response.content_type,
+                            'headers': dict(response.headers)
+                        },
+                        'completed_at': datetime.utcnow(),
+                        'duration': (datetime.utcnow() - g.get('request_start_time', datetime.utcnow())).total_seconds()
+                    }}
+                )
+        except Exception as e:
+            app.logger.error(f"Failed to log response: {
+                             str(e)}\n{traceback.format_exc()}")
+        return response
+
+    @app.errorhandler(Exception)
+    def log_exception(error):
+        """Log exceptions with correlation to original request"""
+        try:
+            if hasattr(g, 'log_id'):
+                logs_service.create_log(
+                    level=LogLevel.ERROR,
+                    tag=LogTag.SYSTEM,
+                    message=f"Request failed: {str(error)}",
+                    data={
+                        'error': str(error),
+                        'type': error.__class__.__name__,
+                        'related_request': g.log_id,
+                        'traceback': traceback.format_exc() if app.debug else None
+                    }
+                )
+        except Exception as e:
+            app.logger.error(f"Failed to log exception: {
+                             str(e)}\n{traceback.format_exc()}")
+        return error
+
+
+# Add request start time tracking
+
+
+    @app.before_request
+    def start_timer():
+        g.request_start_time = datetime.utcnow()
     conf = db.config.find_one({"id": "settings"})
     if conf:
         app.config['SETTINGS'] = conf
