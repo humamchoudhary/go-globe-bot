@@ -19,6 +19,117 @@
     border: 1px solid #ef4444 !important;
     box-shadow: 0 0 0 1px #ef4444 !important;
   }
+
+  /* Phone input container styling */
+  .phone-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--goglobe-site-bg-color);
+    border-radius: 6px;
+    background-color: var(--goglobe-input-color);
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+
+  .phone-input-container:focus-within {
+    border-color: var(--goglobe-main-color);
+  }
+
+  .country-selector {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0.5rem 1rem 1rem;
+    background: transparent;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    font-family: var(--goglobe-body-font-family);
+  }
+
+  .country-flag {
+    width: 20px;
+    height: 15px;
+    margin-right: 0.5rem;
+    border-radius: 2px;
+  }
+
+  .country-code {
+    margin-right: 0.25rem;
+    min-width: 35px;
+    text-align: left;
+  }
+
+  .phone-number-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: white;
+    font-weight: bold;
+    padding: 1rem 1rem 1rem 0.5rem;
+    font-family: var(--goglobe-body-font-family);
+  }
+
+  .phone-number-input::placeholder {
+    color: var(--goglobe-body-color);
+    font-weight: bold;
+  }
+
+  .dropdown-arrow {
+    margin-left: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--goglobe-body-color);
+  }
+
+  /* Country dropdown styling */
+  .country-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--goglobe-input-color);
+    border: 1px solid var(--goglobe-main-color);
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    margin-top: 2px;
+  }
+
+  .country-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s;
+  }
+
+  .country-option:hover {
+    background-color: var(--goglobe-main-color);
+  }
+
+  .country-option .country-flag {
+    margin-right: 0.75rem;
+  }
+
+  .country-option .country-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+
+  .country-name {
+    font-weight: normal;
+  }
+
+  .phone-input-wrapper {
+    position: relative;
+  }
 </style>
 
 <div style="overflow-y:hidden; background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family); width: 100%;">
@@ -75,14 +186,21 @@
                     <p id="subject-error" class="error-text"></p>
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <input type="tel"
-                        style="  font-family: var(--goglobe-body-font-family) ;width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color);"
-                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
-                        id="phone" name="phone" placeholder="Phone Number*" autocapitalize="off"
-                        autocomplete="tel" required pattern="[0-9+\-\s()]{10,15}"
-                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
+                <!-- Enhanced Phone Input -->
+  <div style="margin-bottom: 1.5rem;">
+                    <div class="phone-input-container" id="phone-container">
+                        <select class="country-selector" id="country-selector" name="country-code">
+                            <!-- Countries will be populated by JavaScript -->
+                        </select>
+                        <input type="tel" 
+                            class="phone-number-input" 
+
+ style=" font-family: var(--goglobe-body-font-family)"                           id="phone" 
+                            name="phone" 
+                            placeholder="Phone Number*" 
+                            autocomplete="tel" 
+                            required>
+                    </div>
                     <p id="phone-error" class="error-text"></p>
                 </div>
 
@@ -91,12 +209,8 @@
                 <button type="submit" id="login-btn"
                     class="w-full !font-bold rounded border transition-all duration-300"
                     style="  font-family: var(--goglobe-body-font-family) ;font-weight:bold ;color:white; width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; background-color: var(--goglobe-main-color); border-color: var(--goglobe-border-color); color: white;"
-
-
-
-
                     onmouseover="this.style.backgroundColor='var(--goglobe-site-bg)'; this.style.cursor='pointer'"
-                                 onmouseout="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.cursor='auto'"
+                    onmouseout="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.cursor='auto'"
                     onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
                     onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'">
                     Start Chat
@@ -111,7 +225,107 @@
 {% block scripts %}
 
 <script>
- function initForm() {
+// Country data with flags, codes, and names
+const countries = [
+  { code: '+1', country: 'United States', flag: '🇺🇸', dialCode: '1' },
+    { code: '+91', country: 'India', flag: '🇮🇳', dialCode: '91' },
+    { code: '+92', country: 'Pakistan', flag: '🇵🇰', dialCode: '92' },
+    { code: '+44', country: 'United Kingdom', flag: '🇬🇧', dialCode: '44' },
+    { code: '+86', country: 'China', flag: '🇨🇳', dialCode: '86' },
+    { code: '+81', country: 'Japan', flag: '🇯🇵', dialCode: '81' },
+    { code: '+49', country: 'Germany', flag: '🇩🇪', dialCode: '49' },
+    { code: '+33', country: 'France', flag: '🇫🇷', dialCode: '33' },
+    { code: '+39', country: 'Italy', flag: '🇮🇹', dialCode: '39' },
+    { code: '+34', country: 'Spain', flag: '🇪🇸', dialCode: '34' },
+    { code: '+7', country: 'Russia', flag: '🇷🇺', dialCode: '7' },
+    { code: '+55', country: 'Brazil', flag: '🇧🇷', dialCode: '55' },
+    { code: '+52', country: 'Mexico', flag: '🇲🇽', dialCode: '52' },
+    { code: '+61', country: 'Australia', flag: '🇦🇺', dialCode: '61' },
+    { code: '+82', country: 'South Korea', flag: '🇰🇷', dialCode: '82' },
+    { code: '+65', country: 'Singapore', flag: '🇸🇬', dialCode: '65' },
+    { code: '+971', country: 'UAE', flag: '🇦🇪', dialCode: '971' },
+    { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦', dialCode: '966' },
+    { code: '+90', country: 'Turkey', flag: '🇹🇷', dialCode: '90' },
+    { code: '+20', country: 'Egypt', flag: '🇪🇬', dialCode: '20' },
+    { code: '+27', country: 'South Africa', flag: '🇿🇦', dialCode: '27' },
+    { code: '+234', country: 'Nigeria', flag: '🇳🇬', dialCode: '234' },
+    { code: '+60', country: 'Malaysia', flag: '🇲🇾', dialCode: '60' },
+    { code: '+66', country: 'Thailand', flag: '🇹🇭', dialCode: '66' },
+    { code: '+84', country: 'Vietnam', flag: '🇻🇳', dialCode: '84' },
+    { code: '+62', country: 'Indonesia', flag: '🇮🇩', dialCode: '62' },
+    { code: '+63', country: 'Philippines', flag: '🇵🇭', dialCode: '63' },
+    { code: '+93', country: 'Afghanistan', flag: '🇦🇫', dialCode: '93' },
+    { code: '+355', country: 'Albania', flag: '🇦🇱', dialCode: '355' },
+    { code: '+213', country: 'Algeria', flag: '🇩🇿', dialCode: '213' }
+];
+
+function initPhoneInput() {
+    const countrySelector = document.getElementById('country-selector');
+    const phoneInput = document.getElementById('phone');
+    
+    // Set default country based on Flask variable
+    const userCountryCode = '{{ user_country_code if user_country_code else "1" }}';
+    let defaultCountry = countries.find(c => c.dialCode === userCountryCode) || countries.find(c => c.dialCode === '1');
+    
+    // Populate dropdown options
+    function populateDropdown() {
+        countrySelector.innerHTML = '';
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.code;
+            option.textContent = `${country.flag} ${country.code}`;
+            option.dataset.dialCode = country.dialCode;
+            
+            if (country.dialCode === defaultCountry.dialCode) {
+                option.selected = true;
+            }
+            
+            countrySelector.appendChild(option);
+        });
+    }
+    
+    // Auto-detect country from phone input
+    function detectCountryFromInput() {
+        const inputValue = phoneInput.value.replace(/\D/g, '');
+        if (inputValue.length >= 1) {
+            // Try to match country codes (sort by length desc to match longest first)
+            const possibleCountries = countries.filter(c => 
+                inputValue.startsWith(c.dialCode)
+            ).sort((a, b) => b.dialCode.length - a.dialCode.length);
+            
+            if (possibleCountries.length > 0) {
+                const detectedCountry = possibleCountries[0];
+                const currentSelected = countrySelector.options[countrySelector.selectedIndex];
+                
+                if (currentSelected.dataset.dialCode !== detectedCountry.dialCode) {
+                    // Find and select the detected country
+                    for (let i = 0; i < countrySelector.options.length; i++) {
+                        if (countrySelector.options[i].dataset.dialCode === detectedCountry.dialCode) {
+                            countrySelector.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    // Remove the country code from input
+                    const remainingNumber = inputValue.substring(detectedCountry.dialCode.length);
+                    phoneInput.value = remainingNumber;
+                }
+            }
+        }
+    }
+    
+    // Handle phone input changes
+    phoneInput.addEventListener('input', function() {
+        // Only allow digits, spaces, hyphens, and parentheses
+        this.value = this.value.replace(/[^\d\s\-()]/g, '');
+        detectCountryFromInput();
+    });
+    
+    // Initialize
+    populateDropdown();
+    
+    return defaultCountry;
+}
+function initForm() {
     const loginForm = document.getElementById("login-form");
     const loginBtn = document.getElementById("login-btn");
     const nameInput = document.getElementById("name");
@@ -119,7 +333,11 @@
     const subjectInput = document.getElementById("subject");
     const desgInput = document.getElementById("desg");
     const phoneInput = document.getElementById("phone");
+    const phoneContainer = document.getElementById("phone-container");
     const errorMessage = document.getElementById("error-message");
+
+    // Initialize phone input
+    let currentCountry = initPhoneInput();
 
     // Error message elements
     const nameError = document.getElementById("name-error");
@@ -131,108 +349,104 @@
     // Email validation regex
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    // Phone validation regex - allows digits, +, -, (, ), and spaces
-    const phoneRegex = /^[0-9+\-\s()]{10,15}$/;
+    // Phone validation regex - allows digits, spaces, hyphens, parentheses (without country code)
+    const phoneRegex = /^[\d\s\-()]{7,15}$/;
 
     // Form validation
     function validateForm() {
-      let isValid = true;
+        let isValid = true;
 
-      // Reset all errors
-hideError(errorMessage);
-hideError(nameError);
-hideError(emailError);
-hideError(phoneError);
-hideError(subjectError);
-        if (desgError){
+        // Reset all errors
+        hideError(errorMessage);
+        hideError(nameError);
+        hideError(emailError);
+        hideError(phoneError);
+        hideError(subjectError);
+        if (desgError) {
             hideError(desgError);
         }
 
-nameInput.classList.remove("input-error");
-emailInput.classList.remove("input-error");
-phoneInput.classList.remove("input-error");
-subjectInput.classList.remove("input-error");
-        if(desgInput){
+        nameInput.classList.remove("input-error");
+        emailInput.classList.remove("input-error");
+        phoneContainer.classList.remove("input-error");
+        subjectInput.classList.remove("input-error");
+        if (desgInput) {
             desgInput.classList.remove("input-error");
         }
 
+        // Validate name
+        if (!nameInput.value.trim()) {
+            showInputError(nameInput, nameError, "Name is required");
+            isValid = false;
+        } else if (nameInput.value.trim().length < 2) {
+            showInputError(nameInput, nameError, "Name must be at least 2 characters");
+            isValid = false;
+        }
+        // Validate email
+        else if (!emailInput.value.trim()) {
+            showInputError(emailInput, emailError, "Email is required");
+            isValid = false;
+        } else if (!emailRegex.test(emailInput.value.trim())) {
+            showInputError(emailInput, emailError, "Please enter a valid email address");
+            isValid = false;
+        }
+        // Validate subject
+        else if (!subjectInput.value.trim()) {
+            showInputError(subjectInput, subjectError, "Subject is required");
+            isValid = false;
+        }
+        else if (desgInput && !desgInput.value.trim()) {
+            showInputError(desgInput, desgError, "Designation is required");
+            isValid = false;
+        }
+        // Validate phone
+        else if (!phoneInput.value.trim()) {
+            showPhoneInputError("Phone number is required");
+            isValid = false;
+        } else if (!phoneRegex.test(phoneInput.value.trim())) {
+            showPhoneInputError("Please enter a valid phone number (7-15 digits)");
+            isValid = false;
+        }
 
-      // Validate name
-      if (!nameInput.value.trim()) {
-        showInputError(nameInput, nameError, "Name is required");
-        isValid = false;
-      } else if (nameInput.value.trim().length < 2) {
-        showInputError(
-          nameInput,
-          nameError,
-          "Name must be at least 2 characters"
-        );
-        isValid = false;
-      }
-
-      // Validate email
-     else if (!emailInput.value.trim()) {
-        showInputError(emailInput, emailError, "Email is required");
-        isValid = false;
-      } else if (!emailRegex.test(emailInput.value.trim())) {
-        showInputError(
-          emailInput,
-          emailError,
-          "Please enter a valid email address"
-        );
-        isValid = false;
-      }
-
-
-      // Validate subject
-      else if (!subjectInput.value.trim()) {
-        showInputError(subjectInput, subjectError, "Subject is required");
-        isValid = false;
-      }
-        
-else if (desgInput  && !desgInput.value.trim()) {
-  showInputError(desgInput, desgError, "Designation is required");
-  isValid = false;
-}
-
-
-      // Validate phone
-      else if (!phoneInput.value.trim()) {
-        showInputError(phoneInput, phoneError, "Phone number is required");
-        isValid = false;
-      } else if (!phoneRegex.test(phoneInput.value.trim())) {
-        showInputError(
-          phoneInput,
-          phoneError,
-          "Please enter a valid phone number (10-15 digits)"
-        );
-        isValid = false;
-      }
-
-
-      return isValid;
+        return isValid;
     }
 
     function showInputError(inputElement, errorElement, message) {
-      
-      // Also display in main error message area for accessibility
-      errorMessage.textContent = message;
-      errorMessage.style.display = "block";
+        inputElement.classList.add("input-error");
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+        
+        // Also display in main error message area for accessibility
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+    }
+
+    function showPhoneInputError(message) {
+        phoneContainer.classList.add("input-error");
+        phoneError.textContent = message;
+        phoneError.style.display = "block";
+        
+        // Also display in main error message area for accessibility
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
     }
 
     function hideError(errorElement) {
-      errorElement.textContent = "";
-      errorElement.style.display = "none";
+        errorElement.textContent = "";
+        errorElement.style.display = "none";
     }
 
     function showError(message) {
-      errorMessage.textContent = message;
-      errorMessage.style.display = "block";
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
     }
 
     // Form submission
     loginForm.addEventListener("submit", function (e) {
         e.preventDefault();
+
+        // Update current country before validation
+        currentCountry = document.getElementById('country-selector').value;
 
         if (!validateForm()) {
             return;
@@ -240,10 +454,10 @@ else if (desgInput  && !desgInput.value.trim()) {
 
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
-        const phone = phoneInput.value.trim();
+        const phone = currentCountry + phoneInput.value.trim().replace(/\D/g, ''); // Add country code and clean number
         const subject = subjectInput.value.trim();
         let desg;
-        if(desgInput){
+        if (desgInput) {
             desg = desgInput.value.trim();
         }
         const isHtmxRequest = document.getElementById("chatbox") !== null;
@@ -258,9 +472,9 @@ else if (desgInput  && !desgInput.value.trim()) {
             body: JSON.stringify({
                 name: name,
                 email: email,
-                phone: phone,
+                phone: phone, // This will now include the country code
                 subject: subject,
-                desg: desg? desg:"None"
+                desg: desg ? desg : "None"
             }),
         })
         .then(async (response) => {
@@ -272,16 +486,12 @@ else if (desgInput  && !desgInput.value.trim()) {
 
             if (isHtmxRequest) {
                 const text = await response.text();
-                htmx.swap('#chatbox', text, {swapStyle: 'innerHTML'});  // This will execute scripts automatically
-            }
-            else {
-                // For regular requests, handle redirects
+                htmx.swap('#chatbox', text, {swapStyle: 'innerHTML'});
+            } else {
                 if (response.redirected) {
                     window.location.href = response.url;
                 } else {
                     const text = await response.text();
-                    // Handle non-redirect successful responses
-                    // You might want to update the UI here
                 }
             }
         })
@@ -293,55 +503,39 @@ else if (desgInput  && !desgInput.value.trim()) {
 
     // Real-time validation on input fields
     nameInput.addEventListener("input", function () {
-      nameInput.classList.remove("input-error");
-      hideError(nameError);
-      hideError(errorMessage);
+        nameInput.classList.remove("input-error");
+        hideError(nameError);
+        hideError(errorMessage);
     });
 
     emailInput.addEventListener("input", function () {
-      emailInput.classList.remove("input-error");
-      hideError(emailError);
-      hideError(errorMessage);
+        emailInput.classList.remove("input-error");
+        hideError(emailError);
+        hideError(errorMessage);
 
-      // Optional: Show validation status as user types
-      if (
-        emailInput.value.trim() &&
-        !emailRegex.test(emailInput.value.trim())
-      ) {
-        showInputError(
-          emailInput,
-          emailError,
-          "Please enter a valid email address"
-        );
-      }
+        if (emailInput.value.trim() && !emailRegex.test(emailInput.value.trim())) {
+            showInputError(emailInput, emailError, "Please enter a valid email address");
+        }
     });
 
     phoneInput.addEventListener("input", function () {
-      phoneInput.classList.remove("input-error");
-      hideError(phoneError);
-      hideError(errorMessage);
+        phoneContainer.classList.remove("input-error");
+        hideError(phoneError);
+        hideError(errorMessage);
 
-      // Optional: Show validation status as user types
-      if (
-        phoneInput.value.trim() &&
-        !phoneRegex.test(phoneInput.value.trim())
-      ) {
-        showInputError(
-          phoneInput,
-          phoneError,
-          "Please enter a valid phone number (10-15 digits)"
-        );
-      }
+        if (phoneInput.value.trim() && !phoneRegex.test(phoneInput.value.trim())) {
+            showPhoneInputError("Please enter a valid phone number (7-15 digits)");
+        }
     });
-  };
-  
-  // Initialize the form when the DOM is fully loaded
-  document.addEventListener('DOMContentLoaded', function() {
+}
+
+// Initialize the form when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
     initForm();
-  });
-  
-  // Also call it immediately in case the script loads after DOM is ready
-  initForm();
+});
+
+// Also call it immediately in case the script loads after DOM is ready
+initForm();
 </script>
 
 {% endblock %}

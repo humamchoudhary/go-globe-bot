@@ -12,11 +12,8 @@ class UserService:
         user_id = str(uuid.uuid4())
 
         geo = requests.get(f"http://ip-api.com/json/{ip}")
-        print(geo)
         geo = geo.json()
-
-        print(geo)
-        country = geo.get("country_name", None)
+        country = geo.get("country", None)
         city = geo.get("city")
         if not country:
 

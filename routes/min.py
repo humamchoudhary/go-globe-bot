@@ -1,3 +1,5 @@
+import requests
+from vapi_python import Vapi
 from services.timezone import UTCZoneManager
 from flask import render_template_string
 from services.usage_service import UsageService
@@ -73,7 +75,12 @@ def index():
 @min_bp.route('login/<string:subject>', methods=['GET'])
 def login(subject):
     if request.method == "GET":
-        return render_template('user/min-login.html', default_subject=subject)
+        ip = request.headers.get("X-REAL-IP")
+        print(ip)
+        geo = requests.get(f"http://ip-api.com/json/{ip}")
+        geo = geo.json()
+        country = geo.get("country", None)
+        return render_template('user/min-login.html', default_subject=subject, user_country=country)
 
 
 @min_bp.route('onboarding', methods=['GET'])
@@ -83,6 +90,33 @@ def onboard():
 
 def generate_random_username():
     return f"user_{random.randint(1000, 9999)}"
+
+
+@min_bp.route("/voice", methods=['GET'])
+def voice():
+    return render_template('/user/voice.html')
+
+
+vapi = Vapi(api_key='b188aa83-bacd-4045-916b-a205539b0163')
+
+
+@min_bp.route('/start-call', methods=['POST', 'GET'])
+def start_vc():
+
+    assistant_id = request.json.get(
+        'assistant_id', 'c8d3ac53-d120-421f-bc29-5cfe77d8c11d')
+    try:
+        call = vapi.start(assistant_id=assistant_id)
+        print(call)
+        return jsonify({'status': 'success', 'call_info': call}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@min_bp.route('/end-call', methods=['POST', 'GET'])
+def end_vc():
+    vapi.stop()
+    return "", 200
 
 
 @min_bp.route('/auth', methods=['POST', 'GET'])

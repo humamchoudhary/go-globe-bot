@@ -260,7 +260,18 @@
 
     // Update client information
     document.getElementById("client-name").textContent = user.name || "-";
-    document.getElementById("client-phone").textContent = user.phone || "-";
+ //   document.getElementById("client-phone").textContent = user.phone || "-";
+
+const phone = user.phone || "-";
+const phoneEl = document.getElementById("client-phone");
+
+if (user.phone && user.phone !== "-") {
+  const waLink = `https://wa.me/${user.phone.replace(/\D/g, "")}`; // remove non-digits
+  phoneEl.innerHTML = `<a href="${waLink}" target="_blank" rel="noopener noreferrer" class="text-green-400 underline hover:text-green-300">${user.phone}</a>`;
+} else {
+  phoneEl.textContent = "-";
+}
+
     document.getElementById("client-email").textContent = user.email || "-";
 
     document.getElementById("client-desg").textContent = user.desg || "-";
