@@ -28,7 +28,7 @@ def set_username():
 
     # Create a new anonymous user
     user = temp_user_service.create_user(name)
-    session['temp_user_id'] = user.user_id
+    session['user_id'] = user.user_id
     session['role'] = 'user'
     session.permanent = True
 
@@ -45,18 +45,18 @@ def login():
 def create_anonymous_user():
     # Always create anonymous user
     temp_user_service = TempUserService()
-    
+
     # Generate random username
     name = generate_random_username()
     user_ip = request.remote_addr
-    
+
     user = temp_user_service.create_user(name, ip=user_ip)
-    
+
     # Store user details in session
-    session['temp_user_id'] = user.user_id
+    session['user_id'] = user.user_id
     session['role'] = "user"
     session.permanent = True
-    
+
     if request.args.get('redir'):
         return redirect(url_for(request.args.get('redir')))
     else:
