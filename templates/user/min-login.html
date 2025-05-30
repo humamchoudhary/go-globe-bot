@@ -455,7 +455,7 @@ function initPhoneInput() {
     
     // Set default country based on Flask variable
     const userCountryCode = '{{ user_country if user_country else "United State" }}';
-    let defaultCountry = countries.find(c => c.dialCode === userCountryCode) || countries.find(c => c.dialCode === '1');
+    let defaultCountry = countries.find(c => c.country === userCountryCode) || countries.find(c => c.dialCode === '1');
     
     // Populate dropdown options
     function populateDropdown() {
