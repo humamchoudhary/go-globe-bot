@@ -76,6 +76,7 @@ def index():
 def login(subject):
     if request.method == "GET":
         ip = request.headers.get("X-REAL-IP")
+        print(request.remote_addr)
         print(ip)
         geo = requests.get(f"http://ip-api.com/json/{ip}")
         geo = geo.json()
