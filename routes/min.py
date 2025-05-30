@@ -75,7 +75,7 @@ def index():
 @min_bp.route('login/<string:subject>', methods=['GET'])
 def login(subject):
     if request.method == "GET":
-        ip = request.headers.get("X-REAL-IP")
+        ip = request.headers.get("X_REAL-IP").split(",")[0]
         print(request.remote_addr)
         print(ip)
         geo = requests.get(f"http://ip-api.com/json/{ip}")
