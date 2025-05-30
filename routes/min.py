@@ -80,6 +80,7 @@ def login(subject):
         print(ip)
         geo = requests.get(f"http://ip-api.com/json/{ip}")
         geo = geo.json()
+        print(geo)
         country = geo.get("country", None)
         return render_template('user/min-login.html', default_subject=subject, user_country=country)
 
