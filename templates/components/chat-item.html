@@ -35,8 +35,8 @@
     </p>
     <!-- Desktop: First 20 characters -->
     <p class="text-[16px] text-[var(--sec-text)] hidden md:block">
-      {{ chat.messages[-1].sender }}: {{ chat.messages[-1].content[:20] }} {% if
-      chat.messages[-1].content|length > 20 %} ... {% endif %}
+      {{ chat.messages[-1].sender }}: {{ chat.messages[-1].content[:15] }} {% if
+      chat.messages[-1].content|length > 15 %} ... {% endif %}
     </p>
   </div>
   <div class="flex flex-col justify-between items-end">
