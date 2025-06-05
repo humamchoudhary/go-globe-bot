@@ -45,6 +45,10 @@ class UserService:
             return User.from_dict(user_data)
         return None
 
+    def get_all_users(self):
+        users = self.users_collection.find()
+        return [User.from_dict(user) for user in users]
+
     def add_chat_to_user(self, user_id, chat_id):
         self.users_collection.update_one(
             {"user_id": user_id},

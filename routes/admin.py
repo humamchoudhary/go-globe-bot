@@ -596,6 +596,7 @@ def index():
     chat_service = ChatService(current_app.db)
 
     user_service = UserService(current_app.db)
+    all_users = user_service.get_all_users()
     chats = chat_service.get_all_chats()
 
     chats_ary = []
@@ -610,7 +611,8 @@ def index():
 
     data = generate_stats(chats)
     pprint(chats_ary)
-    return render_template('admin/index.html', chats=chats_ary, data=data, username="Ana")
+
+    return render_template('admin/index.html', chats=chats_ary, data=data, username="Ana", online_users=current_app.config['ONLINE_USERS'], all_users=len(all_users))
 
 
 @admin_bp.route('/join/<room_id>')

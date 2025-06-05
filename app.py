@@ -53,7 +53,7 @@ def create_app(config_class=Config):
     db = client.get_database()
     app.db = db
     app.config['SESSION_MONGODB'] = client
-
+    app.config['ONLINE_USERS'] = 0
     app.config['TEMPLATES_AUTO_RELOAD'] = True
 
     # Add JSON filter to Jinja

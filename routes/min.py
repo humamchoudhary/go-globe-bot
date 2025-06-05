@@ -424,6 +424,7 @@ def register_min_socketio_events(socketio):
         join_room(room)
         username = session.get('name', "USER")
         print(f'{username} has joined the room.')
+        current_app.config['ONLINE_USERS'] += 1
         emit('status', {'msg': f'{username} has joined the room.'}, room=room)
 
     @socketio.on('leave_min')
@@ -440,4 +441,6 @@ def register_min_socketio_events(socketio):
             return
 
         leave_room(room)
+
+        current_app.config['ONLINE_USERS'] += 1
         emit('status', {'msg': f'{user.name} has left the room.'}, room=room)
