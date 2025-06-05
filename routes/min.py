@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 # from vapi_python import Vapi
 from services.timezone import UTCZoneManager
@@ -255,7 +256,6 @@ def chat(chat_id):
 @min_bp.route('/chat/<chat_id>/ping_admin', methods=['POST', 'GET'])
 @login_required
 def ping_admin(chat_id):
-    from datetime import datetime
 
     if request.method == "GET":
         return redirect(f'/chat/{chat_id}')

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+  <!--<![endif]-->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="GoGlobe" />
+    <meta name="author" content="SRBThemes" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>Admin Login - Go Globe</title>
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='img/logo-desktop-mini.svg') }}"
+    />
+    <script>
+      document.documentElement.setAttribute(
+        "data-goglobe-skin",
+        '{{settings["theme"]}}'
+      );
+      if (localStorage.frenify_panel !== "") {
+        document.documentElement.classList.add(localStorage.frenify_panel);
+      }
+    </script>
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/plugins.css') }}"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/prestyle.css') }}"
+    />
+    <!-- !Styles -->
+    <script>
+      const fontFiles = {{font_files | tojson }};
+      const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/fontLoader.js') }}"></script>
+    <script>
+      loadFonts(fontFiles, fontFolder);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body>
+    <!-- Sign In -->
+    <div class="goglobe_fn_sign" style="padding-top: 40px">
+      <div class="sign__content">
+        <img
+          src="{{ url_for('static', filename='img/logo.svg') }}"
+          alt=""
+          class="desktop_logo"
+          style="
+            max-width: 250px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 20px;
+          "
+        />
+        <div class="login">
+          <div class="form__content">
+            <div class="form__title mb-10">Sign In</div>
+            <p id="error-message" class="error" style="display: none"></p>
+            <div class="form__email">
+              <label for="user_login">Email OR Username</label>
+              <input
+                type="text"
+                class="input"
+                id="user_login"
+                autocapitalize="off"
+                autocomplete="email"
+                name="email"
+                aria-describedby="login-message"
+              />
+            </div>
+            <div class="form__pass">
+              <div class="pass_lab">
+                <label for="user_password">Password</label>
+                <a href="#">Forget Password?</a>
+              </div>
+              <input
+                type="password"
+                id="user_password"
+                autocomplete="current-password"
+                name="password"
+                spellcheck="false"
+              />
+            </div>
+            <button
+              id="login-btn"
+              class="fn__submit form__submit duration-300 transition-all hover:cursor-pointer font-bold"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- !Sign In -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const loginBtn = document.getElementById("login-btn");
+        const usernameInput = document.getElementById("user_login");
+        const passwordInput = document.getElementById("user_password");
+        const errorMessage = document.getElementById("error-message");
+
+        loginBtn.addEventListener("click", function () {
+          const username = usernameInput.value.trim();
+          const password = passwordInput.value.trim();
+
+          if (!username || !password) {
+            showError("Please enter both username and password");
+            return;
+          }
+
+          fetch("/admin/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.json().then((data) => {
+                  if (data.redirect) {
+                    window.location.href = data.redirect;
+                  } else {
+                    window.location.href = "/admin/";
+                  }
+                });
+              } else {
+                return response.json().then((data) => {
+                  showError(data.error || "Login failed");
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showError("An error occurred. Please try again.");
+            });
+        });
+
+        function showError(message) {
+          errorMessage.textContent = message;
+          errorMessage.style.display = "block";
+        }
+
+        // Handle enter key
+        passwordInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            loginBtn.click();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -2,6 +2,15 @@
 {% block header %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+<script>
+        if (!("Notification" in window)) {
+          alert("This browser does not support desktop notification");
+        }else if (Notification.permission !== "denied") {
+          Notification.requestPermission()
+        }
+
+</script>
+
 {% endblock %}
 {% block header_items %}
 <div class="flex flex-row justify-between items-center w-full px-[10px] md:px-[20px] ">
@@ -42,13 +51,51 @@
         <div class="px-5"> <i data-lucide="menu"></i></div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+
+
 <script>
 
 document.addEventListener('DOMContentLoaded', () => {
     const openSearch = document.getElementById('open-search');
     const closeSearch = document.getElementById('close-search');
     const searchMenu = document.getElementById('search-menu');
-    console.log(searchMenu)
+    // console.log(searchMenu)
+
+        const socket = io();
+
+        socket.on("new_message", function (data) {
+            console.log(data)
+
+        });
+
+
+
+        socket.on("admin_required", function (data) {
+            console.log(data)
+          if (Notification.permission === "granted") {
+            new Notification("Admin Required", {
+              body: `Chat room ${data.room_id} requires admin attention`,
+              icon: "/static/favicon.ico",
+            });
+          } else {
+
+Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+new Notification("Admin Required", {
+              body: `Chat room ${data.room_id} requires admin attention`,
+              icon: "/static/favicon.ico",
+            })
+            }
+          });
+
+          }
+
+        });
+
+
+
 
     if (searchMenu) {
         // Start hidden
