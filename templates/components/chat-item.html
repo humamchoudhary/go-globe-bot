@@ -35,7 +35,8 @@
     </p>
     <!-- Desktop: First 20 characters -->
     <p class="text-[16px] text-[var(--sec-text)] hidden md:block">
-      {{ chat.messages[-1].sender }}: {{ chat.messages[-1].content[:15] }} {% if
+      {{ chat.messages[-1].sender[:6] }} {% if chat.messages[-1].sender|length >
+      6 %} ... {% endif %} : {{ chat.messages[-1].content[:15] }} {% if
       chat.messages[-1].content|length > 15 %} ... {% endif %}
     </p>
   </div>
