@@ -116,15 +116,17 @@
     const userback = document.getElementById("clientback-{{chat.user_id}}");
     const userpanel = document.getElementById("client-{{chat.user_id}}");
     const chatpanel = document.getElementById("chatarea-{{chat.room_id}}");
-
-    clientInfoBtn.addEventListener("click", function () {
-      userpanel.classList.remove("hidden");
-      chatpanel.classList.add("hidden");
-    });
-
-    userback.addEventListener("click", function () {
-      chatpanel.classList.remove("hidden");
-      userpanel.classList.add("hidden");
-    });
+    if (clientInfoBtn) {
+      clientInfoBtn.addEventListener("click", function () {
+        userpanel.classList.remove("hidden");
+        chatpanel.classList.add("hidden");
+      });
+    }
+    if (userback) {
+      userback.addEventListener("click", function () {
+        chatpanel.classList.remove("hidden");
+        userpanel.classList.add("hidden");
+      });
+    }
   });
 </script>

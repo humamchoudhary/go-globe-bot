@@ -61,7 +61,9 @@
         <p class="text-[26px] text-[var(--sec-text)]  mx-[24px]">Latest Chats</p>
         <div class="flex flex-col">
             {% for chat in chats[:5] %}
+            <a href="/admin/chat/{{chat.room_id}}">
             {% include 'components/chat-item.html' %}
+            </a>
             {% endfor %}
             {% if chats|length > 5 %}
             <div class="flex items-center justify-center py-4">
