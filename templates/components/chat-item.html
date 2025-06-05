@@ -19,7 +19,10 @@
   ></div>
   <div class="flex flex-col">
     <div class="flex flex-row gap-[15px]">
-      <p class="text-[16px] font-bold">{{ chat.username }}</p>
+      <p class="text-[16px] font-bold">
+        {{ chat.messages[-1].sender[:6] }} {% if chat.messages[-1].sender|length
+        > 6 %} ... {% endif %}
+      </p>
       {% if chat.admin_required %}
       <div class="px-[9px] py-[3px] bg-[#56ABFF]/20 rounded-full">
         <p class="text-sm text-[#56ABFF]">Admin Required</p>
