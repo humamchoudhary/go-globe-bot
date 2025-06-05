@@ -34,9 +34,9 @@ class ChatService:
             return Chat.from_dict(chat_data)
         return None
 
-    def delete(self, chat_ids):
-        self.chats_collection.delete_many({"room_id": {'$in': chat_ids}})
-        for id in chat_ids:
+    def delete(self, room_ids):
+        self.chats_collection.delete_many({"room_id": {'$in': room_ids}})
+        for id in room_ids:
             print(id)
             os.remove(f"./bin/chat/{id}.chatpl")
 

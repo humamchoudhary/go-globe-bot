@@ -1,0 +1,93 @@
+{% extends 'base.html' %} 
+
+
+{% block header_items %}
+<div class="flex flex-row justify-between items-center w-full px-[10px] md:px-[20px] ">
+    <div class="flex flex-row gap-4">
+        <div id="open-search" class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
+            <i data-lucide="search" class="text-white size-[22px]"></i></div>
+
+        <div class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
+            <i data-lucide="bell" class="text-white size-[22px]"></i></div>
+
+        <div class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
+            <i data-lucide="sun" class="text-white size-[22px]"></i></div>
+    </div>
+    <div id="search-menu" style="display: none;" class="z-200 absolute items-center flex-col w-screen h-screen overflow-hidden left-0 top-0 pt-[150px]">
+        <div id="close-search" class=" bg-black/60 absolute w-screen h-screen top-0 right-0"></div>
+        <div class="z-250 flex flex-col gap-[30px] w-[680px] items-center">
+            <form
+                hx-post="/admin/search/"
+                hx-swap="innerHTML"
+                hx-trigger="submit" 
+                hx-target="#search-result"
+                class="relative w-full">
+
+                <input name="search-q" class="outline-none border border-[var(--border-color)] h-[50px] focus:border-[var(--main-color)] text-[16px] bg-white rounded-[5px] w-full  px-[13px] py-[16px] text-[var(--bg-color)]" placeholder="Search..." required />
+
+                <button type="submit" class="absolute top-[5px] right-[5px] size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)]  hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
+                    <i data-lucide="search" class="text-white size-[22px]"></i>
+                </button>
+
+            </form>
+           <div id="search-result" class="w-full max-h-[500px] ">
+           </div>
+
+        </div>
+    </div>
+
+    <div class="flex flex-row gap-4 md:hidden" onclick="toggleMenu()">
+        <div class="px-5"> <i data-lucide="menu"></i></div>
+    </div>
+</div>
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    const openSearch = document.getElementById('open-search');
+    const closeSearch = document.getElementById('close-search');
+    const searchMenu = document.getElementById('search-menu');
+    console.log(searchMenu)
+
+    if (searchMenu) {
+        // Start hidden
+        searchMenu.style.display = 'none';
+     }
+
+    openSearch?.addEventListener('click', () => {
+        if (searchMenu) {
+            searchMenu.style.display = 'flex';
+        }
+    });
+
+    closeSearch?.addEventListener('click', () => {
+        if (searchMenu) {
+            searchMenu.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block navbar %}
+
+{% set nav_items = [ { "name":
+"Home", "link": "/admin/", "icon": "house" },
+{ "name":
+"Chats", "link": "/admin/chats/", "icon": "message-square" },
+{ "name":
+"Logs", "link": "/admin/logs/", "icon": "logs" },
+{ "name":
+"Pricings", "link": "/admin/pricing/", "icon": "dollar-sign" },
+{ "name":
+"FAQ", "link": "/admin/faq/", "icon": "circle-help" },
+{ "name":
+"Settings", "link": "/admin/settings", "icon": "circle-help" },
+
+]
+
+%} 
+
+
+ {% include 'components/navbar.html' %}{% endblock %}
+
+

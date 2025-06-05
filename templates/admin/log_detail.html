@@ -1,21 +1,18 @@
 <div
   class="rounded-lg shadow overflow-hidden p-6"
   style="
-    background-color: var(--goglobe-site-bg-color);
-    border: 1px solid var(--goglobe-border-color);
+    background-color: var(--sec-bg-color);
+    border: 1px solid var(--border-color);
   "
 >
   <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold" style="color: var(--goglobe-heading-color)">
+    <h2 class="text-2xl font-bold" style="color: var(--sec-text)">
       Log Details
     </h2>
     <button
       onclick="closeDetails()"
       class="px-4 py-2 text-sm rounded transition-colors"
-      style="
-        background-color: var(--goglobe-border-color);
-        color: var(--goglobe-body-color);
-      "
+      style="background-color: var(--border-color); color: var(--sec-text)"
     >
       Close
     </button>
@@ -25,43 +22,28 @@
     <div class="space-y-4">
       <h3
         class="text-lg font-semibold border-b pb-2"
-        style="
-          color: var(--goglobe-heading-color);
-          border-color: var(--goglobe-border-color);
-        "
+        style="color: var(--sec-text); border-color: var(--border-color)"
       >
         Basic Information
       </h3>
       <div>
-        <p
-          class="text-sm"
-          style="color: var(--goglobe-body-color); opacity: 0.7"
-        >
+        <p class="text-sm" style="color: var(--sec-text); opacity: 0.7">
           Log ID
         </p>
-        <p
-          class="font-mono text-sm break-all"
-          style="color: var(--goglobe-body-color)"
-        >
+        <p class="font-mono text-sm break-all" style="color: var(--sec-text)">
           {{ log.log_id }}
         </p>
       </div>
       <div>
-        <p
-          class="text-sm"
-          style="color: var(--goglobe-body-color); opacity: 0.7"
-        >
+        <p class="text-sm" style="color: var(--sec-text); opacity: 0.7">
           Timestamp
         </p>
-        <p style="color: var(--goglobe-body-color)">
+        <p style="color: var(--sec-text)">
           {{ log.timestamp.strftime("%Y-%m-%d %H:%M:%S UTC") }}
         </p>
       </div>
       <div>
-        <p
-          class="text-sm"
-          style="color: var(--goglobe-body-color); opacity: 0.7"
-        >
+        <p class="text-sm" style="color: var(--sec-text); opacity: 0.7">
           Level
         </p>
         <span
@@ -71,18 +53,10 @@
         </span>
       </div>
       <div>
-        <p
-          class="text-sm"
-          style="color: var(--goglobe-body-color); opacity: 0.7"
-        >
-          Tag
-        </p>
+        <p class="text-sm" style="color: var(--sec-text); opacity: 0.7">Tag</p>
         <span
           class="px-3 py-1 text-sm rounded"
-          style="
-            background-color: var(--goglobe-body-color-2);
-            color: var(--goglobe-body-color);
-          "
+          style="background-color: var(--bg-color); color: var(--sec-text)"
           >{{ log.tag }}</span
         >
       </div>
@@ -91,44 +65,32 @@
     <div class="space-y-4">
       <h3
         class="text-lg font-semibold border-b pb-2"
-        style="
-          color: var(--goglobe-heading-color);
-          border-color: var(--goglobe-border-color);
-        "
+        style="color: var(--sec-text); border-color: var(--border-color)"
       >
         User Information
       </h3>
       <div>
-        <p
-          class="text-sm"
-          style="color: var(--goglobe-body-color); opacity: 0.7"
-        >
+        <p class="text-sm" style="color: var(--sec-text); opacity: 0.7">
           User ID
         </p>
-        <p class="font-mono" style="color: var(--goglobe-body-color)">
+        <p class="font-mono" style="color: var(--sec-text)">
           {{ log.user_id or 'N/A' }}
         </p>
       </div>
       <div>
-        <p
-          class="text-sm"
-          style="color: var(--goglobe-body-color); opacity: 0.7"
-        >
+        <p class="text-sm" style="color: var(--sec-text); opacity: 0.7">
           Admin ID
         </p>
-        <p class="font-mono" style="color: var(--goglobe-body-color)">
+        <p class="font-mono" style="color: var(--sec-text)">
           {{ log.admin_id or 'N/A' }}
         </p>
       </div>
       {% if log.data and log.data.request and log.data.request.ip %}
       <div>
-        <p
-          class="text-sm"
-          style="color: var(--goglobe-body-color); opacity: 0.7"
-        >
+        <p class="text-sm" style="color: var(--sec-text); opacity: 0.7">
           IP Address
         </p>
-        <p class="font-mono" style="color: var(--goglobe-body-color)">
+        <p class="font-mono" style="color: var(--sec-text)">
           {{ log.data.request.ip }}
         </p>
       </div>
@@ -139,18 +101,12 @@
   <div class="mt-6 space-y-4">
     <h3
       class="text-lg font-semibold border-b pb-2"
-      style="
-        color: var(--goglobe-heading-color);
-        border-color: var(--goglobe-border-color);
-      "
+      style="color: var(--sec-text); border-color: var(--border-color)"
     >
       Message
     </h3>
-    <div
-      class="p-4 rounded"
-      style="background-color: var(--goglobe-body-color-2)"
-    >
-      <p class="whitespace-pre-wrap" style="color: var(--goglobe-body-color)">
+    <div class="p-4 rounded" style="background-color: var(--bg-color)">
+      <p class="whitespace-pre-wrap" style="color: var(--sec-text)">
         {{ log.message }}
       </p>
     </div>
@@ -160,18 +116,15 @@
   <div class="mt-6 space-y-4">
     <h3
       class="text-lg font-semibold border-b pb-2"
-      style="
-        color: var(--goglobe-heading-color);
-        border-color: var(--goglobe-border-color);
-      "
+      style="color: var(--sec-text); border-color: var(--border-color)"
     >
       Request Data
     </h3>
     <div
       class="p-4 rounded overflow-x-auto"
-      style="background-color: var(--goglobe-body-color-2)"
+      style="background-color: var(--bg-color)"
     >
-      <pre class="text-sm" style="color: var(--goglobe-body-color)">
+      <pre class="text-sm" style="color: var(--sec-text)">
 {{ log.data.request|tojson(indent=2) }}</pre
       >
     </div>
@@ -182,18 +135,15 @@
   <div class="mt-6 space-y-4">
     <h3
       class="text-lg font-semibold border-b pb-2"
-      style="
-        color: var(--goglobe-heading-color);
-        border-color: var(--goglobe-border-color);
-      "
+      style="color: var(--sec-text); border-color: var(--border-color)"
     >
       Session Data
     </h3>
     <div
       class="p-4 rounded overflow-x-auto"
-      style="background-color: var(--goglobe-body-color-2)"
+      style="background-color: var(--bg-color)"
     >
-      <pre class="text-sm" style="color: var(--goglobe-body-color)">
+      <pre class="text-sm" style="color: var(--sec-text)">
 {{ log.data.session|tojson(indent=2) }}</pre
       >
     </div>
@@ -205,18 +155,15 @@
   <div class="mt-6 space-y-4">
     <h3
       class="text-lg font-semibold border-b pb-2"
-      style="
-        color: var(--goglobe-heading-color);
-        border-color: var(--goglobe-border-color);
-      "
+      style="color: var(--sec-text); border-color: var(--border-color)"
     >
       {{ key|title }} Data
     </h3>
     <div
       class="p-4 rounded overflow-x-auto"
-      style="background-color: var(--goglobe-body-color-2)"
+      style="background-color: var(--bg-color)"
     >
-      <pre class="text-sm" style="color: var(--goglobe-body-color)">
+      <pre class="text-sm" style="color: var(--sec-text)">
 {{ value|tojson(indent=2) }}</pre
       >
     </div>
@@ -226,7 +173,6 @@
 <script>
   function closeDetails() {
     document.getElementById("log-details").innerHTML = "";
-    // Optionally update URL
     history.pushState(null, "", "/admin/logs/");
   }
 </script>

@@ -1,0 +1,731 @@
+{% extends 'user/base.html' %} {% block content %}
+<!-- Sign In -->
+
+<style>
+  /* Simple styling for form validation */
+  input:invalid, select:invalid {
+    border-color: #ef4444;
+  }
+  
+  /* Error message styling */
+  .error-text {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+  }
+  
+  .input-error {
+    border: 1px solid #ef4444 !important;
+    box-shadow: 0 0 0 1px #ef4444 !important;
+  }
+
+  /* Phone input container styling */
+  .phone-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--goglobe-site-bg-color);
+    border-radius: 6px;
+    background-color: var(--goglobe-input-color);
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+
+  .phone-input-container:focus-within {
+    border-color: var(--goglobe-main-color);
+  }
+
+  .country-selector {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0.5rem 1rem 1rem;
+    background: transparent;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    font-family: var(--goglobe-body-font-family);
+  }
+
+  .country-flag {
+    width: 20px;
+    height: 15px;
+    margin-right: 0.5rem;
+    border-radius: 2px;
+  }
+
+  .country-code {
+    margin-right: 0.25rem;
+    min-width: 35px;
+    text-align: left;
+  }
+
+  .phone-number-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: white;
+    font-weight: bold;
+    padding: 1rem 1rem 1rem 0.5rem;
+    font-family: var(--goglobe-body-font-family);
+  }
+
+  .phone-number-input::placeholder {
+    color: var(--goglobe-body-color);
+    font-weight: bold;
+  }
+
+  .dropdown-arrow {
+    margin-left: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--goglobe-body-color);
+  }
+
+  /* Country dropdown styling */
+  .country-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--goglobe-input-color);
+    border: 1px solid var(--goglobe-main-color);
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    margin-top: 2px;
+  }
+
+  .country-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s;
+  }
+
+  .country-option:hover {
+    background-color: var(--goglobe-main-color);
+  }
+
+  .country-option .country-flag {
+    margin-right: 0.75rem;
+  }
+
+  .country-option .country-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+
+  .country-name {
+    font-weight: normal;
+  }
+
+  .phone-input-wrapper {
+    position: relative;
+  }
+</style>
+
+<div style="overflow-y:hidden; background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family); width: 100%;">
+    <!-- Desktop logo would go here -->
+    <div style="border-radius: 0.5rem; padding-left: 3px; padding-right: 3px; padding-top: 0.5rem;">
+        <div style="margin-bottom: 2rem;">
+            <form id="login-form" novalidate>
+                <div style="margin-bottom: 1rem;">
+                    <input type="text"
+                        style="  font-family: var(--goglobe-body-font-family) ;width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color);"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
+                        id="name" name="name" placeholder="Your Name*" autocapitalize="off"
+                        autocomplete="name" required minlength="2"
+                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
+                    <p id="name-error" class="error-text"></p>
+                </div>
+
+                {% if default_subject.lower() != "job" %}
+                <div style="margin-bottom: 1rem;">
+                    <input type="text"
+                        style="  font-family: var(--goglobe-body-font-family) ;width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color);"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
+                        id="desg" name="desg" placeholder="Designation*" autocapitalize="off"
+                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
+                    <p id="desg-error" class="error-text"></p>
+                </div>
+                {% endif %}
+
+                <div style="margin-bottom: 1rem;">
+                    <input type="email"
+                        style="  font-family: var(--goglobe-body-font-family) ;width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color);"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
+                        id="email" name="email" placeholder="Email Address*" autocapitalize="off"
+                        autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
+                    <p id="email-error" class="error-text"></p>
+                </div>
+
+                <div style="margin-bottom: 1rem;" class="hidden">
+                    <select
+                        style="  font-family: var(--goglobe-body-font-family) ;width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color);"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
+                        id="subject" name="subject" autocapitalize="off" autocomplete="off" required
+                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
+                        {% for subject in settings['subjects'] %}
+                        <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
+                            {{subject}}</option>
+                        {% endfor %}
+                    </select>
+                    <p id="subject-error" class="error-text"></p>
+                </div>
+
+                <!-- Enhanced Phone Input -->
+  <div style="margin-bottom: 1.5rem;">
+                    <div class="phone-input-container" id="phone-container">
+                        <select class="country-selector" id="country-selector" name="country-code">
+                            <!-- Countries will be populated by JavaScript -->
+                        </select>
+                        <input type="tel" 
+                            class="phone-number-input" 
+
+ style=" font-family: var(--goglobe-body-font-family)"                           id="phone" 
+                            name="phone" 
+                            placeholder="Phone Number*" 
+                            autocomplete="tel" 
+                            required>
+                    </div>
+                    <p id="phone-error" class="error-text"></p>
+                </div>
+
+                <p id="error-message" style="color: #ef4444; margin-bottom: 1rem; display:none;"></p>
+
+                <button type="submit" id="login-btn"
+                    class="w-full !font-bold rounded border transition-all duration-300"
+                    style="  font-family: var(--goglobe-body-font-family) ;font-weight:bold ;color:white; width: 100%; padding-top: 0.75rem; padding-bottom: 0.75rem; padding-left: 1rem; padding-right: 1rem; background-color: var(--goglobe-main-color); border-color: var(--goglobe-border-color); color: white;"
+                    onmouseover="this.style.backgroundColor='var(--goglobe-site-bg)'; this.style.cursor='pointer'"
+                    onmouseout="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.cursor='auto'"
+                    onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
+                    onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'">
+                    Start Chat
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- !Sign In -->
+
+{% endblock %}
+{% block scripts %}
+
+<script>
+// Country data with flags, codes, and names
+const countries = [
+  // North America (NANP - +1)
+  { code: '+1', country: 'United States', flag: '🇺🇸', dialCode: '1' },
+  { code: '+1', country: 'Canada', flag: '🇨🇦', dialCode: '1' },
+  
+  // Europe
+  { code: '+33', country: 'France', flag: '🇫🇷', dialCode: '33' },
+  { code: '+49', country: 'Germany', flag: '🇩🇪', dialCode: '49' },
+  { code: '+39', country: 'Italy', flag: '🇮🇹', dialCode: '39' },
+  { code: '+34', country: 'Spain', flag: '🇪🇸', dialCode: '34' },
+  { code: '+44', country: 'United Kingdom', flag: '🇬🇧', dialCode: '44' },
+  { code: '+31', country: 'Netherlands', flag: '🇳🇱', dialCode: '31' },
+  { code: '+32', country: 'Belgium', flag: '🇧🇪', dialCode: '32' },
+  { code: '+41', country: 'Switzerland', flag: '🇨🇭', dialCode: '41' },
+  { code: '+43', country: 'Austria', flag: '🇦🇹', dialCode: '43' },
+  { code: '+45', country: 'Denmark', flag: '🇩🇰', dialCode: '45' },
+  { code: '+46', country: 'Sweden', flag: '🇸🇪', dialCode: '46' },
+  { code: '+47', country: 'Norway', flag: '🇳🇴', dialCode: '47' },
+  { code: '+48', country: 'Poland', flag: '🇵🇱', dialCode: '48' },
+  { code: '+351', country: 'Portugal', flag: '🇵🇹', dialCode: '351' },
+  { code: '+353', country: 'Ireland', flag: '🇮🇪', dialCode: '353' },
+  { code: '+354', country: 'Iceland', flag: '🇮🇸', dialCode: '354' },
+  { code: '+358', country: 'Finland', flag: '🇫🇮', dialCode: '358' },
+  { code: '+36', country: 'Hungary', flag: '🇭🇺', dialCode: '36' },
+  { code: '+420', country: 'Czech Republic', flag: '🇨🇿', dialCode: '420' },
+  { code: '+421', country: 'Slovakia', flag: '🇸🇰', dialCode: '421' },
+  { code: '+386', country: 'Slovenia', flag: '🇸🇮', dialCode: '386' },
+  { code: '+385', country: 'Croatia', flag: '🇭🇷', dialCode: '385' },
+  { code: '+387', country: 'Bosnia and Herzegovina', flag: '🇧🇦', dialCode: '387' },
+  { code: '+381', country: 'Serbia', flag: '🇷🇸', dialCode: '381' },
+  { code: '+382', country: 'Montenegro', flag: '🇲🇪', dialCode: '382' },
+  { code: '+383', country: 'Kosovo', flag: '🇽🇰', dialCode: '383' },
+  { code: '+389', country: 'North Macedonia', flag: '🇲🇰', dialCode: '389' },
+  { code: '+355', country: 'Albania', flag: '🇦🇱', dialCode: '355' },
+  { code: '+30', country: 'Greece', flag: '🇬🇷', dialCode: '30' },
+  { code: '+40', country: 'Romania', flag: '🇷🇴', dialCode: '40' },
+  { code: '+359', country: 'Bulgaria', flag: '🇧🇬', dialCode: '359' },
+  { code: '+373', country: 'Moldova', flag: '🇲🇩', dialCode: '373' },
+  { code: '+380', country: 'Ukraine', flag: '🇺🇦', dialCode: '380' },
+  { code: '+375', country: 'Belarus', flag: '🇧🇾', dialCode: '375' },
+  { code: '+370', country: 'Lithuania', flag: '🇱🇹', dialCode: '370' },
+  { code: '+371', country: 'Latvia', flag: '🇱🇻', dialCode: '371' },
+  { code: '+372', country: 'Estonia', flag: '🇪🇪', dialCode: '372' },
+  { code: '+7', country: 'Russia', flag: '🇷🇺', dialCode: '7' },
+  { code: '+90', country: 'Turkey', flag: '🇹🇷', dialCode: '90' },
+  { code: '+357', country: 'Cyprus', flag: '🇨🇾', dialCode: '357' },
+  { code: '+356', country: 'Malta', flag: '🇲🇹', dialCode: '356' },
+  { code: '+377', country: 'Monaco', flag: '🇲🇨', dialCode: '377' },
+  { code: '+378', country: 'San Marino', flag: '🇸🇲', dialCode: '378' },
+  { code: '+379', country: 'Vatican City', flag: '🇻🇦', dialCode: '379' },
+  { code: '+376', country: 'Andorra', flag: '🇦🇩', dialCode: '376' },
+  { code: '+423', country: 'Liechtenstein', flag: '🇱🇮', dialCode: '423' },
+  { code: '+298', country: 'Faroe Islands', flag: '🇫🇴', dialCode: '298' },
+  
+  // Asia
+  { code: '+86', country: 'China', flag: '🇨🇳', dialCode: '86' },
+  { code: '+91', country: 'India', flag: '🇮🇳', dialCode: '91' },
+  { code: '+81', country: 'Japan', flag: '🇯🇵', dialCode: '81' },
+  { code: '+82', country: 'South Korea', flag: '🇰🇷', dialCode: '82' },
+  { code: '+886', country: 'Taiwan', flag: '🇹🇼', dialCode: '886' },
+  { code: '+852', country: 'Hong Kong', flag: '🇭🇰', dialCode: '852' },
+  { code: '+853', country: 'Macau', flag: '🇲🇴', dialCode: '853' },
+  { code: '+65', country: 'Singapore', flag: '🇸🇬', dialCode: '65' },
+  { code: '+60', country: 'Malaysia', flag: '🇲🇾', dialCode: '60' },
+  { code: '+66', country: 'Thailand', flag: '🇹🇭', dialCode: '66' },
+  { code: '+84', country: 'Vietnam', flag: '🇻🇳', dialCode: '84' },
+  { code: '+62', country: 'Indonesia', flag: '🇮🇩', dialCode: '62' },
+  { code: '+63', country: 'Philippines', flag: '🇵🇭', dialCode: '63' },
+  { code: '+855', country: 'Cambodia', flag: '🇰🇭', dialCode: '855' },
+  { code: '+856', country: 'Laos', flag: '🇱🇦', dialCode: '856' },
+  { code: '+95', country: 'Myanmar', flag: '🇲🇲', dialCode: '95' },
+  { code: '+880', country: 'Bangladesh', flag: '🇧🇩', dialCode: '880' },
+  { code: '+94', country: 'Sri Lanka', flag: '🇱🇰', dialCode: '94' },
+  { code: '+977', country: 'Nepal', flag: '🇳🇵', dialCode: '977' },
+  { code: '+975', country: 'Bhutan', flag: '🇧🇹', dialCode: '975' },
+  { code: '+960', country: 'Maldives', flag: '🇲🇻', dialCode: '960' },
+  { code: '+92', country: 'Pakistan', flag: '🇵🇰', dialCode: '92' },
+  { code: '+93', country: 'Afghanistan', flag: '🇦🇫', dialCode: '93' },
+  { code: '+98', country: 'Iran', flag: '🇮🇷', dialCode: '98' },
+  { code: '+964', country: 'Iraq', flag: '🇮🇶', dialCode: '964' },
+  { code: '+965', country: 'Kuwait', flag: '🇰🇼', dialCode: '965' },
+  { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦', dialCode: '966' },
+  { code: '+967', country: 'Yemen', flag: '🇾🇪', dialCode: '967' },
+  { code: '+968', country: 'Oman', flag: '🇴🇲', dialCode: '968' },
+  { code: '+971', country: 'UAE', flag: '🇦🇪', dialCode: '971' },
+  { code: '+973', country: 'Bahrain', flag: '🇧🇭', dialCode: '973' },
+  { code: '+974', country: 'Qatar', flag: '🇶🇦', dialCode: '974' },
+  { code: '+970', country: 'Palestine', flag: '🇵🇸', dialCode: '970' },
+  { code: '+972', country: 'Israel', flag: '🇮🇱', dialCode: '972' },
+  { code: '+961', country: 'Lebanon', flag: '🇱🇧', dialCode: '961' },
+  { code: '+963', country: 'Syria', flag: '🇸🇾', dialCode: '963' },
+  { code: '+962', country: 'Jordan', flag: '🇯🇴', dialCode: '962' },
+  { code: '+996', country: 'Kyrgyzstan', flag: '🇰🇬', dialCode: '996' },
+  { code: '+998', country: 'Uzbekistan', flag: '🇺🇿', dialCode: '998' },
+  { code: '+992', country: 'Tajikistan', flag: '🇹🇯', dialCode: '992' },
+  { code: '+993', country: 'Turkmenistan', flag: '🇹🇲', dialCode: '993' },
+  { code: '+7', country: 'Kazakhstan', flag: '🇰🇿', dialCode: '7' },
+  { code: '+976', country: 'Mongolia', flag: '🇲🇳', dialCode: '976' },
+  { code: '+850', country: 'North Korea', flag: '🇰🇵', dialCode: '850' },
+  
+  // Africa
+  { code: '+20', country: 'Egypt', flag: '🇪🇬', dialCode: '20' },
+  { code: '+27', country: 'South Africa', flag: '🇿🇦', dialCode: '27' },
+  { code: '+234', country: 'Nigeria', flag: '🇳🇬', dialCode: '234' },
+  { code: '+251', country: 'Ethiopia', flag: '🇪🇹', dialCode: '251' },
+  { code: '+254', country: 'Kenya', flag: '🇰🇪', dialCode: '254' },
+  { code: '+255', country: 'Tanzania', flag: '🇹🇿', dialCode: '255' },
+  { code: '+256', country: 'Uganda', flag: '🇺🇬', dialCode: '256' },
+  { code: '+250', country: 'Rwanda', flag: '🇷🇼', dialCode: '250' },
+  { code: '+257', country: 'Burundi', flag: '🇧🇮', dialCode: '257' },
+  { code: '+243', country: 'DR Congo', flag: '🇨🇩', dialCode: '243' },
+  { code: '+242', country: 'Republic of Congo', flag: '🇨🇬', dialCode: '242' },
+  { code: '+237', country: 'Cameroon', flag: '🇨🇲', dialCode: '237' },
+  { code: '+236', country: 'Central African Republic', flag: '🇨🇫', dialCode: '236' },
+  { code: '+235', country: 'Chad', flag: '🇹🇩', dialCode: '235' },
+  { code: '+249', country: 'Sudan', flag: '🇸🇩', dialCode: '249' },
+  { code: '+211', country: 'South Sudan', flag: '🇸🇸', dialCode: '211' },
+  { code: '+216', country: 'Tunisia', flag: '🇹🇳', dialCode: '216' },
+  { code: '+213', country: 'Algeria', flag: '🇩🇿', dialCode: '213' },
+  { code: '+212', country: 'Morocco', flag: '🇲🇦', dialCode: '212' },
+  { code: '+218', country: 'Libya', flag: '🇱🇾', dialCode: '218' },
+  { code: '+233', country: 'Ghana', flag: '🇬🇭', dialCode: '233' },
+  { code: '+225', country: 'Ivory Coast', flag: '🇨🇮', dialCode: '225' },
+  { code: '+226', country: 'Burkina Faso', flag: '🇧🇫', dialCode: '226' },
+  { code: '+223', country: 'Mali', flag: '🇲🇱', dialCode: '223' },
+  { code: '+222', country: 'Mauritania', flag: '🇲🇷', dialCode: '222' },
+  { code: '+221', country: 'Senegal', flag: '🇸🇳', dialCode: '221' },
+  { code: '+220', country: 'Gambia', flag: '🇬🇲', dialCode: '220' },
+  { code: '+224', country: 'Guinea', flag: '🇬🇳', dialCode: '224' },
+  { code: '+245', country: 'Guinea-Bissau', flag: '🇬🇼', dialCode: '245' },
+  { code: '+238', country: 'Cape Verde', flag: '🇨🇻', dialCode: '238' },
+  { code: '+232', country: 'Sierra Leone', flag: '🇸🇱', dialCode: '232' },
+  { code: '+231', country: 'Liberia', flag: '🇱🇷', dialCode: '231' },
+  { code: '+228', country: 'Togo', flag: '🇹🇬', dialCode: '228' },
+  { code: '+229', country: 'Benin', flag: '🇧🇯', dialCode: '229' },
+  { code: '+227', country: 'Niger', flag: '🇳🇪', dialCode: '227' },
+  { code: '+230', country: 'Mauritius', flag: '🇲🇺', dialCode: '230' },
+  { code: '+248', country: 'Seychelles', flag: '🇸🇨', dialCode: '248' },
+  { code: '+261', country: 'Madagascar', flag: '🇲🇬', dialCode: '261' },
+  { code: '+269', country: 'Comoros', flag: '🇰🇲', dialCode: '269' },
+  { code: '+258', country: 'Mozambique', flag: '🇲🇿', dialCode: '258' },
+  { code: '+260', country: 'Zambia', flag: '🇿🇲', dialCode: '260' },
+  { code: '+263', country: 'Zimbabwe', flag: '🇿🇼', dialCode: '263' },
+  { code: '+267', country: 'Botswana', flag: '🇧🇼', dialCode: '267' },
+  { code: '+264', country: 'Namibia', flag: '🇳🇦', dialCode: '264' },
+  { code: '+268', country: 'Eswatini', flag: '🇸🇿', dialCode: '268' },
+  { code: '+266', country: 'Lesotho', flag: '🇱🇸', dialCode: '266' },
+  { code: '+240', country: 'Equatorial Guinea', flag: '🇬🇶', dialCode: '240' },
+  { code: '+239', country: 'São Tomé and Príncipe', flag: '🇸🇹', dialCode: '239' },
+  { code: '+244', country: 'Angola', flag: '🇦🇴', dialCode: '244' },
+  { code: '+253', country: 'Djibouti', flag: '🇩🇯', dialCode: '253' },
+  { code: '+252', country: 'Somalia', flag: '🇸🇴', dialCode: '252' },
+  { code: '+291', country: 'Eritrea', flag: '🇪🇷', dialCode: '291' },
+  
+  // Oceania
+  { code: '+61', country: 'Australia', flag: '🇦🇺', dialCode: '61' },
+  { code: '+64', country: 'New Zealand', flag: '🇳🇿', dialCode: '64' },
+  { code: '+679', country: 'Fiji', flag: '🇫🇯', dialCode: '679' },
+  { code: '+676', country: 'Tonga', flag: '🇹🇴', dialCode: '676' },
+  { code: '+685', country: 'Samoa', flag: '🇼🇸', dialCode: '685' },
+  { code: '+684', country: 'American Samoa', flag: '🇦🇸', dialCode: '684' },
+  { code: '+686', country: 'Kiribati', flag: '🇰🇮', dialCode: '686' },
+  { code: '+687', country: 'New Caledonia', flag: '🇳🇨', dialCode: '687' },
+  { code: '+689', country: 'French Polynesia', flag: '🇵🇫', dialCode: '689' },
+  { code: '+690', country: 'Tokelau', flag: '🇹🇰', dialCode: '690' },
+  { code: '+691', country: 'Micronesia', flag: '🇫🇲', dialCode: '691' },
+  { code: '+692', country: 'Marshall Islands', flag: '🇲🇭', dialCode: '692' },
+  { code: '+680', country: 'Palau', flag: '🇵🇼', dialCode: '680' },
+  { code: '+675', country: 'Papua New Guinea', flag: '🇵🇬', dialCode: '675' },
+  { code: '+677', country: 'Solomon Islands', flag: '🇸🇧', dialCode: '677' },
+  { code: '+678', country: 'Vanuatu', flag: '🇻🇺', dialCode: '678' },
+  { code: '+683', country: 'Niue', flag: '🇳🇺', dialCode: '683' },
+  { code: '+682', country: 'Cook Islands', flag: '🇨🇰', dialCode: '682' },
+  { code: '+688', country: 'Tuvalu', flag: '🇹🇻', dialCode: '688' },
+  { code: '+674', country: 'Nauru', flag: '🇳🇷', dialCode: '674' },
+  
+  // South America
+  { code: '+55', country: 'Brazil', flag: '🇧🇷', dialCode: '55' },
+  { code: '+54', country: 'Argentina', flag: '🇦🇷', dialCode: '54' },
+  { code: '+56', country: 'Chile', flag: '🇨🇱', dialCode: '56' },
+  { code: '+57', country: 'Colombia', flag: '🇨🇴', dialCode: '57' },
+  { code: '+58', country: 'Venezuela', flag: '🇻🇪', dialCode: '58' },
+  { code: '+51', country: 'Peru', flag: '🇵🇪', dialCode: '51' },
+  { code: '+593', country: 'Ecuador', flag: '🇪🇨', dialCode: '593' },
+  { code: '+591', country: 'Bolivia', flag: '🇧🇴', dialCode: '591' },
+  { code: '+595', country: 'Paraguay', flag: '🇵🇾', dialCode: '595' },
+  { code: '+598', country: 'Uruguay', flag: '🇺🇾', dialCode: '598' },
+  { code: '+597', country: 'Suriname', flag: '🇸🇷', dialCode: '597' },
+  { code: '+594', country: 'French Guiana', flag: '🇬🇫', dialCode: '594' },
+  { code: '+592', country: 'Guyana', flag: '🇬🇾', dialCode: '592' },
+  
+  // Central America & Caribbean
+  { code: '+52', country: 'Mexico', flag: '🇲🇽', dialCode: '52' },
+  { code: '+502', country: 'Guatemala', flag: '🇬🇹', dialCode: '502' },
+  { code: '+503', country: 'El Salvador', flag: '🇸🇻', dialCode: '503' },
+  { code: '+504', country: 'Honduras', flag: '🇭🇳', dialCode: '504' },
+  { code: '+505', country: 'Nicaragua', flag: '🇳🇮', dialCode: '505' },
+  { code: '+506', country: 'Costa Rica', flag: '🇨🇷', dialCode: '506' },
+  { code: '+507', country: 'Panama', flag: '🇵🇦', dialCode: '507' },
+  { code: '+501', country: 'Belize', flag: '🇧🇿', dialCode: '501' },
+  { code: '+53', country: 'Cuba', flag: '🇨🇺', dialCode: '53' },
+  { code: '+509', country: 'Haiti', flag: '🇭🇹', dialCode: '509' },
+  { code: '+590', country: 'Guadeloupe', flag: '🇬🇵', dialCode: '590' },
+  { code: '+596', country: 'Martinique', flag: '🇲🇶', dialCode: '596' },
+  { code: '+599', country: 'Curaçao', flag: '🇨🇼', dialCode: '599' },
+  { code: '+297', country: 'Aruba', flag: '🇦🇼', dialCode: '297' },
+  { code: '+1787', country: 'Puerto Rico', flag: '🇵🇷', dialCode: '1787' },
+  { code: '+1809', country: 'Dominican Republic', flag: '🇩🇴', dialCode: '1809' },
+  { code: '+1876', country: 'Jamaica', flag: '🇯🇲', dialCode: '1876' },
+  { code: '+1658', country: 'Jamaica', flag: '🇯🇲', dialCode: '1658' },
+  { code: '+1868', country: 'Trinidad and Tobago', flag: '🇹🇹', dialCode: '1868' },
+  { code: '+1246', country: 'Barbados', flag: '🇧🇧', dialCode: '1246' },
+  { code: '+1242', country: 'Bahamas', flag: '🇧🇸', dialCode: '1242' },
+  
+  // Special Territories & Other
+  { code: '+500', country: 'Falkland Islands', flag: '🇫🇰', dialCode: '500' },
+  { code: '+290', country: 'Saint Helena', flag: '🇸🇭', dialCode: '290' },
+  { code: '+246', country: 'British Indian Ocean Territory', flag: '🇮🇴', dialCode: '246' },
+  { code: '+672', country: 'Antarctica', flag: '🇦🇶', dialCode: '672' },
+  { code: '+299', country: 'Greenland', flag: '🇬🇱', dialCode: '299' },
+  { code: '+508', country: 'Saint Pierre and Miquelon', flag: '🇵🇲', dialCode: '508' }
+];
+
+function initPhoneInput() {
+    const countrySelector = document.getElementById('country-selector');
+    const phoneInput = document.getElementById('phone');
+    
+    // Set default country based on Flask variable
+    const userCountryCode = '{{ user_country if user_country else "United State" }}';
+    let defaultCountry = countries.find(c => c.country === userCountryCode) || countries.find(c => c.dialCode === '1');
+    
+    // Populate dropdown options
+    function populateDropdown() {
+        countrySelector.innerHTML = '';
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.code;
+            option.textContent = `${country.flag} ${country.code}`;
+            option.dataset.dialCode = country.dialCode;
+            
+            if (country.dialCode === defaultCountry.dialCode) {
+                option.selected = true;
+            }
+            
+            countrySelector.appendChild(option);
+        });
+    }
+    
+    // Auto-detect country from phone input
+    function detectCountryFromInput() {
+        const inputValue = phoneInput.value.replace(/\D/g, '');
+        if (inputValue.length >= 1) {
+            // Try to match country codes (sort by length desc to match longest first)
+            const possibleCountries = countries.filter(c => 
+                inputValue.startsWith(c.dialCode)
+            ).sort((a, b) => b.dialCode.length - a.dialCode.length);
+            
+            if (possibleCountries.length > 0) {
+                const detectedCountry = possibleCountries[0];
+                const currentSelected = countrySelector.options[countrySelector.selectedIndex];
+                
+                if (currentSelected.dataset.dialCode !== detectedCountry.dialCode) {
+                    // Find and select the detected country
+                    for (let i = 0; i < countrySelector.options.length; i++) {
+                        if (countrySelector.options[i].dataset.dialCode === detectedCountry.dialCode) {
+                            countrySelector.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    // Remove the country code from input
+                    const remainingNumber = inputValue.substring(detectedCountry.dialCode.length);
+                    phoneInput.value = remainingNumber;
+                }
+            }
+        }
+    }
+    
+    // Handle phone input changes
+    phoneInput.addEventListener('input', function() {
+        // Only allow digits, spaces, hyphens, and parentheses
+        this.value = this.value.replace(/[^\d\s\-()]/g, '');
+        //detectCountryFromInput();
+    });
+    
+    // Initialize
+    populateDropdown();
+    
+    return defaultCountry;
+}
+function initForm() {
+    const loginForm = document.getElementById("login-form");
+    const loginBtn = document.getElementById("login-btn");
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const subjectInput = document.getElementById("subject");
+    const desgInput = document.getElementById("desg");
+    const phoneInput = document.getElementById("phone");
+    const phoneContainer = document.getElementById("phone-container");
+    const errorMessage = document.getElementById("error-message");
+
+    // Initialize phone input
+    let currentCountry = initPhoneInput();
+
+    // Error message elements
+    const nameError = document.getElementById("name-error");
+    const emailError = document.getElementById("email-error");
+    const subjectError = document.getElementById("subject-error");
+    const desgError = document.getElementById("desg-error");
+    const phoneError = document.getElementById("phone-error");
+
+    // Email validation regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // Phone validation regex - allows digits, spaces, hyphens, parentheses (without country code)
+    const phoneRegex = /^[\d\s\-()]{7,15}$/;
+
+    // Form validation
+    function validateForm() {
+        let isValid = true;
+
+        // Reset all errors
+        hideError(errorMessage);
+        hideError(nameError);
+        hideError(emailError);
+        hideError(phoneError);
+        hideError(subjectError);
+        if (desgError) {
+            hideError(desgError);
+        }
+
+        nameInput.classList.remove("input-error");
+        emailInput.classList.remove("input-error");
+        phoneContainer.classList.remove("input-error");
+        subjectInput.classList.remove("input-error");
+        if (desgInput) {
+            desgInput.classList.remove("input-error");
+        }
+
+        // Validate name
+        if (!nameInput.value.trim()) {
+            showInputError(nameInput, nameError, "Name is required");
+            isValid = false;
+        } else if (nameInput.value.trim().length < 2) {
+            showInputError(nameInput, nameError, "Name must be at least 2 characters");
+            isValid = false;
+        }
+        // Validate email
+        else if (!emailInput.value.trim()) {
+            showInputError(emailInput, emailError, "Email is required");
+            isValid = false;
+        } else if (!emailRegex.test(emailInput.value.trim())) {
+            showInputError(emailInput, emailError, "Please enter a valid email address");
+            isValid = false;
+        }
+        // Validate subject
+        else if (!subjectInput.value.trim()) {
+            showInputError(subjectInput, subjectError, "Subject is required");
+            isValid = false;
+        }
+        else if (desgInput && !desgInput.value.trim()) {
+            showInputError(desgInput, desgError, "Designation is required");
+            isValid = false;
+        }
+        // Validate phone
+        else if (!phoneInput.value.trim()) {
+            showPhoneInputError("Phone number is required");
+            isValid = false;
+        } else if (!phoneRegex.test(phoneInput.value.trim())) {
+            showPhoneInputError("Please enter a valid phone number (7-15 digits)");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function showInputError(inputElement, errorElement, message) {
+        inputElement.classList.add("input-error");
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+        
+        // Also display in main error message area for accessibility
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+    }
+
+    function showPhoneInputError(message) {
+        phoneContainer.classList.add("input-error");
+        phoneError.textContent = message;
+        phoneError.style.display = "block";
+        
+        // Also display in main error message area for accessibility
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+    }
+
+    function hideError(errorElement) {
+        errorElement.textContent = "";
+        errorElement.style.display = "none";
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+    }
+
+    // Form submission
+    loginForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Update current country before validation
+        currentCountry = document.getElementById('country-selector').value;
+
+        if (!validateForm()) {
+            return;
+        }
+
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const phone = currentCountry + phoneInput.value.trim().replace(/\D/g, ''); // Add country code and clean number
+        const subject = subjectInput.value.trim();
+        let desg;
+        if (desgInput) {
+            desg = desgInput.value.trim();
+        }
+        const isHtmxRequest = document.getElementById("chatbox") !== null;
+        
+        fetch("{{settings['backend_url']}}/min/auth", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "HX-Request": isHtmxRequest
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                phone: phone, // This will now include the country code
+                subject: subject,
+                desg: desg ? desg : "None"
+            }),
+        })
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                showError(data.error || "Login failed");
+                return;
+            }
+
+            if (isHtmxRequest) {
+                const text = await response.text();
+                htmx.swap('#chatbox', text, {swapStyle: 'innerHTML'});
+            } else {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const text = await response.text();
+                }
+            }
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+            showError("An error occurred. Please try again.");
+        });
+    });
+
+    // Real-time validation on input fields
+    nameInput.addEventListener("input", function () {
+        nameInput.classList.remove("input-error");
+        hideError(nameError);
+        hideError(errorMessage);
+    });
+
+    emailInput.addEventListener("input", function () {
+        emailInput.classList.remove("input-error");
+        hideError(emailError);
+        hideError(errorMessage);
+
+        if (emailInput.value.trim() && !emailRegex.test(emailInput.value.trim())) {
+            showInputError(emailInput, emailError, "Please enter a valid email address");
+        }
+    });
+
+    phoneInput.addEventListener("input", function () {
+        phoneContainer.classList.remove("input-error");
+        hideError(phoneError);
+        hideError(errorMessage);
+
+        if (phoneInput.value.trim() && !phoneRegex.test(phoneInput.value.trim())) {
+            showPhoneInputError("Please enter a valid phone number (7-15 digits)");
+        }
+    });
+}
+
+// Initialize the form when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initForm();
+});
+
+// Also call it immediately in case the script loads after DOM is ready
+initForm();
+</script>
+
+{% endblock %}

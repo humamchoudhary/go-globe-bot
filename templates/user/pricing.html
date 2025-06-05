@@ -1,7 +1,7 @@
-{% extends 'user/template.html' %} {% block content %}
+{% extends 'user/base.html' %} {% set title = "Pricing" %} {% block content %}
 <style>
   .active {
-    background-color: var(--goglobe-main-color);
+    background-color: var(--main-color);
     color: white;
   }
 
@@ -12,16 +12,16 @@
 
   .pricing-table th,
   .pricing-table td {
-    border-right: 1px solid var(--goglobe-border-color);
+    border-right: 1px solid var(--border-color);
   }
 
   .pricing-table th:first-child,
   .pricing-table td:first-child {
-    border-left: 1px solid var(--goglobe-border-color);
+    border-left: 1px solid var(--border-color);
   }
 
   .pricing-table thead th {
-    border-top: 1px solid var(--goglobe-border-color);
+    border-top: 1px solid var(--border-color);
   }
 
   .pricing-table thead th:first-child {
@@ -41,11 +41,7 @@
   }
 
   .plan-header {
-    background: linear-gradient(
-      135deg,
-      var(--goglobe-site-bg-color) 0%,
-      #003a5c 100%
-    );
+    background: linear-gradient(135deg, var(--bg-color) 0%, #003a5c 100%);
   }
 
   .feature-cell {
@@ -53,11 +49,11 @@
   }
 
   .price-cell {
-    background-color: var(--goglobe-site-bg-color);
+    background-color: var(--bg-color);
   }
 
   .popular-badge {
-    background: var(--goglobe-main-color);
+    background: var(--main-color);
     color: white;
     font-size: 12px;
     padding: 4px 12px;
@@ -67,34 +63,26 @@
     left: 50%;
     transform: translateX(-50%);
   }
-
-  body {
-    background-color: var(--goglobe-site-bg-color);
-    color: var(--goglobe-heading-color);
-    font-family: var(--goglobe-body-font-family);
-  }
 </style>
-<div class="flex flex-col w-full h-full items-center pt-10 px-4 pb-10">
+<div class="flex flex-col w-full items-center pt-10 px-4 pb-10">
   <div class="flex flex-col gap-1 text-center items-center">
-    <h1 class="text-[40px]" style="color: var(--goglobe-heading-color)">
-      Simple Pricing, Unbeatable Value
-    </h1>
-    <p class="text-[18px]" style="color: var(--goglobe-heading-color)">
+    <h1 class="text-[40px]">Simple Pricing, Unbeatable Value</h1>
+    <p class="text-[18px]">
       Start small and free, upgrade as you go. Take control of everything.
     </p>
     <div
-      class="flex p-2 rounded-[3px] mt-[40px] gap-2 flex-row border border-[var(--goglobe-border-color)] w-min h-min"
+      class="flex p-2 rounded-[3px] mt-[40px] gap-2 flex-row border border-[var(--border-color)] w-min h-min"
     >
       <div
         id="yearly"
-        class="px-[40px] py-2 text-nowrap text-[var(--goglobe-main-color)] active rounded-md transition-all duration-200 hover:opacity-80 hover:cursor-pointer"
+        class="px-[40px] py-2 text-nowrap text-[var(--main-color)] active rounded-md transition-all duration-200 hover:opacity-80 hover:cursor-pointer"
         onclick="updateSubType('yearly')"
       >
         Yearly
       </div>
       <div
         id="monthly"
-        class="px-[40px] py-2 text-nowrap text-[var(--goglobe-main-color)] rounded-md transition-all duration-200 hover:opacity-80 hover:cursor-pointer"
+        class="px-[40px] py-2 text-nowrap text-[var(--main-color)] rounded-md transition-all duration-200 hover:opacity-80 hover:cursor-pointer"
         onclick="updateSubType('monthly')"
       >
         Monthly
@@ -105,10 +93,7 @@
     <table class="pricing-table w-full">
       <thead>
         <tr>
-          <th
-            class="p-6 text-left feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          ></th>
+          <th class="p-6 text-left feature-cell"></th>
           <th class="p-6 text-center text-white relative">
             <div class="flex flex-col">
               <h3 class="text-xl">Personal</h3>
@@ -132,7 +117,7 @@
               </div>
               <a
                 class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer text-nowrap"
-                style="background-color: var(--goglobe-main-color); font-weight:400;"
+                style="background-color: var(--main-color); font-weight: 400"
                 >Buy Personal</a
               >
             </div>
@@ -161,7 +146,7 @@
               </div>
               <a
                 class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer text-nowrap"
-                style="background-color: var(--goglobe-main-color); font-weight:400;"
+                style="background-color: var(--main-color); font-weight: 400"
                 >Buy Premium</a
               >
             </div>
@@ -189,7 +174,7 @@
               </div>
               <a
                 class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer text-nowrap"
-                style="background-color: var(--goglobe-main-color); font-weight:400;"
+                style="background-color: var(--main-color); font-weight: 400"
                 >Buy Enterprise</a
               >
             </div>
@@ -200,11 +185,11 @@
         <!-- Main Features Section -->
         <tr>
           <td
-            class="p-4 feature-cell bg-[var(--goglobe-border-color)]"
+            class="p-4 feature-cell bg-[var(--border-color)]"
             style="
               color: var(--goglobe-heading-color);
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           >
             Main Features
@@ -212,110 +197,45 @@
           <td
             class="price-cell"
             style="
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           ></td>
           <td
             class="price-cell"
             style="
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           ></td>
           <td
             class="price-cell"
             style="
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           ></td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Tokens per month
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            5,500
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            12,500
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            20,000
-          </td>
+          <td class="p-4 feature-cell">Tokens per month</td>
+          <td class="p-4 text-center price-cell">5,500</td>
+          <td class="p-4 text-center price-cell">12,500</td>
+          <td class="p-4 text-center price-cell">20,000</td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Upscales per month
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            1,500
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            3,500
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            7,500
-          </td>
+          <td class="p-4 feature-cell">Upscales per month</td>
+          <td class="p-4 text-center price-cell">1,500</td>
+          <td class="p-4 text-center price-cell">3,500</td>
+          <td class="p-4 text-center price-cell">7,500</td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Background removals
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            4,000
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            8,000
-          </td>
-          <td
-            class="p-4 text-center price-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            15,000
-          </td>
+          <td class="p-4 feature-cell">Background removals</td>
+          <td class="p-4 text-center price-cell">4,000</td>
+          <td class="p-4 text-center price-cell">8,000</td>
+          <td class="p-4 text-center price-cell">15,000</td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Pending jobs
-          </td>
+          <td class="p-4 feature-cell">Pending jobs</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">+</span>
           </td>
@@ -327,12 +247,7 @@
           </td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Private generations
-          </td>
+          <td class="p-4 feature-cell">Private generations</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">+</span>
           </td>
@@ -344,12 +259,7 @@
           </td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Priority infrastructure
-          </td>
+          <td class="p-4 feature-cell">Priority infrastructure</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">-</span>
           </td>
@@ -361,12 +271,7 @@
           </td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Relaxed generation
-          </td>
+          <td class="p-4 feature-cell">Relaxed generation</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">-</span>
           </td>
@@ -383,8 +288,8 @@
             class="p-4 feature-cell"
             style="
               color: var(--goglobe-heading-color);
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           >
             Other Features
@@ -392,32 +297,27 @@
           <td
             class="price-cell"
             style="
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           ></td>
           <td
             class="price-cell"
             style="
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           ></td>
           <td
             class="price-cell"
             style="
-              background-color: var(--goglobe-body-color-2);
-              border-right-color: var(--goglobe-body-color-2);
+              background-color: var(--sec-bg-color);
+              border-right-color: var(--sec-bg-color);
             "
           ></td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Essential SRBThemes models
-          </td>
+          <td class="p-4 feature-cell">Essential SRBThemes models</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">+</span>
           </td>
@@ -429,12 +329,7 @@
           </td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Expanded SRBThemes models
-          </td>
+          <td class="p-4 feature-cell">Expanded SRBThemes models</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">+</span>
           </td>
@@ -446,12 +341,7 @@
           </td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Community models
-          </td>
+          <td class="p-4 feature-cell">Community models</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">-</span>
           </td>
@@ -463,12 +353,7 @@
           </td>
         </tr>
         <tr>
-          <td
-            class="p-4 feature-cell"
-            style="color: var(--goglobe-heading-color)"
-          >
-            Custom Model
-          </td>
+          <td class="p-4 feature-cell">Custom Model</td>
           <td class="p-4 text-center price-cell">
             <span class="text-xl">-</span>
           </td>
@@ -482,32 +367,32 @@
         <!-- CTA Buttons Row -->
         <tr>
           <td
-            class="p-4 feature-cell border-y border-y-[var(--goglobe-border-color)]"
+            class="p-4 feature-cell border-y border-y-[var(--border-color)]"
           ></td>
           <td
-            class="p-6 text-center price-cell border-y border-y-[var(--goglobe-border-color)]"
+            class="p-6 text-center price-cell border-y border-y-[var(--border-color)]"
           >
             <a
               class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer"
-              style="background-color: var(--goglobe-main-color)"
+              style="background-color: var(--main-color)"
               >Buy Personal</a
             >
           </td>
           <td
-            class="p-6 text-center price-cell border-y border-y-[var(--goglobe-border-color)]"
+            class="p-6 text-center price-cell border-y border-y-[var(--border-color)]"
           >
             <a
               class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer"
-              style="background-color: var(--goglobe-main-color)"
+              style="background-color: var(--main-color)"
               >Buy Premium</a
             >
           </td>
           <td
-            class="p-6 text-center price-cell border-y border-y-[var(--goglobe-border-color)]"
+            class="p-6 text-center price-cell border-y border-y-[var(--border-color)]"
           >
             <a
               class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer"
-              style="background-color: var(--goglobe-main-color)"
+              style="background-color: var(--main-color)"
               >Buy Enterprise</a
             >
           </td>
@@ -516,7 +401,7 @@
     </table>
   </div>
 </div>
-{% include 'user/fragments/faq-frag.html' %}
+{% include 'components/faq-frag.html' %}
 <script>
   function updateSubType(type) {
     const monthlyBtn = document.getElementById("monthly");

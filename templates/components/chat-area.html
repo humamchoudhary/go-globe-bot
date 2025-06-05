@@ -1,0 +1,128 @@
+<div
+  id="chatarea-{{ chat.room_id }}"
+  class="w-screen md:w-[840px] flex flex-col gap-[10px] h-full overflow-hidden border-x border-[var(--border-color)]"
+>
+  <div
+    class="h-[50px] bg-[var(--sec-bg-color)] flex md:hidden flex-row items-center justify-between px-[21px] py-[16px]"
+  >
+    <a href="/admin/chats"
+      ><i
+        data-lucide="chevron-left"
+        class="text-[var(--main-color)] hover:cursor-pointer"
+      ></i
+    ></a>
+    <p class="text-[var(--sec-text)] font-bold">{{ user.name }}</p>
+    <p
+      id="toggleClientInfo"
+      class="text-[var(--main-color)] font-bold text-[14px] cursor-pointer"
+    >
+      Client Info
+    </p>
+  </div>
+  <div
+    id="messageArea"
+    class="flex flex-col gap-[20px] w-full overflow-y-auto flex-grow pt-[20px] px-[20px] md:px-[40px]"
+  >
+    {% for message in chat.messages %} {% include 'components/message.html' %}
+    {% endfor %}
+  </div>
+  <form
+    class="relative w-full h-[60px] px-[20px] md:px-[40px] mb-[10px]"
+    hx-post="/admin/chat/{{ chat.room_id }}/send_message"
+    hx-trigger="submit"
+    hx-swap="none"
+    onsubmit="return !!this.message.value.trim()"
+    hx-on:htmx:afterRequest="this.reset()"
+  >
+    <textarea
+      rows="1"
+      placeholder="Send a message..."
+      class="w-full border-2 border-[var(--border-color)] transition-all duration-300 focus:border-[var(--main-color)] rounded-[5px] h-[60px] resize-none overflow-x-auto overflow-y-hidden whitespace-nowrap focus:outline-none p-[19px] pr-[80px] text-[16px] leading-[22px]"
+      name="message"
+      id="message"
+      required
+    ></textarea>
+    <button
+      type="submit"
+      class="bg-[var(--main-color)] text-white hover:opacity-90 transition-opacity px-[20px] py-[10px] absolute right-[28px] md:right-[48px] bottom-[8px] flex items-center justify-center w-[60px] h-[44px] rounded-[5px] focus:outline-none"
+    >
+      <i data-lucide="corner-down-left" class="text-white"></i>
+    </button>
+  </form>
+</div>
+{% if 'mobile' in request.user_agent.string.lower() %}
+<div
+  id="client-{{ chat.user_id }}"
+  class="hidden w-screen md:w-[840px] flex flex-col gap-[10px] h-full overflow-hidden border-x border-[var(--border-color)]"
+>
+  <div
+    class="h-[50px] bg-[var(--sec-bg-color)] flex flex-row items-center justify-between px-[21px] py-[16px]"
+  >
+    <i
+      id="clientback-{{ chat.user_id }}"
+      data-lucide="chevron-left"
+      class="text-[var(--main-color)] cursor-pointer"
+    ></i>
+    <p class="text-[var(--main-color)] font-bold text-[14px]">Client Info</p>
+    <p></p>
+  </div>
+  <div class="w-[300px] h-full flex flex-col px-[17px] py-[35px] gap-4">
+    <div class="flex flex-col gap-1">
+      <p class="text-[var(--sec-text)] text-[14px]">Name</p>
+      <p class="text-[14px]">{{ user.name }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="text-[var(--sec-text)] text-[14px]">Contact</p>
+      <a
+        class="text-[var(--main-color)] font-bold text-[14px]"
+        target="_blank"
+        href="https://wa.me/{{ user.phone }}"
+        >{{ user.phone }}</a
+      >
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="text-[var(--sec-text)] text-[14px]">Contact</p>
+      <a
+        class="text-[var(--main-color)] font-bold text-[14px]"
+        target="_blank"
+        href="mailto:{{ user.email }}"
+        >{{ user.email }}</a
+      >
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="text-[var(--sec-text)] text-[14px]">Designation</p>
+      <p class="text-[14px]">{{ user.desg }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="text-[var(--sec-text)] text-[14px]">Country</p>
+      <p class="text-[14px]">{{ user.country }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="text-[var(--sec-text)] text-[14px]">City</p>
+      <p class="text-[14px]">{{ user.city }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="text-[var(--sec-text)] text-[14px]">IP Details</p>
+      <p class="text-[14px]">{{ user.ip }}</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const clientInfoBtn = document.getElementById("toggleClientInfo");
+    const userback = document.getElementById("clientback-{{chat.user_id}}");
+    const userpanel = document.getElementById("client-{{chat.user_id}}");
+    const chatpanel = document.getElementById("chatarea-{{chat.room_id}}");
+
+    clientInfoBtn.addEventListener("click", function () {
+      userpanel.classList.remove("hidden");
+      chatpanel.classList.add("hidden");
+    });
+
+    userback.addEventListener("click", function () {
+      chatpanel.classList.remove("hidden");
+      userpanel.classList.add("hidden");
+    });
+  });
+</script>

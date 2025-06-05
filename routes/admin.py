@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+from collections import defaultdict, Counter
 from services.timezone import UTCZoneManager
 import threading
 from pprint import pprint
@@ -202,16 +204,49 @@ def chat(room_id):
 
     chat_service = ChatService(current_app.db)
 
+    user_service = UserService(current_app.db)
+
     chat = chat_service.get_chat_by_room_id(room_id)
     chats = chat_service.get_all_chats()
 
-    chats_data = [c for c in chats if c.admin_required]
+    # chats_data = [c for c in chats]
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data['username'] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    user = user_service.get_user_by_id(chat.user_id)
     if not chat:
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.index'))
     if request.headers.get('HX-Request'):
-        return render_template('admin/fragments/chat_page.html', chat=chat, username="Ana")
+        return render_template('components/chat-area.html', chat=chat, user=user, username="Ana")
 
-    return render_template('admin/dashboard.html', chat=chat, chats=chats_data, username="Ana")
+    return render_template('admin/chats.html', chat=chat, chats=chats_data, user=user, username="Ana")
+
+
+@admin_bp.route('/search/', methods=["POST"])
+@admin_required
+def search():
+    search = request.form.get('search-q')
+
+    chat_service = ChatService(current_app.db)
+    chats = chat_service.get_all_chats()
+
+    user_service = UserService(current_app.db)
+    search_chats = set()
+    for chat in chats:
+        user = user_service.get_user_by_id(chat.user_id)
+        chat.username = user.name
+
+        if search in user.name or (user.country and search in user.country) or (user.city and search in user.city):
+            search_chats.add(chat)
+            continue
+        for message in chat.messages:
+            if search in message.content:
+                search_chats.add(chat)
+                break
+
+    return render_template('components/search-results.html', search_chats=list(search_chats))
 
 
 @admin_bp.route('/chat/<room_id>/user')
@@ -240,7 +275,7 @@ def chat_mini(room_id):
 
     # chats_data = [c for c in chats if c.admin_required]
     # if not chat:
-    #     return redirect(url_for('admin.dashboard'))
+    #     return redirect(url_for('admin.index'))
     return render_template('admin/fragments/chat_mini.html', chat=chat, username="Ana")
 
 
@@ -250,7 +285,8 @@ def get_user_details(user_id):
 
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(user_id)
-    print(user.to_dict())
+    if request.headers.get('HX-Request'):
+        return render_template('components/chat-user-info.html', user=user)
 
     return jsonify(user.to_dict())
 
@@ -265,46 +301,49 @@ def filter_chats(filter):
     chats = chat_service.get_all_chats()
 
     if filter == "all":
-        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats])
+        return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats])
     elif filter == "active":
-        return render_template('admin/fragments/chat_list_container.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.admin_required])
+        return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.admin_required])
 
 
 @admin_bp.route('/chat/<room_id>/send_message', methods=['POST'])
 @admin_required
 def send_message(room_id):
+    try:
+        # if 'user_id' not in session:
+        #     if request.headers.get('HX-Request'):
+        #         return "Please log in first", 401
+        #     return "<h1>Unauthorized</h1>", 401
 
-    # if 'user_id' not in session:
-    #     if request.headers.get('HX-Request'):
-    #         return "Please log in first", 401
-    #     return "<h1>Unauthorized</h1>", 401
+        message = request.form.get('message')
+        print(rf'{message}')
+        print(f'{room_id}')
+        if not message:
+            return "", 302
+        chat_service = ChatService(current_app.db)
+        user_service = UserService(current_app.db)
 
-    message = request.form.get('message')
-    print(rf'{message}')
-    print(f'{room_id}')
-    if not message:
-        return "", 302
-    chat_service = ChatService(current_app.db)
-    user_service = UserService(current_app.db)
+        chat = chat_service.get_chat_by_room_id(room_id)
+        if not chat:
+            if request.headers.get('HX-Request'):
+                return "Chat not found", 404
+            return jsonify({"error": "Chat not found"}), 404
 
-    chat = chat_service.get_chat_by_room_id(room_id)
-    if not chat:
-        if request.headers.get('HX-Request'):
-            return "Chat not found", 404
-        return jsonify({"error": "Chat not found"}), 404
+        new_message = chat_service.add_message(
+            chat.room_id, "Ana", message)
+        user = user_service.get_user_by_id(chat.user_id)
+        if not user:
+            return '<p>User Not Found</>'
+        current_app.socketio.emit('new_message', {
+            'sender': new_message.sender,
+            'content': message,
+            'timestamp': new_message.timestamp.isoformat()
+        }, room=room_id)
 
-    new_message = chat_service.add_message(
-        chat.room_id, "Ana", message)
-    user = user_service.get_user_by_id(chat.user_id)
-    if not user:
-        return '<p>User Not Found</>'
-    current_app.socketio.emit('new_message', {
-        'sender': new_message.sender,
-        'content': message,
-        'timestamp': new_message.timestamp.isoformat()
-    }, room=room_id)
-
-    return render_template('admin/fragments/chat_message.html', message=new_message, username="Ana")
+        # return render_template('admin/fragments/chat_message.html', message=new_message, username="Ana")
+        return "", 200
+    except Exception as e:
+        print(e)
 
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
@@ -446,16 +485,131 @@ def logout():
     return redirect(url_for('admin.login'))
 
 
+def generate_stats(chat_list):
+    now = datetime.utcnow()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=today_start.weekday())
+    year_start = now.replace(month=1, day=1, hour=0,
+                             minute=0, second=0, microsecond=0)
+    month_start = now.replace(day=1, hour=0, minute=0,
+                              second=0, microsecond=0)  # <-- this-month start
+
+    # Containers
+    today_hourly = Counter()
+    today_admin_hourly = Counter()
+
+    week_daily = Counter()
+    week_admin_daily = Counter()
+
+    month_daily = Counter()          # <-- this-month counters
+    month_admin_daily = Counter()
+
+    year_monthly = Counter()
+    year_admin_monthly = Counter()
+
+    all_time_yearly = Counter()
+    all_time_admin_yearly = Counter()
+
+    for chat in chat_list:
+        created = chat.created_at
+
+        # === TODAY (hourly) ===
+        if created >= today_start:
+            hour_label = created.strftime("%H:00")
+            today_hourly[hour_label] += 1
+            if chat.admin_required:
+                today_admin_hourly[hour_label] += 1
+
+        # === THIS WEEK (daily) ===
+        if created >= week_start:
+            day_label = created.strftime("%A")
+            week_daily[day_label] += 1
+            if chat.admin_required:
+                week_admin_daily[day_label] += 1
+
+        # === THIS MONTH (daily) ===
+        if created >= month_start:
+            day_label = created.day  # integer day of month
+            month_daily[day_label] += 1
+            if chat.admin_required:
+                month_admin_daily[day_label] += 1
+
+        # === THIS YEAR (monthly) ===
+        if created >= year_start:
+            month_label = created.strftime("%b")
+            year_monthly[month_label] += 1
+            if chat.admin_required:
+                year_admin_monthly[month_label] += 1
+
+        # === ALL TIME (yearly) ===
+        year_label = created.strftime("%Y")
+        all_time_yearly[year_label] += 1
+        if chat.admin_required:
+            all_time_admin_yearly[year_label] += 1
+
+    # Fill missing labels for consistency
+    full_hours = [f"{str(h).zfill(2)}:00" for h in range(24)]
+    full_days = ['Monday', 'Tuesday', 'Wednesday',
+                 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    full_months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    # Get number of days in current month (handles month length)
+    import calendar
+    days_in_month = calendar.monthrange(now.year, now.month)[1]
+    full_days_in_month = list(range(1, days_in_month + 1))
+
+    return {
+        'today': {
+            'labels': full_hours,
+            'totalChats': [today_hourly[h] for h in full_hours],
+            'adminRequired': [today_admin_hourly[h] for h in full_hours]
+        },
+        'this-week': {
+            'labels': full_days,
+            'totalChats': [week_daily[d] for d in full_days],
+            'adminRequired': [week_admin_daily[d] for d in full_days]
+        },
+        'this-month': {                                   # <-- added this-month
+            'labels': full_days_in_month,
+            'totalChats': [month_daily[d] for d in full_days_in_month],
+            'adminRequired': [month_admin_daily[d] for d in full_days_in_month]
+        },
+        'this-year': {
+            'labels': full_months,
+            'totalChats': [year_monthly[m] for m in full_months],
+            'adminRequired': [year_admin_monthly[m] for m in full_months]
+        },
+        'all-time': {
+            'labels': sorted(all_time_yearly.keys()),
+            'totalChats': [all_time_yearly[y] for y in sorted(all_time_yearly.keys())],
+            'adminRequired': [all_time_admin_yearly[y] for y in sorted(all_time_admin_yearly.keys())]
+        }
+    }
+
+
 @admin_bp.route('/')
 @admin_required
-def dashboard():
+def index():
 
     chat_service = ChatService(current_app.db)
+
+    user_service = UserService(current_app.db)
     chats = chat_service.get_all_chats()
 
-    # Convert to dictionary representation
-    chats_data = [chat for chat in chats if chat.admin_required]
-    return render_template('admin/dashboard.html', chats=chats_data, username="Ana")
+    chats_ary = []
+    x = 0
+    for c in chats:
+        print(x)
+        x += 1
+        print(c)
+        chat = c.to_dict()
+        chat['username'] = user_service.get_user_by_id(c.user_id).name
+        chats_ary.append(chat)
+
+    data = generate_stats(chats)
+    pprint(chats_ary)
+    return render_template('admin/index.html', chats=chats_ary, data=data, username="Ana")
 
 
 @admin_bp.route('/join/<room_id>')
@@ -868,7 +1022,7 @@ def api_usage():
 #     return jsonify(chats_data)
 
 
-@admin_bp.route('/chats', methods=['GET'])
+@admin_bp.route('/chats/', methods=['GET'])
 # @admin_bp.route('/chats/<string:status>', methods=['GET'])
 @admin_required
 def get_all_chats():
@@ -888,8 +1042,22 @@ def get_all_chats():
     return render_template('admin/chats.html', chats=chats)
 
 
+@admin_bp.route("/chat/<string:room_id>/delete", methods=["POST"])
+def delete_chat(room_id):
+
+    try:
+        chat_service = ChatService(current_app.db)
+        chat_service.delete([room_id])
+        return "", 200
+    except Exception as e:
+        print(e)
+        return "Error"
+    # for i in chats:
+    #     print(i)
+
+
 @admin_bp.route("/chats/delete", methods=["POST"])
-def delete_chat():
+def delete_chats():
 
     data = request.get_json()
     if not data.get("chat_ids"):

@@ -1,10 +1,5 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]><html class="ie ie6" lang="en"> <![endif]-->
-<!--[if IE 7]><html class="ie ie7" lang="en"> <![endif]-->
-<!--[if IE 8]><html class="ie ie8" lang="en"> <![endif]-->
-<!--[if (gte IE 9)|!(IE)]><!-->
-<html lang="en">
-  <!--<![endif]-->
+<!doctype html>
+<html lang="en" class="overflow-x-hidden p-0 m-0">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="description" content="GoGlobe" />
@@ -18,97 +13,103 @@
       rel="shortcut icon"
       href="{{ url_for('static', filename='img/logo-desktop-mini.svg') }}"
     />
+    <link rel="stylesheet" href="/static/css/global.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script>
-      document.documentElement.setAttribute(
-        "data-goglobe-skin",
-        '{{settings["theme"]}}'
-      );
-      if (localStorage.frenify_panel !== "") {
-        document.documentElement.classList.add(localStorage.frenify_panel);
-      }
-    </script>
-    <link
-      type="text/css"
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/plugins.css') }}"
-    />
-    <link
-      type="text/css"
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/prestyle.css') }}"
-    />
-    <!-- !Styles -->
-    <script>
-      const fontFiles = {{font_files | tojson }};
+      const fontFiles = {{font_files | safe }};
       const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
     </script>
     <script src="{{ url_for('static', filename='js/fontLoader.js') }}"></script>
     <script>
       loadFonts(fontFiles, fontFolder);
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
-  <body>
-    <!-- Sign In -->
-    <div class="goglobe_fn_sign" style="padding-top: 40px">
-      <div class="sign__content">
-        <img
-          src="{{ url_for('static', filename='img/logo.svg') }}"
-          alt=""
-          class="desktop_logo"
-          style="
-            max-width: 250px;
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: 20px;
-          "
-        />
-        <div class="login">
-          <div class="form__content">
-            <div class="form__title mb-10">Sign In</div>
-            <p id="error-message" class="error" style="display: none"></p>
-            <div class="form__email">
-              <label for="user_login">Email OR Username</label>
-              <input
-                type="text"
-                class="input"
-                id="user_login"
-                autocapitalize="off"
-                autocomplete="email"
-                name="email"
-                aria-describedby="login-message"
-              />
-            </div>
-            <div class="form__pass">
-              <div class="pass_lab">
-                <label for="user_password">Password</label>
-                <a href="#">Forget Password?</a>
-              </div>
-              <input
-                type="password"
-                id="user_password"
-                autocomplete="current-password"
-                name="password"
-                spellcheck="false"
-              />
-            </div>
-            <button
-              id="login-btn"
-              class="fn__submit form__submit duration-300 transition-all hover:cursor-pointer font-bold"
-            >
-              Sign In
-            </button>
+  <body class="m-0 bg-[var(--bg-color)] min-h-screen">
+    <!-- Sign In Container -->
+    <div class="flex items-center justify-center min-h-screen pt-10 px-4">
+      <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+          <img
+            src="{{ url_for('static', filename='img/logo.svg') }}"
+            alt="GoGlobe Logo"
+            class="mx-auto max-w-[250px] h-auto"
+          />
+        </div>
+        <!-- Login Form -->
+        <div
+          class="bg-[var(--sec-bg-color)] rounded-lg p-8 border border-[var(--border-color)] shadow-xl"
+        >
+          <h1 class="text-2xl font-bold text-center mb-8 text-white">
+            Sign In
+          </h1>
+          <!-- Error Message -->
+          <div
+            id="error-message"
+            class="hidden bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-6"
+          >
+            <span class="text-sm"></span>
           </div>
+          <!-- Email/Username Field -->
+          <div class="mb-6">
+            <label
+              for="user_login"
+              class="block text-sm font-medium text-gray-300 mb-2"
+              >Email OR Username</label
+            >
+            <input
+              type="text"
+              id="user_login"
+              name="email"
+              autocapitalize="off"
+              autocomplete="email"
+              aria-describedby="login-message"
+              class="w-full px-4 py-3 bg-bg-primary border border-[var(--border-color)] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors duration-200"
+              placeholder="Enter your email or username"
+            />
+          </div>
+          <!-- Password Field -->
+          <div class="mb-6">
+            <div class="flex justify-between items-center mb-2">
+              <label
+                for="user_password"
+                class="block text-sm font-medium text-gray-300"
+                >Password</label
+              >
+              <a
+                href="#"
+                class="text-sm text-accent hover:text-orange-400 transition-colors duration-200"
+              >
+                Forget Password?
+              </a>
+            </div>
+            <input
+              type="password"
+              id="user_password"
+              name="password"
+              autocomplete="current-password"
+              spellcheck="false"
+              class="w-full px-4 py-3 bg-bg-primary border border-[var(--border-color)] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors duration-200"
+              placeholder="Enter your password"
+            />
+          </div>
+          <!-- Submit Button -->
+          <button
+            id="login-btn"
+            class="w-full py-3 bg-[var(--main-color)] rounded-md hover:opacity-95 duration-300 transition-all hover:cursor-pointer"
+          >
+            Sign In
+          </button>
         </div>
       </div>
     </div>
-    <!-- !Sign In -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const loginBtn = document.getElementById("login-btn");
         const usernameInput = document.getElementById("user_login");
         const passwordInput = document.getElementById("user_password");
         const errorMessage = document.getElementById("error-message");
+        const errorText = errorMessage.querySelector("span");
 
         loginBtn.addEventListener("click", function () {
           const username = usernameInput.value.trim();
@@ -118,6 +119,16 @@
             showError("Please enter both username and password");
             return;
           }
+
+          // Add loading state
+          loginBtn.disabled = true;
+          loginBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing In...
+                `;
 
           fetch("/admin/login", {
             method: "POST",
@@ -144,19 +155,40 @@
             .catch((error) => {
               console.error("Error:", error);
               showError("An error occurred. Please try again.");
+            })
+            .finally(() => {
+              // Reset button state
+              loginBtn.disabled = false;
+              loginBtn.innerHTML = "Sign In";
             });
         });
 
         function showError(message) {
-          errorMessage.textContent = message;
-          errorMessage.style.display = "block";
+          errorText.textContent = message;
+          errorMessage.classList.remove("hidden");
+
+          // Auto-hide error after 5 seconds
+          setTimeout(() => {
+            errorMessage.classList.add("hidden");
+          }, 5000);
         }
 
-        // Handle enter key
-        passwordInput.addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            loginBtn.click();
-          }
+        // Handle enter key on both inputs
+        [usernameInput, passwordInput].forEach((input) => {
+          input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              loginBtn.click();
+            }
+          });
+        });
+
+        // Hide error when user starts typing
+        [usernameInput, passwordInput].forEach((input) => {
+          input.addEventListener("input", function () {
+            if (!errorMessage.classList.contains("hidden")) {
+              errorMessage.classList.add("hidden");
+            }
+          });
         });
       });
     </script>

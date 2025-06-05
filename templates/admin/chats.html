@@ -1,443 +1,198 @@
-<!-- Chat panel (similar to the image) -->
-{% extends 'admin/template.html' %}{% block content %}
+{% extends 'admin/base.html' %}
+{% block header %}
+{{super()}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}
 
+{% set title = "Chats" %} {% block content %}
 <style>
-  .active-filter {
-    border-color: var(--goglobe-main-color);
-    color: var(--goglobe-main-color);
-  }
-  .filter {
-    border-color: var(--goglobe-hover-color);
-  }
-  .delete-checkbox {
-    display: none;
-    margin-right: 8px;
-  }
-  .delete-mode .delete-checkbox {
-    display: block;
-  }
-  .delete-mode .chat-item {
-    padding-left: 8px;
-  }
+.active-chats{
+background-color:var(--sec-bg-color);
+color:var(--main-color);
+border-radius:5px;
+border:1px solid var(--border-color);
+}
 </style>
-
-<div class="goglobe_fn_aichatbot_page fn__chatbot h-[90vh] overflow-auto">
-  <!-- Left panel (already in your template) -->
-
-  <!-- Chat panel (similar to the image) -->
-
-  <div
-    id="chat_panel"
-    class="flex-1 flex flex-col h-full overflow-y-scroll bg-[#001c2e] border-r-[var(--goglobe-border-color)] border-r-4"
-  >
-    <!-- Chat header -->
-    <div class="sticky flex justify-between items-start flex-col items-center">
-      <div class="flex h-15 items-center w-full justify-between">
-        <h2 class="text-xl ml-4 font-medium text-white">Chats</h2>
-        <div class="flex items-center mr-4">
-          <button
-            id="toggle-delete"
-            class="text-sm text-red-400 hover:text-red-300 hidden"
-            onclick="toggleDeleteMode()"
-          >
-            Delete Chats
-          </button>
-          <button
-            id="cancel-delete"
-            class="text-sm text-gray-400 hover:text-white hidden mr-2"
-            onclick="cancelDeleteMode()"
-          >
-            Cancel
-          </button>
-          <button
-            id="confirm-delete"
-            class="text-sm bg-red-600 text-white px-3 py-1 rounded hidden disabled:bg-gray-500"
-            onclick="deleteSelectedChats()"
-          >
-            Delete Selected
-          </button>
-        </div>
-      </div>
-      <div class="grid h-10 grid-cols-2 w-full item-center justify-center">
-        <p
-          id="all-tab"
-          hx-get="/admin/chats/all"
-          hx-target="#chat_list_container"
-          hx-trigger="click"
-          class="active-filter border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--goglobe-hover-color)]/10"
-        >
-          All Chats
-        </p>
-        <p
-          id="active-tab"
-          hx-get="/admin/chats/active"
-          hx-target="#chat_list_container"
-          hx-trigger="click"
-          class="border-b-2 flex items-center justify-center px-2 text-center py-1 text-sm text-white hover:cursor-pointer duration-200 transition-all hover:bg-[var(--goglobe-hover-color)]/10"
-        >
-          Admin Chats
-        </p>
-      </div>
-    </div>
-
-    <!-- Chat list -->
-    <div class="flex-1 overflow-y-auto h-[96vh]">
-      <p class="text-right text-sm text-gray-400 p-2" id="chat-count">
-        Total Chats: <span id="chat-total">{{chats|length}}</span>
+<div class="flex flex-col w-full h-full items-center justify-center">
+  <div class="flex flex-row w-full min-h-[80vh]">
+    <div
+      class="flex flex-col gap-[25px] w-full h-[93vh] overflow-y-scroll"
+    >
+    <div class="flex flex-row gap-[32px] items-center justify-between md:justify-start mx-[24px] mt-[24px] ">
+      <p class=" text-[18px] md:text-[26px] text-[var(--sec-text)]">
+        Chats
       </p>
-      <p id="empty_chat" class="text-center hidden">No Chat</p>
+        <div class="flex flex-row md:gap-[24px] items-center">
+<div
+  hx-get="/admin/chats/all"
+  hx-target="#chat_list_container"
+  hx-trigger="click"
+  hx-on:click="switchActiveChat(this)"
+  class="chat-tab px-[12px] md:px-[18px] font-bold active-chats leading-[40px] hover:cursor-pointer">
+  <p  class="text-[14px]">All Chats ({{ chats|length }})</p>
+</div>
 
-      <div id="chat_list_container">
-        {% include "admin/fragments/chat_list_container.html" %}
-      </div>
+<div
+  hx-get="/admin/chats/active"
+  hx-target="#chat_list_container"
+  hx-trigger="click"
+  hx-on:click="switchActiveChat(this)"
+  class="chat-tab  px-[12px] md:px-[18px] font-bold leading-[40px] hover:cursor-pointer">
+  <p  class="text-[14px]">Admin Chats ({{ chats|selectattr('admin_required', 'equalto', true)|list|length }})</p>
+</div>
+        </div>
     </div>
-  </div>
-
-  <!-- Rest of your existing code remains the same -->
-
-  <div
-    id="chat_container"
-    class="w-screen md:w-210 bg-[var(--goglobe-bg-color)] z-0 h-[20vh] relative md:h-full hidden"
-  >
-    <!-- <body class="bg-[var(--goglobe-bg-color)]" style="background-color: #001f33"></body> -->
-  </div>
-
-  <!-- Right panel for client info -->
-  <div
-    class="bg-[#001c2e] border-l border-[#132f41] p-4 fixed h-min hidden md:flex md:h-screen right-0 w-64 chat__sidebar"
-  >
-    <div class="mb-6">
-      <h3 class="text-lg font-medium text-white mb-3">Client info</h3>
-      <div id="client-info" class="text-sm text-gray-400">
-        <div class="mb-4">
-          <p class="text-gray-500 mb-1">Name</p>
-          <p id="client-name" class="text-white">
-            Select a chat to view details
-          </p>
+        <div class="flex flex-col" id="chat_list_container">
+            {% include 'components/chat-list.html' %}
         </div>
-        <div class="mb-4">
-          <p class="text-gray-500 mb-1">Contact</p>
-          <p id="client-phone" class="text-white">-</p>
-        </div>
-
-        <div class="mb-4">
-          <p class="text-gray-500 mb-1">Email</p>
-          <p id="client-email" class="text-white break-all">-</p>
-        </div>
-
-        <div class="mb-4">
-          <p class="text-gray-500 mb-1">Designation</p>
-          <p id="client-desg" class="text-white break-all">-</p>
-        </div>
-
-        <!-- <div class="mb-4"> -->
-        <!--   <p class="text-gray-500 mb-1">Visit Source</p> -->
-        <!--   <p id="client-source" class="text-white">-</p> -->
-        <!-- </div> -->
-        <!---->
-        <!-- <div class="mb-4"> -->
-        <!--   <p class="text-gray-500 mb-1">Visit Details</p> -->
-        <!--   <p id="client-visit" class="text-white text-sm">-</p> -->
-        <!-- </div> -->
-        <!---->
-        <div class="mb-4">
-          <p class="text-gray-500 mb-1">Country</p>
-          <p id="client-country" class="text-white">-</p>
-        </div>
-
-        <div class="mb-4">
-          <p class="text-gray-500 mb-1">City</p>
-          <p id="client-city" class="text-white">-</p>
-        </div>
-
-        <div class="mb-4">
-          <p class="text-gray-500 mb-1">IP Details</p>
-          <p id="client-ip" class="text-white text-sm">-</p>
-        </div>
-      </div>
+    </div>
+    <div class="w-max h-[90vh] md:h-[93vh]" id="chatArea" class="flex">
+        
+        {% if chat %}
+        {% set active_chat = chat %}
+        {% include 'components/chat-area.html' %}
+        {% endif  %}
+    </div>
+    <div id="userInfo" class="w-min h-full border-l border-[var(--border-color)] hidden md:flex">
+        {% include 'components/chat-user-info.html' %}
     </div>
   </div>
 </div>
-
 <script>
-  function toggleDeleteMode() {
-    document.body.classList.add("delete-mode");
-    document.getElementById("toggle-delete").classList.add("hidden");
-    document.getElementById("cancel-delete").classList.remove("hidden");
-    document.getElementById("confirm-delete").classList.remove("hidden");
-    updateDeleteButton();
-  }
 
-  function cancelDeleteMode() {
-    document.body.classList.remove("delete-mode");
-    document.getElementById("toggle-delete").classList.remove("hidden");
-    document.getElementById("cancel-delete").classList.add("hidden");
-    document.getElementById("confirm-delete").classList.add("hidden");
 
-    // Uncheck all checkboxes
-    document.querySelectorAll(".delete-checkbox").forEach((checkbox) => {
-      checkbox.checked = false;
+  function switchActiveChat(clickedTab) {
+    document.querySelectorAll('.chat-tab').forEach(tab => {
+      tab.classList.remove('active-chats');
     });
+    clickedTab.classList.add('active-chats');
   }
+     function fixAllLinks(element) {
+       const links = element.querySelectorAll('a');
 
-  function updateDeleteButton() {
-    const checkedCount = document.querySelectorAll(
-      ".delete-checkbox:checked"
-    ).length;
-    const deleteButton = document.getElementById("confirm-delete");
+       links.forEach(link => {
+         // Add target="_blank" to open in new tab
+         link.setAttribute('target', '_blank');
+         link.setAttribute('rel', 'noopener noreferrer');
 
-    if (checkedCount > 0) {
-      deleteButton.textContent = `Delete (${checkedCount})`;
-      deleteButton.disabled = false;
-    } else {
-      deleteButton.textContent = "Delete";
-      deleteButton.disabled = true;
-    }
-  }
+         // Fix URLs without http/https
+         let href = link.getAttribute('href');
+         if (href && !/^https?:\/\//i.test(href)) {
+           link.setAttribute('href', 'https://' + href);
+         }
+       });
+     }
 
-  function deleteSelectedChats() {
-    const selectedChats = Array.from(
-      document.querySelectorAll(".delete-checkbox:checked")
-    ).map((checkbox) => checkbox.value);
 
-    if (selectedChats.length === 0) return;
+  window.addEventListener("DOMContentLoaded", function () {
 
-    if (
-      confirm(
-        `Are you sure you want to delete ${selectedChats.length} chat(s)?`
-      )
-    ) {
-      fetch("/admin/chats/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ chat_ids: selectedChats }),
-      })
-        .then((data) => {
-          console.log(data);
-          if (data.status == 200) {
-            // Refresh the chat list
-            htmx.trigger("#all-tab", "click");
-            cancelDeleteMode();
-            location.reload();
-          } else {
-            alert("Error deleting chats: " + (data.message || "Unknown error"));
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          alert("Error deleting chats");
-        });
-    }
-  }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const chatItems = document.querySelectorAll(".chat-item");
-    const toggleDeleteBtn = document.getElementById("toggle-delete");
+  const textarea = document.getElementById("message");
+      if (textarea) textarea.value = "";
 
-    if (chatItems.length > 0) {
-      toggleDeleteBtn.classList.remove("hidden");
-    }
-  });
+     document.querySelectorAll('.md-content').forEach(el => {
+       // Parse markdown
+       el.innerHTML = marked.parseInline(el.textContent);
 
-  function updateClientInfo(user) {
-    if (!user) {
-      // Reset to default state if no chat selected
-      document.getElementById("client-name").textContent =
-        "Select a chat to view details";
-      document.getElementById("client-phone").textContent = "-";
-      document.getElementById("client-email").textContent = "-";
+       // Fix links
+       fixAllLinks(el);
+     });
+      {% if chat %}
 
-      document.getElementById("client-desg").textContent = "-";
-      //  document.getElementById('client-source').textContent = '-';
-      //document.getElementById('client-visit').textContent = '-';
-      document.getElementById("client-country").textContent = "-";
-      document.getElementById("client-city").textContent = "-";
-      document.getElementById("client-ip").textContent = "-";
-      return;
-    }
+      const roomId = "{{chat.room_id}}";
 
-    // Update client information
-    document.getElementById("client-name").textContent = user.name || "-";
- //   document.getElementById("client-phone").textContent = user.phone || "-";
+      const socket = io();
 
-const phone = user.phone || "-";
-const phoneEl = document.getElementById("client-phone");
-
-if (user.phone && user.phone !== "-") {
-  const waLink = `https://wa.me/${user.phone.replace(/\D/g, "")}`; // remove non-digits
-  phoneEl.innerHTML = `<a href="${waLink}" target="_blank" rel="noopener noreferrer" class="text-green-400 underline hover:text-green-300">${user.phone}</a>`;
-} else {
-  phoneEl.textContent = "-";
-}
-
-    document.getElementById("client-email").textContent = user.email || "-";
-
-    document.getElementById("client-desg").textContent = user.desg || "-";
-    //  document.getElementById('client-source').textContent = user.source || '-';
-
-    // Format visit details
-    // const visitDetails = `on website ${user.timeOnSite || '0'} min, viewed ${user.pagesViewed || '0'} page(s)`;
-    // document.getElementById('client-visit').textContent = visitDetails;
-
-    document.getElementById("client-country").textContent = user.country || "-";
-    document.getElementById("client-city").textContent = user.city || "-";
-    document.getElementById("client-ip").textContent = user.ip || "-";
-  }
-
-  function renderChat(room_id, user_id) {
-    //  document.getElementById('chat_container').src = `/admin/chat/min/${room_id}`;
-    document.getElementById("chat_container").classList.remove("hidden");
-    document.getElementById("chat_panel").classList.add("max-md:hidden");
-
-    // Fetch chat details and update sidebar
-    fetch(`/admin/user/${user_id}/details`)
-      .then((response) => response.json())
-      .then((user) => {
-        updateClientInfo(user);
-      })
-      .catch((error) => {
-        console.error("Error fetching chat details:", error);
-        updateClientInfo(null);
+      socket.on("connect", function () {
+          console.log('connect')
+        socket.emit("admin_join", { room: roomId });
       });
-  }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    // Get the tab elements
-    const allTab = document.getElementById("all-tab");
-    const activeTab = document.getElementById("active-tab");
+      socket.on("new_message", function (data) {
 
-    // Handle HTMX events
-    document.body.addEventListener("htmx:afterSwap", function (event) {
-      if (event.detail.target.id === "chat_list_container") {
-        const source = event.detail.requestConfig.path;
+          console.log('message')
+          location.reload()
+      });
 
-        // Update the chat count
-        const chatItems = document.querySelectorAll(".chat-item");
-        document.getElementById("chat-total").textContent = chatItems.length;
 
-        // Update tab styling
-        if (source.includes("/active")) {
-          activeTab.classList.add("active-filter");
-          allTab.classList.remove("active-filter");
-        } else {
-          allTab.classList.add("active-filter");
-          activeTab.classList.remove("active-filter");
-        }
+      {% endif %}
 
-        // Show/hide empty message
-        if (chatItems.length > 0) {
-          document.getElementById("empty_chat").classList.add("hidden");
+const messageArea = document.getElementById('messageArea');
 
-          toggleDeleteBtn.classList.remove("hidden");
-        } else {
-          document.getElementById("empty_chat").classList.remove("hidden");
+          messageArea.scrollTo({
 
-          toggleDeleteBtn.classList.add("hidden");
-          // Also cancel delete mode if no chats
-          if (document.body.classList.contains("delete-mode")) {
-            cancelDeleteMode();
-          }
-        }
-      }
-    });
-  });
+  top: messageArea.scrollHeight,
+  behavior: 'smooth'
+});
 
-  function sortTable(n) {
-    var table,
-      rows,
-      switching,
-      i,
-      x,
-      y,
-      shouldSwitch,
-      dir,
-      switchcount = 0;
-    table = document.getElementById("chatRoomsTable");
-    switching = true;
-    dir = "asc";
 
-    while (switching) {
-      switching = false;
-      rows = table.rows;
+});
 
-      for (i = 1; i < rows.length - 1; i++) {
-        shouldSwitch = false;
-        x = rows[i].getElementsByTagName("TD")[n];
-        y = rows[i + 1].getElementsByTagName("TD")[n];
+  document.body.addEventListener('htmx:afterSwap', (event) => {
 
-        if (dir == "asc") {
-          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-            shouldSwitch = true;
-            break;
-          }
-        } else if (dir == "desc") {
-          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-            shouldSwitch = true;
-            break;
-          }
-        }
-      }
-
-      if (shouldSwitch) {
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-        switchcount++;
-      } else {
-        if (switchcount == 0 && dir == "asc") {
-          dir = "desc";
-          switching = true;
-        }
-      }
+  const textarea = document.getElementById("message");
+      if (textarea) textarea.value = "";
+      // Only rerun Lucide on content swaps, not OOB (out-of-band)
+    if (!event.detail.isOOBSwap && window.lucide) {
+      lucide.createIcons();
     }
-  }
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
-<script>
-  function fixAllLinks(element) {
-    const links = element.querySelectorAll("a");
-
-    links.forEach((link) => {
-      // Add target="_blank" to open in new tab
-      link.setAttribute("target", "_blank");
-      link.setAttribute("rel", "noopener noreferrer");
-
-      // Fix URLs without http/https
-      let href = link.getAttribute("href");
-      if (href && !/^https?:\/\//i.test(href)) {
-        link.setAttribute("href", "https://" + href);
-      }
-    });
-  }
-
-  document.addEventListener("htmx:afterRequest", function (evt) {
-    const url = evt.detail.pathInfo.requestPath;
-
-    if (url.startsWith("/admin/chat/min/")) {
+    
+    const url = event.detail.pathInfo.requestPath;
+    if (url.startsWith("/admin/chat/")) {
       const roomId = url.split("/").splice(-1)[0];
 
       const socket = io();
 
       socket.on("connect", function () {
+          console.log('connect')
         socket.emit("admin_join", { room: roomId });
       });
 
       socket.on("new_message", function (data) {
-        appendMessage(data);
+
+          console.log('message')
+
+          location.reload()
       });
     }
-    document.querySelectorAll(".md-content").forEach((el) => {
-      el.innerHTML = marked.parse(el.textContent);
 
-      fixAllLinks(el);
-    });
+const messageArea = document.getElementById('messageArea');
 
-    // Put the JS code that you want to execute here
+          messageArea.scrollTo({
+
+  top: messageArea.scrollHeight,
+  behavior: 'smooth'
+});
+
+     document.querySelectorAll('.md-content').forEach(el => {
+       // Parse markdown
+       el.innerHTML = marked.parseInline(el.textContent);
+
+       // Fix links
+       fixAllLinks(el);
+     });
+
   });
+
+  document.body.addEventListener("htmx:afterSwap", function (evt) {
+    if (evt.detail.target.id === "chatArea") {
+      // Remove highlight class from all chat rows
+      document.querySelectorAll(".chat-row").forEach(el => {
+        el.classList.remove("bg-[var(--sec-bg-color)]");
+      });
+
+      // Get the new room ID from URL (last part of /admin/chat/<room_id>)
+      const roomId = window.location.pathname.split("/").pop();
+      const activeRow = document.getElementById("chat-" + roomId);
+      if (activeRow) {
+        activeRow.classList.add("bg-[var(--sec-bg-color)]");
+      }
+    }
+  });
+
+
 </script>
+
 
 {% endblock %}

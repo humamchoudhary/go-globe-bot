@@ -1,0 +1,726 @@
+{% extends 'admin/template.html' %} {% block content %}
+<div
+  class="goglobe_fn_aichatbot_page fn__chatbot"
+  style="margin-inline: 34px; margin-bottom: 16px"
+>
+  <div class="chat__page">
+    <h1
+      class="mb-6 text-2xl font-bold"
+      style="color: var(--goglobe-heading-color)"
+    >
+      System Logs
+    </h1>
+    <!-- Filters Section -->
+    <div
+      class="mb-6 rounded-lg shadow p-4"
+      style="
+        background-color: var(--goglobe-site-bg-color);
+        border: 1px solid var(--goglobe-border-color);
+      "
+    >
+      <h3
+        class="text-lg font-semibold mb-4"
+        style="color: var(--goglobe-heading-color)"
+      >
+        Filters
+      </h3>
+      <form
+        id="filter-form"
+        hx-get="/admin/logs/filter"
+        hx-target="#logs-table"
+        hx-swap="innerHTML"
+        hx-trigger="submit, filter-change"
+        hx-include="this"
+        class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      >
+        <!-- Level Filter (Multiple Selection) -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >Levels</label
+          >
+          <div class="multi-select-container">
+            <div
+              class="multi-select-header"
+              onclick="toggleDropdown('level-dropdown')"
+            >
+              <span id="level-selected">All Levels</span>
+              <svg
+                class="dropdown-arrow"
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+              >
+                <path
+                  d="M3 4.5L6 7.5L9 4.5"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <div id="level-dropdown" class="multi-select-dropdown">
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="level"
+                  value="DEBUG"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>DEBUG</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="level"
+                  value="INFO"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>INFO</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="level"
+                  value="WARNING"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>WARNING</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="level"
+                  value="ERROR"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>ERROR</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="level"
+                  value="CRITICAL"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>CRITICAL</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <!-- Tag Filter (Multiple Selection) -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >Tags</label
+          >
+          <div class="multi-select-container">
+            <div
+              class="multi-select-header"
+              onclick="toggleDropdown('tag-dropdown')"
+            >
+              <span id="tag-selected">All Tags</span>
+              <svg
+                class="dropdown-arrow"
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+              >
+                <path
+                  d="M3 4.5L6 7.5L9 4.5"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <div id="tag-dropdown" class="multi-select-dropdown">
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="tag"
+                  value="ACCESS"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>ACCESS</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="tag"
+                  value="MESSAGE"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>MESSAGE</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="tag"
+                  value="PING"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>PING</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="tag"
+                  value="LOGIN"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>LOGIN</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="tag"
+                  value="SYSTEM"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>SYSTEM</span>
+              </label>
+              <label class="multi-select-option">
+                <input
+                  type="checkbox"
+                  name="tag"
+                  value="ADMIN"
+                  onchange="handleFilterChange(this)"
+                />
+                <span>ADMIN</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <!-- Message Search Filter -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >Search Message</label
+          >
+          <input
+            type="text"
+            name="message_search"
+            placeholder="Search in messages..."
+            class="w-full px-3 py-2 rounded border text-sm filter-input"
+            style="
+              background-color: var(--goglobe-button-bg-color);
+              border-color: var(--goglobe-border-color);
+              color: var(--goglobe-body-color);
+            "
+          />
+        </div>
+        <!-- User ID Filter -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >User ID</label
+          >
+          <input
+            type="text"
+            name="user_id"
+            placeholder="Enter User ID"
+            class="w-full px-3 py-2 rounded border text-sm filter-input"
+            style="
+              background-color: var(--goglobe-button-bg-color);
+              border-color: var(--goglobe-border-color);
+              color: var(--goglobe-body-color);
+            "
+          />
+        </div>
+        <!-- Admin ID Filter -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >Admin ID</label
+          >
+          <input
+            type="text"
+            name="admin_id"
+            placeholder="Enter Admin ID"
+            class="w-full px-3 py-2 rounded border text-sm filter-input"
+            style="
+              background-color: var(--goglobe-button-bg-color);
+              border-color: var(--goglobe-border-color);
+              color: var(--goglobe-body-color);
+            "
+          />
+        </div>
+        <!-- Sort Order -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >Sort</label
+          >
+          <select
+            name="sort"
+            class="w-full px-3 py-2 rounded border text-sm"
+            style="
+              background-color: var(--goglobe-button-bg-color);
+              border-color: var(--goglobe-border-color);
+              color: var(--goglobe-body-color);
+            "
+            onchange="triggerFilter()"
+          >
+            <option value="timestamp_desc">Newest First</option>
+            <option value="timestamp_asc">Oldest First</option>
+            <option value="level_desc">Level (High to Low)</option>
+            <option value="level_asc">Level (Low to High)</option>
+          </select>
+        </div>
+        <!-- Date Range -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >From Date</label
+          >
+          <input
+            type="datetime-local"
+            name="start_date"
+            class="w-full px-3 py-2 rounded border text-sm"
+            style="
+              background-color: var(--goglobe-button-bg-color);
+              border-color: var(--goglobe-border-color);
+              color: var(--goglobe-body-color);
+            "
+            onchange="triggerFilter()"
+          />
+        </div>
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >To Date</label
+          >
+          <input
+            type="datetime-local"
+            name="end_date"
+            class="w-full px-3 py-2 rounded border text-sm"
+            style="
+              background-color: var(--goglobe-button-bg-color);
+              border-color: var(--goglobe-border-color);
+              color: var(--goglobe-body-color);
+            "
+            onchange="triggerFilter()"
+          />
+        </div>
+        <!-- Limit -->
+        <div>
+          <label
+            class="block text-sm font-medium mb-2"
+            style="color: var(--goglobe-body-color)"
+            >Limit</label
+          >
+          <select
+            name="limit"
+            class="w-full px-3 py-2 rounded border text-sm"
+            style="
+              background-color: var(--goglobe-button-bg-color);
+              border-color: var(--goglobe-border-color);
+              color: var(--goglobe-body-color);
+            "
+            onchange="triggerFilter()"
+          >
+            <option value="50">50 logs</option>
+            <option value="100" selected>100 logs</option>
+            <option value="200">200 logs</option>
+            <option value="500">500 logs</option>
+            <option value="">All</option>
+          </select>
+        </div>
+        <!-- Clear Filters Button -->
+        <div class="flex items-end">
+          <button
+            type="button"
+            onclick="clearFilters()"
+            class="w-full px-4 py-2 rounded text-sm font-medium transition-colors"
+            style="background-color: var(--goglobe-main-color); color: white"
+          >
+            Clear Filters
+          </button>
+        </div>
+        <!-- Apply Filters Button -->
+      </form>
+    </div>
+    <!-- Active Filters Display -->
+    <div id="active-filters" class="mb-4"></div>
+    <!-- Log Details Container (for HTMX) -->
+    <div id="log-details" class="mb-6"></div>
+    <!-- Logs Table Container -->
+    <div
+      id="logs-table"
+      class="rounded-lg shadow overflow-hidden"
+      style="
+        background-color: var(--goglobe-site-bg-color);
+        border: 1px solid var(--goglobe-border-color);
+      "
+    >
+      {% include 'admin/logs_table.html' %}
+    </div>
+  </div>
+</div>
+<script>
+  // Global variables
+  let debounceTimer;
+
+  // Multi-select dropdown functionality
+  function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    const isOpen = dropdown.style.display === "block";
+
+    // Close all dropdowns
+    document.querySelectorAll(".multi-select-dropdown").forEach((d) => {
+      d.style.display = "none";
+    });
+
+    // Open the clicked one if it wasn't open
+    if (!isOpen) {
+      dropdown.style.display = "block";
+    }
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".multi-select-container")) {
+      document.querySelectorAll(".multi-select-dropdown").forEach((d) => {
+        d.style.display = "none";
+      });
+    }
+  });
+
+  // Update selected text for multi-select
+  function updateSelectedText(selectType) {
+    const checkboxes = document.querySelectorAll(
+      `input[name="${selectType}"]:checked`,
+    );
+    const selectedSpan = document.getElementById(`${selectType}-selected`);
+
+    if (checkboxes.length === 0) {
+      selectedSpan.textContent =
+        selectType === "level" ? "All Levels" : "All Tags";
+    } else if (checkboxes.length === 1) {
+      selectedSpan.textContent = checkboxes[0].value;
+    } else {
+      selectedSpan.textContent = `${checkboxes.length} selected`;
+    }
+  }
+
+  // Handle filter changes for checkboxes
+  function handleFilterChange(checkbox) {
+    updateSelectedText(checkbox.name);
+    triggerFilter();
+  }
+
+  // Trigger filter with HTMX
+  function triggerFilter() {
+    const form = document.getElementById("filter-form");
+    htmx.trigger(form, "filter-change");
+    displayActiveFilters();
+  }
+
+  // Display active filters
+  function displayActiveFilters() {
+    const form = document.getElementById("filter-form");
+    const formData = new FormData(form);
+    const activeFilters = [];
+
+    // Check levels
+    const levels = formData.getAll("level");
+    if (levels.length > 0) {
+      activeFilters.push(`Levels: ${levels.join(", ")}`);
+    }
+
+    // Check tags
+    const tags = formData.getAll("tag");
+    if (tags.length > 0) {
+      activeFilters.push(`Tags: ${tags.join(", ")}`);
+    }
+
+    // Check other filters
+    const messageSearch = formData.get("message_search");
+    if (messageSearch) {
+      activeFilters.push(`Message: "${messageSearch}"`);
+    }
+
+    const userId = formData.get("user_id");
+    if (userId) {
+      activeFilters.push(`User ID: ${userId}`);
+    }
+
+    const adminId = formData.get("admin_id");
+    if (adminId) {
+      activeFilters.push(`Admin ID: ${adminId}`);
+    }
+
+    const startDate = formData.get("start_date");
+    const endDate = formData.get("end_date");
+    if (startDate || endDate) {
+      const dateRange = `${startDate || "..."} to ${endDate || "..."}`;
+      activeFilters.push(`Date: ${dateRange}`);
+    }
+
+    // Display active filters
+    const activeFiltersDiv = document.getElementById("active-filters");
+    if (activeFilters.length > 0) {
+      activeFiltersDiv.innerHTML = `
+        <div class="p-3 rounded-lg" style="background-color: var(--goglobe-button-bg-color); border: 1px solid var(--goglobe-border-color);">
+          <span class="text-sm font-medium" style="color: var(--goglobe-body-color);">Active Filters: </span>
+          ${activeFilters.map((filter) => `<span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs mr-2 mb-1">${filter}</span>`).join("")}
+        </div>
+      `;
+    } else {
+      activeFiltersDiv.innerHTML = "";
+    }
+  }
+
+  // Clear all filters
+  function clearFilters() {
+    const form = document.getElementById("filter-form");
+
+    // Reset form inputs
+    form.reset();
+
+    // Uncheck all checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+      cb.checked = false;
+    });
+
+    // Reset multi-select displays
+    document.getElementById("level-selected").textContent = "All Levels";
+    document.getElementById("tag-selected").textContent = "All Tags";
+
+    // Clear active filters display
+    document.getElementById("active-filters").innerHTML = "";
+
+    // Trigger filter refresh
+    triggerFilter();
+  }
+
+  // Auto-submit form on input changes with debounce
+  document.addEventListener("input", function (e) {
+    if (e.target.matches(".filter-input")) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        triggerFilter();
+      }, 500);
+    }
+  });
+
+  // Handle row clicks
+  document.addEventListener("click", function (e) {
+    const row = e.target.closest(".log-row");
+    if (row && !e.target.closest("button")) {
+      const logId = row.dataset.logId;
+      if (logId) {
+        htmx.ajax("GET", `/admin/log/${logId}`, {
+          target: "#log-details",
+          swap: "innerHTML",
+        });
+      }
+    }
+  });
+
+  // Initialize on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const logId = "{{ selected_log.log_id | default('null') }}";
+    if (logId && logId !== "null") {
+      htmx.ajax("GET", `/admin/log/${logId}`, {
+        target: "#log-details",
+        swap: "innerHTML",
+      });
+    }
+
+    // Initial filter display
+    displayActiveFilters();
+
+    // Preserve filter state on page load
+    preserveFilterState();
+  });
+
+  // Preserve filter state
+  function preserveFilterState() {
+    // This would be called if you need to restore filters from URL params or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Restore levels
+    const levels = urlParams.getAll("level");
+    levels.forEach((level) => {
+      const checkbox = document.querySelector(
+        `input[name="level"][value="${level}"]`,
+      );
+      if (checkbox) checkbox.checked = true;
+    });
+    if (levels.length > 0) updateSelectedText("level");
+
+    // Restore tags
+    const tags = urlParams.getAll("tag");
+    tags.forEach((tag) => {
+      const checkbox = document.querySelector(
+        `input[name="tag"][value="${tag}"]`,
+      );
+      if (checkbox) checkbox.checked = true;
+    });
+    if (tags.length > 0) updateSelectedText("tag");
+
+    // Restore other fields
+    [
+      "message_search",
+      "user_id",
+      "admin_id",
+      "sort",
+      "start_date",
+      "end_date",
+      "limit",
+    ].forEach((field) => {
+      const value = urlParams.get(field);
+      if (value) {
+        const input = document.querySelector(`[name="${field}"]`);
+        if (input) input.value = value;
+      }
+    });
+  }
+
+  // Handle HTMX events
+  document.addEventListener("htmx:afterSettle", function (evt) {
+    if (evt.detail.pathInfo.requestPath.startsWith("/admin/log/")) {
+      history.replaceState(null, "", evt.detail.pathInfo.requestPath);
+    }
+  });
+
+  // Prevent form submission on Enter key in input fields
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.matches("input")) {
+      e.preventDefault();
+      triggerFilter();
+    }
+  });
+</script>
+<style>
+  /* Multi-select dropdown styles */
+  .multi-select-container {
+    position: relative;
+  }
+
+  .multi-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid var(--goglobe-border-color);
+    border-radius: 4px;
+    background-color: var(--goglobe-button-bg-color);
+    color: var(--goglobe-body-color);
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .multi-select-header:hover {
+    border-color: var(--goglobe-main-color);
+  }
+
+  .dropdown-arrow {
+    transition: transform 0.2s ease;
+  }
+
+  .multi-select-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--goglobe-button-bg-color);
+    border: 1px solid var(--goglobe-border-color);
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .multi-select-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--goglobe-body-color);
+  }
+
+  .multi-select-option:hover {
+    background-color: var(--goglobe-body-color-2);
+  }
+
+  .multi-select-option input[type="checkbox"] {
+    margin-right: 8px;
+  }
+
+  /* Custom scrollbar for multi-select */
+  .multi-select-dropdown::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .multi-select-dropdown::-webkit-scrollbar-track {
+    background: var(--goglobe-site-bg-color);
+  }
+
+  .multi-select-dropdown::-webkit-scrollbar-thumb {
+    background: var(--goglobe-border-color);
+    border-radius: 3px;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--goglobe-site-bg-color);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--goglobe-border-color);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--goglobe-main-color);
+  }
+
+  /* Table hover effects */
+  .log-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .log-row:hover {
+    background-color: var(--goglobe-body-color-2) !important;
+  }
+
+  /* Form input focus styles */
+  input:focus,
+  select:focus,
+  .multi-select-header:focus {
+    outline: 2px solid var(--goglobe-main-color);
+    outline-offset: -2px;
+  }
+
+  /* Active filter tags */
+  .filter-tag {
+    background-color: var(--goglobe-main-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+</style>
+{% endblock %}

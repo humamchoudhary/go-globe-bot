@@ -1,0 +1,103 @@
+<div
+  id="audio-dropzone-{{ audio_type }}"
+  class="norm flex flex-col gap-1 justify-center items-center transition-all cursor-pointer"
+  onclick="document.getElementById('{{ audio_type }}-audio').click()"
+>
+  <input
+    id="{{ audio_type }}-audio"
+    type="file"
+    accept="audio/*"
+    class="hidden"
+  />
+  {% if audio_file %}
+  <i
+    data-lucide="music"
+    class="size-12 mb-4"
+    style="color: var(--main-color)"
+  ></i>
+  <p>{{ audio_type | replace('-', ' ') | title }} audio already uploaded</p>
+  <audio controls class="mt-2 w-full max-w-xs">
+    <source src="{{ audio_file }}" type="audio/wav" />
+    Your browser does not support the audio element.
+  </audio>
+  {% else %}
+  <i data-lucide="upload" class="size-12 mb-4"></i>
+  <p>Drag and drop your {{ audio_type | replace('-', ' ') }} audio here</p>
+  <p>MP3 or WAV (recommended)</p>
+  <button
+    class="mt-6 border px-6 py-3 rounded-md transition-all"
+    style="
+      border-color: var(--border-color);
+      hover: bg-var(--main-color);
+      hover: text-var(--bg-color);
+    "
+  >
+    Select File
+  </button>
+  {% endif %}
+</div>
+<script>
+  const audioTypes = ["message", "pop-up"];
+
+  audioTypes.forEach((audioType) => {
+    const dropzone = document.getElementById(`audio-dropzone-${audioType}`);
+    const input = document.getElementById(`${audioType}-audio`);
+
+    input.addEventListener("change", () => uploadAudio(audioType));
+
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, () => highlight(dropzone), false);
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, () => unhighlight(dropzone), false);
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      input.files = dt.files;
+      uploadAudio(audioType);
+    });
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function highlight(element) {
+    element.classList.add("highlight");
+    element.classList.remove("norm");
+  }
+
+  function unhighlight(element) {
+    element.classList.remove("highlight");
+    element.classList.add("norm");
+  }
+
+  function uploadAudio(audioType) {
+    const fileInput = document.getElementById(`${audioType}-audio`);
+    if (fileInput.files.length === 0) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    fetch(`/admin/upload-sound/${audioType}`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Upload failed");
+        alert(`${audioType} sound uploaded!`);
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+</script>

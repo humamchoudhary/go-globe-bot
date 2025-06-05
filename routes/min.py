@@ -75,17 +75,16 @@ def index():
 @min_bp.route('login/<string:subject>', methods=['GET'])
 def login(subject):
     if request.method == "GET":
-        ip = request.headers.get("X_REAL-IP")
+        try:
+            ip = request.headers.get("X_REAL-IP")
+            ip = ip.split(",")[0]
 
-        print(request.remote_addr)
-        print(ip)
-        ip = ip.split(",")[0]
-
-        print(ip)
-        geo = requests.get(f"http://ip-api.com/json/{ip}")
-        geo = geo.json()
-        print(geo)
-        country = geo.get("country", None)
+            geo = requests.get(f"http://ip-api.com/json/{ip}")
+            geo = geo.json()
+            country = geo.get("country", None)
+        except Exception as e:
+            pass
+            country = None
         return render_template('user/min-login.html', default_subject=subject, user_country=country)
 
 

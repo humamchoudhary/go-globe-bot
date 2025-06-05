@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/global.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- <script src="https://unpkg.com/lucide@latest"></script> -->
+    <script src="{{ url_for('static', filename='js/fontLoader.js') }}"></script>
+    <script>
+      const fontFiles = {{ font_files | safe }};
+      const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
+      loadFonts(fontFiles, fontFolder);
+    </script>
+    <script
+      src="https://unpkg.com/htmx.org@2.0.4"
+      integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+      crossorigin="anonymous"
+    ></script>
+    {% block header %}{% endblock %}
+  </head>
+  <body class="bg-[var(--bg-color)]">
+    <div
+      class="h-[80px] bg-[var(--sec-bg-color)] flex flex-row items-center border-b border-[var(--border-color)] fixed top-0 right-0 left-0 z-500"
+    >
+      <div
+        class="min-w-[250px] w-[250px] h-full border-r border-[var(--border-color)] flex-row items-center hidden md:flex"
+        style="padding-left: 30px"
+      >
+        <img src="/static/img/logo.svg" class="w-[150px]" />
+      </div>
+      {% block header_items %}{% endblock %}
+    </div>
+    <div class="flex flex-row">
+      {% block navbar %}{% endblock %}
+      <div class="w-full md:ml-[250px] h-screen pt-[80px]">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
