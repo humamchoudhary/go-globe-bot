@@ -26,6 +26,7 @@
     {% for message in chat.messages %} {% include 'components/message.html' %}
     {% endfor %}
   </div>
+  {% if chat.admin_required %}
   <form
     class="relative w-full h-[60px] px-[20px] md:px-[40px] mb-[10px]"
     hx-post="/admin/chat/{{ chat.room_id }}/send_message"
@@ -49,6 +50,7 @@
       <i data-lucide="corner-down-left" class="text-white"></i>
     </button>
   </form>
+  {% endif %}
 </div>
 {% if 'mobile' in request.user_agent.string.lower() %}
 <div
