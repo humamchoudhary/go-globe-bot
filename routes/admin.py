@@ -62,7 +62,7 @@ def changelogs_page():
 def view_logs():
     """Main logs page"""
     logs_service = LogsService(current_app.db)
-    logs = logs_service.get_recent_logs(None)
+    logs = logs_service.get_recent_logs(10000)
     return render_template('admin/logs.html', logs=logs, selected_log=None)
 
 
