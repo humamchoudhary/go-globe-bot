@@ -205,8 +205,9 @@ def chat(room_id):
     chat_service = ChatService(current_app.db)
 
     user_service = UserService(current_app.db)
-
     chat = chat_service.get_chat_by_room_id(room_id)
+    if not chat:
+        return redirect(url_for('admin.get_all_chats'))
     chats = chat_service.get_all_chats()
 
     # chats_data = [c for c in chats]
