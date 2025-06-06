@@ -111,22 +111,32 @@
 </div>
 {% endif %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  function setupClientInfoToggle() {
     const clientInfoBtn = document.getElementById("toggleClientInfo");
     const userback = document.getElementById("clientback-{{chat.user_id}}");
     const userpanel = document.getElementById("client-{{chat.user_id}}");
     const chatpanel = document.getElementById("chatarea-{{chat.room_id}}");
-    if (clientInfoBtn) {
+
+    if (clientInfoBtn && userpanel && chatpanel) {
       clientInfoBtn.addEventListener("click", function () {
         userpanel.classList.remove("hidden");
         chatpanel.classList.add("hidden");
       });
     }
-    if (userback) {
+
+    if (userback && chatpanel && userpanel) {
       userback.addEventListener("click", function () {
         chatpanel.classList.remove("hidden");
         userpanel.classList.add("hidden");
       });
     }
+  }
+
+  // Run after full page load
+  document.addEventListener("DOMContentLoaded", setupClientInfoToggle);
+
+  // Run after HTMX swaps in new content
+  document.body.addEventListener("htmx:afterSwap", function (e) {
+    setupClientInfoToggle();
   });
 </script>
