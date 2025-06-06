@@ -20,7 +20,7 @@
   <div class="flex flex-col">
     <div class="flex flex-row gap-[15px]">
       <p class="text-[16px] font-bold">
-        {{ chat.username[:6] }} {% if chat.username|length > 6 %} ... {% endif
+        {{ chat.username[:10] }} {% if chat.username|length > 10 %} ... {% endif
         %}
       </p>
       {% if chat.admin_required %}
