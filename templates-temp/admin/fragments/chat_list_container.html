@@ -1,0 +1,43 @@
+{% for chat in chats %}
+    {% if request.user_agent is mobile %}
+        <a href="/admin/chat/{{ chat.room_id }}"
+           onclick="if(document.body.classList.contains('delete-mode')) { event.preventDefault(); this.querySelector('.delete-checkbox').checked = !this.querySelector('.delete-checkbox').checked; updateDeleteButton(); return false; } else { renderChat('{{ chat.room_id }}','{{ chat.user_id }}'); }"
+           data-admin-required="{{ 'true' if chat.admin_required else 'false' }}"
+           class="chat-item flex flex-col p-3 border-b border-[#132f41] hover:bg-[#0c2434] cursor-pointer">
+        {% else %}
+            <div hx-get="/admin/chat/min/{{ chat.room_id }}"
+                 hx-target="#chat_container"
+                 hx-trigger="click"
+                 hx-on:after-request="mdParse()"
+                 onclick="if(document.body.classList.contains('delete-mode')) { this.querySelector('.delete-checkbox').checked = !this.querySelector('.delete-checkbox').checked; updateDeleteButton(); return false; } else { renderChat('{{ chat.room_id }}','{{ chat.user_id }}'); }"
+                 data-admin-required="{{ 'true' if chat.admin_required else 'false' }}"
+                 class="chat-item flex flex-col p-3 border-b border-[#132f41] hover:bg-[#0c2434] cursor-pointer">
+            {% endif %}
+            <div class="flex items-center">
+                <input type="checkbox"
+                       class="delete-checkbox"
+                       value="{{ chat.room_id }}"
+                       onchange="updateDeleteButton()" />
+                <div class="flex-1">
+                    <div class="flex justify-between items-center">
+                        <div class="font-medium text-white">{{ chat.username }}</div>
+                        <div class="text-xs text-gray-400">{{ chat.updated_at.strftime("%H:%M") }}</div>
+                    </div>
+                    <div class="text-sm text-gray-300 truncate mt-1">{{ chat.subject }}</div>
+                    <div class="flex justify-between items-center mt-1 text-xs text-gray-400">
+                        <p class="truncate text-nowrap w-50">
+                            {% set message = chat.messages[-1] %}{{ message.sender }}:{{
+                            message.content }}
+                        </p>
+                        {% if chat.admin_required %}
+                            <div class="px-2 py-0.5 rounded-full bg-[rgba(255,88,0,0.2)] text-[#ff5800]">Admin Required</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if request.user_agent is mobile %}
+            </a>
+        {% else %}
+        </div>
+    {% endif %}
+{% endfor %}

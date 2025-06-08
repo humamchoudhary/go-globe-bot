@@ -42,8 +42,8 @@ class Bot:
         self.dp_key = app.config['SETTINGS']['apiKeys']['deepseek']
         self.active_bot = None
         self.active_bot_name = ""
-        self.sys_prompt = app.config["SETTINGS"]["prompt"] + f"\n\n ONLY RESPOND IN FOLLOWING LANGAUGES YOU CAN TRANSLATE THE INPUT DATA TO ANY LANGAUES OR ACCEPT RESPONSE IN THIS LANGAUGE, FOR OTHER LANGAUGES RESPONSE: '''' I HAVENT LEARNED <LANGAGUE NAME> YET PLEASE TALK TO ANA OR USE THESE LANAGAUES <SUPPORTED LANAGUAGES>, SUPPORTED LANAGUAGES: {
-            ", ".join(app.config['SETTINGS'].get('langauges',['English']))} '''"
+        self.sys_prompt = app.config["SETTINGS"]["prompt"] + f"\n\n only respond in following langauges you can translate the system input/ system instruction data to any langaues or accept response in this langauge, for other langauges response in that lanagues: i havent learned <langague name> yet please talk to ana or use these lanagaues <supported lanaguages>, supported lanaguages: {
+            ", ".join(app.config['SETTINGS'].get('langauges',['English']))} "
 
         # Enhanced Google model configurations
         self.google_models = {
@@ -237,36 +237,20 @@ class Bot:
                         data=buffered.getvalue(), mime_type='image/jpeg')
                 ))
 
-        common_config_params = {
-            "max_output_tokens": model_config["max_tokens"],
-            "temperature": model_config["temperature"]
-        }
-
-        if 'gemma' in actual_model:
-            # For Gemma models, use 'system_instruction'
-            generation_config = types.GenerateContentConfig(
-                system_instruction=f"{self.sys_prompt}\n{text_content}",
-                **common_config_params
-            )
-        else:
-            # For other Google models (like Gemini), use 'developer_instruction'
-            generation_config = types.GenerateContentConfig(
-                enable_developer_instructions=True,
-                developer_instruction=f"{self.sys_prompt}\n{text_content}",
-                **common_config_params
-            )
-        # --- MODIFICATION ENDS HERE ---
-
         return {
             "client": self.active_bot,
             "config": {
                 "model": actual_model,
-                "config": generation_config,  # Pass the correctly created config here
+                "config": types.GenerateContentConfig(
+                    system_instruction=f"{self.sys_prompt}\n{text_content}",
+                    max_output_tokens=model_config["max_tokens"],
+                    temperature=model_config["temperature"]
+                ),
                 "history": history
             }
         }
-    # Keep existing initializers for other models
 
+    # Keep existing initializers for other models
     def _init_claude_3_chat(self, text_content, images):
         messages = [{
             "role": "system",

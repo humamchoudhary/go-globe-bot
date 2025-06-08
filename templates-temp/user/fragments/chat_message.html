@@ -1,0 +1,10 @@
+<div
+  class="chat__box {{'your__chat' if message.sender==username else 'bot__chat'}}"
+>
+  <div class="author">
+    <span>{{ message.sender if message.sender != username else 'You' }}</span>
+  </div>
+  <div class="chat">
+    <p class="md-content">{{ message.content }}</p>
+  </div>
+</div>

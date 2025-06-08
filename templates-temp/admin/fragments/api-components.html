@@ -1,0 +1,42 @@
+<p style="font-size: 16px; margin-top: 24px; margin-bottom: 12px">
+  {{ api_type.capitalize() }} Keys
+</p>
+{% if settings.apiKeys[api_type] %}
+<div class="flex w-full flex-row justify-between min-h-10 gap-4">
+  <p>
+    {{'*'*settings.apiKeys[api_type]|length}}{{ settings.apiKeys[api_type][-4:]
+    }}
+  </p>
+  <button
+    hx-delete="/admin/settings/api/{{ api_type }}"
+    hx-trigger="click"
+    hx-swap="none"
+    hx-on::after-request="window.location.reload()"
+    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--goglobe-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-black hover:bg-white min-w-[50px] px-7"
+  >
+    <i data-lucide="trash" class="size-10"></i> Remove
+  </button>
+</div>
+{% else %}
+<form
+  class="flex w-full flex-row justify-between min-h-10 gap-4"
+  style="margin-bottom: 8px"
+  hx-post="/admin/settings/api/{{ api_type }}"
+  hx-swap="none"
+  hx-on::after-request="window.location.reload()"
+>
+  <input
+    type="password"
+    id="key"
+    name="key"
+    class="flex h-10 w-3/4 rounded-md border border-[var(--goglobe-border-color)] bg-background px-3 py-2 text-base ring-none outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-200 transition-all focus:border-[var(--goglobe-main-color)]"
+    autocomplete="off"
+  />
+  <button
+    type="submit"
+    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[var(--goglobe-main-color)] text-white duration-200 transition-all hover:cursor-pointer hover:text-black hover:bg-white min-w-[50px] px-7"
+  >
+    <i data-lucide="save" class="size-10"></i> Save
+  </button>
+</form>
+{% endif %}

@@ -457,23 +457,23 @@ def upload_file():
                         image.save(image_path, 'PNG')
                         image_filenames.append(image_filename)
                         file_items.append(render_template(
-                            "admin/fragments/file_item.html", file=image_filename))
+                            "components/file_item.html", file=image_filename))
 
                     os.remove(temp_path)
                 else:
                     file.save(file_path)
                     file_items.append(render_template(
-                        "admin/fragments/file_item.html", file=unique_filename))
+                        "components/file_item.html", file=unique_filename))
             except Exception as e:
                 file.seek(0)
                 file.save(file_path)
                 print(f"PDF conversion error: {e}")
                 file_items.append(render_template(
-                    "admin/fragments/file_item.html", file=unique_filename))
+                    "components/file_item.html", file=unique_filename))
         else:
             file.save(file_path)
             file_items.append(render_template(
-                "admin/fragments/file_item.html", file=unique_filename))
+                "components/file_item.html", file=unique_filename))
 
     return "".join(file_items), 200  # Return all file items as HTML
 

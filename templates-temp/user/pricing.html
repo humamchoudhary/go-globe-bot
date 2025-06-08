@@ -1,0 +1,544 @@
+{% extends 'user/template.html' %} {% block content %}
+<style>
+  .active {
+    background-color: var(--goglobe-main-color);
+    color: white;
+  }
+
+  .pricing-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .pricing-table th,
+  .pricing-table td {
+    border-right: 1px solid var(--goglobe-border-color);
+  }
+
+  .pricing-table th:first-child,
+  .pricing-table td:first-child {
+    border-left: 1px solid var(--goglobe-border-color);
+  }
+
+  .pricing-table thead th {
+    border-top: 1px solid var(--goglobe-border-color);
+  }
+
+  .pricing-table thead th:first-child {
+    border-top-left-radius: 8px;
+  }
+
+  .pricing-table thead th:last-child {
+    border-top-right-radius: 8px;
+  }
+
+  .pricing-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+  }
+
+  .pricing-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+  }
+
+  .plan-header {
+    background: linear-gradient(
+      135deg,
+      var(--goglobe-site-bg-color) 0%,
+      #003a5c 100%
+    );
+  }
+
+  .feature-cell {
+    background-color: var(--goglobe-button-bg-color);
+  }
+
+  .price-cell {
+    background-color: var(--goglobe-site-bg-color);
+  }
+
+  .popular-badge {
+    background: var(--goglobe-main-color);
+    color: white;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  body {
+    background-color: var(--goglobe-site-bg-color);
+    color: var(--goglobe-heading-color);
+    font-family: var(--goglobe-body-font-family);
+  }
+</style>
+<div class="flex flex-col w-full h-full items-center pt-10 px-4 pb-10">
+  <div class="flex flex-col gap-1 text-center items-center">
+    <h1 class="text-[40px]" style="color: var(--goglobe-heading-color)">
+      Simple Pricing, Unbeatable Value
+    </h1>
+    <p class="text-[18px]" style="color: var(--goglobe-heading-color)">
+      Start small and free, upgrade as you go. Take control of everything.
+    </p>
+    <div
+      class="flex p-2 rounded-[3px] mt-[40px] gap-2 flex-row border border-[var(--goglobe-border-color)] w-min h-min"
+    >
+      <div
+        id="yearly"
+        class="px-[40px] py-2 text-nowrap text-[var(--goglobe-main-color)] active rounded-md transition-all duration-200 hover:opacity-80 hover:cursor-pointer"
+        onclick="updateSubType('yearly')"
+      >
+        Yearly
+      </div>
+      <div
+        id="monthly"
+        class="px-[40px] py-2 text-nowrap text-[var(--goglobe-main-color)] rounded-md transition-all duration-200 hover:opacity-80 hover:cursor-pointer"
+        onclick="updateSubType('monthly')"
+      >
+        Monthly
+      </div>
+    </div>
+  </div>
+  <div class="mt-12 w-full max-w-6xl">
+    <table class="pricing-table w-full">
+      <thead>
+        <tr>
+          <th
+            class="p-6 text-left feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          ></th>
+          <th class="p-6 text-center text-white relative">
+            <div class="flex flex-col">
+              <h3 class="text-xl">Personal</h3>
+              <div class="mt-2">
+                <span class="text-3xl font-normal yearly-price">$10</span>
+                <span class="text-3xl font-normal monthly-price hidden"
+                  >$15</span
+                >
+                <span class="text-sm opacity-80 yearly-price">/ month</span>
+                <span class="text-sm opacity-80 monthly-price hidden"
+                  >/ month</span
+                >
+              </div>
+              <div class="text-xs opacity-70 mt-1">
+                <span class="yearly-price">billed yearly</span>
+                <span class="monthly-price hidden">billed monthly</span>
+              </div>
+              <div class="text-xs opacity-70">
+                <span class="yearly-price">$120.00 billed yearly</span>
+                <span class="monthly-price hidden">$15.00 billed monthly</span>
+              </div>
+              <a
+                class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer text-nowrap"
+                style="background-color: var(--goglobe-main-color); font-weight:400;"
+                >Buy Personal</a
+              >
+            </div>
+          </th>
+          <th class="p-6 text-center text-white relative">
+            <div class="popular-badge">MOST POPULAR</div>
+            <div class="flex flex-col">
+              <h3 class="text-xl">Premium</h3>
+              <div class="mt-2">
+                <span class="text-3xl font-normal yearly-price">$15</span>
+                <span class="text-3xl font-normal monthly-price hidden"
+                  >$25</span
+                >
+                <span class="text-sm opacity-80 yearly-price">/ month</span>
+                <span class="text-sm opacity-80 monthly-price hidden"
+                  >/ month</span
+                >
+              </div>
+              <div class="text-xs opacity-70 mt-1">
+                <span class="yearly-price">billed yearly</span>
+                <span class="monthly-price hidden">billed monthly</span>
+              </div>
+              <div class="text-xs opacity-70">
+                <span class="yearly-price">$180.00 billed yearly</span>
+                <span class="monthly-price hidden">$25.00 billed monthly</span>
+              </div>
+              <a
+                class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer text-nowrap"
+                style="background-color: var(--goglobe-main-color); font-weight:400;"
+                >Buy Premium</a
+              >
+            </div>
+          </th>
+          <th class="p-6 text-center text-white relative">
+            <div class="flex flex-col">
+              <h3 class="text-xl">Enterprise</h3>
+              <div class="mt-2">
+                <span class="text-3xl font-normal yearly-price">$25</span>
+                <span class="text-3xl font-normal monthly-price hidden"
+                  >$40</span
+                >
+                <span class="text-sm opacity-80 yearly-price">/ month</span>
+                <span class="text-sm opacity-80 monthly-price hidden"
+                  >/ month</span
+                >
+              </div>
+              <div class="text-xs opacity-70 mt-1">
+                <span class="yearly-price">billed yearly</span>
+                <span class="monthly-price hidden">billed monthly</span>
+              </div>
+              <div class="text-xs opacity-70">
+                <span class="yearly-price">$300.00 billed yearly</span>
+                <span class="monthly-price hidden">$40.00 billed monthly</span>
+              </div>
+              <a
+                class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer text-nowrap"
+                style="background-color: var(--goglobe-main-color); font-weight:400;"
+                >Buy Enterprise</a
+              >
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Main Features Section -->
+        <tr>
+          <td
+            class="p-4 feature-cell bg-[var(--goglobe-border-color)]"
+            style="
+              color: var(--goglobe-heading-color);
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          >
+            Main Features
+          </td>
+          <td
+            class="price-cell"
+            style="
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          ></td>
+          <td
+            class="price-cell"
+            style="
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          ></td>
+          <td
+            class="price-cell"
+            style="
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          ></td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Tokens per month
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            5,500
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            12,500
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            20,000
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Upscales per month
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            1,500
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            3,500
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            7,500
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Background removals
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            4,000
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            8,000
+          </td>
+          <td
+            class="p-4 text-center price-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            15,000
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Pending jobs
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Private generations
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Priority infrastructure
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">-</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Relaxed generation
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">-</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">-</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <!-- Other Features Section -->
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="
+              color: var(--goglobe-heading-color);
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          >
+            Other Features
+          </td>
+          <td
+            class="price-cell"
+            style="
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          ></td>
+          <td
+            class="price-cell"
+            style="
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          ></td>
+          <td
+            class="price-cell"
+            style="
+              background-color: var(--goglobe-body-color-2);
+              border-right-color: var(--goglobe-body-color-2);
+            "
+          ></td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Essential SRBThemes models
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Expanded SRBThemes models
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Community models
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">-</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="p-4 feature-cell"
+            style="color: var(--goglobe-heading-color)"
+          >
+            Custom Model
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">-</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">-</span>
+          </td>
+          <td class="p-4 text-center price-cell">
+            <span class="text-xl">+</span>
+          </td>
+        </tr>
+        <!-- CTA Buttons Row -->
+        <tr>
+          <td
+            class="p-4 feature-cell border-y border-y-[var(--goglobe-border-color)]"
+          ></td>
+          <td
+            class="p-6 text-center price-cell border-y border-y-[var(--goglobe-border-color)]"
+          >
+            <a
+              class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer"
+              style="background-color: var(--goglobe-main-color)"
+              >Buy Personal</a
+            >
+          </td>
+          <td
+            class="p-6 text-center price-cell border-y border-y-[var(--goglobe-border-color)]"
+          >
+            <a
+              class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer"
+              style="background-color: var(--goglobe-main-color)"
+              >Buy Premium</a
+            >
+          </td>
+          <td
+            class="p-6 text-center price-cell border-y border-y-[var(--goglobe-border-color)]"
+          >
+            <a
+              class="w-full hover:bg-opacity-80 text-white py-3 px-[70px] mt-8 rounded-lg transition-all duration-200 hover:opacity-85 hover:cursor-pointer"
+              style="background-color: var(--goglobe-main-color)"
+              >Buy Enterprise</a
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'user/fragments/faq-frag.html' %}
+<script>
+  function updateSubType(type) {
+    const monthlyBtn = document.getElementById("monthly");
+    const yearlyBtn = document.getElementById("yearly");
+    const yearlyPrices = document.querySelectorAll(".yearly-price");
+    const monthlyPrices = document.querySelectorAll(".monthly-price");
+
+    if (type === "monthly") {
+      monthlyBtn.classList.add("active");
+      yearlyBtn.classList.remove("active");
+
+      // Show monthly prices, hide yearly
+      yearlyPrices.forEach((el) => el.classList.add("hidden"));
+      monthlyPrices.forEach((el) => el.classList.remove("hidden"));
+    } else {
+      yearlyBtn.classList.add("active");
+      monthlyBtn.classList.remove("active");
+
+      // Show yearly prices, hide monthly
+      monthlyPrices.forEach((el) => el.classList.add("hidden"));
+      yearlyPrices.forEach((el) => el.classList.remove("hidden"));
+    }
+  }
+</script>
+{% endblock %}

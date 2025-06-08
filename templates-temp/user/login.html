@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+  <!--<![endif]-->
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="GoGlobe" />
+    <meta name="author" content="SRBThemes" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>Sign In - Go Globe</title>
+    <link rel="shortcut icon" href={{ url_for('static',
+    filename='img/logo-desktop-mini.svg' ) }}>
+
+    <script>
+      document.documentElement.setAttribute(
+        "data-goglobe-skin",
+        '{{settings["theme"]}}'
+      );
+      if (localStorage.frenify_panel !== "") {
+        document.documentElement.classList.add(localStorage.frenify_panel);
+      }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link type="text/css" rel="stylesheet" href={{ url_for('static',
+    filename='css/plugins.css' ) }} /> <link type="text/css" rel="stylesheet"
+    href={{ url_for('static', filename='css/prestyle.css' ) }} />
+    <!-- !Styles -->
+
+    <script>
+      const fontFiles = {{font_files | tojson }};
+      const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/fontLoader.js') }}"></script>
+    <script>
+      loadFonts(fontFiles, fontFolder);
+    </script>
+
+    <style>
+      .input:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .input-error {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 1px #ef4444;
+      }
+
+      .error-text {
+        color: #ef4444;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+
+      .form__email {
+        margin-bottom: 15px;
+      }
+
+      /* Show the error message */
+      .error-text.visible {
+        display: block;
+      }
+
+      .required-field::after {
+        content: "*";
+        color: #ef4444;
+        margin-left: 4px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Sign In -->
+    <div class="goglobe_fn_sign" style="padding-top: 40px">
+      <div class="sign__content">
+        <img src={{ url_for('static', filename='img/logo.svg' ) }} alt=""
+        class="desktop_logo" style="max-width: 250px; margin-left: auto;
+        margin-right: auto; margin-bottom: 20px;">
+        <div class="login">
+          <form id="login-form" class="form__content" novalidate>
+            <div class="form__title mb-10">User Authentication</div>
+            <p id="error-message" class="error" style="display: none"></p>
+
+            <div class="form__email">
+              <label for="name" class="required-field">Name</label>
+              <input
+                type="text"
+                class="input"
+                id="name"
+                name="name"
+                placeholder="Enter your name"
+                autocapitalize="off"
+                autocomplete="name"
+                required
+                minlength="2"
+              />
+              <p id="name-error" class="error-text">
+                Please enter your name (minimum 2 characters)
+              </p>
+            </div>
+
+            <div class="form__email">
+              <label for="email" class="required-field">Email</label>
+              <input
+                type="email"
+                class="input"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                autocapitalize="off"
+                autocomplete="email"
+                required
+                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+              />
+              <p id="email-error" class="error-text">
+                Please enter a valid email address
+              </p>
+            </div>
+
+            <div class="form__email">
+              <label for="phone" class="required-field">Phone</label>
+              <input
+                type="tel"
+                class="input"
+                id="phone"
+                name="phone"
+                placeholder="Enter your phone number"
+                autocapitalize="off"
+                autocomplete="tel"
+                required
+                pattern="[0-9+\-\s()]{10,15}"
+              />
+              <p id="phone-error" class="error-text">
+                Please enter a valid phone number (10-15 digits)
+              </p>
+              <p style="font-size: 0.8rem; color: #666; margin-top: 0.25rem">
+                Format: 10-15 digits, may include +, -, (, ), and spaces
+              </p>
+            </div>
+
+            <div
+              class="form__pass checkbox-container"
+              style="
+                display: flex;
+                align-items: center;
+                margin-top: 15px;
+                margin-bottom: 15px;
+                visibility: hidden;
+              "
+            >
+              <input
+                type="checkbox"
+                id="anonymous"
+                name="anonymous"
+                style="width: auto; margin-right: 10px"
+              />
+              <label for="anonymous">Chat Anonymously</label>
+            </div>
+
+            <button
+              type="submit"
+              id="login-btn"
+              class="fn__submit form__submit duration-300 transition-all hover:cursor-pointer font-bold"
+            >
+              Submit
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- !Sign In -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const loginForm = document.getElementById("login-form");
+        const loginBtn = document.getElementById("login-btn");
+        const nameInput = document.getElementById("name");
+        const emailInput = document.getElementById("email");
+        const phoneInput = document.getElementById("phone");
+        const anonymousCheckbox = document.getElementById("anonymous");
+        const errorMessage = document.getElementById("error-message");
+
+        // Error message elements
+        const nameError = document.getElementById("name-error");
+        const emailError = document.getElementById("email-error");
+        const phoneError = document.getElementById("phone-error");
+
+        // Email validation regex
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        // Phone validation regex - allows digits, +, -, (, ), and spaces
+        const phoneRegex = /^[0-9+\-\s()]{10,15}$/;
+
+        // Function to toggle input fields based on anonymous checkbox
+        function toggleInputFields() {
+          const isAnonymous = anonymousCheckbox.checked;
+          nameInput.disabled = isAnonymous;
+          emailInput.disabled = isAnonymous;
+          phoneInput.disabled = isAnonymous;
+
+          // Clear fields if anonymous is checked
+          if (isAnonymous) {
+            nameInput.value = "";
+            emailInput.value = "";
+            phoneInput.value = "";
+
+            // Hide error messages when anonymous
+            hideError(nameError);
+            hideError(emailError);
+            hideError(phoneError);
+            nameInput.classList.remove("input-error");
+            emailInput.classList.remove("input-error");
+            phoneInput.classList.remove("input-error");
+          }
+        }
+
+        // Add event listener to the anonymous checkbox
+        anonymousCheckbox.addEventListener("change", toggleInputFields);
+
+        // Form validation
+        function validateForm() {
+          const isAnonymous = anonymousCheckbox.checked;
+
+          // If anonymous is checked, skip validation
+          if (isAnonymous) {
+            return true;
+          }
+
+          let isValid = true;
+
+          // Reset all errors
+          hideError(errorMessage);
+          hideError(nameError);
+          hideError(emailError);
+          hideError(phoneError);
+
+          nameInput.classList.remove("input-error");
+          emailInput.classList.remove("input-error");
+          phoneInput.classList.remove("input-error");
+
+          // Validate name
+          if (!nameInput.value.trim()) {
+            showInputError(nameInput, nameError);
+            isValid = false;
+          } else if (nameInput.value.trim().length < 2) {
+            showInputError(nameInput, nameError);
+            isValid = false;
+          }
+
+          // Validate email
+          if (!emailInput.value.trim()) {
+            showInputError(emailInput, emailError);
+            isValid = false;
+          } else if (!emailRegex.test(emailInput.value.trim())) {
+            showInputError(emailInput, emailError);
+            isValid = false;
+          }
+
+          // Validate phone
+          if (!phoneInput.value.trim()) {
+            showInputError(phoneInput, phoneError);
+            isValid = false;
+          } else if (!phoneRegex.test(phoneInput.value.trim())) {
+            showInputError(phoneInput, phoneError);
+            isValid = false;
+          }
+
+          return isValid;
+        }
+
+        function showInputError(inputElement, errorElement) {
+          inputElement.classList.add("input-error");
+          errorElement.classList.add("visible");
+        }
+
+        function hideError(errorElement) {
+          errorElement.classList.remove("visible");
+        }
+
+        function showError(message) {
+          errorMessage.textContent = message;
+          errorMessage.style.display = "block";
+        }
+
+        // Form submission
+        loginForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          if (!validateForm()) {
+            return;
+          }
+
+          const isAnonymous = anonymousCheckbox.checked;
+          const name = nameInput.value.trim();
+          const email = emailInput.value.trim();
+          const phone = phoneInput.value.trim();
+
+          fetch(
+            "/auth{% if request.args.get('redir') %}?redir={{request.args.get('redir')}}{% endif %}",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: name,
+                email: email,
+                phone: phone,
+                anonymous: isAnonymous,
+              }),
+            }
+          )
+            .then((response) => {
+              if (response.ok) {
+                window.location.href =
+                  "{{url_for(request.args.get('redir','chat.index'))}}";
+              } else {
+                return response.json().then((data) => {
+                  showError(data.error || "Login failed");
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showError("An error occurred. Please try again.");
+            });
+        });
+
+        // Real-time validation on input fields
+        nameInput.addEventListener("input", function () {
+          if (nameInput.value.trim().length >= 2) {
+            nameInput.classList.remove("input-error");
+            hideError(nameError);
+          } else {
+            showInputError(nameInput, nameError);
+          }
+        });
+
+        emailInput.addEventListener("input", function () {
+          if (emailRegex.test(emailInput.value.trim())) {
+            emailInput.classList.remove("input-error");
+            hideError(emailError);
+          } else {
+            showInputError(emailInput, emailError);
+          }
+        });
+
+        phoneInput.addEventListener("input", function () {
+          if (phoneRegex.test(phoneInput.value.trim())) {
+            phoneInput.classList.remove("input-error");
+            hideError(phoneError);
+          } else {
+            showInputError(phoneInput, phoneError);
+          }
+        });
+
+        // Handle enter key
+        phoneInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            loginForm.dispatchEvent(new Event("submit"));
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

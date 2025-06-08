@@ -1,0 +1,115 @@
+{% extends 'admin/base.html' %} {% block content %}
+<div class="pl-5">
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold mb-2">Uploaded Files</h2>
+    <p class="text-gray-400">Manage your files and website scrapes</p>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="file-grid">
+    <!-- Scrape Website Card -->
+    <div 
+      class="group relative flex flex-col items-center justify-center p-6 rounded-lg border border-[var(--sec-bg-color)] bg-[var(--bg-color)] hover:bg-gray-700 transition-all duration-200 cursor-pointer h-full min-h-[180px]"
+      onclick="document.getElementById('scrape-modal').classList.remove('hidden')"
+    >
+      <div class="w-12 h-12 mb-3 rounded-full bg-[var(--sec-bg-color)] group-hover:bg-[var(--main-color)] flex items-center justify-center transition-all duration-200">
+        <i data-lucide="globe" class="w-6 h-6 text-gray-400 group-hover:text-white"></i>
+      </div>
+      <span class="font-medium text-center">Scrape Website</span>
+      <span class="absolute bottom-2 right-2 text-xs text-gray-500 group-hover:text-[var(--main-color)] transition-all">New</span>
+    </div>
+
+    <!-- Scrape Modal -->
+    <div id="scrape-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 hidden">
+      <div class="relative bg-[var(--bg-color)] rounded-lg border border-[var(--sec-bg-color)] p-6 w-full max-w-md">
+        <button 
+          onclick="document.getElementById('scrape-modal').classList.add('hidden')"
+          class="absolute top-4 right-4 p-1 rounded-full hover:bg-[var(--sec-bg-color)] transition-colors"
+        >
+          <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+        </button>
+
+        <h3 class="text-xl font-bold mb-2">Scrape Website</h3>
+        <p class="text-gray-400 mb-6">Enter URLs to scrape content</p>
+
+        <form 
+          hx-post="/admin/scrape"
+          hx-trigger="submit"
+          hx-indicator="#scrape-loading"
+          hx-swap="none"
+          class="space-y-4"
+        >
+          <div>
+            <label for="url" class="block text-sm font-medium mb-1">Page URLs</label>
+            <textarea
+              id="url"
+              name="url"
+              rows="4"
+              placeholder="https://example.com\nhttps://another-site.com/page"
+              class="w-full px-3 py-2 bg-[var(--sec-bg-color)] border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] focus:border-transparent text-sm"
+            ></textarea>
+            <p class="text-xs text-gray-500 mt-1">Put each URL on a new line</p>
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              onclick="document.getElementById('scrape-modal').classList.add('hidden')"
+              class="px-4 py-2 text-sm font-medium rounded-md border border-[var(--border-color)] hover:bg-[var(--sec-bg-color)] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 text-sm font-medium rounded-md bg-[var(--main-color)] hover:opacity-90 text-white transition-colors flex items-center"
+            >
+              <span>Scrape</span>
+              <div id="scrape-loading" class="htmx-indicator  ml-2">
+                <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            </button>
+          </div>
+        </form>
+
+        <div id="scrape-message" class="hidden mt-4 p-3 bg-[var(--sec-bg-color)] rounded-md text-sm">
+          URLs are being processed in the background. You can close this window.
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload File Card -->
+    <div 
+      class="group relative flex flex-col items-center justify-center p-6 rounded-lg border-2 border-dashed border-[var(--sec-bg-color)] hover:border-[var(--main-color)] bg-[var(--bg-color)] hover:bg-gray-700 transition-all duration-200 cursor-pointer h-full min-h-[180px]"
+      onclick="document.getElementById('file-input').click()"
+    >
+      <div class="w-12 h-12 mb-3 rounded-full bg-[var(--sec-bg-color)] group-hover:bg-[var(--main-color)] flex items-center justify-center transition-all duration-200">
+        <i data-lucide="upload" class="w-6 h-6 text-gray-400 group-hover:text-white"></i>
+      </div>
+      <span class="font-medium text-center">Upload File</span>
+      <span class="text-xs text-gray-500 mt-1">or drag and drop</span>
+    </div>
+
+    <!-- Hidden File Input -->
+    <input
+      type="file"
+      id="file-input"
+      class="hidden"
+      hx-post="{{ url_for('admin.upload_file') }}"
+      hx-target="#file-grid"
+      hx-swap="beforeend"
+      hx-trigger="change"
+      hx-encoding="multipart/form-data"
+      name="files"
+      multiple
+      accept=".png, .jpg, .jpeg, .gif, .bmp, .webp, .svg, .txt, .md, .csv, .log, .json, .xml, .pdf, .html"
+    />
+
+    <!-- Render Uploaded Files -->
+    {% for file in files %} 
+      {% include 'components/file_item.html' with context %} 
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
