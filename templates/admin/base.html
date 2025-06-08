@@ -52,7 +52,6 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 
 
 <script>
@@ -141,3 +140,7 @@ new Notification("Admin Required", {
  {% include 'components/navbar.html' %}{% endblock %}
 
 
+ {% block scripts %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+ {% endblock %}

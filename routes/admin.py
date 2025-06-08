@@ -80,7 +80,7 @@ def filter_logs():
     message_search = request.args.get(
         'message_search', '').strip()  # New message filter
     sort_order = request.args.get('sort', 'timestamp_desc')
-    limit = request.args.get('limit', None)
+    limit = request.args.get('limit', 10000)
 
     # Parse dates
     start_date = None
@@ -663,7 +663,7 @@ def settings():
             current_app.config['SETTINGS']['timings'],
             key=lambda time: day_order[time['day']]
         )
-
+    pprint(current_app.config['SETTINGS'])
     return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones())
 
 
@@ -810,6 +810,25 @@ def subjects(subject):
     else:
         try:
             current_app.config['SETTINGS']['subjects'].remove(subject)
+        except KeyError:
+            pass
+        return '', 200
+
+
+@admin_bp.route('/settings/language', defaults={'language': None}, methods=['POST'])
+@admin_bp.route('/settings/language/<string:language>', methods=['DELETE'])
+def langauges(language):
+    if request.method == 'POST':
+        language = request.form.get('language')
+        # ADD NEW SUBJECT
+        current_app.config['SETTINGS']['langauges'] = set(
+            current_app.config['SETTINGS'].get('langauges', []))
+
+        current_app.config['SETTINGS']['langauges'].add(language)
+        return '', 200
+    else:
+        try:
+            current_app.config['SETTINGS']['langauges'].remove(language)
         except KeyError:
             pass
         return '', 200

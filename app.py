@@ -23,10 +23,14 @@ import traceback
 from datetime import datetime
 import json
 
+
 def get_font_data():
     # Path to your font directory
+    # font_dir = os.path.join(
+    #     app.static_folder, 'font/Proxima Nova Complete Collection')
+
     font_dir = os.path.join(
-        app.static_folder, 'font/Proxima Nova Complete Collection')
+        app.static_folder, 'font/NeueHaas')
 
     # Find all font files
     font_files = []
@@ -245,7 +249,6 @@ def create_app(config_class=Config):
 
 # Add request start time tracking
 
-
     @app.before_request
     def start_timer():
         g.request_start_time = datetime.utcnow()
@@ -265,6 +268,7 @@ def create_app(config_class=Config):
                 'small':
                 '/static/img/logo-desktop-mini.svg',
             },
+            'langauges': set({'English'}),
             'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
             'apiKeys': {
                 'claude': Config.CLAUDE_KEY,
@@ -290,10 +294,19 @@ DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THIN
         app.config['SETTINGS']['subjects'] = list(
             app.config['SETTINGS']['subjects'])
 
+        app.config['SETTINGS']['langauges'] = list(
+            app.config['SETTINGS'].get('langauges', ['English']))
+
         db.config.replace_one({"id": "settings"},
                               {"id": "settings", **app.config['SETTINGS'], "apiKeys": "removed"}, upsert=True)
+
         app.config['SETTINGS']['subjects'] = sorted(
             app.config['SETTINGS']['subjects'], key=len, reverse=True)
+        print(app.config['SETTINGS'])
+
+        app.config['SETTINGS']['langauges'] = sorted(
+            app.config['SETTINGS'].get('langauges', None) or ['English'], key=len, reverse=True)
+
         return {'settings': app.config['SETTINGS']}
     app.bot = Bot(Config.BOT_NAME, app=app)
 

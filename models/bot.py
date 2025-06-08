@@ -42,32 +42,114 @@ class Bot:
         self.dp_key = app.config['SETTINGS']['apiKeys']['deepseek']
         self.active_bot = None
         self.active_bot_name = ""
-        self.sys_prompt = app.config["SETTINGS"]["prompt"]
+        self.sys_prompt = app.config["SETTINGS"]["prompt"] + f"\n\n ONLY RESPOND IN FOLLOWING LANGAUGES YOU CAN TRANSLATE THE INPUT DATA TO ANY LANGAUES OR ACCEPT RESPONSE IN THIS LANGAUGE, FOR OTHER LANGAUGES RESPONSE: '''' I HAVENT LEARNED <LANGAGUE NAME> YET PLEASE TALK TO ANA OR USE THESE LANAGAUES <SUPPORTED LANAGUAGES>, SUPPORTED LANAGUAGES: {
+            ", ".join(app.config['SETTINGS']['langauges'])} '''"
+
+        # Enhanced Google model configurations
+        self.google_models = {
+            "gemini-2.0-flash": {
+                "supports_images": True,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 0.10, "output": 0.40}
+            },
+            "gemini-1.5-pro": {
+                "supports_images": True,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 3.50, "output": 10.50}
+            },
+            "gemini-1.5-flash": {
+                "supports_images": True,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 0.075, "output": 0.30}
+            },
+            "gemini-1.0-pro": {
+                "supports_images": False,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 0.50, "output": 1.50}
+            },
+            "gemma-3-27b-it": {
+                "supports_images": False,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 0, "output": 0}
+            },
+            "gemma-3-12b-it": {
+                "supports_images": False,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 0, "output": 0}
+            },
+            "gemma-3-1b-it": {
+                "supports_images": False,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 0, "output": 0}
+            }
+        }
 
         self.bot_maps = {
-            "gm_2_0_f": self._gemini,
             "claude-3": self._claude,
             "gpt-4": self._gpt,
             "dp-chat": self._deepseek
         }
+
+        # Add Google models to bot_maps dynamically
+        for model_name in self.google_models.keys():
+            bot_key = model_name.replace("-", "_")
+            self.bot_maps[bot_key] = self._google_model
+
         self._set_bot(app.config['SETTINGS']['model'])
 
     @classmethod
     def get_bots(cls):
-        return [('Gemini 2.0 Flash (gm_2_0_f)', "gm_2_0_f"),
-                ('Claude 3 (claude-3)', 'claude-3'),
-                ('GPT-4 (gpt-4)', 'gpt-4'),
-                ('Deepseek (dp-chat)', 'dp-chat')]
+        # Static method to get available bots - you may want to make this dynamic too
+        google_models = [
+            ('Gemini 2.0 Flash', "gemini_2.0_flash"),
+            ('Gemini 1.5 Pro', "gemini_1.5_pro"),
+            ('Gemini 1.5 Flash', "gemini_1.5_flash"),
+            ('Gemini 1.0 Pro', "gemini_1.0_pro"),
+            ('Gemma 3 27B', "gemma_3_27b_it"),
+            ('Gemma 3 12B', "gemma_3_12b_it"),
+            ('Gemma 3 1B', "gemma_3_1b_it")
+        ]
+
+        other_models = [
+            ('Claude 3', 'claude-3'),
+            ('GPT-4', 'gpt-4'),
+            ('Deepseek', 'dp-chat')
+        ]
+
+        return google_models + other_models
 
     def responed(self, input, id):
-        # This now sets the correct active bot
         chat_state = self._load_chat(id)
+        pprint(self.bot_maps)
+        print(self.active_bot_name)
         if self.active_bot_name not in self.bot_maps:
             raise ValueError(f"Unsupported bot: {self.active_bot_name}")
         return self.bot_maps[self.active_bot_name](input, id)
 
+    def _get_google_model_name(self, bot_key):
+        """Convert bot key back to actual model name"""
+        return bot_key.replace("_", "-")
+
+    def _is_google_model(self, model_name):
+        """Check if the model is a Google model"""
+
+        print(f"Bot Name: {model_name}")
+        actual_model = self._get_google_model_name(model_name)
+
+        print(f"Bot Name: {actual_model}")
+        print(self.google_models)
+        return actual_model in self.google_models
+
     def _set_bot(self, name):
-        if name == "gm_2_0_f":
+        print(f"Bot Name: {name}")
+        if self._is_google_model(name):
             self.active_bot = genai.Client(api_key=self.gm_key)
             self.active_bot_name = name
         elif name == "claude-3":
@@ -80,7 +162,7 @@ class Bot:
             self.active_bot = DeepseekClient(api_key=self.dp_key)
             self.active_bot_name = name
         else:
-            raise NotImplementedError('Bot not implemented')
+            raise NotImplementedError(f'Bot not implemented: {name}')
 
     def create_chat(self, id):
         text_content, images = self._process_files()
@@ -88,9 +170,12 @@ class Bot:
         if not os.path.exists('./bin/chat/'):
             os.makedirs('./bin/chat/')
 
-        init_method = getattr(
-            self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
-        chat_state = init_method(text_content, images)
+        if self._is_google_model(self.active_bot_name):
+            chat_state = self._init_google_chat(text_content, images)
+        else:
+            init_method = getattr(
+                self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
+            chat_state = init_method(text_content, images)
 
         # Store the model name in the chat state
         chat_state["model_name"] = self.active_bot_name
@@ -100,8 +185,10 @@ class Bot:
             pickle.dump(chat_state, file)
 
     def _get_model_config(self):
+        if self._is_google_model(self.active_bot_name):
+            return self._get_google_model_name(self.active_bot_name)
+
         return {
-            "gm_2_0_f": "gemini-2.0-flash",
             "claude-3": "claude-3-opus-20240229",
             "gpt-4": "gpt-4-vision-preview",
             "dp-chat": "deepseek-chat"
@@ -133,29 +220,52 @@ class Bot:
 
         return "\n".join(text_content), images
 
-    # Bot-specific initializers
-    def _init_gm_2_0_f_chat(self, text_content, images):
+    # Universal Google model initializer
+    def _init_google_chat(self, text_content, images):
+        actual_model = self._get_google_model_name(self.active_bot_name)
+        model_config = self.google_models[actual_model]
+
         history = []
-        for img in images:
-            buffered = BytesIO()
-            img.save(buffered, format="JPEG")
-            history.append(types.UserContent(
-                types.Part.from_bytes(
-                    data=buffered.getvalue(), mime_type='image/jpeg')
-            ))
+
+        # Only add images if the model supports them
+        if model_config["supports_images"] and images:
+            for img in images:
+                buffered = BytesIO()
+                img.save(buffered, format="JPEG")
+                history.append(types.UserContent(
+                    types.Part.from_bytes(
+                        data=buffered.getvalue(), mime_type='image/jpeg')
+                ))
+
+        common_config_params = {
+            "max_output_tokens": model_config["max_tokens"],
+            "temperature": model_config["temperature"]
+        }
+
+        if 'gemma' in actual_model:
+            # For Gemma models, use 'system_instruction'
+            generation_config = types.GenerateContentConfig(
+                system_instruction=f"{self.sys_prompt}\n{text_content}",
+                **common_config_params
+            )
+        else:
+            # For other Google models (like Gemini), use 'developer_instruction'
+            generation_config = types.GenerateContentConfig(
+                enable_developer_instructions=True,
+                developer_instruction=f"{self.sys_prompt}\n{text_content}",
+                **common_config_params
+            )
+        # --- MODIFICATION ENDS HERE ---
 
         return {
             "client": self.active_bot,
             "config": {
-                "model": "gemini-2.0-flash",
-                "config": types.GenerateContentConfig(
-                    system_instruction=f"{self.sys_prompt}\n{text_content}",
-                    max_output_tokens=500,
-                    temperature=0.5
-                ),
+                "model": actual_model,
+                "config": generation_config,  # Pass the correctly created config here
                 "history": history
             }
         }
+    # Keep existing initializers for other models
 
     def _init_claude_3_chat(self, text_content, images):
         messages = [{
@@ -233,8 +343,8 @@ class Bot:
             }
         }
 
-    # Bot response handlers
-    def _gemini(self, input, id):
+    # Universal Google model response handler
+    def _google_model(self, input, id):
         chat_state = self._load_chat(id)
         response = chat_state["client"].chats.create(
             **chat_state["config"]
@@ -244,6 +354,7 @@ class Bot:
         self._save_chat(chat_state, id)
         return response.text, tokens
 
+    # Keep existing response handlers for other models
     def _claude(self, input, id):
         chat_state = self._load_chat(id)
         chat_state["config"]["messages"].append(
@@ -322,7 +433,7 @@ class Bot:
                 if "model_name" in chat_state:
                     self._set_bot(chat_state["model_name"])
                 else:
-                    self._set_bot('gm_2_0_f')
+                    self._set_bot('gemini_2_0_flash')  # Updated default
                 return chat_state
         except FileNotFoundError:
             raise ValueError(f"No chat session found for id {id}")
@@ -335,30 +446,35 @@ class Bot:
             pickle.dump(chat_state, file)
 
     def _count_tokens(self, response):
+        # Enhanced pricing with Google models
         pricing = {
-            "gm_2_0_f": {"input": 0, "output": 0},
             "claude-3": {"input": 15, "output": 75},
             "gpt-4": {"input": 0.03, "output": 0.06},
             "dp-chat": {"input": 0.27, "output": 1.10}
         }
 
         bot_name = self.active_bot_name
-        costs = pricing.get(bot_name, {"input": 0, "output": 0})
-        if bot_name == "gm_2_0_f":
+
+        # Handle Google models
+        if self._is_google_model(bot_name):
+            actual_model = self._get_google_model_name(bot_name)
+            costs = self.google_models[actual_model]["pricing"]
             usage = response.usage_metadata.dict()
             input_tokens = usage['prompt_token_count']
             output_tokens = usage['candidates_token_count']
-        elif bot_name == "claude-3":
-            input_tokens = response.usage.input_tokens
-            output_tokens = response.usage.output_tokens
-        elif bot_name == "gpt-4":
-            input_tokens = response.usage.prompt_tokens
-            output_tokens = response.usage.completion_tokens
-        elif bot_name == "dp-chat":
-            input_tokens = response["usage"]["prompt_tokens"]
-            output_tokens = response["usage"]["completion_tokens"]
         else:
-            input_tokens = output_tokens = 0
+            costs = pricing.get(bot_name, {"input": 0, "output": 0})
+            if bot_name == "claude-3":
+                input_tokens = response.usage.input_tokens
+                output_tokens = response.usage.output_tokens
+            elif bot_name == "gpt-4":
+                input_tokens = response.usage.prompt_tokens
+                output_tokens = response.usage.completion_tokens
+            elif bot_name == "dp-chat":
+                input_tokens = response["usage"]["prompt_tokens"]
+                output_tokens = response["usage"]["completion_tokens"]
+            else:
+                input_tokens = output_tokens = 0
 
         input_cost = (input_tokens * costs["input"]) / 1000000
         output_cost = (output_tokens * costs["output"]) / 1000000

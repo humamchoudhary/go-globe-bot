@@ -14,7 +14,7 @@
     <script src="{{ url_for('static', filename='js/fontLoader.js') }}"></script>
     <script>
       const fontFiles = {{ font_files | safe }};
-      const fontFolder = "{{ url_for('static', filename='font/Proxima Nova Complete Collection') }}";
+      const fontFolder = "{{ url_for('static', filename='font/NeueHaas') }}";
       loadFonts(fontFiles, fontFolder);
     </script>
     <script
@@ -46,10 +46,11 @@
     </div>
     <div class="flex flex-row">
       {% block navbar %}{% endblock %}
-      <div class="w-full md:ml-[250px] h-screen pt-[80px]">
+      <div class="w-full md:ml-[250px] min-h-screen pt-[90px] pb-[20px]">
         {% block content %}{% endblock %}
       </div>
     </div>
+    {% block scripts %}{% endblock %}
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
       lucide.createIcons();

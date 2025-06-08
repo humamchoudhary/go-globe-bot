@@ -13,7 +13,7 @@ function loadFonts(fontFiles, fontFolder) {
     const style = document.createElement("style");
     style.innerHTML = `
             @font-face {
-                font-family: 'Proxima Nova';
+                font-family: 'NeueHaas';
                 src: url('${fontFolder}/${fileName}') format('${getFormat(fileName)}');
                 font-weight: ${fontWeight};
                 font-style: ${fontStyle};

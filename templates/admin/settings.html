@@ -6,7 +6,7 @@
       <!-- Left Column -->
       <div class="flex flex-col gap-4">
         <!-- Logo Settings -->
-        <div class="flex flex-col justify-center border rounded-lg p-6" style="border-color: var(--border-color)">
+        <div class="flex flex-col justify-center border rounded-lg p-6 transition-all hover:shadow-lg" style="border-color: var(--border-color)">
           <h2 class="text-2xl">Logo Settings</h2>
           <p class="text-base mt-6 mb-3">Large Logo</p>
           {% set logo = settings.logo.large %} {% set logo_type = 'large' %} 
@@ -17,7 +17,7 @@
         </div>
 
         <!-- Subjects & Timings -->
-        <div class="flex flex-col justify-center gap-4 border rounded-lg p-6" style="border-color: var(--border-color)">
+        <div class="flex flex-col justify-center gap-4 border rounded-lg p-6 transition-all hover:shadow-lg" style="border-color: var(--border-color)">
           <h2 class="text-2xl">Subjects</h2>
           <form
             hx-post="/admin/settings/subject"
@@ -30,6 +30,8 @@
               name="subject"
               class="flex h-10 w-full rounded-md border px-3 py-2 text-sm outline-none transition-all focus:ring-2"
               style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text); focus:ring-color: var(--main-color)"
+              placeholder="Add new subject"
+              required
             />
             <button
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors px-4 py-2"
@@ -38,16 +40,16 @@
               <i data-lucide="plus" class="size-4"></i> Add
             </button>
           </form>
-          <div class="flex flex-col justify-center gap-4">
+          <div class="flex flex-col justify-center gap-4 max-h-60 overflow-y-auto p-2">
             {% for subj in settings.subjects %}
-            <div class="flex flex-row justify-between p-2">
-              {{subj}}
+            <div class="flex flex-row justify-between p-2 items-center hover:bg-gray-700/10 rounded transition-all">
+              <span>{{subj}}</span>
               <button
                 hx-delete="/admin/settings/subject/{{subj}}"
                 hx-trigger="click"
                 hx-swap="none"
                 hx-on::after-request="window.location.reload()"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2 hover:scale-105 transition-transform"
                 style="background-color: var(--main-color); color: white; hover:bg-white hover:text-black"
               >
                 <i data-lucide="trash" class="size-4"></i> Remove
@@ -56,7 +58,50 @@
             {% endfor %}
           </div>
           
-          <div class="w-full h-px" style="background-color: var(--border-color)"></div>
+          <div class="w-full h-px my-4" style="background-color: var(--border-color)"></div>
+          
+          <!-- Languages Section -->
+          <h2 class="text-2xl">Languages</h2>
+          <form
+            hx-post="/admin/settings/language"
+            hx-swap="none"
+            hx-on::after-request="location.reload();"
+            class="flex flex-row gap-4"
+          >
+            <input
+              type="text"
+              name="language"
+              class="flex h-10 w-full rounded-md border px-3 py-2 text-sm outline-none transition-all focus:ring-2"
+              style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text); focus:ring-color: var(--main-color)"
+              placeholder="Add new language"
+              required
+            />
+            <button
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors px-4 py-2"
+              style="background-color: var(--main-color); color: white; hover:bg-white hover:text-black"
+            >
+              <i data-lucide="plus" class="size-4"></i> Add
+            </button>
+          </form>
+          <div class="flex flex-col justify-center gap-4 max-h-60 overflow-y-auto p-2">
+            {% for lang in settings.langauges %}
+            <div class="flex flex-row justify-between p-2 items-center hover:bg-gray-700/10 rounded transition-all">
+              <span>{{lang}}</span>
+              <button
+                hx-delete="/admin/settings/language/{{lang}}"
+                hx-trigger="click"
+                hx-swap="none"
+                hx-on::after-request="window.location.reload()"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2 hover:scale-105 transition-transform"
+                style="background-color: var(--main-color); color: white; hover:bg-white hover:text-black"
+              >
+                <i data-lucide="trash" class="size-4"></i> Remove
+              </button>
+            </div>
+            {% endfor %}
+          </div>
+          
+          <div class="w-full h-px my-4" style="background-color: var(--border-color)"></div>
           
           <h2 class="text-2xl">Timings</h2>
           <form
@@ -73,12 +118,12 @@
                 id="timezone" 
                 name="timezone" 
                 required
-                class="w-full rounded-md border px-3 py-2 text-sm outline-none transition-all"
+                class="w-full rounded-md border px-3 py-2 text-sm outline-none transition-all hover:border-gray-400"
                 style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
               >
                 <option value="">-- Select a timezone --</option>
                 {% for tz in tzs %}
-                <option value="{{ tz }}">{{ tz }}</option>
+                <option value="{{ tz }}" {% if settings.timezone == tz %}selected{% endif %}>{{ tz }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -89,7 +134,7 @@
                 id="meetingDay" 
                 name="meetingDay" 
                 required
-                class="w-full rounded-md border px-3 py-2 text-sm outline-none transition-all"
+                class="w-full rounded-md border px-3 py-2 text-sm outline-none transition-all hover:border-gray-400"
                 style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
               >
                 <option value="">-- Select a day --</option>
@@ -109,7 +154,7 @@
                   type="time"
                   id="startTime"
                   name="startTime"
-                  class="h-10 rounded-md border px-3 py-2 text-sm outline-none transition-all"
+                  class="h-10 rounded-md border px-3 py-2 text-sm outline-none transition-all hover:border-gray-400"
                   style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
                   required
                 />
@@ -120,7 +165,7 @@
                   type="time"
                   id="endTime"
                   name="endTime"
-                  class="h-10 rounded-md border px-3 py-2 text-sm outline-none transition-all"
+                  class="h-10 rounded-md border px-3 py-2 text-sm outline-none transition-all hover:border-gray-400"
                   style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
                   required
                 />
@@ -129,14 +174,14 @@
 
             <button
               type="submit"
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2 mt-2"
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2 mt-2 hover:scale-[1.02] transition-transform"
               style="background-color: var(--main-color); color: white; hover:bg-white hover:text-black"
             >
               Add Timing
             </button>
           </form>
 
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-2 mt-4 max-h-60 overflow-y-auto p-2">
             {% for t in settings.timings %} 
               {% set id = loop.index0 %} 
               {% include 'components/timing.html' %} 
@@ -148,7 +193,7 @@
       <!-- Right Column -->
       <div class="flex flex-col gap-4">
         <!-- API Keys -->
-        <div class="flex flex-col justify-center border rounded-lg p-6" style="border-color: var(--border-color)">
+        <div class="flex flex-col justify-center border rounded-lg p-6 transition-all hover:shadow-lg" style="border-color: var(--border-color)">
           <h2 class="text-2xl">API Keys</h2>
           {% set api_type = 'gemini' %} 
           {% include 'components/api-components.html' %} 
@@ -159,19 +204,19 @@
           {% set api_type = 'deepseek' %} 
           {% include 'components/api-components.html' %}
 
-          <p class="mt-8">
+          <p class="mt-8 text-sm opacity-80">
             Your API keys are stored on runtime and never shared with third parties.
           </p>
           <div class="flex flex-row gap-4 mt-1 items-center">
             <i data-lucide="triangle-alert" class="size-4 text-yellow-200"></i>
-            <p>
+            <p class="text-sm opacity-80">
               API Keys will be reset to default upon restart of server to maintain security
             </p>
           </div>
         </div>
 
         <!-- General Settings -->
-        <div class="flex flex-col justify-center border rounded-lg p-6" style="border-color: var(--border-color)">
+        <div class="flex flex-col justify-center border rounded-lg p-6 transition-all hover:shadow-lg" style="border-color: var(--border-color)">
           <h2 class="text-2xl">General Settings</h2>
           <div class="flex flex-col gap-3 mt-4">
             <p>Model Selection</p>
@@ -181,10 +226,11 @@
               hx-target="this"
               hx-swap="none"
               hx-on::after-request="window.location.reload()"
+              class="flex flex-col gap-2"
             >
               <select
                 name="model"
-                class="rounded-md border px-3 py-2 text-sm outline-none transition-all"
+                class="rounded-md border px-3 py-2 text-sm outline-none transition-all hover:border-gray-400"
                 style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
               >
                 {% for label, value in bots() %}
@@ -193,6 +239,11 @@
                 </option>
                 {% endfor %}
               </select>
+              
+              <div class="flex items-center gap-2 mt-2">
+                <i data-lucide="info" class="size-4 text-blue-200"></i>
+                <p class="text-xs opacity-70">Changes take effect immediately</p>
+              </div>
             </form>
           </div>
 
@@ -204,13 +255,14 @@
               hx-trigger="click"
               hx-swap="none"
               hx-on::after-request="window.location.reload()"
-              class="border rounded-md flex flex-col h-full hover:bg-gray-700/40 transition-all cursor-pointer items-center justify-center"
+              class="border rounded-md flex flex-col h-full hover:bg-gray-700/40 transition-all cursor-pointer items-center justify-center hover:scale-[1.02]"
               style="border-color: {% if settings.theme == theme %}var(--main-color){% else %}white{% endif %}; color: {% if settings.theme == theme %}var(--main-color){% else %}inherit{% endif %}"
             >
               <i
                 data-lucide="{% if theme == 'light' %}sun{% elif theme == 'dark' %}moon{% else %}laptop{% endif %}"
                 class="size-8"
               ></i>
+              <span class="text-xs mt-1">{{ theme.capitalize() }}</span>
             </div>
             {% endfor %}
           </div>
@@ -227,13 +279,14 @@
               name="prompt"
               id="prompt"
               rows="10"
-              class="w-full rounded-md border px-3 py-2 text-base outline-none transition-all"
+              class="w-full rounded-md border px-3 py-2 text-base outline-none transition-all hover:border-gray-400"
               style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
+              placeholder="Enter your custom system prompt here..."
             >{{ settings.prompt | e }}</textarea>
 
             <button
               type="submit"
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2 mt-2"
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2 mt-2 hover:scale-[1.02] transition-transform"
               style="background-color: var(--main-color); color: white; hover:bg-white hover:text-black"
             >
               <i data-lucide="save" class="size-4"></i> Save
@@ -252,12 +305,55 @@
     border: 3px dotted var(--border-color);
     border-radius: 12px;
     padding: 50px 30px;
+    transition: all 0.2s ease;
   }
 
   .highlight {
     border: 3px solid var(--main-color);
     border-radius: 12px;
     padding: 50px 30px;
+    transition: all 0.2s ease;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg-color);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--main-color);
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--main-color);
   }
 </style>
+
+<script>
+  // Add hover effects to all buttons
+  document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('mouseenter', () => {
+      button.style.transform = 'scale(1.02)';
+    });
+    button.addEventListener('mouseleave', () => {
+      button.style.transform = 'scale(1)';
+    });
+  });
+  
+  // Add confirmation for delete actions
+  document.querySelectorAll('[hx-delete]').forEach(element => {
+    element.addEventListener('click', (e) => {
+      if (!confirm('Are you sure you want to delete this item?')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  });
+</script>
 {% endblock %}
