@@ -43,7 +43,7 @@ class Bot:
         self.active_bot = None
         self.active_bot_name = ""
         self.sys_prompt = app.config["SETTINGS"]["prompt"] + f"\n\n ONLY RESPOND IN FOLLOWING LANGAUGES YOU CAN TRANSLATE THE INPUT DATA TO ANY LANGAUES OR ACCEPT RESPONSE IN THIS LANGAUGE, FOR OTHER LANGAUGES RESPONSE: '''' I HAVENT LEARNED <LANGAGUE NAME> YET PLEASE TALK TO ANA OR USE THESE LANAGAUES <SUPPORTED LANAGUAGES>, SUPPORTED LANAGUAGES: {
-            ", ".join(app.config['SETTINGS']['langauges'])} '''"
+            ", ".join(app.config['SETTINGS'].get('langauges',['English']))} '''"
 
         # Enhanced Google model configurations
         self.google_models = {
