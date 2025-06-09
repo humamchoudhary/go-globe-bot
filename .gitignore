@@ -267,4 +267,4 @@ bin/chat/*
 *.csr
 node_modules
 node_modules/*
-credentials.json
+./credentials.json
