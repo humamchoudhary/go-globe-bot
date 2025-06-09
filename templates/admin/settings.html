@@ -83,7 +83,7 @@
               <i data-lucide="plus" class="size-4"></i> Add
             </button>
           </form>
-          <div class="flex flex-col justify-center gap-4 max-h-60 overflow-y-auto p-2">
+          <div class="flex flex-col gap-4 max-h-60 overflow-y-auto p-2">
             {% for lang in settings.langauges %}
             <div class="flex flex-row justify-between p-2 items-center hover:bg-gray-700/10 rounded transition-all">
               <span>{{lang}}</span>
@@ -267,6 +267,62 @@
             {% endfor %}
           </div>
 
+
+
+<div class="flex flex-col gap-4 font-[var(--font-family)]">
+  {% if folders|length == 0 %}
+    <div class="flex flex-col items-center justify-center gap-4 p-6 bg-[var(--bg-color)] rounded-xl border border-[var(--border-color)]">
+      <div class="p-4 bg-[var(--bg-color)] rounded-full border border-[var(--border-color)]">
+        <i data-lucide="folder-x" class="w-8 h-8 text-[var(--sec-text)]"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-[var(--sec-text)] text-center">No Google Drive folders found</h3>
+      <p class="text-sm text-[var(--sec-text)] text-center mb-2">Connect your Google account to access folders</p>
+      <a href="{{ url_for('admin.google_connect') }}" class="inline-flex items-center justify-center px-6 py-3 bg-[var(--main-color)] hover:bg-opacity-90 text-white font-medium rounded-xl shadow-lg transition-all">
+        Connect Google Drive
+      </a>
+    </div>
+  {% else %}
+    <div class="bg-[var(--bg-color)] p-4 rounded-xl border border-[var(--border-color)] shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-lg text-[var(--sec-text)]">Select Folders</h3>
+      </div>
+
+      <form hx-post="/admin/load-folders" hx-swap="none" hx-trigger="submit" class="space-y-2">
+        <div class="max-h-[50vh] overflow-y-auto pr-2 -mr-2 custom-scrollbar">
+          {% for folder in folders %}
+            <label class="flex items-center gap-3 p-3 hover:bg-[var(--sec-bg-color)] rounded-lg transition cursor-pointer group">
+              <div class="relative flex items-center">
+                <input 
+                  {% if folder.id in selected_folders %}checked{% endif %} 
+                  type="checkbox" 
+                  name="selected_folders" 
+                  value="{{ folder.id }}" 
+                  class="absolute opacity-0 peer">
+                <div class="size-3 flex items-center rounded-full text-white justify-center border-2 border-[var(--border-color)] rounded-[4px] peer-checked:bg-[var(--main-color)] peer-checked:border-[var(--main-color)] transition group-hover:border-[var(--main-color)]">
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-[var(--sec-text)] truncate">{{ folder.name }}</p>
+                <p class="text-xs text-[var(--sec-text)] opacity-70 truncate">ID: {{ folder.id }}</p>
+              </div>
+              <i data-lucide="folder" class="text-[var(--sec-text)] group-hover:text-[var(--main-color)] transition"></i>
+            </label>
+          {% endfor %}
+        </div>
+
+        <div class="pt-4">
+          <button type="submit" class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[var(--main-color)] hover:bg-opacity-90 text-white font-medium rounded-xl shadow-lg transition-all">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            Load Selected Folders
+            <span id="selected-count" class="ml-auto bg-white/20 px-2 py-1 rounded-lg text-xs">
+              {{ selected_folders|length if selected_folders else 0 }} selected
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+</div>
           <!-- System Prompt -->
           <form
             hx-post="/admin/settings/prompt"
@@ -355,5 +411,25 @@
       }
     });
   });
+
+
+  // Update selected count in real-time
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[name="selected_folders"]');
+    const counter = document.getElementById('selected-count');
+    
+    function updateCounter() {
+      const selected = Array.from(checkboxes).filter(cb => cb.checked).length;
+      counter.textContent = `${selected} selected`;
+    }
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', updateCounter);
+    });
+    
+    updateCounter();
+  });
+
+
 </script>
 {% endblock %}

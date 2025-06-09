@@ -1,0 +1,72 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+    <div class="pl-5">
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-2">Google Drive Files</h2>
+            <p class="text-[var(--sec-text)]">Files loaded from your connected Google account</p>
+        </div>
+        {% if not files %}
+            <div class="bg-[var(--border-color)] p-8 rounded-lg text-center">
+                <p class="text-lg text-[var(--sec-text)]">No files found in selected folders</p>
+                <a href="{{ url_for("admin.select_folder") }}"
+                   class="text-[var(--main-color)] hover:underline mt-2 inline-block">Select different folders</a>
+            </div>
+        {% else %}
+            {% for folder_name, folder_data in files.items() %}
+                <div class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <h3 class="text-xl font-semibold">{{ folder_name }}</h3>
+                        <span class="ml-2 text-xs text-[var(--sec-text)]">(ID: {{ folder_data.id }})</span>
+                    </div>
+                    {% if not folder_data.files %}
+                        <div class="bg-[var(--border-color)] p-4 rounded-lg mb-4">
+                            <p class="text-[var(--sec-text)]">No files in this folder</p>
+                        </div>
+                    {% else %}
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            {% for file in folder_data.files %}
+                                {% set file_name = file.name %}
+                                {% set mime = file.mimeType %}
+                                {% set file_ext = file_name.split('.')[-1].lower() %}
+                                <a href="{{ url_for('admin.view_google_file', file_id=file.id) }}"
+                                   class="block group"
+                                   target="_blank">
+                                    <div class="relative overflow-hidden rounded-lg border border-[var(--border-color)] bg-[var(--bg-color)] hover:border-[var(--main-color)] transition-all duration-200 h-full">
+                                        {% if mime.startswith('image/') %}
+                                            <div class="aspect-square flex items-center justify-center bg-[var(--border-color)]">
+                                                <div class="text-center p-4">
+                                                    <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gray-600 flex items-center justify-center">
+                                                        <span class="text-sm font-bold text-[var(--sec-text)]">IMG</span>
+                                                    </div>
+                                                    <span class="text-xs text-[var(--sec-text)]">Image File</span>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <div class="aspect-square flex items-center justify-center bg-[var(--border-color)]">
+                                                <div class="text-center p-4">
+                                                    <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gray-600 flex items-center justify-center">
+                                                        <span class="text-xs font-bold text-[var(--sec-text)]">{{ mime.split("/")[-1] .upper() }}</span>
+                                                    </div>
+                                                    <span class="text-xs text-[var(--sec-text)]">File</span>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        <div class="p-3">
+                                            <p class="text-sm font-medium truncate">{{ file_name }}</p>
+                                            <div class="flex justify-between items-center mt-2">
+                                                <span class="text-xs text-[var(--sec-text)]">{{ mime }}</span>
+                                                <button class="text-[var(--sec-text)] hover:text-[var(--main-color)] transition-colors invisible group-hover:visible">
+                                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

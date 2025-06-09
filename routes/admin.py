@@ -1,5 +1,10 @@
+import json
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
 from datetime import datetime, timedelta
-from collections import defaultdict, Counter
+from collections import Counter
 from services.timezone import UTCZoneManager
 import threading
 from pprint import pprint
@@ -22,8 +27,6 @@ from services.user_service import UserService
 from werkzeug.utils import secure_filename
 import pdf2image
 from services.logs_service import LogsService
-
-from datetime import datetime
 from models.log import LogLevel, LogTag
 
 
@@ -664,7 +667,25 @@ def settings():
             key=lambda time: day_order[time['day']]
         )
     pprint(current_app.config['SETTINGS'])
-    return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones())
+
+    ##################################  GOOGLE DRIVE CONNECTION #############################
+
+    folders = []
+    sess_cred = session.get('google-token')
+    creds = None
+    if sess_cred:
+        creds = Credentials.from_authorized_user_info(
+            json.loads(sess_cred), SCOPES)
+
+    if creds:
+        service = build('drive', 'v3', credentials=creds)
+        results = service.files().list(
+            q="mimeType='application/vnd.google-apps.folder'",
+            fields="files(id, name)").execute()
+        folders = results.get('files', [])
+    selected_folders = session.get('selected_folder_id',[])
+
+    return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones(), folders=folders, selected_folders=selected_folders)
 
 
 def save_settings(settings):
@@ -1095,6 +1116,119 @@ def delete_chats():
         return "Error"
     # for i in chats:
     #     print(i)
+
+
+CREDENTIALS_FILE = 'credentials.json'
+SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
+          'https://www.googleapis.com/auth/drive.readonly']
+
+
+@admin_bp.route('/google-login')
+def google_connect():
+    flow = InstalledAppFlow.from_client_secrets_file(
+        CREDENTIALS_FILE,
+        scopes=SCOPES
+    )
+    flow.redirect_uri = url_for('admin.oauth2callback', _external=True)
+    auth_url, state = flow.authorization_url(
+        access_type='offline',
+        prompt='consent',
+        include_granted_scopes='true'
+    )
+    session['state'] = state
+    return redirect(auth_url)
+
+
+@admin_bp.route('/load-folders', methods=['POST'])
+def load_folders():
+    x = request.form.getlist('selected_folders')
+    # current_app.config['GOOGLE-FOLDER'] = x
+    session['selected_folder_id'] = x
+    return "", 200
+
+
+@admin_bp.route('/google-files/')
+def google_files():
+    folder_ids = session.get('selected_folder_id')
+    if not folder_ids:
+        return render_template('admin/google_files.html', files={})
+
+    creds = Credentials.from_authorized_user_info(
+        json.loads(session.get('google-token')), SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+
+    files_by_folder = {}
+
+    for folder_id in folder_ids:
+        # Get folder name
+        folder_info = service.files().get(
+            fileId=folder_id,
+            fields="name"
+        ).execute()
+        folder_name = folder_info.get('name', f'Folder ({folder_id})')
+
+        # Get files in folder
+        results = service.files().list(
+            q=f"'{
+                folder_id}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'",
+            pageSize=1000,
+            fields="files(id, name, mimeType)"
+        ).execute()
+
+        files_by_folder[folder_name] = {
+            'id': folder_id,
+            'files': results.get('files', [])
+        }
+
+    return render_template('admin/google_files.html', files=files_by_folder)
+
+
+@admin_bp.route('/admin/google-files/view/<file_id>')
+def view_google_file(file_id):
+    creds = Credentials.from_authorized_user_info(
+        json.loads(session.get('google-token')), SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+    file = service.files().get(fileId=file_id, fields="webViewLink").execute()
+    return redirect(file.get('webViewLink', '/admin/google-files/'))
+
+
+@admin_bp.route('/google-thumbnail/<file_id>')
+def google_thumbnail(file_id):
+    creds = Credentials.from_authorized_user_info(
+        json.loads(session.get('google-token')), SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+    request = service.files().get_media(fileId=file_id)
+    from googleapiclient.http import MediaIoBaseDownload
+    import io
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+        _, done = downloader.next_chunk()
+    fh.seek(0)
+
+    # Send image file with Flask
+    from flask import send_file
+    return send_file(fh, mimetype='image/jpeg')
+
+
+@admin_bp.route('/oauth2callback')
+def oauth2callback():
+    state = session['state']
+    flow = InstalledAppFlow.from_client_secrets_file(
+        CREDENTIALS_FILE,
+        SCOPES,
+        state=state
+    )
+    flow.redirect_uri = url_for('admin.oauth2callback', _external=True)
+    flow.fetch_token(authorization_response=request.url)
+
+    creds = flow.credentials
+    # with open(TOKEN_FILE, 'w') as token:
+    #     token.write(creds.to_json())
+    session['google-token'] = creds.to_json()
+
+    return redirect(url_for('admin.settings'))
 
 
 def register_admin_socketio_events(socketio):
