@@ -1149,7 +1149,7 @@ def load_folders():
 
 @admin_bp.route('/google-files/')
 def google_files():
-    folder_ids = current_app['SETTINGS'].config.get('selected_folder_id')
+    folder_ids = current_app.config['SETTINGS'].get('selected_folder_id')
     if not folder_ids:
         return render_template('admin/google_files.html', files={})
 
