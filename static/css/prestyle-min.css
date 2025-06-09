@@ -104,6 +104,10 @@
   --goglobe-input-color: #475864;
 }
 
+::-webkit-scrollbar-track {
+  background-color: transparent; /* Background color of the scrollbar */
+}
+
 .chatbot-body {
   font-family: var(--goglobe-body-font-family);
   font-size: 16px;

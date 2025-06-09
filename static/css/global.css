@@ -13,6 +13,10 @@ html {
   margin: 0px;
 }
 
+::-webkit-scrollbar-track {
+  background-color: transparent; /* Background color of the scrollbar */
+}
+
 *:after,
 *:before,
 * {
