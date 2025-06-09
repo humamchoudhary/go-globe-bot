@@ -1246,3 +1246,6 @@ def register_admin_socketio_events(socketio):
         join_room('admin')  # Join the admin room for broadcasts
         print('admin joined')
         emit('status', {'msg': 'Admin has joined the room.'}, room=room)
+
+
+
