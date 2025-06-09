@@ -671,7 +671,7 @@ def settings():
     ##################################  GOOGLE DRIVE CONNECTION #############################
 
     folders = []
-    sess_cred = session.get('google-token')
+    sess_cred = current_app.config['SETTINGS'].get('google-token')
     creds = None
     if sess_cred:
         creds = Credentials.from_authorized_user_info(
@@ -683,7 +683,7 @@ def settings():
             q="mimeType='application/vnd.google-apps.folder'",
             fields="files(id, name)").execute()
         folders = results.get('files', [])
-    selected_folders = session.get('selected_folder_id',[])
+    selected_folders = current_app.config['SETTINGS'].get('selected_folder_id', [])
 
     return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones(), folders=folders, selected_folders=selected_folders)
 
@@ -1143,18 +1143,18 @@ def google_connect():
 def load_folders():
     x = request.form.getlist('selected_folders')
     # current_app.config['GOOGLE-FOLDER'] = x
-    session['selected_folder_id'] = x
+    current_app.config['SETTINGS']['selected_folder_id'] = x
     return "", 200
 
 
 @admin_bp.route('/google-files/')
 def google_files():
-    folder_ids = session.get('selected_folder_id')
+    folder_ids = current_app['SETTINGS'].config.get('selected_folder_id')
     if not folder_ids:
         return render_template('admin/google_files.html', files={})
 
     creds = Credentials.from_authorized_user_info(
-        json.loads(session.get('google-token')), SCOPES)
+        json.loads(current_app.config['SETTINGS'].get('google-token')), SCOPES)
     service = build('drive', 'v3', credentials=creds)
 
     files_by_folder = {}
@@ -1186,7 +1186,7 @@ def google_files():
 @admin_bp.route('/admin/google-files/view/<file_id>')
 def view_google_file(file_id):
     creds = Credentials.from_authorized_user_info(
-        json.loads(session.get('google-token')), SCOPES)
+        json.loads(current_app.config['SETTINGS'].get('google-token')), SCOPES)
     service = build('drive', 'v3', credentials=creds)
     file = service.files().get(fileId=file_id, fields="webViewLink").execute()
     return redirect(file.get('webViewLink', '/admin/google-files/'))
@@ -1195,7 +1195,7 @@ def view_google_file(file_id):
 @admin_bp.route('/google-thumbnail/<file_id>')
 def google_thumbnail(file_id):
     creds = Credentials.from_authorized_user_info(
-        json.loads(session.get('google-token')), SCOPES)
+        json.loads(current_app.config['SETTINGS'].get('google-token')), SCOPES)
     service = build('drive', 'v3', credentials=creds)
     request = service.files().get_media(fileId=file_id)
     from googleapiclient.http import MediaIoBaseDownload
@@ -1226,7 +1226,7 @@ def oauth2callback():
     creds = flow.credentials
     # with open(TOKEN_FILE, 'w') as token:
     #     token.write(creds.to_json())
-    session['google-token'] = creds.to_json()
+    current_app.config['SETTINGS']['google-token'] = creds.to_json()
 
     return redirect(url_for('admin.settings'))
 
@@ -1246,6 +1246,3 @@ def register_admin_socketio_events(socketio):
         join_room('admin')  # Join the admin room for broadcasts
         print('admin joined')
         emit('status', {'msg': 'Admin has joined the room.'}, room=room)
-
-
-
