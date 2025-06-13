@@ -28,21 +28,21 @@
   </div>
   {% if chat.admin_required %}
   <form
-    class="relative w-full h-[60px] px-[20px] md:px-[40px] mb-[10px]"
+    class="relative w-full h-[60px] px-[20px] md:px-[40px] mb-[20px]"
     hx-post="/admin/chat/{{ chat.room_id }}/send_message"
     hx-trigger="submit"
     hx-swap="none"
     onsubmit="return !!this.message.value.trim()"
     hx-on:htmx:afterRequest="this.reset()"
   >
-    <textarea
+    <input
       rows="1"
       placeholder="Send a message..."
       class="w-full border-2 border-[var(--border-color)] transition-all duration-300 focus:border-[var(--main-color)] rounded-[5px] h-[60px] resize-none overflow-x-auto overflow-y-hidden whitespace-nowrap focus:outline-none p-[19px] pr-[80px] text-[16px] leading-[22px]"
       name="message"
       id="message"
       required
-    ></textarea>
+    />
     <button
       type="submit"
       class="bg-[var(--main-color)] text-white hover:opacity-90 transition-opacity px-[20px] py-[10px] absolute right-[28px] md:right-[48px] bottom-[8px] flex items-center justify-center w-[60px] h-[44px] rounded-[5px] focus:outline-none"

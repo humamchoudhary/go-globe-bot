@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from collections import Counter
 from services.timezone import UTCZoneManager
 import threading
-from pprint import pprint
+# from # p# print import pprint
 from services.usage_service import UsageService
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
@@ -36,7 +36,7 @@ def admin_required(f):
         if session.get('role') != 'admin':
             # Store the original path in session
             session['next'] = request.path
-            print(request.path)
+            # print(request.path)
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -191,7 +191,7 @@ def login():
     # Redirect to the stored 'next' URL if available
 
     next_url = session.pop('next', None)
-    print(f"NEXT: {next_url}")
+    # print(f"NEXT: {next_url}")
     session.clear()
     session['role'] = 'admin'
     if next_url:
@@ -308,6 +308,39 @@ def filter_chats(filter):
         return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats])
     elif filter == "active":
         return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.admin_required])
+    elif filter == 'exported':
+
+        return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.exported])
+
+
+@admin_bp.route('/chat/<room_id>/export', methods=['POST'])
+@admin_required
+def export_chat(room_id):
+    chat_service = ChatService(current_app.db)
+    chat = chat_service.get_chat_by_room_id(room_id)
+
+    if chat:
+        user_service = UserService(current_app.db)
+        user = user_service.get_user_by_id(chat.user_id)
+        # try:
+        erp_url = f"https://erp-new.go-globe.dev/api/leads?name={user.name}&title={
+            user.desg}&phone={user.phone}&email={user.email}&country={user.country}&city={user.city}"
+        headers = {
+            "Authorization": f"Bearer {os.environ.get('ERP_TOKEN')}"
+        }
+        r = requests.post(erp_url, headers=headers)
+        print(r.url)
+        if r.status_code == 200:
+            if not chat_service.export_chat(room_id):
+                return "Chat not found", 404
+        else:
+            raise Exception(f'Error in exporting: {r.status_code}')
+        # except Exception as e:
+        #     print(e)
+        #     return "Error pushing", 500
+        return "", 200
+
+    return "Chat not found", 404
 
 
 @admin_bp.route('/chat/<room_id>/send_message', methods=['POST'])
@@ -320,8 +353,8 @@ def send_message(room_id):
         #     return "<h1>Unauthorized</h1>", 401
 
         message = request.form.get('message')
-        print(rf'{message}')
-        print(f'{room_id}')
+        # print(rf'{message}')
+        # print(f'{room_id}')
         if not message:
             return "", 302
         chat_service = ChatService(current_app.db)
@@ -347,7 +380,8 @@ def send_message(room_id):
         # return render_template('admin/fragments/chat_message.html', message=new_message, username="Ana")
         return "", 200
     except Exception as e:
-        print(e)
+        pass
+        # print(e)
 
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
@@ -470,7 +504,7 @@ def upload_file():
             except Exception as e:
                 file.seek(0)
                 file.save(file_path)
-                print(f"PDF conversion error: {e}")
+                # print(f"PDF conversion error: {e}")
                 file_items.append(render_template(
                     "components/file_item.html", file=unique_filename))
         else:
@@ -605,15 +639,15 @@ def index():
     chats_ary = []
     x = 0
     for c in chats:
-        print(x)
+        # print(x)
         x += 1
-        print(c)
+        # print(c)
         chat = c.to_dict()
         chat['username'] = user_service.get_user_by_id(c.user_id).name
         chats_ary.append(chat)
 
     data = generate_stats(chats)
-    pprint(chats_ary)
+    # p# print(chats_ary)
 
     return render_template('admin/index.html', chats=chats_ary, data=data, username="Ana", online_users=current_app.config['ONLINE_USERS'], all_users=len(all_users))
 
@@ -666,7 +700,7 @@ def settings():
             current_app.config['SETTINGS']['timings'],
             key=lambda time: day_order[time['day']]
         )
-    pprint(current_app.config['SETTINGS'])
+    # p# print(current_app.config['SETTINGS'])
 
     ##################################  GOOGLE DRIVE CONNECTION #############################
 
@@ -683,7 +717,8 @@ def settings():
             q="mimeType='application/vnd.google-apps.folder'",
             fields="files(id, name)").execute()
         folders = results.get('files', [])
-    selected_folders = current_app.config['SETTINGS'].get('selected_folder_id', [])
+    selected_folders = current_app.config['SETTINGS'].get(
+        'selected_folder_id', [])
 
     return render_template('admin/settings.html', settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones(), folders=folders, selected_folders=selected_folders)
 
@@ -722,7 +757,7 @@ def upload_logo(file_name):
         file.save(file_path)
         current_app.config['SETTINGS']['logo'][f_type] = os.path.join(
             '/static', 'img', filename)
-        # print(current_app.config)
+        # # print(current_app.config)
         return f"File saved at {file_path}", 200
 
     return "Invalid file type", 400
@@ -761,7 +796,7 @@ def add_timing():
 
 @admin_bp.route('/settings/timing/<int:id>', methods=['DELETE'])
 def delete_timing(id):
-    print(id)
+    # print(id)
     timings = current_app.config['SETTINGS'].get('timings', [])
     day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
                  'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
@@ -787,13 +822,13 @@ def api_key(api_type):
     if request.method == 'DELETE':
         current_app.config['SETTINGS']['apiKeys'][api_type] = ''
 
-        print(current_app.config)
+        # print(current_app.config)
         return '', 200
     elif request.method == 'POST':
         # data = request.json
         current_app.config['SETTINGS']['apiKeys'][api_type] = request.form.get(
             "key")
-        print(current_app.config)
+        # print(current_app.config)
         return '', 200
     return '', 500
 
@@ -819,8 +854,8 @@ def set_prompt():
 @admin_bp.route('/settings/subject/<string:subject>', methods=['DELETE'])
 def subjects(subject):
     if request.method == 'POST':
-        print("SUBJECT")
-        print(current_app.config['SETTINGS']['subjects'])
+        # print("SUBJECT")
+        # print(current_app.config['SETTINGS']['subjects'])
         subject = request.form.get('subject')
         # ADD NEW SUBJECT
         current_app.config['SETTINGS']['subjects'] = set(
@@ -865,23 +900,23 @@ def scrape_urls(urls):
         )
         if res and 'text' in res:
             lines = str(res['text'])
-            # print(lines)
+            # # print(lines)
             lines = re.sub(r"\s+", " ", lines).strip()
             # Create a filename from the URL
             if res['url'].endswith('/'):
                 res['url'] = res['url'][:-1]
-                print(res['url'])
-            print(res['url'].endswith('/'))
+                # print(res['url'])
+            # print(res['url'].endswith('/'))
             filename = '*'.join(res['url'].split('/')[2:])
             if not filename:
                 # Use domain if path is empty
                 filename = urlparse(res['url']).netloc
             filepath = f"{os.getcwd()}/files/{filename}.txt"
             with open(filepath, 'w') as f:
-                # print(f"Saving content to {f.name}")
+                # # print(f"Saving content to {f.name}")
                 # if len(lines) > 500:
-                # print(lines)
-                # print(filepath)
+                # # print(lines)
+                # # print(filepath)
                 f.write(lines)
 
 
@@ -899,7 +934,7 @@ def scrape():
     thread = threading.Thread(target=scrape_urls, args=(all_urls,))
     thread.start()
     # Now scrape all the collected URLs
-    # pprint(all_urls)
+    # # p# print(all_urls)
     return '', 200
 
 
@@ -933,7 +968,7 @@ def process_sitemap_url(url):
     try:
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
-            print(f"Failed to fetch {url}: Status code {response.status_code}")
+            # print(f"Failed to fetch {url}: Status code {response.status_code}")
             return [url]  # Return original URL if we can't process it
 
         content_type = response.headers.get('Content-Type', '').lower()
@@ -949,7 +984,7 @@ def process_sitemap_url(url):
         return [url]
 
     except Exception as e:
-        print(f"Error processing {url}: {str(e)}")
+        # print(f"Error processing {url}: {str(e)}")
         return [url]  # Include the original URL if processing fails
 
 
@@ -970,7 +1005,7 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
                 if loc_elem is not None and loc_elem.text:
                     # Recursively process this sitemap
                     child_sitemap_url = loc_elem.text.strip()
-                    print(f"Found child sitemap: {child_sitemap_url}")
+                    # print(f"Found child sitemap: {child_sitemap_url}")
                     child_urls = process_sitemap_url(child_sitemap_url)
                     urls.extend(child_urls)
         # Handle regular sitemap
@@ -982,10 +1017,10 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
                     page_url = loc_elem.text.strip()
                     urls.append(page_url)
     except Exception as e:
-        print(f"Error parsing sitemap from {base_url}: {str(e)}")
+        # print(f"Error parsing sitemap from {base_url}: {str(e)}")
         # Fall back to regex-based extraction if XML parsing fails
         urls.extend(re.findall(r'<loc>(.*?)</loc>', sitemap_content))
-    # print(f"Extracted {len(urls)} URLs from sitemap")
+    # # print(f"Extracted {len(urls)} URLs from sitemap")
     return urls
 
 
@@ -1080,7 +1115,7 @@ def get_all_chats():
         chats.append(chat)
 
     # Convert to dictionary representation
-    pprint(chats)
+    # p# print(chats)
     # = [chat.to_dict() for chat in chats if chat.admin_required]
     return render_template('admin/chats.html', chats=chats)
 
@@ -1093,10 +1128,10 @@ def delete_chat(room_id):
         chat_service.delete([room_id])
         return "", 200
     except Exception as e:
-        print(e)
+        # print(e)
         return "Error"
     # for i in chats:
-    #     print(i)
+    #     # print(i)
 
 
 @admin_bp.route("/chats/delete", methods=["POST"])
@@ -1106,16 +1141,16 @@ def delete_chats():
     if not data.get("chat_ids"):
         return "", 200
     chats = data["chat_ids"]
-    print(chats)
+    # print(chats)
     try:
         chat_service = ChatService(current_app.db)
         chat_service.delete(chats)
         return "", 200
     except Exception as e:
-        print(e)
+        # print(e)
         return "Error"
     # for i in chats:
-    #     print(i)
+    #     # print(i)
 
 
 CREDENTIALS_FILE = 'credentials.json'
@@ -1235,7 +1270,7 @@ def register_admin_socketio_events(socketio):
     @socketio.on('admin_join')
     def on_admin_join(data):
         if session.get('role') != 'admin':
-            print('ret')
+            # print('ret')
             return
 
         room = data.get('room')
@@ -1244,5 +1279,5 @@ def register_admin_socketio_events(socketio):
 
         join_room(room)
         join_room('admin')  # Join the admin room for broadcasts
-        print('admin joined')
+        # print('admin joined')
         emit('status', {'msg': 'Admin has joined the room.'}, room=room)

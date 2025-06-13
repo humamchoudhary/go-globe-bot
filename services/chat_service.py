@@ -46,6 +46,14 @@ class ChatService:
             return Chat.from_dict(chat_data)
         return None
 
+    def export_chat(self, room_id):
+        chat = self.get_chat_by_room_id(room_id)
+        if not chat:
+            return False
+        self.chats_collection.update_one(
+            {'room_id': room_id}, {"$set": {"exported": True}})
+        return True
+
     def add_message(self, room_id, sender, content):
         chat = self.get_chat_by_room_id(room_id)
         if not chat:

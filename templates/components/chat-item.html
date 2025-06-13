@@ -46,7 +46,12 @@
       {{ chat.created_at.strftime("%d %B %Y") }}
     </p>
     <div class="flex flex-row gap-4">
+      {% if not chat.exported %}
       <div
+        hx-post="/admin/chat/{{ chat.room_id }}/export"
+        hx-swap="none"
+        hx-trigger="click"
+        hx-on::after-request="location.reload()"
         class="flex flex-row gap-4 hover:opacity-80 hover:cursor-pointer duration-300 transition-all"
       >
         <i
@@ -55,6 +60,7 @@
         ></i>
         <p class="text-sm font-bold text-[var(--main-color)]">Export Chat</p>
       </div>
+      {% endif %}
       <div
         hx-post="/admin/chat/{{ chat.room_id }}/delete"
         hx-trigger="click"
