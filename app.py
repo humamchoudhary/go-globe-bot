@@ -22,6 +22,8 @@ from models.log import LogLevel, LogTag, LogEntry
 import traceback
 from datetime import datetime
 import json
+from services.admin_service import AdminService
+from urllib.parse import urlparse
 
 
 def get_font_data():
@@ -60,11 +62,6 @@ def create_app(config_class=Config):
     app.config['ONLINE_USERS'] = 0
     app.config['NOTIFICATIONS'] = []
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-
-    # Add JSON filter to Jinja
-    @app.template_filter('tojson')
-    def to_json_filter(value, indent=None):
-        return json.dumps(value, indent=indent, default=str)
 
     app.config['SESSION_TYPE'] = 'mongodb'
     app.config['LOGOS_FOLDER'] = os.path.join(os.getcwd(), 'static/img/')
@@ -109,9 +106,36 @@ def create_app(config_class=Config):
         'Authorization',
         'Cookie',
         'X-Api-Key',
-        'X-CSRFToken'
+        'X-CSRFToken', 'password'
     }
     logs_service = LogsService(app.db)
+
+    @app.before_request
+    def set_admin_id():
+        # Skip domain check for these paths
+        exempt_paths = ['static', 'socket.io',
+                        'favicon.ico', 'healthcheck', 'robots.txt']
+        if any(request.path.startswith(f'/{path}') for path in exempt_paths):
+            return
+
+        admin_id = session.get('admin_id')
+        if not admin_id:
+            sec_key = request.headers.get('SECRET_KEY')
+            if sec_key:
+                admin = AdminService(app.db).get_admin_by_key(sec_key)
+                if admin:
+                    session['admin_id'] = admin.admin_id
+                    session['role'] = admin.role
+                    app.config['CURRENT_ADMIN'] = admin
+
+        # Domain checking for non-superadmin requests
+        if app.config.get('CURRENT_ADMIN', None) and app.config['CURRENT_ADMIN'].role != 'superadmin':
+            if 'domains' in app.config['CURRENT_ADMIN'].settings and app.config['CURRENT_ADMIN'].settings['domains']:
+                referrer = request.headers.get('Referer')
+                if referrer:
+                    domain = urlparse(referrer).netloc
+                    if domain not in app.config['CURRENT_ADMIN'].settings['domains']:
+                        return "Access denied", 403
 
     @app.before_request
     def log_request():
@@ -205,6 +229,7 @@ def create_app(config_class=Config):
     @app.after_request
     def log_response(response):
         """Log response information"""
+
         try:
             if hasattr(g, 'log_id') and hasattr(g, 'request_id'):
                 logs_service.logs_collection.update_one(
@@ -228,12 +253,15 @@ def create_app(config_class=Config):
     @app.errorhandler(Exception)
     def log_exception(error):
         """Log exceptions with correlation to original request"""
+
+        admin_id = session.get('admin_id')
         try:
             if hasattr(g, 'log_id'):
                 logs_service.create_log(
                     level=LogLevel.ERROR,
                     tag=LogTag.SYSTEM,
                     message=f"Request failed: {str(error)}",
+                    admin_id=admin_id,
                     data={
                         'error': str(error),
                         'type': error.__class__.__name__,
@@ -249,65 +277,11 @@ def create_app(config_class=Config):
 
 # Add request start time tracking
 
+
     @app.before_request
     def start_timer():
         g.request_start_time = datetime.utcnow()
-    conf = db.config.find_one({"id": "settings"})
-    if conf:
-        app.config['SETTINGS'] = conf
-        app.config['SETTINGS']["apiKeys"] = {
-            'claude': Config.CLAUDE_KEY,
-            'openAi': Config.OPENAI_KEY,
-            'deepseek': Config.DEEPSEEK_KEY,
-            'gemini': Config.GEMINI_KEY
-        }
-    else:
-        app.config['SETTINGS'] = {
-            'logo': {
-                'large': '/static/img/logo.svg',
-                'small':
-                '/static/img/logo-desktop-mini.svg',
-            },
-            'langauges': set({'English'}),
-            'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
-            'apiKeys': {
-                'claude': Config.CLAUDE_KEY,
-                'openAi': Config.OPENAI_KEY,
-                'deepseek': Config.DEEPSEEK_KEY,
-                'gemini': Config.GEMINI_KEY
-            },
-            'theme': 'system',
-            'model': 'gm_2_0_f',
-            'backend_url': Config.BACKEND_URL,
-            "prompt": """
-       you are a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Assistance" button for human assistance.'
-                Incorporate information from any attached images into your responses where relevant. Give concise answers
-                When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.
-                Example: If the filename is 'www.example.com*details.php.txt', the link should be 'https://www.example.com/details.php' ie just removin the .txt from the end and the link text should also be 'product/details'.
-                USE VALID MARKUP TEXT, Have proper Formating for links
-DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THING USER ASKS TO EXPLAIN
-                """
-        }
 
-    @app.context_processor
-    def settings():
-        app.config['SETTINGS']['subjects'] = list(
-            app.config['SETTINGS']['subjects'])
-
-        app.config['SETTINGS']['langauges'] = list(
-            app.config['SETTINGS'].get('langauges', ['English']))
-
-        db.config.replace_one({"id": "settings"},
-                              {"id": "settings", **app.config['SETTINGS'], "apiKeys": "removed"}, upsert=True)
-
-        app.config['SETTINGS']['subjects'] = sorted(
-            app.config['SETTINGS']['subjects'], key=len, reverse=True)
-        print(app.config['SETTINGS'])
-
-        app.config['SETTINGS']['langauges'] = sorted(
-            app.config['SETTINGS'].get('langauges', None) or ['English'], key=len, reverse=True)
-
-        return {'settings': app.config['SETTINGS']}
     app.bot = Bot(Config.BOT_NAME, app=app)
 
     # app.config['SETTINGS']['backend_url'] = 'https://192.168.22.249:5000'
@@ -392,5 +366,6 @@ app, socketio = create_app()
 if __name__ == '__main__':
     socketio.run(app, port=Config.PORT, host='0.0.0.0',
                  debug=True,
-                 ssl_context='adhoc'
-                 )
+                 # ssl_context='adhoc'
+
+                 ssl_context=('cert.pem', 'key.pem'))

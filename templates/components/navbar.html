@@ -7,8 +7,9 @@
   class="h-screen fixed -right-[250px] md:left-0 top-[80px] w-[250px] min-w-[250px] bg-[var(--sec-bg-color)] flex flex-col gap-[16px] px-[30px] py-[40px] border-r border-[var(--border-color)] z-100 transition-all duration-300 rounded-l-md md:rounded-[0px]"
   id="navbar"
 >
-  {% if nav_items %} {% for nav_item in nav_items %} {% include
-  "components/nav_item.html" %} {% endfor %} {% endif %}
+  {% if nav_items %} {% for nav_item in nav_items %} {% if not nav_item.role or
+  nav_item.role == session.get('role') %} {% include "components/nav_item.html"
+  %} {% endif %} {% endfor %} {% endif %}
 </div>
 <script>
   function toggleMenu() {

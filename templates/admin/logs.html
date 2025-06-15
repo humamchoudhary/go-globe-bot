@@ -108,13 +108,6 @@
             style="background-color: var(--bg-color); border-color: var(--border-color); color: var(--sec-text)">
         </div>
         
-        <!-- Admin ID Filter -->
-        <div>
-          <label class="block text-sm font-medium mb-2" style="color: var(--sec-text)">Admin ID</label>
-          <input type="text" name="admin_id" placeholder="Enter Admin ID" 
-            class="w-full px-3 py-2 rounded border text-sm focus:outline-none focus:ring-2" 
-            style="background-color: var(--bg-color); border-color: var(--border-color); color: var(--sec-text)">
-        </div>
         
         <!-- Sort Order -->
         <div>
@@ -355,10 +348,6 @@
       activeFilters.push(`User ID: ${userId}`);
     }
 
-    const adminId = formData.get('admin_id');
-    if (adminId) {
-      activeFilters.push(`Admin ID: ${adminId}`);
-    }
 
     const startDate = formData.get('start_date');
     const endDate = formData.get('end_date');
@@ -412,7 +401,7 @@
 
   // Auto-submit form on input changes with debounce
   document.addEventListener('input', function(e) {
-    if (e.target.matches('input[name="message_search"], input[name="user_id"], input[name="admin_id"]')) {
+    if (e.target.matches('input[name="message_search"], input[name="user_id"]')) {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         triggerFilter();
@@ -472,7 +461,7 @@
     if (tags.length > 0) updateSelectedText('tag');
 
     // Restore other fields
-    ['message_search', 'user_id', 'admin_id', 'start_date', 'end_date'].forEach(field => {
+    ['message_search', 'user_id', 'start_date', 'end_date'].forEach(field => {
       const value = urlParams.get(field);
       if (value) {
         const input = document.querySelector(`[name="${field}"]`);

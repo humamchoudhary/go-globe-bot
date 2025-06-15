@@ -8,7 +8,7 @@ class ChatService:
         self.db = db
         self.chats_collection = db.chats
 
-    def create_chat(self, user_id, subject):
+    def create_chat(self, user_id, subject,admin_id):
         chat_id = str(uuid.uuid4())
         # if not room_id:
         #     room_id = f"{user_id}-{chat_id[:8]}"
@@ -87,7 +87,7 @@ class ChatService:
         self.chats_collection.update_one(
             {'room_id': room_id}, {"$set": {'open': False}})
 
-    def get_all_chats(self, limit=100, skip=0):
-        chats_data = list(self.chats_collection.find().sort(
+    def get_all_chats(self, admin_id=None, limit=100, skip=0):
+        chats_data = list(self.chats_collection.find({'admin_id': admin_id}).sort(
             "updated_at", -1).skip(skip).limit(limit))
         return [Chat.from_dict(chat_data) for chat_data in chats_data]

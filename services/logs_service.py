@@ -66,10 +66,13 @@ class LogsService:
             logs = logs.limit(int(limit))
         return [LogEntry.from_dict(log) for log in logs]
 
-    def get_recent_logs(self, limit: int) -> list[LogEntry]:
-        """Get most recent logs"""
+    def get_recent_logs(self, admin_id: Optional[str] = None, limit: int = 100) -> list[LogEntry]:
+        """Get most recent logs with optional admin_id filter"""
+        query = {}
+        if admin_id is not None:
+            query['admin_id'] = admin_id
 
-        logs = self.logs_collection.find().sort("timestamp", -1)
+        logs = self.logs_collection.find(query).sort("timestamp", -1)
         if limit:
             logs = logs.limit(int(limit))
         return [LogEntry.from_dict(log) for log in logs]
@@ -110,11 +113,16 @@ class LogsService:
         return [LogEntry.from_dict(log) for log in logs]
 
     def search_logs_advanced(self, levels=None, tags=None, user_id=None, admin_id=None,
-                             message_search=None, start_date=None, end_date=None, limit=None):
+                             message_search=None, start_date=None, end_date=None, limit=None,
+                             current_admin_id: Optional[str] = None):
         """
-        Advanced search with multiple selections and message filtering
+        Advanced search with admin restrictions
         """
         query = {}
+
+        # Apply admin restriction if current_admin_id is provided
+        if current_admin_id is not None:
+            query['admin_id'] = current_admin_id
 
         # Multiple level filtering
         if levels:
@@ -130,11 +138,11 @@ class LogsService:
         if user_id:
             query['user_id'] = user_id
 
-        # Admin ID filtering
-        if admin_id:
+        # Specific admin filtering (only for superadmin)
+        if admin_id and current_admin_id is None:
             query['admin_id'] = admin_id
 
-        # Message content search (case-insensitive)
+        # Message content search
         if message_search:
             query['message'] = {'$regex': message_search, '$options': 'i'}
 
@@ -147,13 +155,9 @@ class LogsService:
                 date_query['$lte'] = end_date
             query['timestamp'] = date_query
 
-        # Execute query
-        cursor = self.db.logs.find(query).sort('timestamp', -1)
-
+        cursor = self.logs_collection.find(query).sort('timestamp', -1)
         if limit:
             cursor = cursor.limit(int(limit))
-
-        logs = []
 
         return [LogEntry.from_dict(log) for log in cursor]
         # for doc in cursor:

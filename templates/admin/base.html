@@ -118,19 +118,20 @@ new Notification("Admin Required", {
 
 {% block navbar %}
 
-{% set nav_items = [ { "name":
+{% set nav_items = [  { "name":
 "Home", "link": "/admin/", "icon": "house" },
 { "name":
-"Chats", "link": "/admin/chats/", "icon": "message-square" },
+"Chats", "link": "/admin/chats/", "icon": "message-square","role":"admin" },
 { "name":
 "Logs", "link": "/admin/logs/", "icon": "logs" },
-
 { "name":
-"Files", "link": "/admin/files/", "icon": "file" },
+"Create Admin", "link": "/admin/create-admin", "icon": "user-plus","role":"superadmin" },
 { "name":
-"Pricings", "link": "/admin/pricing/", "icon": "dollar-sign" },
+"Files", "link": "/admin/files/", "icon": "file","role":"admin" },
 { "name":
-"FAQ", "link": "/admin/faq/", "icon": "circle-help" },
+"Pricings", "link": "/admin/pricing/", "icon": "dollar-sign","role":"admin" },
+{ "name":
+"FAQ", "link": "/admin/faq/", "icon": "circle-help","role":"admin" },
 { "name":
 "Settings", "link": "/admin/settings", "icon": "settings" },
 { "name":

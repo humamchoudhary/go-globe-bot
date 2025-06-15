@@ -83,8 +83,7 @@ def login(subject):
             geo = requests.get(f"http://ip-api.com/json/{ip}")
             geo = geo.json()
             country = geo.get("country", None)
-        except Exception as e:
-            pass
+        except:
             country = None
         return render_template('user/min-login.html', default_subject=subject, user_country=country)
 
@@ -220,7 +219,8 @@ def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
-    chat = chat_service.create_chat(user.user_id, subject=subject)
+    chat = chat_service.create_chat(
+        user.user_id, subject=subject, admin_id=session.get('admin_id'))
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
 
     current_app.bot.create_chat(chat.room_id)

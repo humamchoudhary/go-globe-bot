@@ -2,7 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
-import ssl
+# import ssl
 # Replace with your custom SMTP server settings
 SMTP_SERVER = os.environ.get('SMTP_SERVER')
 SMTP_PORT = os.environ.get('SMTP_PORT')  # Usually 587 for TLS, 465 for SSL
@@ -14,7 +14,7 @@ SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
 FROM_EMAIL = SMTP_USERNAME
 
 
-print(SMTP_SERVER)
+# print(SMTP_SERVER)
 
 
 def send_email(to_email, subject, message):

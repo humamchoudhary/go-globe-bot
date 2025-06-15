@@ -2,7 +2,7 @@ import os
 import pickle
 import base64
 from io import BytesIO
-from pprint import pprint
+# from p# print import pprint
 from dotenv import load_dotenv
 from PIL import Image
 import anthropic
@@ -11,6 +11,7 @@ import requests
 from google import genai
 from google.genai import types
 
+from flask import g
 load_dotenv()
 
 
@@ -42,8 +43,19 @@ class Bot:
         self.dp_key = app.config['SETTINGS']['apiKeys']['deepseek']
         self.active_bot = None
         self.active_bot_name = ""
-        self.sys_prompt = app.config["SETTINGS"]["prompt"] + f"\n\n only respond in following langauges you can translate the system input/ system instruction data to any langaues or accept response in this langauge, for other langauges response in that lanagues: i havent learned <langague name> yet please talk to ana or use these lanagaues <supported lanaguages>, supported lanaguages: {
-            ", ".join(app.config['SETTINGS'].get('langauges',['English']))} "
+
+        # Get the current admin's settings if available
+
+        admin_settings = getattr(app.config, 'CURRENT_ADMIN', {}).get('settings', {})
+
+        # Combine superadmin prompt with admin prompt if available
+        base_prompt = app.config["SETTINGS"].get("prompt", "")
+        admin_prompt = admin_settings.get("prompt", "")
+        self.sys_prompt = f"{base_prompt}\n\n{admin_prompt}".strip()
+
+        if admin_settings.get('languages'):
+            self.sys_prompt += f"\n\nOnly respond in following languages: {
+                ', '.join(admin_settings['languages'])}"
 
         # Enhanced Google model configurations
         self.google_models = {
@@ -127,8 +139,8 @@ class Bot:
 
     def responed(self, input, id):
         chat_state = self._load_chat(id)
-        pprint(self.bot_maps)
-        print(self.active_bot_name)
+        # pprint(self.bot_maps)
+        # print(self.active_bot_name)
         if self.active_bot_name not in self.bot_maps:
             raise ValueError(f"Unsupported bot: {self.active_bot_name}")
         return self.bot_maps[self.active_bot_name](input, id)
@@ -140,15 +152,15 @@ class Bot:
     def _is_google_model(self, model_name):
         """Check if the model is a Google model"""
 
-        print(f"Bot Name: {model_name}")
+        # # print(f"Bot Name: {model_name}")
         actual_model = self._get_google_model_name(model_name)
 
-        print(f"Bot Name: {actual_model}")
-        print(self.google_models)
+        # # print(f"Bot Name: {actual_model}")
+        # # print(self.google_models)
         return actual_model in self.google_models
 
     def _set_bot(self, name):
-        print(f"Bot Name: {name}")
+        # print(f"Bot Name: {name}")
         if self._is_google_model(name):
             self.active_bot = genai.Client(api_key=self.gm_key)
             self.active_bot_name = name
@@ -405,7 +417,7 @@ class Bot:
             return assistant_message, tokens
 
         except Exception as e:
-            print(f"Deepseek API error: {str(e)}")
+            # print(f"Deepseek API error: {str(e)}")
             chat_state["config"]["messages"].pop()
             raise
 
@@ -489,10 +501,10 @@ if __name__ == "__main__":
 
     # Test each bot
     for bot_name, bot_code in bot.get_bots():
-        print(f"\nTesting {bot_name}...")
+        # print(f"\nTesting {bot_name}...")
         bot._set_bot(bot_code)
         chat_id = f"test_{bot_code}"
         bot.create_chat(chat_id)
         response, tokens = bot.responed("Hello! What can you do?", chat_id)
-        print(f"Response: {response[:100]}...")
-        print(f"Tokens used: {tokens}")
+        # print(f"Response: {response[:100]}...")
+        # print(f"Tokens used: {tokens}")

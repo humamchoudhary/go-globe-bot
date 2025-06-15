@@ -47,7 +47,7 @@ class LogEntry:
         user_id: Optional[str] = None,
         admin_id: Optional[str] = None,
         data: Optional[Dict[str, Any]] = None,
-        timestamp: Optional[datetime] = None
+        timestamp: Optional[datetime] = None,
     ):
         self.log_id = str(uuid.uuid4())
         self.level = level

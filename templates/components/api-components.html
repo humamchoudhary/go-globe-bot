@@ -1,50 +1,58 @@
-<p class="text-base mt-6 mb-3">{{ api_type.capitalize() }} Keys</p>
-{% if settings.apiKeys[api_type] %}
-<div class="flex w-full flex-row justify-between min-h-10 gap-4 items-center">
-  <p>
-    {{'*'*settings.apiKeys[api_type]|length}}{{ settings.apiKeys[api_type][-4:]
-    }}
-  </p>
-  <button
-    hx-delete="/admin/settings/api/{{ api_type }}"
-    hx-trigger="click"
+<div
+  class="border rounded-lg p-4"
+  style="
+    border-color: var(--border-color);
+    background-color: var(--sec-bg-color);
+  "
+>
+  <p class="text-sm font-medium mb-2">{{ api_type.capitalize() }} API Key</p>
+  {% if settings.apiKeys[api_type] %}
+  <div class="flex items-center justify-between gap-3">
+    <p class="text-sm truncate">
+      {{'•'*15}}{{ settings.apiKeys[api_type][-4:] }}
+    </p>
+    <button
+      hx-delete="/admin/settings/api/{{ api_type }}"
+      hx-trigger="click"
+      hx-swap="none"
+      hx-on::after-request="window.location.reload()"
+      class="flex items-center justify-center rounded-lg text-sm p-2 transition-colors"
+      style="background-color: rgba(255,255,255,0.1);
+                           color: var(--sec-text);
+                           hover:background-color: rgba(255,255,255,0.2)"
+      title="Remove API Key"
+    >
+      <i data-lucide="trash-2" class="size-4"></i>
+    </button>
+  </div>
+  {% else %}
+  <form
+    class="flex items-center gap-2"
+    hx-post="/admin/settings/api/{{ api_type }}"
     hx-swap="none"
     hx-on::after-request="window.location.reload()"
-    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2"
-    style="background-color: var(--main-color);
-                       color: white;
-                       hover:bg-white hover:text-black"
   >
-    <i data-lucide="trash" class="size-4"></i> Remove
-  </button>
+    <input
+      type="password"
+      id="key"
+      name="key"
+      class="flex-1 h-9 rounded-lg border px-3 text-sm outline-none transition-all"
+      style="
+        border-color: var(--border-color);
+        background-color: var(--bg-color);
+        color: var(--sec-text);
+      "
+      placeholder="Enter API key"
+      autocomplete="off"
+    />
+    <button
+      type="submit"
+      class="flex items-center justify-center rounded-lg text-sm p-2 transition-colors"
+      style="background-color: var(--main-color); color: white"
+      title="Save API Key"
+    >
+      <i data-lucide="check" class="size-4"></i>
+    </button>
+  </form>
+  {% endif %}
 </div>
-{% else %}
-<form
-  class="flex w-full flex-row justify-between min-h-10 gap-4 items-center"
-  hx-post="/admin/settings/api/{{ api_type }}"
-  hx-swap="none"
-  hx-on::after-request="window.location.reload()"
->
-  <input
-    type="password"
-    id="key"
-    name="key"
-    class="flex h-10 w-full rounded-md border px-3 py-2 text-sm outline-none transition-all"
-    style="
-      border-color: var(--border-color);
-      background-color: var(--bg-color);
-      color: var(--sec-text);
-    "
-    autocomplete="off"
-  />
-  <button
-    type="submit"
-    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium px-4 py-2"
-    style="background-color: var(--main-color);
-                       color: white;
-                       hover:bg-white hover:text-black"
-  >
-    <i data-lucide="save" class="size-4"></i> Save
-  </button>
-</form>
-{% endif %}
