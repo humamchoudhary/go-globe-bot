@@ -230,6 +230,7 @@ def create_app(config_class=Config):
     def log_response(response):
         """Log response information"""
 
+        admin_id = session.get('admin_id')
         try:
             if hasattr(g, 'log_id') and hasattr(g, 'request_id'):
                 logs_service.logs_collection.update_one(
@@ -281,7 +282,62 @@ def create_app(config_class=Config):
     @app.before_request
     def start_timer():
         g.request_start_time = datetime.utcnow()
+    conf = db.config.find_one({"id": "settings"})
+    if conf:
+        app.config['SETTINGS'] = conf
+        app.config['SETTINGS']["apiKeys"] = {
+            'claude': Config.CLAUDE_KEY,
+            'openAi': Config.OPENAI_KEY,
+            'deepseek': Config.DEEPSEEK_KEY,
+            'gemini': Config.GEMINI_KEY
+        }
+    else:
+        app.config['SETTINGS'] = {
+            'logo': {
+                'large': '/static/img/logo.svg',
+                'small':
+                '/static/img/logo-desktop-mini.svg',
+            },
+            'langauges': set({'English'}),
+            'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
+            'apiKeys': {
+                'claude': Config.CLAUDE_KEY,
+                'openAi': Config.OPENAI_KEY,
+                'deepseek': Config.DEEPSEEK_KEY,
+                'gemini': Config.GEMINI_KEY
+            },
+            'theme': 'system',
+            'model': 'gm_2_0_f',
+            'backend_url': Config.BACKEND_URL,
+            "prompt": """
+       you are a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Assistance" button for human assistance.'
+                Incorporate information from any attached images into your responses where relevant. Give concise answers
+                When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.
+                Example: If the filename is 'www.example.com*details.php.txt', the link should be 'https://www.example.com/details.php' ie just removin the .txt from the end and the link text should also be 'product/details'.
+                USE VALID MARKUP TEXT, Have proper Formating for links
+DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THING USER ASKS TO EXPLAIN
+                """
+        }
 
+    @app.context_processor
+    def settings():
+        app.config['SETTINGS']['subjects'] = list(
+            app.config['SETTINGS']['subjects'])
+
+        app.config['SETTINGS']['langauges'] = list(
+            app.config['SETTINGS'].get('langauges', ['English']))
+
+        db.config.replace_one({"id": "settings"},
+                              {"id": "settings", **app.config['SETTINGS'], "apiKeys": "removed"}, upsert=True)
+
+        app.config['SETTINGS']['subjects'] = sorted(
+            app.config['SETTINGS']['subjects'], key=len, reverse=True)
+        print(app.config['SETTINGS'])
+
+        app.config['SETTINGS']['langauges'] = sorted(
+            app.config['SETTINGS'].get('langauges', None) or ['English'], key=len, reverse=True)
+
+        return {'settings': app.config['SETTINGS']}
     app.bot = Bot(Config.BOT_NAME, app=app)
 
     # app.config['SETTINGS']['backend_url'] = 'https://192.168.22.249:5000'
