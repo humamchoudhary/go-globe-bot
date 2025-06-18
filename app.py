@@ -116,6 +116,7 @@ def create_app(config_class=Config):
     def set_admin_id():
         origin = request.headers.get('Origin')
         referer = request.headers.get('Referer')
+        print('\n\n\n\n')
         print(f"[BEFORE_REQUEST] Incoming request - Path: {request.path}")
         print(f"[HEADERS] Referer: {referer}")
         print(f"[HEADERS] Origin: {origin}")
