@@ -5,7 +5,7 @@ import secrets
 
 class Admin:
     def __init__(self, username, password_hash, role="admin", admin_id=None, email=None, secret_key=None,
-                 phone=None, created_by=None, settings=None, last_login=None, status="active", onboarding=False):
+                 phone=None, created_by=None, settings=None, last_login=None, status="active", onboarding=True):
         self.admin_id = admin_id
         self.username = username
         self.password_hash = password_hash
