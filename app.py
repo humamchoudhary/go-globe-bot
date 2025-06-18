@@ -155,15 +155,15 @@ def create_app(config_class=Config):
         # if app.config.get('CURRENT_ADMIN', None) and app.config['CURRENT_ADMIN'].role != 'superadmin':
         # print(admin)
 
-        if 'domains' in admin.settings and admin.settings['domains']:
-            referrer = request.headers.get('Referer')
-            if referrer:
-                domain = urlparse(referrer).netloc
-                print(type(domain))
-                print(type(Config.BACKEND_URL))
-                print(domain not in Config.BACKEND_URL)
-                if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
-                    return "Access denied", 403
+        # if 'domains' in admin.settings and admin.settings['domains']:
+        #     referrer = request.headers.get('Referer')
+        #     if referrer:
+        #         domain = urlparse(referrer).netloc
+        #         print(type(domain))
+        #         print(type(Config.BACKEND_URL))
+        #         print(domain not in Config.BACKEND_URL)
+        #         if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
+        #             return "Access denied", 403
 
     @app.before_request
     def log_request():
