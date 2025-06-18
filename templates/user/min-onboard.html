@@ -22,7 +22,8 @@
         gap: 0.5rem;
       "
     >
-      {% for subject in settings['subjects'] %}
+    {{ settings | safe }}
+{% for subject in (current_admin.settings.subjects if current_admin and current_admin.settings.subjects else settings['subjects']) %}
 
       <a
         style="

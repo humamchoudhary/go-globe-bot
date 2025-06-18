@@ -19,36 +19,20 @@ class Admin:
         self.secret_key = secret_key or secrets.token_hex(32)
         self.onboarding = onboarding
 
-        # Default settings for each admin
+        # Default settings for regular admins
         default_admin_settings = {
             'languages': ['English'],
             'subjects': [],
-            'model': 'gm_2_0_f',
             'prompt': """you are a customer service assistant...""",
             'domains': [],
             'google_token': None,  # Store serialized Google credentials
             'selected_folders': []  # Store folder IDs selected by this admin
         }
 
-        default_superadmin_settings = {
-            'logo': {
-                'large': '/static/img/logo.svg',
-                'small': '/static/img/logo-desktop-mini.svg',
-            },
-            'apiKeys': {
-                'claude': None,
-                'openAi': None,
-                'deepseek': None,
-                'gemini': None
-            },
-            'theme': 'system',
-            'sound': '/static/sounds/notification.wav',
-            'backend_url': '',
-            'prompt': """you are a customer service assistant..."""
-        }
-
+        # Superadmin settings are now stored in app.config['SETTINGS']
+        # Only store admin-specific settings here
         if self.role == 'superadmin':
-            self.settings = settings or default_superadmin_settings
+            self.settings = settings or {}  # Superadmins don't need local settings
         else:
             self.settings = settings or default_admin_settings
 
@@ -96,7 +80,7 @@ class Admin:
 
     def can_manage_admins(self):
         """Only superadmins can manage other admins"""
-        return self.role == "superadmin" or self.status == "active"
+        return self.role == "superadmin" and self.status == "active"
 
     def update_last_login(self):
         """Update last login timestamp"""

@@ -8,7 +8,7 @@ class ChatService:
         self.db = db
         self.chats_collection = db.chats
 
-    def create_chat(self, user_id, subject,admin_id):
+    def create_chat(self, user_id, subject, admin_id):
         chat_id = str(uuid.uuid4())
         # if not room_id:
         #     room_id = f"{user_id}-{chat_id[:8]}"
@@ -21,7 +21,7 @@ class ChatService:
         chat = Chat(
             chat_id=chat_id,
             # room_id=room_id,
-            user_id=user_id,
+            user_id=user_id, admin_id=admin_id,
             messages=initial_messages, subject=subject
         )
 

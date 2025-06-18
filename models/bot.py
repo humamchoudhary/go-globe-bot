@@ -11,7 +11,6 @@ import requests
 from google import genai
 from google.genai import types
 
-from flask import g
 load_dotenv()
 
 
@@ -41,21 +40,14 @@ class Bot:
         self.gpt_key = app.config['SETTINGS']['apiKeys']['openAi']
         self.cld_key = app.config['SETTINGS']['apiKeys']['claude']
         self.dp_key = app.config['SETTINGS']['apiKeys']['deepseek']
+
         self.active_bot = None
-        self.active_bot_name = ""
+        # self.active_bot_name = ""
 
-        # Get the current admin's settings if available
+        self.active_bot_name = app.config['SETTINGS'].get(
+            'model', 'gemini_2.0_flash')
 
-        admin_settings = getattr(app.config, 'CURRENT_ADMIN', {}).get('settings', {})
-
-        # Combine superadmin prompt with admin prompt if available
-        base_prompt = app.config["SETTINGS"].get("prompt", "")
-        admin_prompt = admin_settings.get("prompt", "")
-        self.sys_prompt = f"{base_prompt}\n\n{admin_prompt}".strip()
-
-        if admin_settings.get('languages'):
-            self.sys_prompt += f"\n\nOnly respond in following languages: {
-                ', '.join(admin_settings['languages'])}"
+        self.base_prompt = app.config["SETTINGS"]["prompt"]
 
         # Enhanced Google model configurations
         self.google_models = {
@@ -114,7 +106,7 @@ class Bot:
             bot_key = model_name.replace("-", "_")
             self.bot_maps[bot_key] = self._google_model
 
-        self._set_bot(app.config['SETTINGS']['model'])
+        self._set_bot(self.active_bot_name)
 
     @classmethod
     def get_bots(cls):
@@ -176,11 +168,40 @@ class Bot:
         else:
             raise NotImplementedError(f'Bot not implemented: {name}')
 
-    def create_chat(self, id):
-        text_content, images = self._process_files()
+    # def create_chat(self, id, admin):
+    #     text_content, images = self._process_files()
+    #
+    #     if not os.path.exists('./bin/chat/'):
+    #         os.makedirs('./bin/chat/')
+    #
+    #     if self._is_google_model(self.active_bot_name):
+    #         chat_state = self._init_google_chat(text_content, images)
+    #     else:
+    #         init_method = getattr(
+    #             self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
+    #         chat_state = init_method(text_content, images)
+    #
+    #     # Store the model name in the chat state
+    #     chat_state["model_name"] = self.active_bot_name
+    #     chat_state["model_config"] = self._get_model_config()
+    #
+    #     with open(f'bin/chat/{id}.chatpl', 'wb') as file:
+    #         pickle.dump(chat_state, file)
 
-        if not os.path.exists('./bin/chat/'):
-            os.makedirs('./bin/chat/')
+    def create_chat(self, id, admin=None):
+        """Create a new chat session with optional admin-specific settings"""
+        admin_settings = admin.settings
+        text_content, images = self._process_files(admin.admin_id)
+
+        # Use admin-specific prompt if available, otherwise use base prompt
+        prompt = admin_settings.get(
+            'prompt', self.base_prompt) if admin_settings else self.base_prompt
+
+        # Initialize system prompt with language restrictions if specified
+        languages = admin_settings.get(
+            'languages', ['English']) if admin_settings else ['English']
+        self.sys_prompt = f"{prompt}\n\nOnly respond in these languages: {
+            ', '.join(languages)}"
 
         if self._is_google_model(self.active_bot_name):
             chat_state = self._init_google_chat(text_content, images)
@@ -189,10 +210,11 @@ class Bot:
                 self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
             chat_state = init_method(text_content, images)
 
-        # Store the model name in the chat state
         chat_state["model_name"] = self.active_bot_name
         chat_state["model_config"] = self._get_model_config()
 
+        # Save chat state
+        os.makedirs('./bin/chat/', exist_ok=True)
         with open(f'bin/chat/{id}.chatpl', 'wb') as file:
             pickle.dump(chat_state, file)
 
@@ -206,15 +228,16 @@ class Bot:
             "dp-chat": "deepseek-chat"
         }.get(self.active_bot_name, "unknown")
 
-    def _process_files(self):
+    def _process_files(self, admin_id):
         text_content = []
         images = []
 
-        if not os.path.exists(os.path.join(os.getcwd(), 'files')):
+        if not os.path.exists(os.path.join(os.getcwd(), 'files', f"{admin_id}")):
             return "", []
 
-        for file_name in os.listdir(os.path.join(os.getcwd(), 'files')):
-            file_path = os.path.join(os.getcwd(), 'files', file_name)
+        for file_name in os.listdir(os.path.join(os.getcwd(), 'files', f"{admin_id}")):
+            file_path = os.path.join(os.getcwd(), 'files', f"{
+                                     admin_id}", file_name)
             file_ext = os.path.splitext(file_name)[1].lower()
 
             try:

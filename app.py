@@ -112,30 +112,56 @@ def create_app(config_class=Config):
 
     @app.before_request
     def set_admin_id():
+
+        origin = request.headers.get('Origin')
+        referer = request.headers.get('Referer')
+        print(f"Referer: {referer}")
+        print(f"Origin: {origin}")
+
         # Skip domain check for these paths
         exempt_paths = ['static', 'socket.io',
                         'favicon.ico', 'healthcheck', 'robots.txt']
         if any(request.path.startswith(f'/{path}') for path in exempt_paths):
             return
 
-        admin_id = session.get('admin_id')
+        admin_id = session.get('admin_id') if request.headers.get(
+            'Origin') or request.headers.get('Referer') else "f2846db0-b1ac-49bb-83a8-e1524cf332d4"
+        # print(f"Admin Id: {admin_id}")
+        sec_key = None
+        admin = None
+        if not admin_id and Config.BACKEND_URL in request.headers.get('Referer'):
+            admin_id = "f2846db0-b1ac-49bb-83a8-e1524cf332d4"
+        admin = AdminService(app.db).get_admin_by_id(admin_id)
+        # print(f"ADMIN IDD: {admin_id}")
+        # print(f"ADMIN IDD: {admin}")
+
         if not admin_id:
             sec_key = request.headers.get('SECRET_KEY')
+
+            # print(f"Sec Key {sec_key}")
             if sec_key:
                 admin = AdminService(app.db).get_admin_by_key(sec_key)
-                if admin:
-                    session['admin_id'] = admin.admin_id
-                    session['role'] = admin.role
-                    app.config['CURRENT_ADMIN'] = admin
+            else:
+                return "No Secrect Key", 403
+
+        if admin:
+            session['admin_id'] = admin.admin_id
+            # session['role'] = admin.role
+            # ['CURRENT_ADMIN'] = admin
 
         # Domain checking for non-superadmin requests
-        if app.config.get('CURRENT_ADMIN', None) and app.config['CURRENT_ADMIN'].role != 'superadmin':
-            if 'domains' in app.config['CURRENT_ADMIN'].settings and app.config['CURRENT_ADMIN'].settings['domains']:
-                referrer = request.headers.get('Referer')
-                if referrer:
-                    domain = urlparse(referrer).netloc
-                    if domain not in app.config['CURRENT_ADMIN'].settings['domains']:
-                        return "Access denied", 403
+        # if app.config.get('CURRENT_ADMIN', None) and app.config['CURRENT_ADMIN'].role != 'superadmin':
+        # print(admin)
+
+        if 'domains' in admin.settings and admin.settings['domains']:
+            referrer = request.headers.get('Referer')
+            if referrer:
+                domain = urlparse(referrer).netloc
+                print(type(domain))
+                print(type(Config.BACKEND_URL))
+                print( domain not in Config.BACKEND_URL)
+                if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
+                    return "Access denied", 403
 
     @app.before_request
     def log_request():
@@ -278,66 +304,92 @@ def create_app(config_class=Config):
 
 # Add request start time tracking
 
-
     @app.before_request
     def start_timer():
         g.request_start_time = datetime.utcnow()
+
+    # @app.context_processor
+    # def settings():
+    #     admin_id = session.get('admin_id')
+    #     # Start with global settings
+    #     settings_data = current_app.config['SETTINGS'].copy()
+    #
+    #     if admin_id:
+    #         admin_service = AdminService(current_app.db)
+    #         admin = admin_service.get_admin_by_id(admin_id)
+    #         if admin and admin.settings:
+    #             # Merge admin settings with global settings
+    #             settings_data.update(admin.settings)
+    #
+    #     # Process subjects and languages
+    #     settings_data['subjects'] = list(settings_data.get('subjects', []))
+    #     settings_data['languages'] = list(
+    #         settings_data.get('languages', ['English']))
+    #
+    #     # Save to database (only global settings)
+    #     if not admin_id:  # Only superadmin can update global settings
+    #         db.config.replace_one(
+    #             {"id": "settings"},
+    #             {"id": "settings", **settings_data, "apiKeys": "removed"},
+    #             upsert=True
+    #         )
+    #
+    #     # Sort for display
+    #     settings_data['subjects'] = sorted(
+    #         settings_data['subjects'], key=len, reverse=True)
+    #     settings_data['languages'] = sorted(
+    #         settings_data['languages'], key=len, reverse=True)
+    #
+    #     return {'settings': settings_data}
+
     conf = db.config.find_one({"id": "settings"})
     if conf:
         app.config['SETTINGS'] = conf
-        app.config['SETTINGS']["apiKeys"] = {
-            'claude': Config.CLAUDE_KEY,
-            'openAi': Config.OPENAI_KEY,
-            'deepseek': Config.DEEPSEEK_KEY,
-            'gemini': Config.GEMINI_KEY
-        }
     else:
+        # Initialize default superadmin settings
         app.config['SETTINGS'] = {
+            'id': 'settings',
             'logo': {
                 'large': '/static/img/logo.svg',
-                'small':
-                '/static/img/logo-desktop-mini.svg',
+                'small': '/static/img/logo-desktop-mini.svg',
             },
-            'langauges': set({'English'}),
-            'subjects': set({'Services', 'Products', 'Enquire', 'Others'}),
             'apiKeys': {
                 'claude': Config.CLAUDE_KEY,
                 'openAi': Config.OPENAI_KEY,
                 'deepseek': Config.DEEPSEEK_KEY,
                 'gemini': Config.GEMINI_KEY
             },
+            'model': 'gemini_2.0_flash',
             'theme': 'system',
-            'model': 'gm_2_0_f',
+            'sound': '/static/sounds/notification.wav',
             'backend_url': Config.BACKEND_URL,
-            "prompt": """
-       you are a customer service assistant. Your role is to provide information and assistance based solely on the data provided. Do not generate information from external sources. If the user asks about something not covered in the provided data, respond with: 'I cannot assist with that. Please click the "Request Assistance" button for human assistance.'
-                Incorporate information from any attached images into your responses where relevant. Give concise answers
-                When referencing specific files or pages, include a link at the end of your response. Construct the link by replacing any '*' characters in the filename with '/', and removing the '.txt' extension. The link text should be the generated link itself.
-                Example: If the filename is 'www.example.com*details.php.txt', the link should be 'https://www.example.com/details.php' ie just removin the .txt from the end and the link text should also be 'product/details'.
-                USE VALID MARKUP TEXT, Have proper Formating for links
-DON'T HALLUCINATE AND GIVE SMALL RESPONSES DONT EXPLAIN EVERYTHING ONLY THE THING USER ASKS TO EXPLAIN
-                """
+            'prompt': """you are a customer service assistant..."""
         }
+        db.config.insert_one(app.config['SETTINGS'])
 
     @app.context_processor
-    def settings():
-        app.config['SETTINGS']['subjects'] = list(
-            app.config['SETTINGS']['subjects'])
+    def inject_settings():
+        """Inject settings into templates, combining superadmin settings with admin-specific settings"""
+        settings_data = app.config['SETTINGS'].copy()
 
-        app.config['SETTINGS']['langauges'] = list(
-            app.config['SETTINGS'].get('langauges', ['English']))
+        admin_id = session.get('admin_id')
+        if admin_id:
+            admin_service = AdminService(app.db)
+            admin = admin_service.get_admin_by_id(admin_id)
+            if admin:
+                # Merge admin-specific settings with superadmin settings
+                # Admin settings take precedence for overlapping keys
+                if admin.settings:
+                    settings_data.update(admin.settings)
 
-        db.config.replace_one({"id": "settings"},
-                              {"id": "settings", **app.config['SETTINGS'], "apiKeys": "removed"}, upsert=True)
+                # Special handling for languages and subjects
+                if 'languages' in admin.settings:
+                    settings_data['languages'] = admin.settings['languages']
+                if 'subjects' in admin.settings:
+                    settings_data['subjects'] = admin.settings['subjects']
 
-        app.config['SETTINGS']['subjects'] = sorted(
-            app.config['SETTINGS']['subjects'], key=len, reverse=True)
-        print(app.config['SETTINGS'])
+        return {'settings': settings_data}
 
-        app.config['SETTINGS']['langauges'] = sorted(
-            app.config['SETTINGS'].get('langauges', None) or ['English'], key=len, reverse=True)
-
-        return {'settings': app.config['SETTINGS']}
     app.bot = Bot(Config.BOT_NAME, app=app)
 
     # app.config['SETTINGS']['backend_url'] = 'https://192.168.22.249:5000'

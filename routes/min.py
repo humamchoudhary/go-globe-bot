@@ -1,3 +1,4 @@
+from services.admin_service import AdminService
 from datetime import datetime
 import requests
 # from vapi_python import Vapi
@@ -219,16 +220,20 @@ def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
+    print(f"CREATE CHAT ADMIN ID: {session.get('admin_id')} ")
     chat = chat_service.create_chat(
         user.user_id, subject=subject, admin_id=session.get('admin_id'))
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
 
-    current_app.bot.create_chat(chat.room_id)
+    admin = AdminService(current_app.db).get_admin_by_id(
+        session.get('admin_id'))
+
+    current_app.bot.create_chat(chat.room_id, admin)
 
     # If HTMX request, return the chat URL instead of redirecting
     if request.headers.get('HX-Request') == 'true':
         return chat.chat_id
-
+    
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
 
@@ -256,17 +261,24 @@ def chat(chat_id):
 @min_bp.route('/chat/<chat_id>/ping_admin', methods=['POST', 'GET'])
 @login_required
 def ping_admin(chat_id):
-
     if request.method == "GET":
         return redirect(f'/chat/{chat_id}')
 
-    # Step 1: Check if current time falls within allowed timings
+    # Get admin settings from current admin in session
+    admin_service = AdminService(current_app.db)
+    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
 
-    timings = current_app.config['SETTINGS'].get('timings', [])
-    timezone = current_app.config['SETTINGS'].get('timezone', "UTC")
+    # Use admin's settings if available, otherwise fall back to default
+    if current_admin:
+        settings = current_admin.settings
+        timings = settings.get('timings', [])
+        timezone = settings.get('timezone', "UTC")
+    else:
+        # Fallback for superadmin or default settings
+        settings = current_app.config.get('SETTINGS', {})
+        timings = settings.get('timings', [])
+        timezone = settings.get('timezone', "UTC")
 
-    # tz = pytz.timezone(timezone)
-    # now = datetime.now(tz)
     now = UTCZoneManager().get_current_date(timezone)
     current_day = now.strftime('%A').lower()
     current_time = now.strftime('%H:%M')

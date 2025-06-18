@@ -1,3 +1,6 @@
+from flask import request, flash, make_response
+import zipfile
+import io
 import json
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -31,6 +34,9 @@ from services.admin_service import AdminService
 from services.email_service import send_email
 
 
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
+
+
 def admin_required(_func=None, *, roles=None):
     if roles is None:
         roles = ['admin', 'superadmin']
@@ -40,6 +46,10 @@ def admin_required(_func=None, *, roles=None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            if session.get('role') not in roles:
+
+                return redirect(url_for('admin.login'))
+
             if not session.get('admin_id'):
                 session['next'] = request.path
                 return redirect(url_for('admin.login'))
@@ -211,7 +221,7 @@ def login():
     session['username'] = admin.username
 
     # Load admin's personal settings into current_app.config
-    current_app.config['CURRENT_ADMIN_SETTINGS'] = admin.settings
+    # current_app.config['CURRENT_ADMIN_SETTINGS'] = admin.settings
 
     if next_url:
         return jsonify({"status": "success", "redirect": next_url}), 200
@@ -296,10 +306,6 @@ def chat_user(room_id):
         chat_service.get_chat_by_room_id(room_id).user_id)
 
     return render_template("admin/user.html", user=user.to_dict())
-    # with current_app.test_client() as client:
-    #     response = client.get('/internal-data')
-    #     data = response.get_json()
-    #     pass
 
 
 @admin_bp.route('/chat/min/<room_id>', methods=['GET'])
@@ -309,11 +315,6 @@ def chat_mini(room_id):
     chat_service = ChatService(current_app.db)
 
     chat = chat_service.get_chat_by_room_id(room_id)
-    # chats = chat_service.get_all_chats()
-
-    # chats_data = [c for c in chats if c.admin_required]
-    # if not chat:
-    #     return redirect(url_for('admin.index'))
     return render_template('admin/fragments/chat_mini.html', chat=chat, username="Ana")
 
 
@@ -357,13 +358,21 @@ def export_chat(room_id):
         user_service = UserService(current_app.db)
         user = user_service.get_user_by_id(chat.user_id)
         # try:
-        erp_url = f"https://erp-new.go-globe.dev/api/leads?name={user.name}&title={
-            user.desg}&phone={user.phone}&email={user.email}&country={user.country}&city={user.city}"
+        erp_url = os.environ.get('ERP_URL')
         headers = {
-            "Authorization": f"Bearer {os.environ.get('ERP_TOKEN')}"
+            "Content-Type": "application/x-www-form-urlencoded",
+            "authtoken": f"{os.environ.get('ERP_TOKEN')}"
         }
-        r = requests.post(erp_url, headers=headers)
-        print(r.url)
+        data = {
+            "name": user.name,
+            "title": user.desg,
+            "phone": user.phone,
+            "email": user.email,
+            "country": user.country,
+            "city": user.city
+        }
+
+        r = requests.post(erp_url, headers=headers, data=data)
         if r.status_code == 200:
             if not chat_service.export_chat(room_id):
                 return "Chat not found", 404
@@ -414,18 +423,17 @@ def send_message(room_id):
         # return render_template('admin/fragments/chat_message.html', message=new_message, username="Ana")
         return "", 200
     except Exception as e:
-        pass
+        return f"{e}", 500
         # print(e)
-
-
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @admin_bp.route('/files/')
 @admin_required
 def files():
-    return render_template('admin/files.html', files=sorted(os.listdir(UPLOAD_FOLDER)))
+    admin_id = session.get('admin_id')
+    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+    os.makedirs(path, exist_ok=True)
+    return render_template('admin/files.html', files=sorted(os.listdir(path)))
 
 
 def is_readable_file(file_path):
@@ -441,7 +449,10 @@ def is_readable_file(file_path):
 def file_page(file_name):
     file = {}
     file_readable = False
-    file_path = os.path.join(UPLOAD_FOLDER, file_name)
+
+    admin_id = session.get('admin_id')
+    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+    file_path = os.path.join(path, file_name)
     if os.path.exists(file_path):
         file["filename"] = file_name
         # Get file extension
@@ -462,8 +473,11 @@ def file_page(file_name):
 @admin_bp.route('/files/delete/<file_name>', methods=['POST'])
 @admin_required
 def delete_file(file_name):
+
+    admin_id = session.get('admin_id')
+    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
     try:
-        file_path = os.path.join(UPLOAD_FOLDER, file_name)
+        file_path = os.path.join(path, file_name)
         # Check if file exists before attempting to delete
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -481,8 +495,11 @@ def delete_file(file_name):
 @admin_bp.route('/serve-file/<file_name>')
 @admin_required
 def serve_file(file_name):
+
+    admin_id = session.get('admin_id')
+    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
     # Securely serve the file from the UPLOAD_FOLDER
-    return send_from_directory(UPLOAD_FOLDER, file_name)
+    return send_from_directory(path, file_name)
 
 
 # @admin_bp.route('/add-admin', methods=['GET', 'POST'])
@@ -509,12 +526,16 @@ def upload_file():
         base_filename = os.path.splitext(original_filename)[0]
         file_extension = os.path.splitext(original_filename)[1].lower()
         unique_filename = f"{uuid.uuid4().hex}{file_extension}"
-        file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+
+        admin_id = session.get('admin_id')
+        path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+        file_path = os.path.join(path, unique_filename)
 
         if file_extension == '.pdf':
             try:
                 temp_path = os.path.join(
-                    UPLOAD_FOLDER, f"temp_{unique_filename}")
+                    path, f"temp_{unique_filename}")
+
                 file.save(temp_path)
                 images = pdf2image.convert_from_path(temp_path)
 
@@ -524,7 +545,7 @@ def upload_file():
                     for i, image in enumerate(images):
                         image_filename = f"{base_filename}_{i+1}.png"
                         image_path = os.path.join(
-                            UPLOAD_FOLDER, image_filename)
+                            path, image_filename)
                         image.save(image_path, 'PNG')
                         image_filenames.append(image_filename)
                         file_items.append(render_template(
@@ -678,6 +699,7 @@ def index():
 
     chats_ary = []
     for c in chats:
+        print(c.to_dict())
         chat = c.to_dict()
         chat['username'] = user_service.get_user_by_id(c.user_id).name
         chats_ary.append(chat)
@@ -910,15 +932,15 @@ def add_timing():
 
     if current_admin.role == 'superadmin':
         current_app.config['SETTINGS']['timings'] = timings
-        current_app.config['SETTINGS']['timezone'] = timezone
+        # current_app.config['SETTINGS']['timezone'] = timezone
     else:
         current_admin.settings['timings'] = timings
-        current_admin.settings['timezone'] = timezone
+        # current_admin.settings['timezone'] = timezone
         admin_service.admins_collection.update_one(
             {"admin_id": current_admin.admin_id},
             {"$set": {
                 "settings.timings": timings,
-                "settings.timezone": timezone
+                # "settings.timezone": timezone
             }}
         )
 
@@ -1486,12 +1508,91 @@ def google_files():
 
 
 @admin_bp.route('/google-files/view/<file_id>')
+@admin_required
 def view_google_file(file_id):
+    admin_service = AdminService(current_app.db)
+    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
     creds = Credentials.from_authorized_user_info(
-        json.loads(current_app.config['SETTINGS'].get('google-token')), SCOPES)
+        json.loads(current_admin.settings['google_token']), SCOPES)
     service = build('drive', 'v3', credentials=creds)
     file = service.files().get(fileId=file_id, fields="webViewLink").execute()
     return redirect(file.get('webViewLink', '/admin/google-files/'))
+
+
+@admin_bp.route('/google-files/download', methods=['POST'])
+@admin_required
+def download_google_files():
+    admin_service = AdminService(current_app.db)
+    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+
+    if not current_admin.settings.get('google_token'):
+        return redirect('/admin/google-files/')
+
+    file_ids = request.form.getlist('file_ids')
+    if not file_ids:
+        flash('No files selected for download', 'warning')
+        return redirect('/admin/google-files/')
+
+    try:
+        # Get the download path from config (you'll need to set this in your config)
+        admin_id = session.get('admin_id')
+        download_path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+        os.makedirs(download_path, exist_ok=True)
+
+        creds = Credentials.from_authorized_user_info(
+            json.loads(current_admin.settings['google_token']), SCOPES)
+        service = build('drive', 'v3', credentials=creds)
+
+        downloaded_files = []
+
+        for file_id in file_ids:
+            try:
+                # Get file metadata
+                file_meta = service.files().get(
+                    fileId=file_id,
+                    fields="name, mimeType"
+                ).execute()
+
+                # Create safe filename
+                original_name = file_meta['name']
+                safe_name = secure_filename(original_name)
+                file_path = os.path.join(download_path, safe_name)
+
+                # Handle duplicate filenames
+                counter = 1
+                while os.path.exists(file_path):
+                    name, ext = os.path.splitext(original_name)
+                    safe_name = f"{secure_filename(name)}_{counter}{ext}"
+                    file_path = os.path.join(download_path, safe_name)
+                    counter += 1
+
+                # Download file content
+                request_download = service.files().get_media(fileId=file_id)
+                file_content = request_download.execute()
+
+                # Save to server
+                with open(file_path, 'wb') as f:
+                    f.write(file_content)
+
+                downloaded_files.append(safe_name)
+
+            except Exception as e:
+                current_app.logger.error(
+                    f"Error downloading file {file_id}: {str(e)}")
+                continue
+
+        if downloaded_files:
+            flash(f"Successfully downloaded {
+                  len(downloaded_files)} file(s) to server", 'success')
+        else:
+            flash("No files were downloaded", 'warning')
+
+        return redirect('/admin/google-files/')
+
+    except Exception as e:
+        current_app.logger.error(f"Failed to download files: {str(e)}")
+        flash('Failed to download files', 'error')
+        return redirect('/admin/google-files/')
 
 
 @admin_bp.route('/google-thumbnail/<file_id>')
