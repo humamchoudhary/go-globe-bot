@@ -22,7 +22,6 @@
         gap: 0.5rem;
       "
     >
-    {{ settings | safe }}
 {% for subject in (current_admin.settings.subjects if current_admin and current_admin.settings.subjects else settings['subjects']) %}
 
       <a

@@ -368,7 +368,7 @@ def export_chat(room_id):
             "company": user.name,
             "title": user.desg,
             "phone": user.phone,
-            "email": f"{user.email}a",
+            "email": f"{user.email}",
             "country": user.country,
             "city": user.city
         }
