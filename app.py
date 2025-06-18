@@ -47,11 +47,13 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    CORS(app, origins=["*"],
+    CORS(app, 
+         origins=["*"],  # Be more specific in production
          supports_credentials=True,
-         allow_headers=["*"],
+         allow_headers=["*", "SECRET_KEY"],  # Explicitly include your custom header
          expose_headers=["Content-Disposition"],
-         methods=["GET", "POST", "OPTIONS"])
+         methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+    )
     app.config.from_object(config_class)
 
     # Setup MongoDB
@@ -110,58 +112,58 @@ def create_app(config_class=Config):
     }
     logs_service = LogsService(app.db)
 
-    @app.before_request
-    def set_admin_id():
-
-        origin = request.headers.get('Origin')
-        referer = request.headers.get('Referer')
-        print(f"Referer: {referer}")
-        print(f"Origin: {origin}")
-
-        # Skip domain check for these paths
-        exempt_paths = ['static', 'socket.io',
-                        'favicon.ico', 'healthcheck', 'robots.txt']
-        if any(request.path.startswith(f'/{path}') for path in exempt_paths):
-            return
-
-        admin_id = session.get('admin_id') if request.headers.get(
-            'Origin') or request.headers.get('Referer') else os.environ.get('DEFAULT_ADMIN_ID')
-        # print(f"Admin Id: {admin_id}")
-        sec_key = None
-        admin = None
-        if not admin_id and Config.BACKEND_URL in request.headers.get('Referer'):
-            admin_id = os.environ.get('DEFAULT_ADMIN_ID')
-        admin = AdminService(app.db).get_admin_by_id(admin_id)
-        # print(f"ADMIN IDD: {admin_id}")
-        # print(f"ADMIN IDD: {admin}")
-
-        if not admin_id:
-            sec_key = request.headers.get('SECRET_KEY')
-
-            # print(f"Sec Key {sec_key}")
-            if sec_key:
-                admin = AdminService(app.db).get_admin_by_key(sec_key)
-            else:
-                return "No Secrect Key", 403
-
-        if admin:
-            session['admin_id'] = admin.admin_id
-            # session['role'] = admin.role
-            # ['CURRENT_ADMIN'] = admin
-
-        # Domain checking for non-superadmin requests
-        # if app.config.get('CURRENT_ADMIN', None) and app.config['CURRENT_ADMIN'].role != 'superadmin':
-        # print(admin)
-
-        if 'domains' in admin.settings and admin.settings['domains']:
-            referrer = request.headers.get('Referer')
-            if referrer:
-                domain = urlparse(referrer).netloc
-                print(type(domain))
-                print(type(Config.BACKEND_URL))
-                print(domain not in Config.BACKEND_URL)
-                if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
-                    return "Access denied", 403
+    # @app.before_request
+    # def set_admin_id():
+    #
+    #     origin = request.headers.get('Origin')
+    #     referer = request.headers.get('Referer')
+    #     print(f"Referer: {referer}")
+    #     print(f"Origin: {origin}")
+    #
+    #     # Skip domain check for these paths
+    #     exempt_paths = ['static', 'socket.io',
+    #                     'favicon.ico', 'healthcheck', 'robots.txt']
+    #     if any(request.path.startswith(f'/{path}') for path in exempt_paths):
+    #         return
+    #
+    #     admin_id = session.get('admin_id') if request.headers.get(
+    #         'Origin') or request.headers.get('Referer') else os.environ.get('DEFAULT_ADMIN_ID')
+    #     # print(f"Admin Id: {admin_id}")
+    #     sec_key = None
+    #     admin = None
+    #     if not admin_id and Config.BACKEND_URL in request.headers.get('Referer'):
+    #         admin_id = os.environ.get('DEFAULT_ADMIN_ID')
+    #     admin = AdminService(app.db).get_admin_by_id(admin_id)
+    #     # print(f"ADMIN IDD: {admin_id}")
+    #     # print(f"ADMIN IDD: {admin}")
+    #
+    #     if not admin_id:
+    #         sec_key = request.headers.get('SECRET_KEY')
+    #
+    #         # print(f"Sec Key {sec_key}")
+    #         if sec_key:
+    #             admin = AdminService(app.db).get_admin_by_key(sec_key)
+    #         else:
+    #             return "No Secrect Key", 403
+    #
+    #     if admin:
+    #         session['admin_id'] = admin.admin_id
+    #         # session['role'] = admin.role
+    #         # ['CURRENT_ADMIN'] = admin
+    #
+    #     # Domain checking for non-superadmin requests
+    #     # if app.config.get('CURRENT_ADMIN', None) and app.config['CURRENT_ADMIN'].role != 'superadmin':
+    #     # print(admin)
+    #
+    #     if 'domains' in admin.settings and admin.settings['domains']:
+    #         referrer = request.headers.get('Referer')
+    #         if referrer:
+    #             domain = urlparse(referrer).netloc
+    #             print(type(domain))
+    #             print(type(Config.BACKEND_URL))
+    #             print(domain not in Config.BACKEND_URL)
+    #             if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
+    #                 return "Access denied", 403
 
     @app.before_request
     def log_request():
