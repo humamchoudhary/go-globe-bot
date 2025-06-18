@@ -365,14 +365,17 @@ def export_chat(room_id):
         }
         data = {
             "name": user.name,
+            "company": user.name,
             "title": user.desg,
             "phone": user.phone,
-            "email": user.email,
+            "email": f"{user.email}a",
             "country": user.country,
             "city": user.city
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
+        print(r.url)
+        print(r.json())
         if r.status_code == 200:
             if not chat_service.export_chat(room_id):
                 return "Chat not found", 404
@@ -1378,6 +1381,7 @@ def get_all_chats():
 
     # Convert to dictionary representation
     # = [chat.to_dict() for chat in chats if chat.admin_required]
+    print(chats)
     return render_template('admin/chats.html', chats=chats)
 
 
