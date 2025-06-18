@@ -179,7 +179,7 @@ def create_app(config_class=Config):
             referer = request.headers.get('Referer')
             print(f"Referer: {referer}")
             print(f"Origin: {origin}")
-            print(f"HEADERS: {request.headers.items(lower=False)}")
+            print(f"HEADERS: {request.headers.to_list()}")
 
             # Skip domain check for these paths
             exempt_paths = ['static', 'socket.io',
