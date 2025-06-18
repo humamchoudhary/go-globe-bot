@@ -47,14 +47,11 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    CORS(app,     origins=[ "https://gobot.go-globe.com", "https://go-globe.com"],
+    CORS(app, origins=["*"],
          supports_credentials=True,
          allow_headers=["*"],
          expose_headers=["Content-Disposition"],
-         methods=["GET", "POST", "OPTIONS"]
-
-
-         )
+         methods=["GET", "POST", "OPTIONS"])
     app.config.from_object(config_class)
 
     # Setup MongoDB
