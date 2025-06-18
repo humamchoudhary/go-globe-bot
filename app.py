@@ -47,11 +47,14 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    CORS(app, origins=["*"],
+    CORS(app,     origins=["https://localhost:5000", "https://192.168.100.4:5000", "https://gobot.go-globe.com", "https://go-globe.com"],
          supports_credentials=True,
          allow_headers=["*"],
          expose_headers=["Content-Disposition"],
-         methods=["GET", "POST", "OPTIONS"])
+         methods=["GET", "POST", "OPTIONS"]
+
+
+         )
     app.config.from_object(config_class)
 
     # Setup MongoDB
@@ -304,7 +307,6 @@ def create_app(config_class=Config):
 
 # Add request start time tracking
 
-
     @app.before_request
     def start_timer():
         g.request_start_time = datetime.utcnow()
@@ -433,11 +435,6 @@ def create_app(config_class=Config):
         print(app.config['SETTINGS']['backend_url'])
         print('fonts called')
         return {'font_files': get_font_data()}
-
-    @app.route('/init-bot')
-    def init_chatbot():
-
-        return Response(render_template('js/init_chatbox.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
 
     @app.route('/render-bot')
     def render_chatbot():
