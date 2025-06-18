@@ -47,13 +47,14 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    CORS(app, 
+    CORS(app,
          origins=["*"],  # Be more specific in production
          supports_credentials=True,
-         allow_headers=["*", "SECRET_KEY"],  # Explicitly include your custom header
+         # Explicitly include your custom header
+         allow_headers=["*", "SECRET_KEY"],
          expose_headers=["Content-Disposition"],
          methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"]
-    )
+         )
     app.config.from_object(config_class)
 
     # Setup MongoDB
@@ -165,6 +166,11 @@ def create_app(config_class=Config):
     #     #         if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
     #     #             return "Access denied", 403
 
+    def normalize_domain(domain):
+        """Remove www. prefix for domain comparison"""
+        if domain.startswith('www.'):
+            return domain[4:]  # Remove 'www.'
+        return domain
 
     @app.before_request
     def set_admin_id():
@@ -173,15 +179,17 @@ def create_app(config_class=Config):
             referer = request.headers.get('Referer')
             print(f"Referer: {referer}")
             print(f"Origin: {origin}")
+            print(f"HEADERS: {request.headers.items()}")
 
             # Skip domain check for these paths
-            exempt_paths = ['static', 'socket.io', 'favicon.ico', 'healthcheck', 'robots.txt']
+            exempt_paths = ['static', 'socket.io',
+                            'favicon.ico', 'healthcheck', 'robots.txt']
             if any(request.path.startswith(f'/{path}') for path in exempt_paths):
                 return
 
             admin_id = None
             admin = None
-            
+
             # Try to get admin_id from session if there's an Origin or Referer
             if request.headers.get('Origin') or request.headers.get('Referer'):
                 admin_id = session.get('admin_id')
@@ -209,7 +217,7 @@ def create_app(config_class=Config):
                 try:
                     sec_key = request.headers.get('SECRET_KEY')
                     print(f"Secret key provided: {sec_key is not None}")
-                    
+
                     if sec_key:
                         admin = AdminService(app.db).get_admin_by_key(sec_key)
                         print(f"Admin found by key: {admin is not None}")
@@ -240,9 +248,10 @@ def create_app(config_class=Config):
                                     parsed_url = urlparse(referrer)
                                     domain = parsed_url.netloc
                                     print(f"Checking domain: {domain}")
-                                    print(f"Allowed domains: {allowed_domains}")
+                                    print(f"Allowed domains: {
+                                          allowed_domains}")
                                     print(f"Backend URL: {Config.BACKEND_URL}")
-                                    
+
                                     # Check if domain is allowed
                                     if domain not in allowed_domains and domain not in Config.BACKEND_URL:
                                         print(f"Domain {domain} not allowed")
@@ -263,7 +272,6 @@ def create_app(config_class=Config):
             # Don't block the request on critical errors during development
             # In production, you might want to return an error instead
             pass
-
 
     @app.before_request
     def log_request():
