@@ -177,6 +177,7 @@ def create_app(config_class=Config):
         try:
             origin = request.headers.get('Origin')
             referer = request.headers.get('Referer')
+            print('\n\n\n\n')
             print(f'ENDPOINT: {request.endpoint}')
             print(f"Referer: {referer}")
             print(f"Origin: {origin}")
