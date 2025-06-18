@@ -10,6 +10,9 @@ from pymongo import MongoClient
 from services.admin_service import AdminService
 from models.admin import Admin
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def create_initial_superadmin():
     """Create the first superadmin user"""
@@ -18,8 +21,9 @@ def create_initial_superadmin():
     print()
 
     # Get database connection
-    mongo_uri = os.getenv(
+    mongo_uri = os.environ.get(
         'MONGODB_URI', 'mongodb://localhost:27017/chatbot')
+    print(mongo_uri)
     client = MongoClient(mongo_uri)
     db = client.get_default_database()
 
