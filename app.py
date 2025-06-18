@@ -110,58 +110,74 @@ def create_app(config_class=Config):
     }
     logs_service = LogsService(app.db)
 
+    from urllib.parse import urlparse
+
     @app.before_request
     def set_admin_id():
-
         origin = request.headers.get('Origin')
         referer = request.headers.get('Referer')
-        print(f"Referer: {referer}")
-        print(f"Origin: {origin}")
+        print(f"[BEFORE_REQUEST] Incoming request - Path: {request.path}")
+        print(f"[HEADERS] Referer: {referer}")
+        print(f"[HEADERS] Origin: {origin}")
 
-        # Skip domain check for these paths
+        # Skip domain check for exempted paths
         exempt_paths = ['static', 'socket.io',
                         'favicon.ico', 'healthcheck', 'robots.txt']
         if any(request.path.startswith(f'/{path}') for path in exempt_paths):
+            print(f"[SKIP] Path '{
+                  request.path}' is exempted from domain check.")
             return
 
-        admin_id = session.get('admin_id') if request.headers.get(
-            'Origin') or request.headers.get('Referer') else os.environ.get('DEFAULT_ADMIN_ID')
-        # print(f"Admin Id: {admin_id}")
-        sec_key = None
-        admin = None
-        if not admin_id and Config.BACKEND_URL in request.headers.get('Referer'):
+        admin_id = None
+        if origin or referer:
+            admin_id = session.get('admin_id')
+            print(f"[SESSION] Found admin_id in session: {admin_id}")
+        else:
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
-        admin = AdminService(app.db).get_admin_by_id(admin_id)
-        # print(f"ADMIN IDD: {admin_id}")
-        # print(f"ADMIN IDD: {admin}")
+            print(
+                f"[ENV] No Origin/Referer. Using DEFAULT_ADMIN_ID from env: {admin_id}")
 
-        if not admin_id:
+        admin = None
+        sec_key = None
+
+        if not admin_id and referer and Config.BACKEND_URL in referer:
+            admin_id = os.environ.get('DEFAULT_ADMIN_ID')
+            print(
+                f"[FALLBACK] Referer matches BACKEND_URL. Using DEFAULT_ADMIN_ID: {admin_id}")
+
+        if admin_id:
+            print(f"[DB] Fetching admin by ID: {admin_id}")
+            admin = AdminService(app.db).get_admin_by_id(admin_id)
+            print(f"[DB] Admin fetched: {admin}")
+        else:
             sec_key = request.headers.get('SECRET_KEY')
-
-            # print(f"Sec Key {sec_key}")
+            print(
+                f"[SECURITY] No admin_id found. Checking for SECRET_KEY in headers: {sec_key}")
             if sec_key:
                 admin = AdminService(app.db).get_admin_by_key(sec_key)
+                print(f"[DB] Admin fetched using SECRET_KEY: {admin}")
             else:
-                return "No Secrect Key", 403
+                print("[ERROR] No admin_id or SECRET_KEY provided. Returning 403.")
+                return "No Secret Key", 403
 
         if admin:
             session['admin_id'] = admin.admin_id
-            # session['role'] = admin.role
-            # ['CURRENT_ADMIN'] = admin
+            print(f"[SESSION] Set session admin_id: {admin.admin_id}")
+            # print(f"[SESSION] Set session role: {admin.role}")  # Uncomment if needed
 
-        # Domain checking for non-superadmin requests
-        # if app.config.get('CURRENT_ADMIN', None) and app.config['CURRENT_ADMIN'].role != 'superadmin':
-        # print(admin)
-
-        if 'domains' in admin.settings and admin.settings['domains']:
-            referrer = request.headers.get('Referer')
-            if referrer:
-                domain = urlparse(referrer).netloc
-                print(type(domain))
-                print(type(Config.BACKEND_URL))
-                print(domain not in Config.BACKEND_URL)
+        # Domain checking for non-superadmin admins
+        if admin and 'domains' in admin.settings and admin.settings['domains']:
+            print(f"[SECURITY] Admin has domain restrictions: {
+                  admin.settings['domains']}")
+            if referer:
+                domain = urlparse(referer).netloc
+                print(f"[DOMAIN] Parsed referer domain: {domain}")
                 if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
+                    print(f"[ACCESS DENIED] Domain '{
+                          domain}' not allowed for this admin.")
                     return "Access denied", 403
+            else:
+                print("[WARNING] No referer provided to validate domain.")
 
     @app.before_request
     def log_request():
@@ -433,7 +449,6 @@ def create_app(config_class=Config):
         print(app.config['SETTINGS']['backend_url'])
         print('fonts called')
         return {'font_files': get_font_data()}
-
 
     @app.route('/render-bot')
     def render_chatbot():
