@@ -9,6 +9,9 @@ from pymongo import MongoClient
 from services.admin_service import AdminService
 from models.admin import Admin
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def assign_admin_to_chats():
     """Assign selected admin to chats without admin_id"""
@@ -17,8 +20,9 @@ def assign_admin_to_chats():
     print()
 
     # Get database connection
-    mongo_uri = os.getenv(
+    mongo_uri = os.environ.get(
         'MONGODB_URI', 'mongodb://localhost:27017/chatbot')
+    print(mongo_uri)
     client = MongoClient(mongo_uri)
     db = client.get_default_database()
     admin_service = AdminService(db)
