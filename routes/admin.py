@@ -1379,9 +1379,9 @@ def get_all_chats():
         chat['username'] = user_service.get_user_by_id(c.user_id).name
         chats.append(chat)
 
-    # Convert to dictionary representation
-    # = [chat.to_dict() for chat in chats if chat.admin_required]
     print(chats)
+
+    chats.sort(key=lambda x: x['created_at'], reverse=True)
     return render_template('admin/chats.html', chats=chats)
 
 
