@@ -125,12 +125,12 @@ def create_app(config_class=Config):
             return
 
         admin_id = session.get('admin_id') if request.headers.get(
-            'Origin') or request.headers.get('Referer') else "f2846db0-b1ac-49bb-83a8-e1524cf332d4"
+            'Origin') or request.headers.get('Referer') else os.environ.get('DEFAULT_ADMIN_ID')
         # print(f"Admin Id: {admin_id}")
         sec_key = None
         admin = None
         if not admin_id and Config.BACKEND_URL in request.headers.get('Referer'):
-            admin_id = "f2846db0-b1ac-49bb-83a8-e1524cf332d4"
+            admin_id = os.environ.get('DEFAULT_ADMIN_ID')
         admin = AdminService(app.db).get_admin_by_id(admin_id)
         # print(f"ADMIN IDD: {admin_id}")
         # print(f"ADMIN IDD: {admin}")
@@ -159,7 +159,7 @@ def create_app(config_class=Config):
                 domain = urlparse(referrer).netloc
                 print(type(domain))
                 print(type(Config.BACKEND_URL))
-                print( domain not in Config.BACKEND_URL)
+                print(domain not in Config.BACKEND_URL)
                 if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
                     return "Access denied", 403
 
@@ -303,6 +303,7 @@ def create_app(config_class=Config):
 
 
 # Add request start time tracking
+
 
     @app.before_request
     def start_timer():
