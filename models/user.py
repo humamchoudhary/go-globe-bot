@@ -3,7 +3,7 @@ import requests
 
 
 class User:
-    def __init__(self, name, ip=None, phone=None, email=None, user_id=None, country=None, city=None, role="user", chat_ids=None, desg=None, loc=None):
+    def __init__(self, name, ip=None, phone=None, email=None, user_id=None, country=None, city=None, role="user", chat_ids=None, desg=None, loc=None, db=None):
         self.user_id = user_id
         self.name = name
         self.role = role
@@ -19,7 +19,7 @@ class User:
         self.desg = desg
         self.loc = loc
 
-        if not city or not country:
+        if city == None or country == None:
 
             geo = requests.get(f"http://ip-api.com/json/{ip}")
             print(geo)
@@ -27,6 +27,10 @@ class User:
             print(geo)
             self.country = geo.get("country", None)
             self.city = geo.get("city")
+            if db:
+                x= db.users.updateOne({'user_id': user_id}, {
+                                   "$set": {"city": city, "country": country}})
+                print(x)
 
     def to_dict(self):
         if self.loc and not (self.city and self.country):
