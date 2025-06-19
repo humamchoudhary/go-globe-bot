@@ -81,9 +81,9 @@ def login(subject):
             ip = request.headers.get("X_REAL-IP")
             ip = ip.split(",")[0]
 
-            geo = requests.get(f"http://ip-api.com/json/{ip}")
+            geo = requests.get(f"http://ipleak.net/json/{ip}")
             geo = geo.json()
-            country = geo.get("country", None)
+            country = geo.get("country_name", None)
         except:
             country = None
         return render_template('user/min-login.html', default_subject=subject, user_country=country)
@@ -233,7 +233,7 @@ def new_chat(subject):
     # If HTMX request, return the chat URL instead of redirecting
     if request.headers.get('HX-Request') == 'true':
         return chat.chat_id
-    
+
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
 
