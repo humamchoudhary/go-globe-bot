@@ -27,7 +27,7 @@ class User:
             print(geo)
             self.country = geo.get("country", None)
             self.city = geo.get("city")
-            if geo.status !="fail" and db !=None:
+            if geo['status'] !="fail" and db !=None:
                 x= db.update_one({'user_id': user_id}, {
                                    "$set": {"city": city, "country": country}})
                 print(x)
