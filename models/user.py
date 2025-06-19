@@ -1,4 +1,5 @@
 from datetime import datetime
+import requests
 
 
 class User:
@@ -17,6 +18,15 @@ class User:
         self.city = city
         self.desg = desg
         self.loc = loc
+
+        if not city or not country:
+
+            geo = requests.get(f"http://ip-api.com/json/{ip}")
+            print(geo)
+            geo = geo.json()
+            print(geo)
+            self.country = geo.get("country", None)
+            self.city = geo.get("city")
 
     def to_dict(self):
         if self.loc and not (self.city and self.country):
