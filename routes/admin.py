@@ -269,6 +269,7 @@ def chat(room_id):
     if request.headers.get('HX-Request'):
         return render_template('components/chat-area.html', chat=chat, user=user, username="Ana")
 
+    chats.sort(key=lambda x: x['created_at'], reverse=True)
     return render_template('admin/chats.html', chat=chat, chats=chats_data, user=user, username="Ana")
 
 
