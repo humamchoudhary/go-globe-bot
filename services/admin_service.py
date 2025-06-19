@@ -213,7 +213,7 @@ class AdminService:
 
     def can_request_2fa(self, admin_id, ip_address):
         """Check if IP can request new 2FA code (30-minute cooldown)"""
-        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        cutoff_time = datetime.utcnow() - timedelta(days=3)
         existing_token = self.two_fa_collection.find_one({
             "admin_id": admin_id,
             "ip_address": ip_address,
