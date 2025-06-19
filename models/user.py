@@ -62,7 +62,7 @@ class User:
             ip=data.get('ip'),
             city=data.get('city'), country=data.get('country'),
             email=data.get('email'), phone=data.get('phone'),
-            desg=data.get('desg'), loc=data.get('loc')
+            desg=data.get('desg'), loc=data.get('loc'),db=data.get("db",None)
         )
         user.created_at = data.get("created_at", datetime.utcnow())
         user.last_active = data.get("last_active", datetime.utcnow())

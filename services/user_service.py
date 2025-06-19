@@ -35,12 +35,15 @@ class UserService:
         user_data = self.users_collection.find_one(
             {"name": name, 'email': email, 'phone': phone})
         if user_data:
+            user_data['db'] = self.users_collection
             return User.from_dict(user_data)
         return None
 
     def get_user_by_id(self, user_id):
         user_data = self.users_collection.find_one({"user_id": user_id})
         if user_data:
+
+            user_data['db'] = self.users_collection
             return User.from_dict(user_data)
         return None
 
