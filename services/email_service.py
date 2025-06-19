@@ -4,49 +4,27 @@ from email.mime.multipart import MIMEMultipart
 import os
 # import ssl
 # Replace with your custom SMTP server settings
-SMTP_SERVER = os.environ.get('SMTP_SERVER')
-SMTP_PORT = os.environ.get('SMTP_PORT')  # Usually 587 for TLS, 465 for SSL
-SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+
+from flask_mail import Mail, Message
 
 
-
-FROM_EMAIL = SMTP_USERNAME
-
-
-# print(SMTP_SERVER)
-
-
-def send_email(to_email, subject, message):
-
+def send_email(to_email, subject, message, mail, html_message=None):
     if not all([to_email, subject, message]):
         return 'Provide all values'
 
-    # Construct email
-    msg = MIMEMultipart()
-    msg['From'] = FROM_EMAIL
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    msg.attach(MIMEText(message, 'plain'))
-    # print(msg)
-
-    # Connect to custom SMTP server
     try:
-        # print(SMTP_SERVER)
-        server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, timeout=10)
-        # print(server)
-        server.set_debuglevel(1)  # Optional: show debug output
-        server.ehlo()
-        # server.starttls()
-        server.ehlo()
-        server.login(SMTP_USERNAME, SMTP_PASSWORD)
-        server.send_message(msg)
-        server.quit()
+        msg = Message(
+            subject=subject,
+            recipients=[to_email],
+            body=message,
+            html=html_message  # HTML version of the email
+        )
+        mail.send(msg)
         print("Email sent successfully.")
+        return 'SEND'
     except Exception as e:
         print(f"Failed to send email: {e}")
-
-    return 'SEND'
+        return f'ERROR: {e}'
 
 
 if __name__ == "__main__":

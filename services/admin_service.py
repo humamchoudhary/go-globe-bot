@@ -1,13 +1,17 @@
 import uuid
 import bcrypt
+import random
+import string
 from models.admin import Admin
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class AdminService:
     def __init__(self, db):
         self.db = db
         self.admins_collection = db.admins
+        self.two_fa_collection = db.two_fa_tokens
+        self.trusted_ips_collection = db.trusted_ips 
 
     def create_admin(self, username, password, role="admin", email=None, phone=None, created_by=None):
         """Create a new admin"""
@@ -166,3 +170,202 @@ class AdminService:
 
         result = list(self.admins_collection.aggregate(pipeline))
         return result
+
+    def create_password_reset_token(self, admin_id):
+        """Create a password reset token that expires in 1 hour"""
+        token = str(uuid.uuid4())
+        expires_at = datetime.utcnow() + timedelta(hours=1)
+
+        self.admins_collection.update_one(
+            {"admin_id": admin_id},
+            {"$set": {
+                "password_reset_token": token,
+                "password_reset_expires": expires_at
+            }}
+        )
+        return token
+
+    def validate_password_reset_token(self, token):
+        """Validate a password reset token"""
+        admin_data = self.admins_collection.find_one({
+            "password_reset_token": token,
+            "password_reset_expires": {"$gt": datetime.utcnow()}
+        })
+        if admin_data:
+            return Admin.from_dict(admin_data)
+        return None
+
+    def clear_password_reset_token(self, admin_id):
+        """Clear the password reset token"""
+        self.admins_collection.update_one(
+            {"admin_id": admin_id},
+            {"$unset": {
+                "password_reset_token": "",
+                "password_reset_expires": ""
+            }}
+        )
+
+    # ===== 2FA Methods =====
+
+    def generate_2fa_code(self):
+        """Generate a 6-digit 2FA code"""
+        return ''.join(random.choices(string.digits, k=6))
+
+    def can_request_2fa(self, admin_id, ip_address):
+        """Check if IP can request new 2FA code (30-minute cooldown)"""
+        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        existing_token = self.two_fa_collection.find_one({
+            "admin_id": admin_id,
+            "ip_address": ip_address,
+            "created_at": {"$gt": cutoff_time},
+            "status": "active"
+        })
+        return existing_token is None
+
+    def create_2fa_token(self, admin_id, ip_address):
+        """Create a new 2FA token for the IP address"""
+        # Clean up expired tokens first
+        self.cleanup_expired_2fa_tokens()
+
+        # Check if IP can request new 2FA
+        if not self.can_request_2fa(admin_id, ip_address):
+            return None
+
+        # Deactivate any existing active tokens for this admin/IP combo
+        self.two_fa_collection.update_many(
+            {"admin_id": admin_id, "ip_address": ip_address, "status": "active"},
+            {"$set": {"status": "superseded"}}
+        )
+
+        code = self.generate_2fa_code()
+        code_hash = bcrypt.hashpw(code.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        token_id = str(uuid.uuid4())
+        # 2FA code expires in 10 minutes
+        expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+        token_data = {
+            "token_id": token_id,
+            "admin_id": admin_id,
+            "ip_address": ip_address,
+            "code_hash": code_hash,
+            "created_at": datetime.utcnow(),
+            "expires_at": expires_at,
+            "status": "active",  # active, used, expired, superseded
+            "attempts": 0,
+            "max_attempts": 3
+        }
+
+        self.two_fa_collection.insert_one(token_data)
+        return {
+            "token_id": token_id,
+            "code": code,  # Return plaintext code only for sending to user
+            "expires_at": expires_at
+        }
+
+    def verify_2fa_code(self, admin_id, ip_address, code):
+        """Verify 2FA code for specific admin and IP"""
+        token_data = self.two_fa_collection.find_one({
+            "admin_id": admin_id,
+            "ip_address": ip_address,
+            "status": "active",
+            "expires_at": {"$gt": datetime.utcnow()}
+        })
+
+        if not token_data:
+            return {"success": False, "error": "No valid 2FA token found"}
+
+        # Check attempts limit
+        if token_data["attempts"] >= token_data["max_attempts"]:
+            self.two_fa_collection.update_one(
+                {"token_id": token_data["token_id"]},
+                {"$set": {"status": "expired"}}
+            )
+            return {"success": False, "error": "Maximum attempts exceeded"}
+
+        # Increment attempts
+        self.two_fa_collection.update_one(
+            {"token_id": token_data["token_id"]},
+            {"$inc": {"attempts": 1}}
+        )
+
+        # Verify code using bcrypt
+        if bcrypt.checkpw(code.encode('utf-8'), token_data["code_hash"].encode('utf-8')):
+            # Mark as used
+            self.two_fa_collection.update_one(
+                {"token_id": token_data["token_id"]},
+                {"$set": {"status": "used", "used_at": datetime.utcnow()}}
+            )
+            return {"success": True, "token_id": token_data["token_id"]}
+        else:
+            remaining_attempts = token_data["max_attempts"] - token_data["attempts"]
+            return {
+                "success": False,
+                "error": f"Invalid code. {remaining_attempts} attempts remaining"
+            }
+
+    def get_2fa_cooldown_remaining(self, admin_id, ip_address):
+        """Get remaining cooldown time in minutes"""
+        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        token = self.two_fa_collection.find_one({
+            "admin_id": admin_id,
+            "ip_address": ip_address,
+            "created_at": {"$gt": cutoff_time},
+            "status": "active"
+        }, sort=[("created_at", -1)])
+
+        if token:
+            elapsed = datetime.utcnow() - token["created_at"]
+            remaining = timedelta(minutes=30) - elapsed
+            return max(0, int(remaining.total_seconds() / 60))
+        return 0
+
+    def cleanup_expired_2fa_tokens(self):
+        """Clean up expired 2FA tokens (older than 24 hours)"""
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        self.two_fa_collection.delete_many({
+            "created_at": {"$lt": cutoff_time}
+        })
+
+    def get_2fa_stats(self, admin_id, days=7):
+        """Get 2FA usage statistics for an admin"""
+        cutoff_time = datetime.utcnow() - timedelta(days=days)
+        pipeline = [
+            {"$match": {
+                "admin_id": admin_id,
+                "created_at": {"$gt": cutoff_time}
+            }},
+            {"$group": {
+                "_id": "$status",
+                "count": {"$sum": 1}
+            }}
+        ]
+        result = list(self.two_fa_collection.aggregate(pipeline))
+        stats = {"active": 0, "used": 0, "expired": 0, "superseded": 0}
+        for item in result:
+            stats[item["_id"]] = item["count"]
+        return stats
+
+    def is_ip_trusted(self, admin_id, ip_address):
+        """Check if IP is trusted (has completed 2FA within last 30 mins)"""
+        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        trusted_ip = self.trusted_ips_collection.find_one({
+            "admin_id": admin_id,
+            "ip_address": ip_address,
+            "last_verified": {"$gt": cutoff_time}
+        })
+        return trusted_ip is not None
+
+    def add_trusted_ip(self, admin_id, ip_address):
+        """Add/update trusted IP with current timestamp"""
+        self.trusted_ips_collection.update_one(
+            {"admin_id": admin_id, "ip_address": ip_address},
+            {"$set": {"last_verified": datetime.utcnow()}},
+            upsert=True
+        )
+
+    def cleanup_expired_trusted_ips(self):
+        """Clean up IPs older than 30 minutes"""
+        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        self.trusted_ips_collection.delete_many({
+            "last_verified": {"$lt": cutoff_time}
+        })

@@ -1,3 +1,4 @@
+from flask_mail import Mail
 from services.admin_service import AdminService
 from datetime import datetime
 import requests
@@ -361,12 +362,17 @@ User Information:
     Designation: {user.desg}
     IP: {user.ip}
     Country: {user.country}
-    City: {user.city}\n\n
+    City: {user.city}
+    Last messages: {[f'{m.sender}: {m.content}' for m in chat.messages[-5:-1]]}
+    \n\n
 Auto Generated Message"""
 
-    SEND_USER = os.environ.get('SMTP_TO')
-    print(SEND_USER)
-    send_email(SEND_USER, f'Assistance Required: {chat.subject}', msg)
+    print(current_admin.email)
+
+    mail = Mail(current_app)
+    status = send_email(current_admin.email, f'Assistance Required: {
+               chat.subject}', "Ping", mail,render_template('/email/new_message.html',user=user,chat=chat))
+    print(status)
 
     if request.headers.get('HX-Request'):
         return "", 204

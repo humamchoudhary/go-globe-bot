@@ -55,8 +55,9 @@
             <label
               for="user_login"
               class="block text-sm font-medium text-gray-300 mb-2"
-              >Email OR Username</label
             >
+              Email OR Username
+            </label>
             <input
               type="text"
               id="user_login"
@@ -77,7 +78,7 @@
                 >Password</label
               >
               <a
-                href="#"
+                href="/admin/forgot-password"
                 class="text-sm text-accent hover:text-orange-400 transition-colors duration-200"
               >
                 Forget Password?
@@ -103,6 +104,55 @@
         </div>
       </div>
     </div>
+    <!-- 2FA Verification Modal -->
+    <div
+      id="2fa-modal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+    >
+      <div class="bg-[var(--sec-bg-color)] rounded-lg p-8 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4 text-white">
+          Two-Factor Authentication
+        </h2>
+        <p class="text-gray-300 mb-6" id="2fa-message">
+          Please enter the 6-digit code sent to your email.
+        </p>
+        <div
+          id="2fa-error"
+          class="hidden bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-6"
+        >
+          <span class="text-sm"></span>
+        </div>
+        <div class="mb-6">
+          <label
+            for="2fa-code"
+            class="block text-sm font-medium text-gray-300 mb-2"
+            >Verification Code</label
+          >
+          <input
+            type="text"
+            id="2fa-code"
+            maxlength="6"
+            class="w-full px-4 py-3 bg-bg-primary border border-[var(--border-color)] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors duration-200"
+            placeholder="123456"
+          />
+        </div>
+        <div class="flex justify-between">
+          <button
+            id="resend-2fa-btn"
+            class="text-sm text-accent hover:text-orange-400 transition-colors duration-200 disabled:text-gray-500"
+            disabled
+          >
+            Resend Code (<span id="resend-countdown">30:00</span>)
+          </button>
+          <button
+            id="verify-2fa-btn"
+            class="py-2 px-6 bg-[var(--main-color)] rounded-md hover:opacity-95 duration-300 transition-all"
+          >
+            Verify
+          </button>
+        </div>
+      </div>
+    </div>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const loginBtn = document.getElementById("login-btn");
@@ -110,6 +160,19 @@
         const passwordInput = document.getElementById("user_password");
         const errorMessage = document.getElementById("error-message");
         const errorText = errorMessage.querySelector("span");
+
+        // 2FA Modal Elements
+        const twoFaModal = document.getElementById("2fa-modal");
+        const twoFaCodeInput = document.getElementById("2fa-code");
+        const verify2faBtn = document.getElementById("verify-2fa-btn");
+        const resend2faBtn = document.getElementById("resend-2fa-btn");
+        const resendCountdown = document.getElementById("resend-countdown");
+        const twoFaMessage = document.getElementById("2fa-message");
+        const twoFaError = document.getElementById("2fa-error");
+        const twoFaErrorText = twoFaError.querySelector("span");
+
+        let currentAdminId = null;
+        let cooldownInterval = null;
 
         loginBtn.addEventListener("click", function () {
           const username = usernameInput.value.trim();
@@ -123,12 +186,12 @@
           // Add loading state
           loginBtn.disabled = true;
           loginBtn.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing In...
-                `;
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Signing In...
+          `;
 
           fetch("/admin/login", {
             method: "POST",
@@ -140,7 +203,16 @@
             .then((response) => {
               if (response.ok) {
                 return response.json().then((data) => {
-                  if (data.redirect) {
+                  if (
+                    data.status === "2fa_required" ||
+                    data.status === "2fa_verification_needed"
+                  ) {
+                    // Show 2FA modal
+                    currentAdminId = data.admin_id;
+                    twoFaMessage.textContent = data.message;
+                    twoFaModal.classList.remove("hidden");
+                    startCooldownTimer();
+                  } else if (data.redirect) {
                     window.location.href = data.redirect;
                   } else {
                     window.location.href = "/admin/";
@@ -163,6 +235,109 @@
             });
         });
 
+        verify2faBtn.addEventListener("click", function () {
+          const code = twoFaCodeInput.value.trim();
+
+          if (!code || code.length !== 6) {
+            show2faError("Please enter a valid 6-digit code");
+            return;
+          }
+
+          verify2faBtn.disabled = true;
+          verify2faBtn.innerHTML = `Verifying...`;
+
+          fetch("/admin/verify-2fa", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              admin_id: currentAdminId,
+              code: code,
+            }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.json().then((data) => {
+                  window.location.href = data.redirect || "/admin/";
+                });
+              } else {
+                return response.json().then((data) => {
+                  show2faError(data.error || "Verification failed");
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              show2faError("An error occurred. Please try again.");
+            })
+            .finally(() => {
+              verify2faBtn.disabled = false;
+              verify2faBtn.innerHTML = "Verify";
+            });
+        });
+
+        // Resend 2FA Code (simplified without cooldown)
+        resend2faBtn.addEventListener("click", function () {
+          resend2faBtn.disabled = true;
+          resend2faBtn.innerHTML = `Sending...`;
+
+          fetch("/admin/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: document.getElementById("user_login").value.trim(),
+              password: document.getElementById("user_password").value.trim(),
+            }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.json().then((data) => {
+                  if (data.status === "2fa_required") {
+                    twoFaMessage.textContent = data.message;
+                  } else {
+                    show2faError("Failed to resend code");
+                  }
+                });
+              } else {
+                return response.json().then((data) => {
+                  show2faError(data.error || "Failed to resend code");
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              show2faError("An error occurred. Please try again.");
+            })
+            .finally(() => {
+              resend2faBtn.disabled = false;
+              resend2faBtn.innerHTML = "Resend Code";
+            });
+        });
+        function startCooldownTimer() {
+          let seconds = 1800; // 30 minutes in seconds
+          clearInterval(cooldownInterval);
+
+          function updateCountdown() {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            resendCountdown.textContent = `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+
+            if (seconds <= 0) {
+              clearInterval(cooldownInterval);
+              resend2faBtn.disabled = false;
+              resendCountdown.textContent = "Ready";
+            } else {
+              seconds--;
+            }
+          }
+
+          updateCountdown();
+          cooldownInterval = setInterval(updateCountdown, 1000);
+        }
+
         function showError(message) {
           errorText.textContent = message;
           errorMessage.classList.remove("hidden");
@@ -173,19 +348,37 @@
           }, 5000);
         }
 
-        // Handle enter key on both inputs
-        [usernameInput, passwordInput].forEach((input) => {
+        function show2faError(message) {
+          twoFaErrorText.textContent = message;
+          twoFaError.classList.remove("hidden");
+
+          setTimeout(() => {
+            twoFaError.classList.add("hidden");
+          }, 5000);
+        }
+
+        // Handle enter key on all inputs
+        [usernameInput, passwordInput, twoFaCodeInput].forEach((input) => {
           input.addEventListener("keypress", function (e) {
             if (e.key === "Enter") {
-              loginBtn.click();
+              if (input === twoFaCodeInput) {
+                verify2faBtn.click();
+              } else {
+                loginBtn.click();
+              }
             }
           });
         });
 
         // Hide error when user starts typing
-        [usernameInput, passwordInput].forEach((input) => {
+        [usernameInput, passwordInput, twoFaCodeInput].forEach((input) => {
           input.addEventListener("input", function () {
-            if (!errorMessage.classList.contains("hidden")) {
+            if (
+              input === twoFaCodeInput &&
+              !twoFaError.classList.contains("hidden")
+            ) {
+              twoFaError.classList.add("hidden");
+            } else if (!errorMessage.classList.contains("hidden")) {
               errorMessage.classList.add("hidden");
             }
           });

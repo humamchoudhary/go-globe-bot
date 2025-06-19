@@ -34,6 +34,8 @@ class ChatService:
             return Chat.from_dict(chat_data)
         return None
 
+
+
     def delete(self, room_ids):
         self.chats_collection.delete_many({"room_id": {'$in': room_ids}})
         for id in room_ids:
@@ -46,12 +48,12 @@ class ChatService:
             return Chat.from_dict(chat_data)
         return None
 
-    def export_chat(self, room_id):
+    def export_chat(self, room_id,lead_id):
         chat = self.get_chat_by_room_id(room_id)
         if not chat:
             return False
         self.chats_collection.update_one(
-            {'room_id': room_id}, {"$set": {"exported": True}})
+                {'room_id': room_id}, {"$set": {"exported": True,"lead_id":lead_id}})
         return True
 
     def add_message(self, room_id, sender, content):

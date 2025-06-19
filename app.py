@@ -24,6 +24,7 @@ from datetime import datetime
 import json
 from services.admin_service import AdminService
 from urllib.parse import urlparse
+from flask_mail import Mail, Message
 
 
 def get_font_data():
@@ -110,8 +111,16 @@ def create_app(config_class=Config):
     }
     logs_service = LogsService(app.db)
 
-    from urllib.parse import urlparse
+    app.config['MAIL_SERVER'] = os.environ.get('SMTP_SERVER')
+    app.config['MAIL_PORT'] = int(os.environ.get('SMTP_PORT', 465))
+    app.config['MAIL_USE_TLS'] = False  # Set to False if using SSL on port 465
+    app.config['MAIL_USE_SSL'] = True  # Set to True if using SSL on port 465
+    app.config['MAIL_USERNAME'] = os.environ.get('SMTP_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.environ.get('SMTP_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('SMTP_USERNAME')
 
+
+    from urllib.parse import urlparse
 
     #####################  GO BACK TO THIS CODE ONCE THE HEADER IS ADDED #########################
     # @app.before_request
@@ -182,7 +191,6 @@ def create_app(config_class=Config):
     #         else:
     #             print("[WARNING] No referer provided to validate domain.")
 
-
     @app.before_request
     def set_admin_id():
         origin = request.headers.get('Origin')
@@ -191,9 +199,11 @@ def create_app(config_class=Config):
         print(f"[HEADERS] Referer: {referer}")
         print(f"[HEADERS] Origin: {origin}")
 
-        exempt_paths = ['static', 'socket.io', 'favicon.ico', 'healthcheck', 'robots.txt']
+        exempt_paths = ['static', 'socket.io',
+                        'favicon.ico', 'healthcheck', 'robots.txt']
         if any(request.path.startswith(f'/{path}') for path in exempt_paths):
-            print(f"[SKIP] Path '{request.path}' is exempted from domain check.")
+            print(f"[SKIP] Path '{
+                  request.path}' is exempted from domain check.")
             return
 
         admin_id = None
@@ -205,7 +215,8 @@ def create_app(config_class=Config):
 
         if not admin_id and referer and Config.BACKEND_URL in referer:
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
-            print(f"[FALLBACK] Referer matches BACKEND_URL. Using DEFAULT_ADMIN_ID: {admin_id}")
+            print(
+                f"[FALLBACK] Referer matches BACKEND_URL. Using DEFAULT_ADMIN_ID: {admin_id}")
 
         admin = None
         sec_key = request.headers.get('SECRET_KEY')
@@ -224,7 +235,8 @@ def create_app(config_class=Config):
         # If still no admin, use default fallback
         if not admin:
             fallback_admin_id = os.environ.get('DEFAULT_ADMIN_ID')
-            print(f"[FALLBACK] No valid admin_id or SECRET_KEY. Using DEFAULT_ADMIN_ID: {fallback_admin_id}")
+            print(f"[FALLBACK] No valid admin_id or SECRET_KEY. Using DEFAULT_ADMIN_ID: {
+                  fallback_admin_id}")
             admin = AdminService(app.db).get_admin_by_id(fallback_admin_id)
 
         # Final check
@@ -238,17 +250,17 @@ def create_app(config_class=Config):
 
         # Check domain access if required
         if 'domains' in admin.settings and admin.settings['domains']:
-            print(f"[SECURITY] Admin has domain restrictions: {admin.settings['domains']}")
+            print(f"[SECURITY] Admin has domain restrictions: {
+                  admin.settings['domains']}")
             if referer:
                 domain = urlparse(referer).netloc
                 print(f"[DOMAIN] Parsed referer domain: {domain}")
                 if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
-                    print(f"[ACCESS DENIED] Domain '{domain}' not allowed for this admin.")
+                    print(f"[ACCESS DENIED] Domain '{
+                          domain}' not allowed for this admin.")
                     return "Access denied", 403
             else:
                 print("[WARNING] No referer provided to validate domain.")
-
-
 
     @app.before_request
     def log_request():

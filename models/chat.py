@@ -28,7 +28,7 @@ class Message:
 
 class Chat:
     def __init__(self, chat_id, user_id, bot_name="bot", messages=None,
-                 admin_required=False, admin_present=False, open=True, subject=None, exported=False, admin_id=None):
+                 admin_required=False, admin_present=False, open=True, subject=None, exported=False, admin_id=None,lead_id=None):
         self.chat_id = chat_id
         # Generate room_id from user_id and first 8 chars of chat_id
         self.room_id = f"{user_id}-{chat_id[:8]}"
@@ -43,6 +43,7 @@ class Chat:
         self.subject = subject
         self.exported = exported
         self.admin_id = admin_id
+        self.lead_id = lead_id
 
     def add_message(self, sender, content):
         message = Message(sender, content)
@@ -63,7 +64,8 @@ class Chat:
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "exported": self.exported,
-            "admin_id": self.admin_id
+            "admin_id": self.admin_id,
+            'lead_id':self.lead_id
         }
 
     @classmethod
@@ -78,7 +80,8 @@ class Chat:
             admin_required=data.get("admin_required", False),
             admin_present=data.get("admin_present", False),
             exported=data.get('exported', False),
-            admin_id=data.get('admin_id', None)
+            admin_id=data.get('admin_id', None),
+            lead_id=data.get("lead_id",None)
         )
         # Make sure to load the room_id from the data
         chat.room_id = data.get("room_id")

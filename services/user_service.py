@@ -57,6 +57,7 @@ class UserService:
             {"$addToSet": {"chat_ids": chat_id}}
         )
 
+
     def update_last_active(self, user_id):
         from datetime import datetime
         self.users_collection.update_one(

@@ -19,7 +19,7 @@ class User:
         self.desg = desg
         self.loc = loc
 
-        if city == None or country == None:
+        if ip.split(".")[0] not in ['192', '127'] and (city == None or country == None):
 
             geo = requests.get(f"http://ip-api.com/json/{ip}")
             print(geo)
@@ -27,9 +27,9 @@ class User:
             print(geo)
             self.country = geo.get("country", None)
             self.city = geo.get("city")
-            if geo['status'] !="fail" and db !=None:
-                x= db.update_one({'user_id': user_id}, {
-                                   "$set": {"city": city, "country": country}})
+            if geo['status'] != "fail" and db != None:
+                x = db.update_one({'user_id': user_id}, {
+                    "$set": {"city": city, "country": country}})
                 print(x)
 
     def to_dict(self):
@@ -62,7 +62,7 @@ class User:
             ip=data.get('ip'),
             city=data.get('city'), country=data.get('country'),
             email=data.get('email'), phone=data.get('phone'),
-            desg=data.get('desg'), loc=data.get('loc'),db=data.get("db",None)
+            desg=data.get('desg'), loc=data.get('loc'), db=data.get("db", None)
         )
         user.created_at = data.get("created_at", datetime.utcnow())
         user.last_active = data.get("last_active", datetime.utcnow())

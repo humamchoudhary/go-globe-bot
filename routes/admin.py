@@ -1,3 +1,4 @@
+from flask_mail import Mail
 from flask import request, flash, make_response
 import zipfile
 import io
@@ -195,6 +196,126 @@ def view_log_detail(log_id):
         return render_template('admin/logs.html', logs=logs, selected_log=log)
 
 
+@admin_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'GET':
+        return render_template('admin/forgot_password.html')
+
+    data = request.json
+    username = data.get('username')
+    email = data.get('email')
+
+    if not username or not email:
+        return jsonify({"error": "Username and email are required"}), 400
+
+    admin_service = AdminService(current_app.db)
+    admin = admin_service.get_admin_by_username(username)
+
+    if not admin or admin.email != email:
+        return jsonify({"error": "No account found with that username and email"}), 404
+
+    # Create reset token
+    token = admin_service.create_password_reset_token(admin.admin_id)
+
+    # Send email with reset link
+    reset_url = url_for('admin.reset_password', token=token, _external=True)
+    mail = Mail(current_app)
+    try:
+        # msg = Message(
+        #     subject="Password Reset Request",
+        #     recipients=[admin.email],
+        #     html=render_template('admin/email/reset_password.html',
+        #                          reset_url=reset_url,
+        #                          admin=admin)
+        # )
+        # mail.send(msg)
+
+        status = send_email(admin.email, "GoBot Password Reset", f"""<!DOCTYPE html>
+                            Hello {admin.username},
+                            You have requested to reset your password. Please click the link below to reset your password:\n
+                            {reset_url}\n
+                            This link will expire in 1 hour.
+                            If you didn't request this, please ignore this email.
+                                """, mail=mail, html_message=render_template('/email/forget_pass.html', admin=admin, reset_url=reset_url))
+
+        return jsonify({"status": "success", "message": "Password reset link sent to your email"}), 200
+    except Exception as e:
+        current_app.logger.error(
+            f"Failed to send password reset email: {str(e)}")
+        return jsonify({"error": "Failed to send password reset email"}), 500
+
+
+@admin_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    admin_service = AdminService(current_app.db)
+    admin = admin_service.validate_password_reset_token(token)
+
+    if not admin:
+        return render_template('admin/reset_password_invalid.html')
+
+    if request.method == 'GET':
+        return render_template('admin/reset_password_form.html', token=token)
+
+    # Handle POST request for password reset
+    data = request.json
+    print(data)
+    new_password = data.get('password')
+    confirm_password = data.get('confirm_password')
+    # print(dict(request.form))
+    print(new_password)
+    print(confirm_password)
+
+    if not new_password or not confirm_password:
+        return jsonify({"error": "Both password fields are required"}), 400
+
+    if new_password != confirm_password:
+        return jsonify({"error": "Passwords do not match"}), 400
+
+    # Update password and clear token
+    admin_service.update_admin_password(admin.admin_id, new_password)
+    admin_service.clear_password_reset_token(admin.admin_id)
+
+    return jsonify({
+        "status": "success",
+        "message": "Password updated successfully",
+        "redirect": url_for('admin.login')
+    }), 200
+
+
+# @admin_bp.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'GET':
+#         return render_template('admin/login.html')
+#
+#     data = request.json
+#     username = data.get('username')
+#     password = data.get('password')
+#
+#     if not username or not password:
+#         return jsonify({"error": "Username and password are required"}), 400
+#
+#     admin_service = AdminService(current_app.db)
+#     admin = admin_service.authenticate_admin(username, password)
+#
+#     if not admin:
+#         return jsonify({"error": "Invalid credentials"}), 401
+#
+#     # Clear session and set admin session
+#     next_url = session.pop('next', None)
+#     session.clear()
+#     session['admin_id'] = admin.admin_id
+#     session['role'] = admin.role
+#     session['username'] = admin.username
+#
+#     # Load admin's personal settings into current_app.config
+#     # current_app.config['CURRENT_ADMIN_SETTINGS'] = admin.settings
+#
+#     if next_url:
+#         return jsonify({"status": "success", "redirect": next_url}), 200
+#
+#     return jsonify({"status": "success", "redirect": url_for('admin.index')}), 200
+
+
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -203,6 +324,8 @@ def login():
     data = request.json
     username = data.get('username')
     password = data.get('password')
+    ip_address = request.headers.get(
+        "X_Real-IP", request.remote_addr).split(",")[0]
 
     if not username or not password:
         return jsonify({"error": "Username and password are required"}), 400
@@ -213,6 +336,54 @@ def login():
     if not admin:
         return jsonify({"error": "Invalid credentials"}), 401
 
+    # Check if IP is trusted (completed 2FA within last 30 mins)
+    if admin_service.is_ip_trusted(admin.admin_id, ip_address):
+        # IP is trusted, proceed with login
+        return complete_admin_login(admin)
+
+    # IP not trusted, require 2FA
+    token_info = admin_service.create_2fa_token(admin.admin_id, ip_address)
+    if not token_info:
+        return jsonify({
+            "error": "Failed to create 2FA token",
+            "requires_2fa": True
+        }), 500
+    mail = Mail(current_app)
+    # Send the 2FA code via email
+    status = send_email(
+        admin.email,
+        "Your GoGlobe 2FA Verification Code",
+        f"""<!DOCTYPE html>
+        <html>
+        <body>
+            <p>Hello {admin.username},</p>
+            <p>Your verification code is: <strong>{token_info['code']}</strong></p>
+            <p>This code will expire in 10 minutes.</p>
+            <p>If you didn't request this, please secure your account immediately.</p>
+        </body>
+        </html>
+        """,
+        mail=mail,
+        html_message=render_template(
+            '/email/2fa_code.html',
+            admin=admin,
+            code=token_info['code'],
+            expires_at=token_info['expires_at']
+        )
+    )
+
+    if not status:
+        return jsonify({"error": "Failed to send 2FA code"}), 500
+
+    return jsonify({
+        "status": "2fa_required",
+        "message": "2FA code sent to your email",
+        "admin_id": admin.admin_id
+    }), 200
+
+
+def complete_admin_login(admin):
+    """Common login completion logic"""
     # Clear session and set admin session
     next_url = session.pop('next', None)
     session.clear()
@@ -220,13 +391,36 @@ def login():
     session['role'] = admin.role
     session['username'] = admin.username
 
-    # Load admin's personal settings into current_app.config
-    # current_app.config['CURRENT_ADMIN_SETTINGS'] = admin.settings
-
     if next_url:
         return jsonify({"status": "success", "redirect": next_url}), 200
-
     return jsonify({"status": "success", "redirect": url_for('admin.index')}), 200
+
+
+@admin_bp.route('/verify-2fa', methods=['POST'])
+def verify_2fa():
+    data = request.json
+    admin_id = data.get('admin_id')
+    code = data.get('code')
+    ip_address = request.headers.get(
+        "X_Real-IP", request.remote_addr).split(",")[0]
+
+    if not admin_id or not code:
+        return jsonify({"error": "Admin ID and code are required"}), 400
+
+    admin_service = AdminService(current_app.db)
+    verification = admin_service.verify_2fa_code(admin_id, ip_address, code)
+
+    if not verification.get('success'):
+        return jsonify({"error": verification.get('error')}), 401
+
+    # 2FA verified successfully - mark IP as trusted
+    admin_service.add_trusted_ip(admin_id, ip_address)
+
+    admin = admin_service.get_admin_by_id(admin_id)
+    if not admin:
+        return jsonify({"error": "Admin not found"}), 404
+
+    return complete_admin_login(admin)
 
 
 @admin_bp.route('/onboarding', methods=['GET', 'POST'])
@@ -371,17 +565,23 @@ def export_chat(room_id):
             "phone": user.phone,
             "email": f"{user.email}",
             "country": user.country,
-            "city": user.city
+            "city": user.city,
+            "status": 2,
+            "source": 10,
+            "assigned": 1
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
         print(r.url)
-        print(r.json())
         if r.status_code == 200:
-            if not chat_service.export_chat(room_id):
+
+            # data = r.json()
+            print(r)
+            print(r.content)
+            if not chat_service.export_chat(room_id, data.get('lead_id', None)):
                 return "Chat not found", 404
         else:
-            raise Exception(f'Error in exporting: {r.status_code}')
+            raise Exception(f'Error in exporting: {r.status_code}, {r.json()}')
         # except Exception as e:
         #     print(e)
         #     return "Error pushing", 500

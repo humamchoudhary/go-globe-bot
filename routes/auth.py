@@ -48,7 +48,8 @@ def create_anonymous_user():
 
     # Generate random username
     name = generate_random_username()
-    user_ip = request.remote_addr
+    user_ip = request.headers.get(
+        "X_Real-IP", request.remote_addr).split(",")[0]
 
     user = temp_user_service.create_user(name, ip=user_ip)
 

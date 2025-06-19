@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Chat Request</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: white;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #001523;
+      }
+      .email-container {
+        background: #001523;
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #001523 0%, #001f33 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+      }
+      .header .icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+      .content {
+        padding: 30px;
+      }
+      .greeting {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: white;
+      }
+      .message {
+        color: white;
+        background: #001f33;
+        border-left: 4px solid #ff5800;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+      }
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #001523 0%, #001f33 100%);
+        color: white;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin: 20px 0;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: transform 0.2s ease;
+      }
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+      .user-info {
+        background: #001f33;
+        border: 1px solid #ff5800;
+        border-radius: 8px;
+        padding: 25px;
+        margin: 25px 0;
+      }
+      .user-info h3 {
+        color: #c0bcca;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .info-item {
+        display: flex;
+        flex-direction: column;
+      }
+      .info-label {
+        font-size: 12px;
+        color: #c0bcca;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+      .info-value {
+        font-weight: 600;
+        color: #c0bcca;
+      }
+      .location {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .messages-section {
+        margin: 25px 0;
+      }
+      .messages-section h4 {
+        color: #c0bcca;
+        margin-bottom: 15px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .message-item {
+        background: #001f33;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 8px;
+        border-left: 3px solid #001f33;
+      }
+      .message-sender {
+        font-weight: 600;
+        color: #c0bcca;
+        font-size: 12px;
+      }
+      .message-content {
+        color: #c0bcca;
+        font-size: 14px;
+        margin-top: 4px;
+      }
+      .footer {
+        background: #001f33;
+        padding: 20px 30px;
+        text-align: center;
+        border-top: 1px solid #ff5800;
+      }
+      .footer p {
+        margin: 0;
+        color: #c0bcca;
+        font-size: 12px;
+      }
+      .priority-badge {
+        display: inline-block;
+        background: #dc3545;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+      @media (max-width: 480px) {
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+        .content {
+          padding: 20px;
+        }
+        .header {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <div class="icon"></div>
+        <h1>New Live Chat Request</h1>
+      </div>
+      <div class="content">
+        <div class="greeting">Hi Ana,</div>
+        <div class="message">
+          <strong>{{ user.name }}</strong> has just requested to have a live
+          chat and is waiting for your response.
+        </div>
+        <div style="text-align: center">
+          <a
+            href="{{ settings['backend_url'] }}/admin/chat/{{ chat.room_id }}"
+            class="cta-button"
+            >Start Conversation Now</a
+          >
+        </div>
+        <div class="user-info">
+          <h3>User Information</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Name</span>
+              <span class="info-value">{{ user.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Phone</span>
+              <span class="info-value">{{ user.phone }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Designation</span>
+              <span class="info-value">{{ user.desg }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">IP Address</span>
+              <span class="info-value">{{ user.ip }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">location</span>
+              <span class="info-value location"
+                >{{ user.city }}, {{ user.country }}</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="messages-section">
+          <h4>Recent Messages</h4>
+          <!-- Loop through last messages -->
+          {% for message in chat.messages[-5:-1] %}
+          <div class="message-item">
+            <div class="message-sender">{{ message.sender }}</div>
+            <div class="message-content">{{ message.content }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="footer">
+        <p>This is an automated message generated by your chat system.</p>
+      </div>
+    </div>
+  </body>
+</html>
