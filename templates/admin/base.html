@@ -359,5 +359,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
  {% block scripts %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+<script>
+function formatLocalTime(date) {
+  const now = new Date();
+
+  // Calculate the start of today and yesterday in local time
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  // If the message was from today
+  if (date >= today) {
+    const diff = now - date;
+    const seconds = Math.floor(diff / 1000);
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    return `${Math.floor(seconds / 3600)}h ago`;
+  }
+
+  // If the message was from yesterday
+  if (date >= yesterday) {
+    return 'Yesterday';
+  }
+
+  // Older messages - return formatted date
+  return date.toLocaleString(navigator.language, {
+    hour: '2-digit',
+    minute: '2-digit',
+    day: 'numeric',
+    month: 'short'
+  });
+}
+
+document.querySelectorAll('.message-time').forEach(el => {
+  try {
+    let utcString = el.dataset.utc;
+
+    // Ensure it's a proper ISO string with UTC 'Z' if not already
+    if (!utcString.endsWith('Z') && !utcString.includes('+')) {
+      utcString += 'Z';
+    }
+
+    const date = new Date(utcString);
+    el.textContent = formatLocalTime(date);
+  } catch (e) {
+    console.error('Time formatting failed', e);
+  }
+});
+</script>
+
+
+><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
  {% endblock %}

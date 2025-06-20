@@ -6,17 +6,23 @@
 
 {% set title = "Chats" %} {% block content %}
 <style>
+
 .active-chats{
 background-color:var(--sec-bg-color);
 color:var(--main-color);
 border-radius:5px;
 border:1px solid var(--border-color);
+
 }
 
 
 @media (max-width: 768px) {
-}
 
+ .active-chats{
+
+display:none;
+            }}
+           
             .message a{
 color:var(--main-color)
             }
@@ -28,11 +34,11 @@ color:var(--main-color)
     <div
       class="flex flex-col gap-[25px] w-full h-[93vh] overflow-y-scroll"
     >
-    <div class="flex flex-row gap-[32px] items-start justify-between md:justify-start mx-[24px] mt-[24px] ">
+    <div class="flex flex-row gap-[32px] items-start justify-between mx-[24px] mt-[24px] ">
       <p class=" text-[18px] md:text-[26px] text-[var(--sec-text)]">
         Chats
       </p>
-        <div class="flex flex-row gap-2 md:gap-[24px] flex-wrap items-end md:items-center">
+<div class="flex flex-row gap-2 md:gap-[24px] flex-wrap items-end md:items-center">
 <div
   hx-get="/admin/chats/all"
   hx-target="#chat_list_container"
