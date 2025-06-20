@@ -28,7 +28,7 @@ class Message:
 
 class Chat:
     def __init__(self, chat_id, user_id, bot_name="bot", messages=None,
-                 admin_required=False, admin_present=False, open=True, subject=None, exported=False, admin_id=None,lead_id=None):
+                 admin_required=False, admin_present=False, open=True, subject=None, exported=False, admin_id=None, lead_id=None, viewed=False):
         self.chat_id = chat_id
         # Generate room_id from user_id and first 8 chars of chat_id
         self.room_id = f"{user_id}-{chat_id[:8]}"
@@ -44,6 +44,7 @@ class Chat:
         self.exported = exported
         self.admin_id = admin_id
         self.lead_id = lead_id
+        self.viewed = viewed
 
     def add_message(self, sender, content):
         message = Message(sender, content)
@@ -65,7 +66,8 @@ class Chat:
             "updated_at": self.updated_at,
             "exported": self.exported,
             "admin_id": self.admin_id,
-            'lead_id':self.lead_id
+            'lead_id': self.lead_id,
+            'viewed': self.viewed
         }
 
     @classmethod
@@ -81,10 +83,13 @@ class Chat:
             admin_present=data.get("admin_present", False),
             exported=data.get('exported', False),
             admin_id=data.get('admin_id', None),
-            lead_id=data.get("lead_id",None)
+            lead_id=data.get("lead_id", None),
+            viewed=data.get('viewed', False)
         )
         # Make sure to load the room_id from the data
         chat.room_id = data.get("room_id")
         chat.created_at = data.get("created_at", datetime.utcnow())
-        chat.updated_at = data.get("updated_at", datetime.utcnow())
+        chat.updated_at = data.get("updated_at")
+        if not chat.updated_at:
+            chat.updated_at = chat.created_at
         return chat

@@ -66,7 +66,7 @@ class ChatService:
             {"room_id": room_id},
             {
                 "$push": {"messages": message.to_dict()},
-                "$set": {"updated_at": message.timestamp},
+                "$set": {"updated_at": message.timestamp, 'viewed': False},
             },
         )
 
@@ -74,7 +74,14 @@ class ChatService:
 
     def set_admin_required(self, room_id, required=True):
         self.chats_collection.update_one(
-            {"room_id": room_id}, {"$set": {"admin_required": required}}
+            {"room_id": room_id}, {
+                "$set": {"admin_required": required, "viewed": False}}
+        )
+
+    def set_chat_viewed(self, room_id):
+        self.chats_collection.update_one(
+            {"room_id": room_id}, {
+                "$set": {"viewed": True}}
         )
 
     def set_admin_present(self, room_id, present=True):

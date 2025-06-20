@@ -344,6 +344,8 @@ def ping_admin(chat_id):
             'sender': 'SYSTEM',
             'content': new_message.content,
             'timestamp': new_message.timestamp.isoformat(),
+
+            'room_id':room_id
         }, room=room_id)
     else:
         new_message = chat_service.add_message(
@@ -353,6 +355,7 @@ def ping_admin(chat_id):
             'sender': 'SYSTEM',
             'content': new_message.content,
             'timestamp': new_message.timestamp.isoformat(),
+            'room_id':room_id
         }, room=room_id)
 
     # print("ANNA PINGED")
@@ -416,7 +419,9 @@ def send_message(chat_id):
         'sender': user.name,
         'content': message,
         'timestamp': new_message.timestamp.isoformat(),
-    }, room=f'{user.user_id}-{chat_id[:8]}')
+
+            'room_id':chat.room_id
+    }, room=chat.room_id)
     # print('hello')
 
     if (not chat.admin_required):
@@ -429,13 +434,17 @@ def send_message(chat_id):
             chat.room_id, chat.bot_name, msg)
 
         current_app.socketio.emit('new_message', {
+
+            'room_id':chat.room_id,
             'sender': chat.bot_name,
             'content': msg,
             'timestamp': bot_message.timestamp.isoformat()
-        }, room=f'{user.user_id}-{chat_id[:8]}')
+        }, room=chat.room_id)
     else:
 
         current_app.socketio.emit('new_message_admin', {
+
+            'room_id':chat.room_id,
             'sender': user.name,
             'content': message,
             'timestamp': new_message.timestamp.isoformat(),

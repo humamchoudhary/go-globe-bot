@@ -61,7 +61,7 @@
         </div>
         
         <p class="text-[26px] text-[var(--sec-text)]  mx-[24px]">Latest Chats</p>
-        <div class="flex flex-col">
+        <div class="flex flex-col" id="chat_list_container">
             {% for chat in chats[:5] %}
             <a href="/admin/chat/{{chat.room_id}}">
             {% include 'components/chat-item.html' %}

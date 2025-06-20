@@ -512,15 +512,34 @@ def chat(room_id):
     user = user_service.get_user_by_id(chat.user_id)
     if not chat:
         return redirect(url_for("admin.index"))
+    chat_service.set_chat_viewed(chat.room_id)
     if request.headers.get("HX-Request"):
         return render_template(
             "components/chat-area.html", chat=chat, user=user, username="Ana"
         )
 
-    chats_data.sort(key=lambda x: x["created_at"], reverse=True)
+    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     return render_template(
         "admin/chats.html", chat=chat, chats=chats_data, user=user, username="Ana"
     )
+
+
+@admin_bp.route('/chats_list/')
+@admin_required
+def get_chat_list():
+
+    chat_service = ChatService(current_app.db)
+    chats = chat_service.get_all_chats(session.get("admin_id"))
+    print(chats)
+
+    user_service = UserService(current_app.db)
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data["username"] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    return render_template("components/chat-list.html", chats=chats_data)
 
 
 @admin_bp.route("/search/", methods=["POST"])
@@ -712,6 +731,8 @@ def send_message(room_id):
         current_app.socketio.emit(
             "new_message",
             {
+
+            'room_id':chat.room_id,
                 "sender": new_message.sender,
                 "content": message,
                 "timestamp": new_message.timestamp.isoformat(),
@@ -1764,7 +1785,7 @@ def get_all_chats():
 
     # print(chats)
 
-    chats.sort(key=lambda x: x["created_at"], reverse=True)
+    chats.sort(key=lambda x: x["updated_at"], reverse=True)
     return render_template("admin/chats.html", chats=chats)
 
 
@@ -2126,23 +2147,25 @@ def get_notifications():
 
     for noti in notis:
         chat = chat_service.get_chat_by_room_id(noti.get('room_id'))
-        notificaitons.append({**noti, **chat.to_dict()})
+        if chat:
+            notificaitons.append({**noti, **chat.to_dict()})
 
     return render_template(
         "components/notification-list.html", notifications=notificaitons
     )
 
-@admin_bp.route("/notification/<notification_id>/",methods=['POST'])
+
+@admin_bp.route("/notification/<notification_id>/", methods=['POST'])
 @admin_required
 def viewed_notifications(notification_id):
     noti_service = NotificationService(current_app.db)
 
-    if noti_service.mark_notification_read(notification_id,session.get('admin_id')):
+    if noti_service.mark_notification_read(notification_id, session.get('admin_id')):
 
-        return "",200
+        return "", 200
     else:
         return "Notification not updated", 500
-        
+
 
 def register_admin_socketio_events(socketio):
     @socketio.on("admin_join")

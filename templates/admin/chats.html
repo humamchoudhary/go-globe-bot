@@ -73,7 +73,7 @@ color:var(--main-color)
             {% include 'components/chat-list.html' %}
         </div>
     </div>
-    <div class="w-max h-[90vh] md:h-[93vh]" id="chatArea" class="flex">
+    <div id="chatarea" class="w-max h-[90vh] md:h-[93vh]" id="chatArea" class="flex">
         
         {% if chat %}
         {% set active_chat = chat %}
@@ -126,25 +126,24 @@ color:var(--main-color)
        // Fix links
        fixAllLinks(el);
      });
-      {% if chat %}
 
-      const roomId = "{{chat.room_id}}";
 
       const socket = io();
 
-      socket.on("connect", function () {
-          console.log('connect')
-        socket.emit("admin_join", { room: roomId });
+
+      socket.on("new_message", function (data) {
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
+      });
+
+      socket.on("admin_required", function (data) {
+
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
       });
 
       socket.on("new_message", function (data) {
-
-          console.log('message')
-          location.reload()
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
       });
 
-
-      {% endif %}
 
 const messageArea = document.getElementById('messageArea');
       if (messageArea){
@@ -178,10 +177,12 @@ const messageArea = document.getElementById('messageArea');
       });
 
       socket.on("new_message", function (data) {
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
+      });
 
-          console.log('message')
+      socket.on("admin_required", function (data) {
 
-          location.reload()
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
       });
     }
 

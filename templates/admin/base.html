@@ -256,11 +256,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+      socket.on("new_message", function (data) {
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
+
+          {% if chat %}
+          var chatid = '{{chat.room_id}}' 
+          if (chatid == data['room_id']){
+              htmx.ajax('GET', '/admin/chat/{{chat.room_id}}', '#chatarea') 
+          }
+          {% endif%}
+      });
+
+      socket.on("admin_required", function (data) {
+
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
+      });
+
 
 
 
     socket.on("admin_required", function (data) {
-        console.log(data)
         const notificationTitle = "Admin Required";
         const notificationMessage = `A Chat room requires admin attention`;
         
@@ -391,20 +406,50 @@ function formatLocalTime(date) {
   });
 }
 
-document.querySelectorAll('.message-time').forEach(el => {
-  try {
-    let utcString = el.dataset.utc;
+// Function to process all time elements
+function processMessageTimes() {
+  document.querySelectorAll('.message-time').forEach(el => {
+    try {
+      let utcString = el.dataset.utc;
 
-    // Ensure it's a proper ISO string with UTC 'Z' if not already
-    if (!utcString.endsWith('Z') && !utcString.includes('+')) {
-      utcString += 'Z';
+      // Ensure it's a proper ISO string with UTC 'Z' if not already
+      if (!utcString.endsWith('Z') && !utcString.includes('+')) {
+        utcString += 'Z';
+      }
+
+      const date = new Date(utcString);
+      
+      // Only update if we got a valid date
+      if (!isNaN(date.getTime())) {
+        el.textContent = formatLocalTime(date);
+      } else {
+        console.warn('Invalid date for element:', el);
+      }
+    } catch (e) {
+      console.error('Time formatting failed', e);
+      // Optionally show a fallback value
+      el.textContent = 'Just now';
     }
+  });
+}
 
-    const date = new Date(utcString);
-    el.textContent = formatLocalTime(date);
-  } catch (e) {
-    console.error('Time formatting failed', e);
+// Run on initial page load
+window.addEventListener('DOMContentLoaded', function() {
+  processMessageTimes();
+});
+
+
+// Run after HTMX swaps
+document.body.addEventListener('htmx:afterSwap', function(event) {
+  // Only process for non-out-of-band swaps
+  if (!event.detail.isOOBSwap) {
+    processMessageTimes();
   }
+});
+
+// Also run after HTMX content is added to the page
+document.body.addEventListener('htmx:afterSettle', function(event) {
+  processMessageTimes();
 });
 </script>
 
