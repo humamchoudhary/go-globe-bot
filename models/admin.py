@@ -98,7 +98,6 @@ class Admin:
         else:
             admin.created_at = created_at
 
-        print(created_at)
 
         return admin
 
