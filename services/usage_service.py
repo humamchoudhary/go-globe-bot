@@ -18,7 +18,7 @@ class UsageService:
             usage_data[period][date] = {
                 "cost": doc.get("cost", []),
                 "input_tokens": doc.get("input_tokens", []),
-                "output_tokens": doc.get("output_tokens", [])
+                "output_tokens": doc.get("output_tokens", []),
             }
         return usage_data
 
@@ -46,22 +46,26 @@ class UsageService:
             # Ensure array exists and has the correct size
             existing_doc = self.collection.find_one(query)
             if not existing_doc:
-                self.collection.insert_one({
-                    "period": period,
-                    "date": date_key,
-                    "cost": [0] * size,
-                    "input_tokens": [0] * size,
-                    "output_tokens": [0] * size
-                })
+                self.collection.insert_one(
+                    {
+                        "period": period,
+                        "date": date_key,
+                        "cost": [0] * size,
+                        "input_tokens": [0] * size,
+                        "output_tokens": [0] * size,
+                    }
+                )
 
             # Increment specific index
             self.collection.update_one(
                 query,
-                {"$inc": {
-                    f"cost.{index}": cost,
-                    f"input_tokens.{index}": input_tokens,
-                    f"output_tokens.{index}": output_tokens
-                }}
+                {
+                    "$inc": {
+                        f"cost.{index}": cost,
+                        f"input_tokens.{index}": input_tokens,
+                        f"output_tokens.{index}": output_tokens,
+                    }
+                },
             )
 
 
@@ -88,22 +92,26 @@ def log_usage(input_tokens: int, output_tokens: int, cost: float):
         # Ensure array exists and has the correct size
         existing_doc = collection.find_one(query)
         if not existing_doc:
-            collection.insert_one({
-                "period": period,
-                "date": date_key,
-                "cost": [0] * size,
-                "input_tokens": [0] * size,
-                "output_tokens": [0] * size
-            })
+            collection.insert_one(
+                {
+                    "period": period,
+                    "date": date_key,
+                    "cost": [0] * size,
+                    "input_tokens": [0] * size,
+                    "output_tokens": [0] * size,
+                }
+            )
 
         # Increment specific index
         collection.update_one(
             query,
-            {"$inc": {
-                f"cost.{index}": cost,
-                f"input_tokens.{index}": input_tokens,
-                f"output_tokens.{index}": output_tokens
-            }}
+            {
+                "$inc": {
+                    f"cost.{index}": cost,
+                    f"input_tokens.{index}": input_tokens,
+                    f"output_tokens.{index}": output_tokens,
+                }
+            },
         )
 
 
@@ -118,14 +126,14 @@ def get_usage():
         usage_data[period][date] = {
             "cost": doc.get("cost", []),
             "input_tokens": doc.get("input_tokens", []),
-            "output_tokens": doc.get("output_tokens", [])
+            "output_tokens": doc.get("output_tokens", []),
         }
     return usage_data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     client = MongoClient("mongodb://localhost:27017/")
     db = client["test"]
     collection = db["usage"]
     log_usage(100, 10, 400)
-    print(get_usage())
+    # print(get_usage())

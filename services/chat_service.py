@@ -14,15 +14,15 @@ class ChatService:
         #     room_id = f"{user_id}-{chat_id[:8]}"
 
         # Add default bot message
-        initial_messages = [
-            Message("bot", "How may I help you")
-        ]
+        initial_messages = [Message("bot", "How may I help you")]
 
         chat = Chat(
             chat_id=chat_id,
             # room_id=room_id,
-            user_id=user_id, admin_id=admin_id,
-            messages=initial_messages, subject=subject
+            user_id=user_id,
+            admin_id=admin_id,
+            messages=initial_messages,
+            subject=subject,
         )
 
         self.chats_collection.insert_one(chat.to_dict())
@@ -34,12 +34,10 @@ class ChatService:
             return Chat.from_dict(chat_data)
         return None
 
-
-
     def delete(self, room_ids):
-        self.chats_collection.delete_many({"room_id": {'$in': room_ids}})
+        self.chats_collection.delete_many({"room_id": {"$in": room_ids}})
         for id in room_ids:
-            print(id)
+            # print(id)
             os.remove(f"./bin/chat/{id}.chatpl")
 
     def get_chat_by_room_id(self, room_id):
@@ -48,12 +46,13 @@ class ChatService:
             return Chat.from_dict(chat_data)
         return None
 
-    def export_chat(self, room_id,lead_id):
+    def export_chat(self, room_id, lead_id):
         chat = self.get_chat_by_room_id(room_id)
         if not chat:
             return False
         self.chats_collection.update_one(
-                {'room_id': room_id}, {"$set": {"exported": True,"lead_id":lead_id}})
+            {"room_id": room_id}, {"$set": {"exported": True, "lead_id": lead_id}}
+        )
         return True
 
     def add_message(self, room_id, sender, content):
@@ -67,29 +66,32 @@ class ChatService:
             {"room_id": room_id},
             {
                 "$push": {"messages": message.to_dict()},
-                "$set": {"updated_at": message.timestamp}
-            }
+                "$set": {"updated_at": message.timestamp},
+            },
         )
 
         return message
 
     def set_admin_required(self, room_id, required=True):
         self.chats_collection.update_one(
-            {"room_id": room_id},
-            {"$set": {"admin_required": required}}
+            {"room_id": room_id}, {"$set": {"admin_required": required}}
         )
 
     def set_admin_present(self, room_id, present=True):
         self.chats_collection.update_one(
-            {"room_id": room_id},
-            {"$set": {"admin_present": present}}
+            {"room_id": room_id}, {"$set": {"admin_present": present}}
         )
 
     def close_chat(self, room_id):
         self.chats_collection.update_one(
-            {'room_id': room_id}, {"$set": {'open': False}})
+            {"room_id": room_id}, {"$set": {"open": False}}
+        )
 
     def get_all_chats(self, admin_id=None, limit=100, skip=0):
-        chats_data = list(self.chats_collection.find({'admin_id': admin_id}).sort(
-            "updated_at", -1).skip(skip).limit(limit))
+        chats_data = list(
+            self.chats_collection.find({"admin_id": admin_id})
+            .sort("updated_at", -1)
+            .skip(skip)
+            .limit(limit)
+        )
         return [Chat.from_dict(chat_data) for chat_data in chats_data]

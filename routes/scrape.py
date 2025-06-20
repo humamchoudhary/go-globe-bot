@@ -87,7 +87,7 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
 
         # Wait for page to fully load
         time.sleep(3)  # Additional wait to ensure JS content loads
-        print('scraping')
+        # print('scraping')
 
         # Check for and handle common cookie consent popups
         try:
@@ -183,11 +183,11 @@ def scrape_web(url, cookies=None, headers=None, timeout=30, rotate_user_agents=T
 
         # Clean up extra whitespace
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-        print(type(clean_text))
-        print(len(clean_text.split()))
+        # print(type(clean_text))
+        # print(len(clean_text.split()))
 
         if len(clean_text.split()) < 500:
-            print('LESS TEXT')
+            # print('LESS TEXT')
             content_patterns = ['content', 'main',
                                 'post', 'article', 'entry', 'body']
             for pattern in content_patterns:
@@ -250,11 +250,11 @@ if __name__ == '__main__':
     )
 
     # updated_cookies = result['cookies']
-    # print("\n".join(line.strip() for line in result['text'].splitlines() if line.strip()))
+    # # print("\n".join(line.strip() for line in result['text'].splitlines() if line.strip()))
     lines = str(result['text'])
     import re
     lines = re.sub(r"\s+", " ", lines).strip()
-    print(lines)
+    # print(lines)
     # with open('output.txt', 'w') as file:
     #     file.writelines(lines)
     # hti.screenshot(html_str=result[''], save_as="output.png")

@@ -1,3 +1,4 @@
+from services.notification_service import NotificationService
 from flask_mail import Mail
 from services.admin_service import AdminService
 from datetime import datetime
@@ -27,10 +28,10 @@ def before_req():
 #
 # @min_bp.after_request
 # def after_request(response):
-#     print("Response status:", response.status)
-#     print("Response headers:", response.headers)
+#     # print("Response status:", response.status)
+#     # print("Response headers:", response.headers)
 #     # Be cautious if you're streaming
-#     print("Response data:", response.get_data(as_text=True))
+#     # print("Response data:", response.get_data(as_text=True))
 #     return response
 
 
@@ -39,8 +40,8 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            # print(session.get('user_id'))
-            print('No user')
+            # # print(session.get('user_id'))
+            # print('No user')
             return redirect('/')
 
         user_service = UserService(current_app.db)
@@ -48,7 +49,7 @@ def login_required(f):
 
         if not user:
 
-            print('No user')
+            # print('No user')
             return redirect('/')
         return f(*args, **kwargs)
     return decorated_function
@@ -68,7 +69,7 @@ def headers():
 def index():
 
     # if 'last_visit' in session:
-    #     print(f" ")
+    #     # print(f" ")
     if 'last_visit' in session and session['last_visit'] not in ['/min/', '/min/get-headers']:
         return redirect(session['last_visit'])
     return redirect('/min/onboarding')
@@ -114,7 +115,7 @@ def generate_random_username():
 #         'assistant_id', 'c8d3ac53-d120-421f-bc29-5cfe77d8c11d')
 #     try:
 #         call = vapi.start(assistant_id=assistant_id)
-#         print(call)
+#         # print(call)
 #         return jsonify({'status': 'success', 'call_info': call}), 200
 #     except Exception as e:
 #         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -134,7 +135,7 @@ def auth_user():
 
     # Check if request is coming from HTMX or regular JSON
     is_htmx = request.headers.get('HX-Request') == 'true'
-    print(is_htmx)
+    # print(is_htmx)
 
     # Handle different content types
 
@@ -143,7 +144,7 @@ def auth_user():
     else:
         # For form submissions via HTMX
         data = request.form.to_dict() or {}
-    print(data)
+    # print(data)
     name = data.get('name')
     email = data.get('email')
     phone = data.get('phone')
@@ -178,7 +179,7 @@ def auth_user():
                                                       "phone": phone,
                                                       "subject": subject})
 
-        print("Request send")
+        # print("Request send")
     except Exception as e:
         print(e)
     if is_htmx:
@@ -188,7 +189,7 @@ def auth_user():
         resp = chat(chat_id)
         session['last_visit'] = f"/min/chat/{chat_id}"
 
-        print(session['last_visit'])
+        # print(session['last_visit'])
         return render_template_string(resp)
 
         # Make a server-side request to newchat endpoint
@@ -203,9 +204,9 @@ def auth_user():
         #         chat_url = newchat_response.headers['Location']
         #         chat_response = client.get(chat_url)
         #         if chat_response.status_code == 200:
-        #             print(chat_response)
+        #             # print(chat_response)
         #             return chat_response.data, 200
-        #             print('ads')
+        #             # print('ads')
 
         # Fallback if something went wrong with the server-side requests
         # return redirect(url_for('min.new_chat', subject=subject))
@@ -221,7 +222,7 @@ def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
-    print(f"CREATE CHAT ADMIN ID: {session.get('admin_id')} ")
+    # print(f"CREATE CHAT ADMIN ID: {session.get('admin_id')} ")
     chat = chat_service.create_chat(
         user.user_id, subject=subject, admin_id=session.get('admin_id'))
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
@@ -317,6 +318,12 @@ def ping_admin(chat_id):
         'subject': chat.subject
     }, room='admin')
 
+    noti_service = NotificationService(current_app.db)
+    # user_service = UserService(current_app.db)
+    # admin_service = AdminService(current_app.db)
+    noti_service.create_admin_required_notification(
+        chat.admin_id, chat.room_id, user.name)
+
     if not available:
 
         formatted_timings = "\n".join(
@@ -348,7 +355,7 @@ def ping_admin(chat_id):
             'timestamp': new_message.timestamp.isoformat(),
         }, room=room_id)
 
-    print("ANNA PINGED")
+    # print("ANNA PINGED")
     msg = f"""Hi Ana,
 
 {user.name} has just requested to have a live chat. If you'd like to start the conversation, simply click the link below:
@@ -367,12 +374,12 @@ User Information:
     \n\n
 Auto Generated Message"""
 
-    print(current_admin.email)
+    # print(current_admin.email)
 
     mail = Mail(current_app)
     status = send_email(current_admin.email, f'Assistance Required: {
-               chat.subject}', "Ping", mail,render_template('/email/new_message.html',user=user,chat=chat))
-    print(status)
+        chat.subject}', "Ping", mail, render_template('/email/new_message.html', user=user, chat=chat))
+    # print(status)
 
     if request.headers.get('HX-Request'):
         return "", 204
@@ -403,14 +410,14 @@ def send_message(chat_id):
     new_message = chat_service.add_message(
         chat.room_id, user.name, message)
 
-    # print(f'{session["user_id"]}-{chat_id[:8]}')
+    # # print(f'{session["user_id"]}-{chat_id[:8]}')
 
     current_app.socketio.emit('new_message', {
         'sender': user.name,
         'content': message,
         'timestamp': new_message.timestamp.isoformat(),
     }, room=f'{user.user_id}-{chat_id[:8]}')
-    print('hello')
+    # print('hello')
 
     if (not chat.admin_required):
         msg, usage = current_app.bot.responed(
@@ -426,6 +433,16 @@ def send_message(chat_id):
             'content': msg,
             'timestamp': bot_message.timestamp.isoformat()
         }, room=f'{user.user_id}-{chat_id[:8]}')
+    else:
+
+        current_app.socketio.emit('new_message_admin', {
+            'sender': user.name,
+            'content': message,
+            'timestamp': new_message.timestamp.isoformat(),
+        }, room=chat.room_id)
+        noti_service = NotificationService(current_app.db)
+        noti_service.create_notification(chat.admin_id, f'{
+                                         user.name} sent a message', message, 'admin_required', chat.room_id)
 
     return jsonify({'success': True}), 200
 
@@ -441,7 +458,7 @@ def register_min_socketio_events(socketio):
 
         join_room(room)
         username = session.get('name', "USER")
-        print(f'{username} has joined the room.')
+        # print(f'{username} has joined the room.')
         current_app.config['ONLINE_USERS'] += 1
         emit('status', {'msg': f'{username} has joined the room.'}, room=room)
 

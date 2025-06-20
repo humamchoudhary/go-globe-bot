@@ -11,6 +11,45 @@
 
 </script>
 
+
+
+<style>
+
+/* Notification menu animations */
+#notification-menu {
+    transition: all 0.3s ease;
+}
+
+#notification-popup {
+    transition: all 0.3s ease;
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+#notification-popup.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Notification list styling */
+#notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#notification-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#notification-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+#notification-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}</style>
+
 {% endblock %}
 {% block header_items %}
 <div class="flex flex-row justify-between items-center w-full px-[10px] md:px-[20px] ">
@@ -18,8 +57,10 @@
         <div id="open-search" class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
             <i data-lucide="search" class="text-white size-[22px]"></i></div>
 
-        <div class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
-            <i data-lucide="bell" class="text-white size-[22px]"></i></div>
+<div id="open-notifications" class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all relative">
+            <i data-lucide="bell" class="text-white size-[22px]"></i>
+            <div id="notification-badge" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs hidden">0</div>
+        </div>
 
         <div class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
             <i data-lucide="sun" class="text-white size-[22px]"></i></div>
@@ -47,51 +88,217 @@
         </div>
     </div>
 
+
+    <!-- Updated notification menu in base.html -->
+    <div id="notification-menu" style="display: none;" class="z-200 absolute items-center flex-col w-screen h-screen overflow-hidden left-0 top-0 pt-[150px]">
+      <div id="close-notifications" class="bg-black/60 absolute w-screen h-screen top-0 right-0"></div>
+      <div class="z-250 flex flex-col gap-[30px] w-[680px] items-center">
+        <div class="w-full rounded-[5px] border border-[var(--border-color)] bg-[var(--sec-bg-color)]">
+          <div id="notification-list" class="max-h-[500px] overflow-y-auto"
+               hx-get="/admin/notifications/"
+               hx-trigger="load">
+            <div class="text-center py-4 text-[var(--sec-text)] opacity-70">Loading notifications...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="flex flex-row gap-4 md:hidden" onclick="toggleMenu()">
         <div class="px-5"> <i data-lucide="menu"></i></div>
     </div>
 </div>
 
+<!-- Notification Popup (will be shown temporarily) -->
+<div id="notification-popup" class="fixed top-4 left-1/2 transform -translate-x-1/2 w-[400px] bg-[var(--sec-bg-color)] rounded-[5px] shadow-lg p-4 z-[1000] border border-[var(--border-color)] hidden">
+  <div class="flex justify-between items-start gap-[15px]">
+    <div class="flex flex-col gap-[5px]">
+      <div class="flex flex-row gap-[10px] items-center">
+        <h3 id="popup-title" class="text-[16px] font-bold text-[var(--main-color)]"></h3>
+        <div class="px-[6px] py-[1px] bg-red-500/20 rounded-full">
+          <p class="text-xs text-red-500">New</p>
+        </div>
+      </div>
+      <p id="popup-message" class="text-[14px] text-[var(--sec-text)] opacity-80"></p>
+    </div>
+    <button onclick="dismissPopup()" class="text-[var(--sec-text)] opacity-50 hover:opacity-100 transition-all">
+      <i data-lucide="x" class="size-4"></i>
+    </button>
+  </div>
+</div>
 
 
+
+<script>
+// Notification handling
+let unreadNotifications = 0;
+const notificationBadge = document.getElementById('notification-badge');
+const notificationList = document.getElementById('notification-list');
+const notificationMenu = document.getElementById('notification-menu');
+const openNotifications = document.getElementById('open-notifications');
+const closeNotifications = document.getElementById('close-notifications');
+const notificationPopup = document.getElementById('notification-popup');
+const popupTitle = document.getElementById('popup-title');
+const popupMessage = document.getElementById('popup-message');
+
+// Toggle notification menu
+openNotifications?.addEventListener('click', () => {
+    if (notificationMenu) {
+        notificationMenu.style.display = 'flex';
+        // Refresh notifications when opening
+htmx.ajax('GET', '/admin/notifications/', '#notification-list') 
+        markNotificationsAsRead();
+    }
+});
+
+closeNotifications?.addEventListener('click', () => {
+    if (notificationMenu) {
+        notificationMenu.style.display = 'none';
+    }
+});
+
+function markNotificationsAsRead() {
+    unreadNotifications = 0;
+    updateBadge();
+    // You could also send an AJAX request to mark notifications as read in the backend
+}
+
+function updateBadge() {
+    if (unreadNotifications > 0) {
+        notificationBadge.textContent = unreadNotifications;
+        notificationBadge.classList.remove('hidden');
+    } else {
+        notificationBadge.classList.add('hidden');
+    }
+}
+
+function addNotification(title, message) {
+    unreadNotifications++;
+    updateBadge();
+    
+    // Add to notification list
+htmx.ajax('GET', '/admin/notifications/', '#notification-list') 
+
+}
+
+function refreshNotifcation() {
+    unreadNotifications--;
+    updateBadge();
+    
+    // Add to notification list
+htmx.ajax('GET', '/admin/notifications/', '#notification-list') 
+
+}
+
+function showPopupNotification(title, message) {
+    popupTitle.textContent = title;
+    popupMessage.textContent = message;
+
+    notificationPopup.classList.remove('hidden');
+
+    // Show and animate in
+    setTimeout(() => {
+        notificationPopup.classList.add('show');
+    }, 10);
+
+    // Auto-dismiss after 5 seconds
+    setTimeout(dismissPopup, 100000);
+}
+
+function dismissPopup() {
+    // Animate out
+    notificationPopup.classList.remove('show');
+
+    // Hide after animation
+    setTimeout(() => {
+        notificationPopup.classList.add('hidden');
+    }, 300);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const socket = io();
+
+      socket.on("connect", function () {
+          console.log('connect')
+        socket.emit("admin_join", { room: 'admin' });
+
+      });
+
+
+
+    socket.on("new_message_admin", function (data) {
+        console.log(data)
+        const notificationTitle = `New Message from ${data['sender']}`;
+        const notificationMessage = data['content'];
+        console.log(data)
+        
+        // Add to notification list
+        addNotification(notificationTitle, notificationMessage);
+        
+        // Show popup notification
+        showPopupNotification(notificationTitle, notificationMessage);
+        
+        // Browser notification (optional)
+        if (Notification.permission === "granted") {
+            new Notification(notificationTitle, {
+                body: `Message: ${notificationMessage}`,
+              icon: "/static/img/logo-desktop-mini.svg",
+            });
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    new Notification(notificationTitle, {
+                body: `Message: ${notificationMessage}`,
+              icon: "/static/img/logo-desktop-mini.svg",
+                    });
+                }
+            });
+        }
+    });
+
+
+
+
+    socket.on("admin_required", function (data) {
+        console.log(data)
+        const notificationTitle = "Admin Required";
+        const notificationMessage = `A Chat room requires admin attention`;
+        
+        // Add to notification list
+        addNotification(notificationTitle, notificationMessage);
+        
+        // Show popup notification
+        showPopupNotification(notificationTitle, notificationMessage);
+        
+        // Browser notification (optional)
+        if (Notification.permission === "granted") {
+            new Notification(notificationTitle, {
+                body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+            });
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    new Notification(notificationTitle, {
+                        body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+                    });
+                }
+            });
+        }
+    });
+});
+</script>
+
+
+
+<!--   Search Script   -->
 <script>
 
 document.addEventListener('DOMContentLoaded', () => {
     const openSearch = document.getElementById('open-search');
     const closeSearch = document.getElementById('close-search');
     const searchMenu = document.getElementById('search-menu');
-    // console.log(searchMenu)
-
-        const socket = io();
-
-        socket.on("new_message", function (data) {
-            console.log(data)
-
-        });
-
-
-
-        socket.on("admin_required", function (data) {
-            console.log(data)
-          if (Notification.permission === "granted") {
-            new Notification("Admin Required", {
-              body: `Chat room ${data.room_id} requires admin attention`,
-              icon: "/static/favicon.ico",
-            });
-          } else {
-
-Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-new Notification("Admin Required", {
-              body: `Chat room ${data.room_id} requires admin attention`,
-              icon: "/static/favicon.ico",
-            })
-            }
-          });
-
-          }
-
-        });
 
 
 
@@ -113,6 +320,12 @@ new Notification("Admin Required", {
         }
     });
 });
+
+  document.body.addEventListener("htmx:afterSwap", () => {
+      lucide.createIcons();
+
+  });
+
 </script>
 {% endblock %}
 

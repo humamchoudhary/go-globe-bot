@@ -1,3 +1,4 @@
+from services.notification_service import NotificationService
 from flask_mail import Mail
 from flask import request, flash, make_response
 import zipfile
@@ -11,7 +12,8 @@ from datetime import datetime, timedelta
 from collections import Counter
 from services.timezone import UTCZoneManager
 import threading
-# from # p# print import pprint
+
+# from # p# # print import p# print
 from services.usage_service import UsageService
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
@@ -21,8 +23,17 @@ import re
 from flask import send_from_directory
 import uuid
 import os
-from flask import render_template, session, request, jsonify, redirect, url_for, current_app, flash
-from flask_socketio import join_room,  emit
+from flask import (
+    render_template,
+    session,
+    request,
+    jsonify,
+    redirect,
+    url_for,
+    current_app,
+    flash,
+)
+from flask_socketio import join_room, emit
 from functools import wraps
 from . import admin_bp
 from services.chat_service import ChatService
@@ -35,36 +46,38 @@ from services.admin_service import AdminService
 from services.email_service import send_email
 
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'files')
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "files")
 
 
 def admin_required(_func=None, *, roles=None):
     if roles is None:
-        roles = ['admin', 'superadmin']
+        roles = ["admin", "superadmin"]
     elif isinstance(roles, str):
         roles = [roles]
 
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if session.get('role') not in roles:
+            if session.get("role") not in roles:
 
-                return redirect(url_for('admin.login'))
+                return redirect(url_for("admin.login"))
 
-            if not session.get('admin_id'):
-                session['next'] = request.path
-                return redirect(url_for('admin.login'))
+            if not session.get("admin_id"):
+                session["next"] = request.path
+                return redirect(url_for("admin.login"))
 
             admin_service = AdminService(current_app.db)
-            current_admin = admin_service.get_admin_by_id(session['admin_id'])
+            current_admin = admin_service.get_admin_by_id(session["admin_id"])
 
             if not current_admin or not current_admin.has_permission(roles):
-                return redirect(url_for('admin.login'))
+                return redirect(url_for("admin.login"))
 
             from flask import g
+
             g.current_admin = current_admin
 
             return f(*args, **kwargs)
+
         return decorated_function
 
     if _func:
@@ -73,64 +86,70 @@ def admin_required(_func=None, *, roles=None):
     return decorator
 
 
-@admin_bp.route('/pricing/')
+@admin_bp.route("/pricing/")
 @admin_required
 def pricing_page():
-    return render_template('admin/pricing.html')
+    return render_template("admin/pricing.html")
 
 
-@admin_bp.route('/faq/')
+@admin_bp.route("/faq/")
 @admin_required
 def faq_page():
-    return render_template('admin/faq.html')
+    return render_template("admin/faq.html")
 
 
-@admin_bp.route('/change-logs')
+@admin_bp.route("/change-logs")
 @admin_required
 def changelogs_page():
-    return render_template('admin/change-logs.html')
+    return render_template("admin/change-logs.html")
 
 
-@admin_bp.route('/logs/')
+@admin_bp.route("/logs/")
 @admin_required
 def view_logs():
     """Main logs page"""
     admin = AdminService(current_app.db).get_admin_by_id(
-        session.get('admin_id'))
+        session.get("admin_id"))
     logs_service = LogsService(current_app.db)
 
     # Regular admins only see their own logs
     admin_filter = session.get(
-        'admin_id') if admin.role != 'superadmin' else None
+        "admin_id") if admin.role != "superadmin" else None
     logs = logs_service.get_recent_logs(admin_filter, 10000)
 
-    return render_template('admin/logs.html', logs=logs, selected_log=None)
+    return render_template("admin/logs.html", logs=logs, selected_log=None)
 
 
-@admin_bp.route('/logs/filter')
+@admin_bp.route("/logs/filter")
 @admin_required
 def filter_logs():
     """Filter logs with HTMX"""
     admin = AdminService(current_app.db).get_admin_by_id(
-        session.get('admin_id'))
+        session.get("admin_id"))
     logs_service = LogsService(current_app.db)
 
     # Get filter parameters
-    levels = request.args.getlist('level')
-    tags = request.args.getlist('tag')
-    user_id = request.args.get('user_id', '').strip()
+    levels = request.args.getlist("level")
+    tags = request.args.getlist("tag")
+    user_id = request.args.get("user_id", "").strip()
     admin_id = admin.admin_id
-    message_search = request.args.get('message_search', '').strip()
-    sort_order = request.args.get('sort', 'timestamp_desc')
-    limit = request.args.get('limit', 10000)
+    message_search = request.args.get("message_search", "").strip()
+    sort_order = request.args.get("sort", "timestamp_desc")
+    limit = request.args.get("limit", 10000)
 
     # Parse dates
     start_date = end_date = None
     try:
-        start_date = datetime.fromisoformat(request.args.get(
-            'start_date', '')) if request.args.get('start_date') else None
-        end_date = datetime.fromisoformat(request.args.get(
-            'end_date', '')) if request.args.get('end_date') else None
+        start_date = (
+            datetime.fromisoformat(request.args.get("start_date", ""))
+            if request.args.get("start_date")
+            else None
+        )
+        end_date = (
+            datetime.fromisoformat(request.args.get("end_date", ""))
+            if request.args.get("end_date")
+            else None
+        )
     except ValueError:
         pass
 
@@ -140,7 +159,7 @@ def filter_logs():
 
     # Regular admins can't filter by other admin_ids
     current_admin_id = session.get(
-        'admin_id') if admin.role != 'superadmin' else None
+        "admin_id") if admin.role != "superadmin" else None
 
     logs = logs_service.search_logs_advanced(
         levels=level_enums or None,
@@ -151,59 +170,64 @@ def filter_logs():
         start_date=start_date,
         end_date=end_date,
         limit=limit,
-        current_admin_id=current_admin_id
+        current_admin_id=current_admin_id,
     )
 
     # Apply sorting
-    if sort_order == 'timestamp_asc':
+    if sort_order == "timestamp_asc":
         logs.sort(key=lambda x: x.timestamp)
-    elif sort_order in ('level_desc', 'level_asc'):
-        level_priority = {LogLevel.CRITICAL: 5, LogLevel.ERROR: 4,
-                          LogLevel.WARNING: 3, LogLevel.INFO: 2, LogLevel.DEBUG: 1}
-        reverse = sort_order == 'level_desc'
+    elif sort_order in ("level_desc", "level_asc"):
+        level_priority = {
+            LogLevel.CRITICAL: 5,
+            LogLevel.ERROR: 4,
+            LogLevel.WARNING: 3,
+            LogLevel.INFO: 2,
+            LogLevel.DEBUG: 1,
+        }
+        reverse = sort_order == "level_desc"
         logs.sort(key=lambda x: level_priority.get(
             x.level, 0), reverse=reverse)
 
-    return render_template('admin/logs_table.html', logs=logs)
+    return render_template("admin/logs_table.html", logs=logs)
 
 
-@admin_bp.route('/log/<string:log_id>')
+@admin_bp.route("/log/<string:log_id>")
 @admin_required
 def view_log_detail(log_id):
     """View individual log details"""
     admin = AdminService(current_app.db).get_admin_by_id(
-        session.get('admin_id'))
+        session.get("admin_id"))
     logs_service = LogsService(current_app.db)
 
     log = logs_service.get_log_by_id(log_id)
     if not log:
-        if request.headers.get('HX-Request') == 'true':
+        if request.headers.get("HX-Request") == "true":
             return '<div class="p-4 text-red-500">Log not found</div>', 404
         return "Log not found", 404
 
     # Check access for regular admins
-    if admin.role != 'superadmin' and log.admin_id != session.get('admin_id'):
-        if request.headers.get('HX-Request') == 'true':
+    if admin.role != "superadmin" and log.admin_id != session.get("admin_id"):
+        if request.headers.get("HX-Request") == "true":
             return '<div class="p-4 text-red-500">Access denied</div>', 403
         return "Access denied", 403
 
-    if request.headers.get('HX-Request') == 'true':
-        return render_template('admin/log_detail.html', log=log)
+    if request.headers.get("HX-Request") == "true":
+        return render_template("admin/log_detail.html", log=log)
     else:
         admin_filter = session.get(
-            'admin_id') if admin.role != 'superadmin' else None
+            "admin_id") if admin.role != "superadmin" else None
         logs = logs_service.get_recent_logs(admin_filter, limit=10000)
-        return render_template('admin/logs.html', logs=logs, selected_log=log)
+        return render_template("admin/logs.html", logs=logs, selected_log=log)
 
 
-@admin_bp.route('/forgot-password', methods=['GET', 'POST'])
+@admin_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
-    if request.method == 'GET':
-        return render_template('admin/forgot_password.html')
+    if request.method == "GET":
+        return render_template("admin/forgot_password.html")
 
     data = request.json
-    username = data.get('username')
-    email = data.get('email')
+    username = data.get("username")
+    email = data.get("email")
 
     if not username or not email:
         return jsonify({"error": "Username and email are required"}), 400
@@ -218,7 +242,7 @@ def forgot_password():
     token = admin_service.create_password_reset_token(admin.admin_id)
 
     # Send email with reset link
-    reset_url = url_for('admin.reset_password', token=token, _external=True)
+    reset_url = url_for("admin.reset_password", token=token, _external=True)
     mail = Mail(current_app)
     try:
         # msg = Message(
@@ -230,40 +254,56 @@ def forgot_password():
         # )
         # mail.send(msg)
 
-        status = send_email(admin.email, "GoBot Password Reset", f"""<!DOCTYPE html>
+        status = send_email(
+            admin.email,
+            "GoBot Password Reset",
+            f"""<!DOCTYPE html>
                             Hello {admin.username},
                             You have requested to reset your password. Please click the link below to reset your password:\n
                             {reset_url}\n
                             This link will expire in 1 hour.
                             If you didn't request this, please ignore this email.
-                                """, mail=mail, html_message=render_template('/email/forget_pass.html', admin=admin, reset_url=reset_url))
+                                """,
+            mail=mail,
+            html_message=render_template(
+                "/email/forget_pass.html", admin=admin, reset_url=reset_url
+            ),
+        )
 
-        return jsonify({"status": "success", "message": "Password reset link sent to your email"}), 200
+        return (
+            jsonify(
+                {
+                    "status": "success",
+                    "message": "Password reset link sent to your email",
+                }
+            ),
+            200,
+        )
     except Exception as e:
         current_app.logger.error(
             f"Failed to send password reset email: {str(e)}")
         return jsonify({"error": "Failed to send password reset email"}), 500
 
 
-@admin_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+@admin_bp.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
     admin_service = AdminService(current_app.db)
     admin = admin_service.validate_password_reset_token(token)
 
     if not admin:
-        return render_template('admin/reset_password_invalid.html')
+        return render_template("admin/reset_password_invalid.html")
 
-    if request.method == 'GET':
-        return render_template('admin/reset_password_form.html', token=token)
+    if request.method == "GET":
+        return render_template("admin/reset_password_form.html", token=token)
 
     # Handle POST request for password reset
     data = request.json
-    print(data)
-    new_password = data.get('password')
-    confirm_password = data.get('confirm_password')
-    # print(dict(request.form))
-    print(new_password)
-    print(confirm_password)
+    # print(data)
+    new_password = data.get("password")
+    confirm_password = data.get("confirm_password")
+    # # print(dict(request.form))
+    # print(new_password)
+    # print(confirm_password)
 
     if not new_password or not confirm_password:
         return jsonify({"error": "Both password fields are required"}), 400
@@ -275,11 +315,16 @@ def reset_password(token):
     admin_service.update_admin_password(admin.admin_id, new_password)
     admin_service.clear_password_reset_token(admin.admin_id)
 
-    return jsonify({
-        "status": "success",
-        "message": "Password updated successfully",
-        "redirect": url_for('admin.login')
-    }), 200
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Password updated successfully",
+                "redirect": url_for("admin.login"),
+            }
+        ),
+        200,
+    )
 
 
 # @admin_bp.route('/login', methods=['GET', 'POST'])
@@ -316,14 +361,14 @@ def reset_password(token):
 #     return jsonify({"status": "success", "redirect": url_for('admin.index')}), 200
 
 
-@admin_bp.route('/login', methods=['GET', 'POST'])
+@admin_bp.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'GET':
-        return render_template('admin/login.html')
+    if request.method == "GET":
+        return render_template("admin/login.html")
 
     data = request.json
-    username = data.get('username')
-    password = data.get('password')
+    username = data.get("username")
+    password = data.get("password")
     ip_address = request.headers.get(
         "X_Real-IP", request.remote_addr).split(",")[0]
 
@@ -344,10 +389,10 @@ def login():
     # IP not trusted, require 2FA
     token_info = admin_service.create_2fa_token(admin.admin_id, ip_address)
     if not token_info:
-        return jsonify({
-            "error": "Failed to create 2FA token",
-            "requires_2fa": True
-        }), 500
+        return (
+            jsonify({"error": "Failed to create 2FA token", "requires_2fa": True}),
+            500,
+        )
     mail = Mail(current_app)
     # Send the 2FA code via email
     status = send_email(
@@ -365,42 +410,47 @@ def login():
         """,
         mail=mail,
         html_message=render_template(
-            '/email/2fa_code.html',
+            "/email/2fa_code.html",
             admin=admin,
-            code=token_info['code'],
-            expires_at=token_info['expires_at']
-        )
+            code=token_info["code"],
+            expires_at=token_info["expires_at"],
+        ),
     )
 
     if not status:
         return jsonify({"error": "Failed to send 2FA code"}), 500
 
-    return jsonify({
-        "status": "2fa_required",
-        "message": "2FA code sent to your email",
-        "admin_id": admin.admin_id
-    }), 200
+    return (
+        jsonify(
+            {
+                "status": "2fa_required",
+                "message": "2FA code sent to your email",
+                "admin_id": admin.admin_id,
+            }
+        ),
+        200,
+    )
 
 
 def complete_admin_login(admin):
     """Common login completion logic"""
     # Clear session and set admin session
-    next_url = session.pop('next', None)
+    next_url = session.pop("next", None)
     session.clear()
-    session['admin_id'] = admin.admin_id
-    session['role'] = admin.role
-    session['username'] = admin.username
+    session["admin_id"] = admin.admin_id
+    session["role"] = admin.role
+    session["username"] = admin.username
 
     if next_url:
         return jsonify({"status": "success", "redirect": next_url}), 200
-    return jsonify({"status": "success", "redirect": url_for('admin.index')}), 200
+    return jsonify({"status": "success", "redirect": url_for("admin.index")}), 200
 
 
-@admin_bp.route('/verify-2fa', methods=['POST'])
+@admin_bp.route("/verify-2fa", methods=["POST"])
 def verify_2fa():
     data = request.json
-    admin_id = data.get('admin_id')
-    code = data.get('code')
+    admin_id = data.get("admin_id")
+    code = data.get("code")
     ip_address = request.headers.get(
         "X_Real-IP", request.remote_addr).split(",")[0]
 
@@ -410,8 +460,8 @@ def verify_2fa():
     admin_service = AdminService(current_app.db)
     verification = admin_service.verify_2fa_code(admin_id, ip_address, code)
 
-    if not verification.get('success'):
-        return jsonify({"error": verification.get('error')}), 401
+    if not verification.get("success"):
+        return jsonify({"error": verification.get("error")}), 401
 
     # 2FA verified successfully - mark IP as trusted
     admin_service.add_trusted_ip(admin_id, ip_address)
@@ -423,23 +473,24 @@ def verify_2fa():
     return complete_admin_login(admin)
 
 
-@admin_bp.route('/onboarding', methods=['GET', 'POST'])
+@admin_bp.route("/onboarding", methods=["GET", "POST"])
 @admin_required
 def onboard():
     if request.method == "GET":
-        return render_template('admin/onboarding.html')
+        return render_template("admin/onboarding.html")
     else:
         data = request.json
-        print(data)
-        admin_id = session.get('admin_id')
+        # print(data)
+        admin_id = session.get("admin_id")
         admin_service = AdminService(current_app.db)
         admin_service.update_admin_login(
-            admin_id, data['username'], data['password'], data['email'], data['phone'])
+            admin_id, data["username"], data["password"], data["email"], data["phone"]
+        )
 
-        return jsonify({'message': "No Error"})
+        return jsonify({"message": "No Error"})
 
 
-@admin_bp.route('/chat/<room_id>', methods=['GET'])
+@admin_bp.route("/chat/<room_id>", methods=["GET"])
 @admin_required
 def chat(room_id):
 
@@ -448,32 +499,36 @@ def chat(room_id):
     user_service = UserService(current_app.db)
     chat = chat_service.get_chat_by_room_id(room_id)
     if not chat:
-        return redirect(url_for('admin.get_all_chats'))
-    chats = chat_service.get_all_chats(session.get('admin_id'))
+        return redirect(url_for("admin.get_all_chats"))
+    chats = chat_service.get_all_chats(session.get("admin_id"))
 
     # chats_data = [c for c in chats]
     chats_data = []
     for c in chats:
         data = c.to_dict()
-        data['username'] = user_service.get_user_by_id(c.user_id).name
+        data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
     user = user_service.get_user_by_id(chat.user_id)
     if not chat:
-        return redirect(url_for('admin.index'))
-    if request.headers.get('HX-Request'):
-        return render_template('components/chat-area.html', chat=chat, user=user, username="Ana")
+        return redirect(url_for("admin.index"))
+    if request.headers.get("HX-Request"):
+        return render_template(
+            "components/chat-area.html", chat=chat, user=user, username="Ana"
+        )
 
-    chats_data.sort(key=lambda x: x['created_at'], reverse=True)
-    return render_template('admin/chats.html', chat=chat, chats=chats_data, user=user, username="Ana")
+    chats_data.sort(key=lambda x: x["created_at"], reverse=True)
+    return render_template(
+        "admin/chats.html", chat=chat, chats=chats_data, user=user, username="Ana"
+    )
 
 
-@admin_bp.route('/search/', methods=["POST"])
+@admin_bp.route("/search/", methods=["POST"])
 @admin_required
 def search():
-    search = request.form.get('search-q')
+    search = request.form.get("search-q")
 
     chat_service = ChatService(current_app.db)
-    chats = chat_service.get_all_chats(session.get('admin_id'))
+    chats = chat_service.get_all_chats(session.get("admin_id"))
 
     user_service = UserService(current_app.db)
     search_chats = set()
@@ -481,7 +536,11 @@ def search():
         user = user_service.get_user_by_id(chat.user_id)
         chat.username = user.name
 
-        if search in user.name or (user.country and search in user.country) or (user.city and search in user.city):
+        if (
+            search in user.name
+            or (user.country and search in user.country)
+            or (user.city and search in user.city)
+        ):
             search_chats.add(chat)
             continue
         for message in chat.messages:
@@ -489,61 +548,93 @@ def search():
                 search_chats.add(chat)
                 break
 
-    return render_template('components/search-results.html', search_chats=list(search_chats))
+    return render_template(
+        "components/search-results.html", search_chats=list(search_chats)
+    )
 
 
-@admin_bp.route('/chat/<room_id>/user')
+@admin_bp.route("/chat/<room_id>/user")
 def chat_user(room_id):
     chat_service = ChatService(current_app.db)
 
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(
-        chat_service.get_chat_by_room_id(room_id).user_id)
+        chat_service.get_chat_by_room_id(room_id).user_id
+    )
 
     return render_template("admin/user.html", user=user.to_dict())
 
 
-@admin_bp.route('/chat/min/<room_id>', methods=['GET'])
+@admin_bp.route("/chat/min/<room_id>", methods=["GET"])
 @admin_required
 def chat_mini(room_id):
 
     chat_service = ChatService(current_app.db)
 
     chat = chat_service.get_chat_by_room_id(room_id)
-    return render_template('admin/fragments/chat_mini.html', chat=chat, username="Ana")
+    return render_template("admin/fragments/chat_mini.html", chat=chat, username="Ana")
 
 
-@admin_bp.route('/user/<string:user_id>/details', methods=['GET'])
+@admin_bp.route("/user/<string:user_id>/details", methods=["GET"])
 @admin_required
 def get_user_details(user_id):
 
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(user_id)
-    if request.headers.get('HX-Request'):
-        return render_template('components/chat-user-info.html', user=user)
+    if request.headers.get("HX-Request"):
+        return render_template("components/chat-user-info.html", user=user)
 
     return jsonify(user.to_dict())
 
 
-@admin_bp.route('/chats/<string:filter>', methods=['GET'])
+@admin_bp.route("/chats/<string:filter>", methods=["GET"])
 @admin_required
 def filter_chats(filter):
 
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
 
-    chats = chat_service.get_all_chats(session.get('admin_id'))
+    chats = chat_service.get_all_chats(session.get("admin_id"))
 
     if filter == "all":
-        return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats])
+        return render_template(
+            "components/chat-list.html",
+            chats=[
+                {
+                    **chat.to_dict(),
+                    "username": user_service.get_user_by_id(chat.user_id).name,
+                }
+                for chat in chats
+            ],
+        )
     elif filter == "active":
-        return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.admin_required])
-    elif filter == 'exported':
+        return render_template(
+            "components/chat-list.html",
+            chats=[
+                {
+                    **chat.to_dict(),
+                    "username": user_service.get_user_by_id(chat.user_id).name,
+                }
+                for chat in chats
+                if chat.admin_required
+            ],
+        )
+    elif filter == "exported":
 
-        return render_template('components/chat-list.html', chats=[{**chat.to_dict(), "username": user_service.get_user_by_id(chat.user_id).name} for chat in chats if chat.exported])
+        return render_template(
+            "components/chat-list.html",
+            chats=[
+                {
+                    **chat.to_dict(),
+                    "username": user_service.get_user_by_id(chat.user_id).name,
+                }
+                for chat in chats
+                if chat.exported
+            ],
+        )
 
 
-@admin_bp.route('/chat/<room_id>/export', methods=['POST'])
+@admin_bp.route("/chat/<room_id>/export", methods=["POST"])
 @admin_required
 def export_chat(room_id):
     chat_service = ChatService(current_app.db)
@@ -553,10 +644,10 @@ def export_chat(room_id):
         user_service = UserService(current_app.db)
         user = user_service.get_user_by_id(chat.user_id)
         # try:
-        erp_url = os.environ.get('ERP_URL')
+        erp_url = os.environ.get("ERP_URL")
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "authtoken": f"{os.environ.get('ERP_TOKEN')}"
+            "authtoken": f"{os.environ.get('ERP_TOKEN')}",
         }
         data = {
             "name": user.name,
@@ -568,29 +659,29 @@ def export_chat(room_id):
             "city": user.city,
             "status": 2,
             "source": 10,
-            "assigned": 1
+            "assigned": 1,
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
-        print(r.url)
+        # print(r.url)
         if r.status_code == 200:
 
             # data = r.json()
-            print(r)
-            print(r.content)
-            if not chat_service.export_chat(room_id, data.get('lead_id', None)):
+            # print(r)
+            # print(r.content)
+            if not chat_service.export_chat(room_id, data.get("lead_id", None)):
                 return "Chat not found", 404
         else:
-            raise Exception(f'Error in exporting: {r.status_code}, {r.json()}')
+            raise Exception(f"Error in exporting: {r.status_code}, {r.json()}")
         # except Exception as e:
-        #     print(e)
+        #     # print(e)
         #     return "Error pushing", 500
         return "", 200
 
     return "Chat not found", 404
 
 
-@admin_bp.route('/chat/<room_id>/send_message', methods=['POST'])
+@admin_bp.route("/chat/<room_id>/send_message", methods=["POST"])
 @admin_required
 def send_message(room_id):
     try:
@@ -599,9 +690,9 @@ def send_message(room_id):
         #         return "Please log in first", 401
         #     return "<h1>Unauthorized</h1>", 401
 
-        message = request.form.get('message')
-        # print(rf'{message}')
-        # print(f'{room_id}')
+        message = request.form.get("message")
+        # # print(rf'{message}')
+        # # print(f'{room_id}')
         if not message:
             return "", 302
         chat_service = ChatService(current_app.db)
@@ -609,99 +700,104 @@ def send_message(room_id):
 
         chat = chat_service.get_chat_by_room_id(room_id)
         if not chat:
-            if request.headers.get('HX-Request'):
+            if request.headers.get("HX-Request"):
                 return "Chat not found", 404
             return jsonify({"error": "Chat not found"}), 404
 
-        new_message = chat_service.add_message(
-            chat.room_id, "Ana", message)
+        new_message = chat_service.add_message(chat.room_id, "Ana", message)
         user = user_service.get_user_by_id(chat.user_id)
         if not user:
-            return '<p>User Not Found</>'
-        current_app.socketio.emit('new_message', {
-            'sender': new_message.sender,
-            'content': message,
-            'timestamp': new_message.timestamp.isoformat()
-        }, room=room_id)
+            return "<p>User Not Found</>"
+        current_app.socketio.emit(
+            "new_message",
+            {
+                "sender": new_message.sender,
+                "content": message,
+                "timestamp": new_message.timestamp.isoformat(),
+            },
+            room=room_id,
+        )
 
         # return render_template('admin/fragments/chat_message.html', message=new_message, username="Ana")
         return "", 200
     except Exception as e:
         return f"{e}", 500
-        # print(e)
+        # # print(e)
 
 
-@admin_bp.route('/files/')
+@admin_bp.route("/files/")
 @admin_required
 def files():
-    admin_id = session.get('admin_id')
-    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
     os.makedirs(path, exist_ok=True)
-    return render_template('admin/files.html', files=sorted(os.listdir(path)))
+    return render_template("admin/files.html", files=sorted(os.listdir(path)))
 
 
 def is_readable_file(file_path):
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
     except Exception:
         return None
 
 
-@admin_bp.route('/files/<file_name>', methods=['GET'])
+@admin_bp.route("/files/<file_name>", methods=["GET"])
 @admin_required
 def file_page(file_name):
     file = {}
     file_readable = False
 
-    admin_id = session.get('admin_id')
-    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
     file_path = os.path.join(path, file_name)
     if os.path.exists(file_path):
         file["filename"] = file_name
         # Get file extension
         file_ext = os.path.splitext(file_name)[1].lower()
         # Check if file is an image
-        if file_ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']:
+        if file_ext in [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]:
             # If it's an image, we don't need to read its content
             # The template will display it as an image
             file_readable = False
         else:
             # Try to read the file content for non-image files
-            file['content'] = is_readable_file(file_path)
-            if file['content']:
+            file["content"] = is_readable_file(file_path)
+            if file["content"]:
                 file_readable = True
-    return render_template('admin/read_file.html', file=file, file_readable=file_readable)
+    return render_template(
+        "admin/read_file.html", file=file, file_readable=file_readable
+    )
 
 
-@admin_bp.route('/files/delete/<file_name>', methods=['POST'])
+@admin_bp.route("/files/delete/<file_name>", methods=["POST"])
 @admin_required
 def delete_file(file_name):
 
-    admin_id = session.get('admin_id')
-    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
     try:
         file_path = os.path.join(path, file_name)
         # Check if file exists before attempting to delete
         if os.path.exists(file_path):
             os.remove(file_path)
-            flash('File deleted successfully', 'success')
+            flash("File deleted successfully", "success")
         else:
-            flash('File not found', 'error')
+            flash("File not found", "error")
     except Exception as e:
-        flash(f'Error deleting file: {str(e)}', 'error')
+        flash(f"Error deleting file: {str(e)}", "error")
 
     # Redirect to the file list page
     # Assuming 'file_list' is your route for /file
-    return redirect(url_for('admin.files'))
+    return redirect(url_for("admin.files"))
 
 
-@admin_bp.route('/serve-file/<file_name>')
+@admin_bp.route("/serve-file/<file_name>")
 @admin_required
 def serve_file(file_name):
 
-    admin_id = session.get('admin_id')
-    path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
     # Securely serve the file from the UPLOAD_FOLDER
     return send_from_directory(path, file_name)
 
@@ -716,14 +812,14 @@ def serve_file(file_name):
 @admin_bp.route("/upload", methods=["POST"])
 @admin_required
 def upload_file():
-    if 'files' not in request.files:
+    if "files" not in request.files:
         return jsonify({"error": "No files provided"}), 400
 
     uploaded_files = request.files.getlist("files")  # Get multiple files
     file_items = []
 
     for file in uploaded_files:
-        if file.filename == '':
+        if file.filename == "":
             continue
 
         original_filename = secure_filename(file.filename)
@@ -731,14 +827,13 @@ def upload_file():
         file_extension = os.path.splitext(original_filename)[1].lower()
         unique_filename = f"{uuid.uuid4().hex}{file_extension}"
 
-        admin_id = session.get('admin_id')
-        path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+        admin_id = session.get("admin_id")
+        path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
         file_path = os.path.join(path, unique_filename)
 
-        if file_extension == '.pdf':
+        if file_extension == ".pdf":
             try:
-                temp_path = os.path.join(
-                    path, f"temp_{unique_filename}")
+                temp_path = os.path.join(path, f"temp_{unique_filename}")
 
                 file.save(temp_path)
                 images = pdf2image.convert_from_path(temp_path)
@@ -748,38 +843,47 @@ def upload_file():
                     # Save each page as a separate image
                     for i, image in enumerate(images):
                         image_filename = f"{base_filename}_{i+1}.png"
-                        image_path = os.path.join(
-                            path, image_filename)
-                        image.save(image_path, 'PNG')
+                        image_path = os.path.join(path, image_filename)
+                        image.save(image_path, "PNG")
                         image_filenames.append(image_filename)
-                        file_items.append(render_template(
-                            "components/file_item.html", file=image_filename))
+                        file_items.append(
+                            render_template(
+                                "components/file_item.html", file=image_filename
+                            )
+                        )
 
                     os.remove(temp_path)
                 else:
                     file.save(file_path)
-                    file_items.append(render_template(
-                        "components/file_item.html", file=unique_filename))
+                    file_items.append(
+                        render_template(
+                            "components/file_item.html", file=unique_filename
+                        )
+                    )
             except Exception as e:
                 file.seek(0)
                 file.save(file_path)
-                # print(f"PDF conversion error: {e}")
-                file_items.append(render_template(
-                    "components/file_item.html", file=unique_filename))
+                # # print(f"PDF conversion error: {e}")
+                file_items.append(
+                    render_template("components/file_item.html",
+                                    file=unique_filename)
+                )
         else:
             file.save(file_path)
-            file_items.append(render_template(
-                "components/file_item.html", file=unique_filename))
+            file_items.append(
+                render_template("components/file_item.html",
+                                file=unique_filename)
+            )
 
     return "".join(file_items), 200  # Return all file items as HTML
 
 
-@admin_bp.route('/logout')
+@admin_bp.route("/logout")
 @admin_required
 def logout():
     # session.pop('user', None)
     session.clear()
-    return redirect(url_for('admin.login'))
+    return redirect(url_for("admin.login"))
 
 
 def generate_stats(chat_list):
@@ -788,8 +892,9 @@ def generate_stats(chat_list):
     week_start = today_start - timedelta(days=today_start.weekday())
     year_start = now.replace(month=1, day=1, hour=0,
                              minute=0, second=0, microsecond=0)
-    month_start = now.replace(day=1, hour=0, minute=0,
-                              second=0, microsecond=0)  # <-- this-month start
+    month_start = now.replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )  # <-- this-month start
 
     # Containers
     today_hourly = Counter()
@@ -798,7 +903,7 @@ def generate_stats(chat_list):
     week_daily = Counter()
     week_admin_daily = Counter()
 
-    month_daily = Counter()          # <-- this-month counters
+    month_daily = Counter()  # <-- this-month counters
     month_admin_daily = Counter()
 
     year_monthly = Counter()
@@ -846,74 +951,103 @@ def generate_stats(chat_list):
 
     # Fill missing labels for consistency
     full_hours = [f"{str(h).zfill(2)}:00" for h in range(24)]
-    full_days = ['Monday', 'Tuesday', 'Wednesday',
-                 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    full_months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    full_days = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+    full_months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ]
 
     # Get number of days in current month (handles month length)
     import calendar
+
     days_in_month = calendar.monthrange(now.year, now.month)[1]
     full_days_in_month = list(range(1, days_in_month + 1))
 
     return {
-        'today': {
-            'labels': full_hours,
-            'totalChats': [today_hourly[h] for h in full_hours],
-            'adminRequired': [today_admin_hourly[h] for h in full_hours]
+        "today": {
+            "labels": full_hours,
+            "totalChats": [today_hourly[h] for h in full_hours],
+            "adminRequired": [today_admin_hourly[h] for h in full_hours],
         },
-        'this-week': {
-            'labels': full_days,
-            'totalChats': [week_daily[d] for d in full_days],
-            'adminRequired': [week_admin_daily[d] for d in full_days]
+        "this-week": {
+            "labels": full_days,
+            "totalChats": [week_daily[d] for d in full_days],
+            "adminRequired": [week_admin_daily[d] for d in full_days],
         },
-        'this-month': {                                   # <-- added this-month
-            'labels': full_days_in_month,
-            'totalChats': [month_daily[d] for d in full_days_in_month],
-            'adminRequired': [month_admin_daily[d] for d in full_days_in_month]
+        "this-month": {  # <-- added this-month
+            "labels": full_days_in_month,
+            "totalChats": [month_daily[d] for d in full_days_in_month],
+            "adminRequired": [month_admin_daily[d] for d in full_days_in_month],
         },
-        'this-year': {
-            'labels': full_months,
-            'totalChats': [year_monthly[m] for m in full_months],
-            'adminRequired': [year_admin_monthly[m] for m in full_months]
+        "this-year": {
+            "labels": full_months,
+            "totalChats": [year_monthly[m] for m in full_months],
+            "adminRequired": [year_admin_monthly[m] for m in full_months],
         },
-        'all-time': {
-            'labels': sorted(all_time_yearly.keys()),
-            'totalChats': [all_time_yearly[y] for y in sorted(all_time_yearly.keys())],
-            'adminRequired': [all_time_admin_yearly[y] for y in sorted(all_time_admin_yearly.keys())]
-        }
+        "all-time": {
+            "labels": sorted(all_time_yearly.keys()),
+            "totalChats": [all_time_yearly[y] for y in sorted(all_time_yearly.keys())],
+            "adminRequired": [
+                all_time_admin_yearly[y] for y in sorted(all_time_admin_yearly.keys())
+            ],
+        },
     }
 
 
-@admin_bp.route('/')
-@admin_bp.route('/dashboard')
+@admin_bp.route("/")
+@admin_bp.route("/dashboard")
 @admin_required
 def index():
 
     admin = AdminService(current_app.db).get_admin_by_id(
-        session.get('admin_id'))
+        session.get("admin_id"))
     if admin.onboarding:
-        return redirect(url_for('admin.onboard'))
+        return redirect(url_for("admin.onboard"))
 
     chat_service = ChatService(current_app.db)
 
     user_service = UserService(current_app.db)
     all_users = user_service.get_all_users()
-    chats = chat_service.get_all_chats(session.get('admin_id'))
+    chats = chat_service.get_all_chats(session.get("admin_id"))
 
     chats_ary = []
     for c in chats:
-        print(c.to_dict())
+        # print(c.to_dict())
         chat = c.to_dict()
-        chat['username'] = user_service.get_user_by_id(c.user_id).name
+        chat["username"] = user_service.get_user_by_id(c.user_id).name
         chats_ary.append(chat)
 
     data = generate_stats(chats)
 
-    return render_template('admin/index.html', chats=chats_ary, data=data, username="Ana", online_users=current_app.config['ONLINE_USERS'], all_users=len(all_users))
+    return render_template(
+        "admin/index.html",
+        chats=chats_ary,
+        data=data,
+        username="Ana",
+        online_users=current_app.config["ONLINE_USERS"],
+        all_users=len(all_users),
+    )
 
 
-@admin_bp.route('/join/<room_id>')
+@admin_bp.route("/join/<room_id>")
 @admin_required
 def join_chat(room_id):
     chat_service = ChatService(current_app.db)
@@ -926,11 +1060,12 @@ def join_chat(room_id):
     chat_service.set_admin_present(chat.chat_id, True)
 
     # Notify the room that admin has joined
-    current_app.socketio.emit('admin_joined', {
-        'message': 'Admin has joined the chat'
-    }, room=room_id)
+    current_app.socketio.emit(
+        "admin_joined", {"message": "Admin has joined the chat"}, room=room_id
+    )
 
-    return render_template('chat.html', room_id=room_id, is_admin=True)
+    return render_template("chat.html", room_id=room_id, is_admin=True)
+
 
 # Socket.IO events for admin
 
@@ -984,73 +1119,100 @@ def join_chat(room_id):
 #
 #                            settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones(), folders=folders, selected_folders=selected_folders)
 
-@admin_bp.route('/settings', methods=['GET'])
+
+@admin_bp.route("/settings", methods=["GET"])
 @admin_required
 def settings():
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
     # Initialize settings data based on role
-    if current_admin.role == 'superadmin':
+    if current_admin.role == "superadmin":
         settings_data = {
-            **current_app.config['SETTINGS'], **current_admin.settings}
+            **current_app.config["SETTINGS"], **current_admin.settings}
     else:
         settings_data = current_admin.settings
 
     # Validate logo paths for superadmin
-    if current_admin.role == 'superadmin':
-        settings_data['logo']['large'] = (
-            current_app.config['SETTINGS']['logo']['large']
-            if os.path.exists(os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['large'][1:]))
-            else ''
+    if current_admin.role == "superadmin":
+        settings_data["logo"]["large"] = (
+            current_app.config["SETTINGS"]["logo"]["large"]
+            if os.path.exists(
+                os.path.join(
+                    os.getcwd(
+                    ), current_app.config["SETTINGS"]["logo"]["large"][1:]
+                )
+            )
+            else ""
         )
-        settings_data['logo']['small'] = (
-            current_app.config['SETTINGS']['logo']['small']
-            if os.path.exists(os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['small'][1:]))
-            else ''
+        settings_data["logo"]["small"] = (
+            current_app.config["SETTINGS"]["logo"]["small"]
+            if os.path.exists(
+                os.path.join(
+                    os.getcwd(
+                    ), current_app.config["SETTINGS"]["logo"]["small"][1:]
+                )
+            )
+            else ""
         )
 
     # Sort timings by day order if they exist
-    day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
-                 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
-    if settings_data.get('timings'):
-        settings_data['timings'] = sorted(
-            settings_data['timings'],
-            key=lambda time: day_order[time['day']]
+    day_order = {
+        "monday": 0,
+        "tuesday": 1,
+        "wednesday": 2,
+        "thursday": 3,
+        "friday": 4,
+        "saturday": 5,
+        "sunday": 6,
+    }
+    if settings_data.get("timings"):
+        settings_data["timings"] = sorted(
+            settings_data["timings"], key=lambda time: day_order[time["day"]]
         )
 
     # Handle Google Drive connection for all admins
     folders = []
     selected_folders = []
-    if current_admin.settings.get('google_token'):
+    if current_admin.settings.get("google_token"):
         try:
             creds = Credentials.from_authorized_user_info(
-                json.loads(current_admin.settings['google_token']), SCOPES)
+                json.loads(current_admin.settings["google_token"]), SCOPES
+            )
             if creds:
-                service = build('drive', 'v3', credentials=creds)
-                results = service.files().list(
-                    q="mimeType='application/vnd.google-apps.folder'",
-                    fields="files(id, name)").execute()
-                folders = results.get('files', [])
+                service = build("drive", "v3", credentials=creds)
+                results = (
+                    service.files()
+                    .list(
+                        q="mimeType='application/vnd.google-apps.folder'",
+                        fields="files(id, name)",
+                    )
+                    .execute()
+                )
+                folders = results.get("files", [])
                 selected_folders = current_admin.settings.get(
-                    'selected_folders', [])
+                    "selected_folders", [])
         except Exception as e:
-            current_app.logger.error(f"Failed to load Google Drive for admin {
-                                     current_admin.admin_id}: {str(e)}")
+            current_app.logger.error(
+                f"Failed to load Google Drive for admin {
+                    current_admin.admin_id}: {str(e)}"
+            )
 
-    return render_template('admin/settings.html',
-                           settings=settings_data,
-                           tzs=UTCZoneManager.get_timezones(),
-                           folders=folders,
-                           selected_folders=selected_folders)
+    return render_template(
+        "admin/settings.html",
+        settings=settings_data,
+        tzs=UTCZoneManager.get_timezones(),
+        folders=folders,
+        selected_folders=selected_folders,
+    )
 
 
 def save_settings(settings):
-    session['settings'] = settings
+    session["settings"] = settings
     return True
 
 
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "txt", 'svg'}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "txt", "svg"}
 
 
 def allowed_file(filename):
@@ -1058,7 +1220,7 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@admin_bp.route('/update-logo/<file_name>', methods=['POST'])
+@admin_bp.route("/update-logo/<file_name>", methods=["POST"])
 @admin_required
 def upload_logo(file_name):
 
@@ -1068,252 +1230,268 @@ def upload_logo(file_name):
     file = request.files["file"]
     if file.filename == "":
         return "No selected file", 400
-    if file_name == 'logo.svg':
-        f_type = 'large'
-    elif file_name == 'logo-desktop-mini.svg':
-        f_type = 'small'
+    if file_name == "logo.svg":
+        f_type = "large"
+    elif file_name == "logo-desktop-mini.svg":
+        f_type = "small"
     if file and allowed_file(file_name):
         # Prevent directory traversal attacks
         filename = secure_filename(file_name)
         file_path = os.path.join(current_app.config["LOGOS_FOLDER"], filename)
         file.save(file_path)
-        current_app.config['SETTINGS']['logo'][f_type] = os.path.join(
-            '/static', 'img', filename)
-        # # print(current_app.config)
+        current_app.config["SETTINGS"]["logo"][f_type] = os.path.join(
+            "/static", "img", filename
+        )
+        # # # print(current_app.config)
         return f"File saved at {file_path}", 200
 
     return "Invalid file type", 400
 
 
-@admin_bp.route('/settings/timezone', methods=['POST'])
+@admin_bp.route("/settings/timezone", methods=["POST"])
 @admin_required
 def set_timezone():
-    tz = request.form.get('timezone')
+    tz = request.form.get("timezone")
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role == 'superadmin':
-        current_app.config['SETTINGS']['timezone'] = tz
+    if current_admin.role == "superadmin":
+        current_app.config["SETTINGS"]["timezone"] = tz
     else:
-        current_admin.settings['timezone'] = tz
+        current_admin.settings["timezone"] = tz
         admin_service.admins_collection.update_one(
-            {"admin_id": current_admin.admin_id},
-            {"$set": {"settings.timezone": tz}}
+            {"admin_id": current_admin.admin_id}, {
+                "$set": {"settings.timezone": tz}}
         )
     return "", 200
 
 
-@admin_bp.route('/settings/timing', methods=['POST'])
+@admin_bp.route("/settings/timing", methods=["POST"])
 @admin_required
 def add_timing():
-    day = request.form.get('meetingDay')
-    start_time = request.form.get('startTime')
-    end_time = request.form.get('endTime')
-    timezone = request.form.get('timezone')
+    day = request.form.get("meetingDay")
+    start_time = request.form.get("startTime")
+    end_time = request.form.get("endTime")
+    timezone = request.form.get("timezone")
 
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role == 'superadmin':
-        timings = current_app.config['SETTINGS'].get('timings', [])
+    if current_admin.role == "superadmin":
+        timings = current_app.config["SETTINGS"].get("timings", [])
     else:
-        timings = current_admin.settings.get('timings', [])
+        timings = current_admin.settings.get("timings", [])
 
     # Remove existing entry for that day
-    timings = [t for t in timings if t['day'] != day]
+    timings = [t for t in timings if t["day"] != day]
 
     # Add new timing entry
-    timings.append({
-        "day": day,
-        "startTime": start_time,
-        "endTime": end_time
-    })
+    timings.append({"day": day, "startTime": start_time, "endTime": end_time})
 
     # Sort by weekday
-    day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
-                 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
-    timings.sort(key=lambda t: day_order[t['day']])
+    day_order = {
+        "monday": 0,
+        "tuesday": 1,
+        "wednesday": 2,
+        "thursday": 3,
+        "friday": 4,
+        "saturday": 5,
+        "sunday": 6,
+    }
+    timings.sort(key=lambda t: day_order[t["day"]])
 
-    if current_admin.role == 'superadmin':
-        current_app.config['SETTINGS']['timings'] = timings
+    if current_admin.role == "superadmin":
+        current_app.config["SETTINGS"]["timings"] = timings
         # current_app.config['SETTINGS']['timezone'] = timezone
     else:
-        current_admin.settings['timings'] = timings
+        current_admin.settings["timings"] = timings
         # current_admin.settings['timezone'] = timezone
         admin_service.admins_collection.update_one(
             {"admin_id": current_admin.admin_id},
-            {"$set": {
-                "settings.timings": timings,
-                # "settings.timezone": timezone
-            }}
+            {
+                "$set": {
+                    "settings.timings": timings,
+                    # "settings.timezone": timezone
+                }
+            },
         )
 
     return "added", 200
 
 
-@admin_bp.route('/settings/timing/<int:id>', methods=['DELETE'])
+@admin_bp.route("/settings/timing/<int:id>", methods=["DELETE"])
 @admin_required
 def delete_timing(id):
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role == 'superadmin':
-        timings = current_app.config['SETTINGS'].get('timings', [])
+    if current_admin.role == "superadmin":
+        timings = current_app.config["SETTINGS"].get("timings", [])
     else:
-        timings = current_admin.settings.get('timings', [])
+        timings = current_admin.settings.get("timings", [])
 
-    day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
-                 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
+    day_order = {
+        "monday": 0,
+        "tuesday": 1,
+        "wednesday": 2,
+        "thursday": 3,
+        "friday": 4,
+        "saturday": 5,
+        "sunday": 6,
+    }
     timings = sorted(timings, key=lambda time: day_order[time["day"]])
 
     if 0 <= id < len(timings):
         timings.pop(id)
 
-    if current_admin.role == 'superadmin':
-        current_app.config['SETTINGS']['timings'] = timings
+    if current_admin.role == "superadmin":
+        current_app.config["SETTINGS"]["timings"] = timings
     else:
-        current_admin.settings['timings'] = timings
+        current_admin.settings["timings"] = timings
         admin_service.admins_collection.update_one(
             {"admin_id": current_admin.admin_id},
-            {"$set": {"settings.timings": timings}}
+            {"$set": {"settings.timings": timings}},
         )
 
     return "delete", 200
 
 
-@admin_bp.route('/settings/model/', methods=['POST'])
+@admin_bp.route("/settings/model/", methods=["POST"])
 @admin_required
 def update_model():
-    model = request.form.get('model')
+    model = request.form.get("model")
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role == 'superadmin':
-        current_app.config['SETTINGS']['model'] = model
+    if current_admin.role == "superadmin":
+        current_app.config["SETTINGS"]["model"] = model
     else:
-        current_admin.settings['model'] = model
+        current_admin.settings["model"] = model
         admin_service.admins_collection.update_one(
-            {"admin_id": current_admin.admin_id},
-            {"$set": {"settings.model": model}}
+            {"admin_id": current_admin.admin_id}, {
+                "$set": {"settings.model": model}}
         )
 
     current_app.bot._set_bot(model)
     return "", 200
 
 
-@admin_bp.route('/settings/api/<api_type>', methods=['POST', 'DELETE'])
-@admin_required(roles=['superadmin'])  # Only superadmin can modify API keys
+@admin_bp.route("/settings/api/<api_type>", methods=["POST", "DELETE"])
+@admin_required(roles=["superadmin"])  # Only superadmin can modify API keys
 def api_key(api_type):
-    if request.method == 'DELETE':
-        current_app.config['SETTINGS']['apiKeys'][api_type] = ''
-        return '', 200
-    elif request.method == 'POST':
-        current_app.config['SETTINGS']['apiKeys'][api_type] = request.form.get(
+    if request.method == "DELETE":
+        current_app.config["SETTINGS"]["apiKeys"][api_type] = ""
+        return "", 200
+    elif request.method == "POST":
+        current_app.config["SETTINGS"]["apiKeys"][api_type] = request.form.get(
             "key")
-        return '', 200
-    return '', 500
+        return "", 200
+    return "", 500
 
 
-@admin_bp.route('/settings/theme/<theme_type>', methods=['POST'])
+@admin_bp.route("/settings/theme/<theme_type>", methods=["POST"])
 @admin_required
 def set_theme(theme_type):
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role == 'superadmin':
-        current_app.config['SETTINGS']['theme'] = theme_type
+    if current_admin.role == "superadmin":
+        current_app.config["SETTINGS"]["theme"] = theme_type
     else:
-        current_admin.settings['theme'] = theme_type
+        current_admin.settings["theme"] = theme_type
         admin_service.admins_collection.update_one(
             {"admin_id": current_admin.admin_id},
-            {"$set": {"settings.theme": theme_type}}
+            {"$set": {"settings.theme": theme_type}},
         )
-    return '', 200
+    return "", 200
 
 
-@admin_bp.route('/settings/prompt', methods=['POST'])
+@admin_bp.route("/settings/prompt", methods=["POST"])
 @admin_required
 def set_prompt():
-    prpt = request.form.get('prompt')
+    prpt = request.form.get("prompt")
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role == 'superadmin':
-        current_app.config['SETTINGS']['prompt'] = prpt
+    if current_admin.role == "superadmin":
+        current_app.config["SETTINGS"]["prompt"] = prpt
     else:
-        current_admin.settings['prompt'] = prpt
+        current_admin.settings["prompt"] = prpt
         admin_service.admins_collection.update_one(
-            {"admin_id": current_admin.admin_id},
-            {"$set": {"settings.prompt": prpt}}
+            {"admin_id": current_admin.admin_id}, {
+                "$set": {"settings.prompt": prpt}}
         )
-    return '', 200
+    return "", 200
 
 
-@admin_bp.route('/settings/subject', defaults={'subject': None}, methods=['POST'])
-@admin_bp.route('/settings/subject/<string:subject>', methods=['DELETE'])
+@admin_bp.route("/settings/subject", defaults={"subject": None}, methods=["POST"])
+@admin_bp.route("/settings/subject/<string:subject>", methods=["DELETE"])
 @admin_required
 def subjects(subject):
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if request.method == 'POST':
-        subject = request.form.get('subject')
-        if current_admin.role == 'superadmin':
-            current_app.config['SETTINGS']['subjects'] = set(
-                current_app.config['SETTINGS'].get('subjects', []))
-            current_app.config['SETTINGS']['subjects'].add(subject)
+    if request.method == "POST":
+        subject = request.form.get("subject")
+        if current_admin.role == "superadmin":
+            current_app.config["SETTINGS"]["subjects"] = set(
+                current_app.config["SETTINGS"].get("subjects", [])
+            )
+            current_app.config["SETTINGS"]["subjects"].add(subject)
         else:
-            current_admin.settings['subjects'] = set(
-                current_admin.settings.get('subjects', []))
-            current_admin.settings['subjects'].add(subject)
+            current_admin.settings["subjects"] = set(
+                current_admin.settings.get("subjects", [])
+            )
+            current_admin.settings["subjects"].add(subject)
             admin_service.admins_collection.update_one(
                 {"admin_id": current_admin.admin_id},
-                {"$addToSet": {"settings.subjects": subject}}
+                {"$addToSet": {"settings.subjects": subject}},
             )
-        return '', 200
+        return "", 200
     else:
         try:
-            if current_admin.role == 'superadmin':
-                current_app.config['SETTINGS']['subjects'].remove(subject)
+            if current_admin.role == "superadmin":
+                current_app.config["SETTINGS"]["subjects"].remove(subject)
             else:
-                current_admin.settings['subjects'].remove(subject)
+                current_admin.settings["subjects"].remove(subject)
                 admin_service.admins_collection.update_one(
                     {"admin_id": current_admin.admin_id},
-                    {"$pull": {"settings.subjects": subject}}
+                    {"$pull": {"settings.subjects": subject}},
                 )
         except KeyError:
             pass
-        return '', 200
+        return "", 200
 
 
-@admin_bp.route('/settings/language', methods=['POST'])
+@admin_bp.route("/settings/language", methods=["POST"])
 @admin_required
 def add_language():
-    language = request.form.get('language')
+    language = request.form.get("language")
     if not language:
         return jsonify({"error": "Language is required"}), 400
 
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
     try:
-        if current_admin.role == 'superadmin':
+        if current_admin.role == "superadmin":
             # Update global settings
-            languages = set(current_app.config['SETTINGS'].get(
-                'languages', ['English']))
+            languages = set(
+                current_app.config["SETTINGS"].get("languages", ["English"])
+            )
             languages.add(language)
-            current_app.config['SETTINGS']['languages'] = list(languages)
+            current_app.config["SETTINGS"]["languages"] = list(languages)
         else:
             # Update admin-specific settings
             languages = set(current_admin.settings.get(
-                'languages', ['English']))
+                "languages", ["English"]))
             languages.add(language)
-            current_admin.settings['languages'] = list(languages)
+            current_admin.settings["languages"] = list(languages)
 
             # Update in database
             admin_service.admins_collection.update_one(
                 {"admin_id": current_admin.admin_id},
-                {"$addToSet": {"settings.languages": language}}
+                {"$addToSet": {"settings.languages": language}},
             )
 
         return "", 200
@@ -1322,33 +1500,34 @@ def add_language():
         return jsonify({"error": "Failed to add language"}), 500
 
 
-@admin_bp.route('/settings/language/<string:language>', methods=['DELETE'])
+@admin_bp.route("/settings/language/<string:language>", methods=["DELETE"])
 @admin_required
 def remove_language(language):
     if not language:
         return jsonify({"error": "Language is required"}), 400
 
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
     try:
-        if current_admin.role == 'superadmin':
+        if current_admin.role == "superadmin":
             # Update global settings
-            languages = set(current_app.config['SETTINGS'].get(
-                'languages', ['English']))
+            languages = set(
+                current_app.config["SETTINGS"].get("languages", ["English"])
+            )
             languages.discard(language)
-            current_app.config['SETTINGS']['languages'] = list(languages)
+            current_app.config["SETTINGS"]["languages"] = list(languages)
         else:
             # Update admin-specific settings
             languages = set(current_admin.settings.get(
-                'languages', ['English']))
+                "languages", ["English"]))
             languages.discard(language)
-            current_admin.settings['languages'] = list(languages)
+            current_admin.settings["languages"] = list(languages)
 
             # Update in database
             admin_service.admins_collection.update_one(
                 {"admin_id": current_admin.admin_id},
-                {"$pull": {"settings.languages": language}}
+                {"$pull": {"settings.languages": language}},
             )
 
         return "", 200
@@ -1360,37 +1539,33 @@ def remove_language(language):
 def scrape_urls(urls):
 
     for url in urls:
-        res = scrape_web(
-            url,
-            rotate_user_agents=True,
-            random_delay=True
-        )
-        if res and 'text' in res:
-            lines = str(res['text'])
-            # # print(lines)
+        res = scrape_web(url, rotate_user_agents=True, random_delay=True)
+        if res and "text" in res:
+            lines = str(res["text"])
+            # # # print(lines)
             lines = re.sub(r"\s+", " ", lines).strip()
             # Create a filename from the URL
-            if res['url'].endswith('/'):
-                res['url'] = res['url'][:-1]
-                # print(res['url'])
-            # print(res['url'].endswith('/'))
-            filename = '*'.join(res['url'].split('/')[2:])
+            if res["url"].endswith("/"):
+                res["url"] = res["url"][:-1]
+                # # print(res['url'])
+            # # print(res['url'].endswith('/'))
+            filename = "*".join(res["url"].split("/")[2:])
             if not filename:
                 # Use domain if path is empty
-                filename = urlparse(res['url']).netloc
+                filename = urlparse(res["url"]).netloc
             filepath = f"{os.getcwd()}/files/{filename}.txt"
-            with open(filepath, 'w') as f:
-                # # print(f"Saving content to {f.name}")
+            with open(filepath, "w") as f:
+                # # # print(f"Saving content to {f.name}")
                 # if len(lines) > 500:
-                # # print(lines)
-                # # print(filepath)
+                # # # print(lines)
+                # # # print(filepath)
                 f.write(lines)
 
 
-@admin_bp.route('/scrape', methods=['POST'])
+@admin_bp.route("/scrape", methods=["POST"])
 @admin_required
 def scrape():
-    urls = str(request.form.get('url')).rsplit()
+    urls = str(request.form.get("url")).rsplit()
     all_urls = []
     # Process each URL (could be a sitemap or regular page)
     for url in urls:
@@ -1401,8 +1576,8 @@ def scrape():
     thread = threading.Thread(target=scrape_urls, args=(all_urls,))
     thread.start()
     # Now scrape all the collected URLs
-    # # p# print(all_urls)
-    return '', 200
+    # # p# # print(all_urls)
+    return "", 200
 
 
 def process_url(url):
@@ -1422,9 +1597,11 @@ def is_likely_sitemap(url):
     Returns True if URL ends with common sitemap extensions or contains 'sitemap' in path.
     """
     url_lower = url.lower()
-    return (url_lower.endswith('.xml') or
-            url_lower.endswith('.xml.gz') or
-            'sitemap' in url_lower)
+    return (
+        url_lower.endswith(".xml")
+        or url_lower.endswith(".xml.gz")
+        or "sitemap" in url_lower
+    )
 
 
 def process_sitemap_url(url):
@@ -1435,23 +1612,21 @@ def process_sitemap_url(url):
     try:
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
-            # print(f"Failed to fetch {url}: Status code {response.status_code}")
+            # # print(f"Failed to fetch {url}: Status code {response.status_code}")
             return [url]  # Return original URL if we can't process it
 
-        content_type = response.headers.get('Content-Type', '').lower()
+        content_type = response.headers.get("Content-Type", "").lower()
         content = response.text
 
         # Check if it's actually a sitemap (even if URL suggested it might be)
-        if ('xml' in content_type or
-            '<urlset' in content or
-                '<sitemapindex' in content):
+        if "xml" in content_type or "<urlset" in content or "<sitemapindex" in content:
             return extract_urls_from_sitemap(content, url)
 
         # If URL suggested sitemap but content isn't, return original URL
         return [url]
 
     except Exception as e:
-        # print(f"Error processing {url}: {str(e)}")
+        # # print(f"Error processing {url}: {str(e)}")
         return [url]  # Include the original URL if processing fails
 
 
@@ -1465,29 +1640,29 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
         # Parse the XML
         root = ET.fromstring(sitemap_content)
         # Handle sitemap index (collection of sitemaps)
-        if root.tag.endswith('sitemapindex'):
+        if root.tag.endswith("sitemapindex"):
             # This is a sitemap index, we need to process each sitemap
-            for sitemap in root.findall('.//{*}sitemap'):
-                loc_elem = sitemap.find('.//{*}loc')
+            for sitemap in root.findall(".//{*}sitemap"):
+                loc_elem = sitemap.find(".//{*}loc")
                 if loc_elem is not None and loc_elem.text:
                     # Recursively process this sitemap
                     child_sitemap_url = loc_elem.text.strip()
-                    # print(f"Found child sitemap: {child_sitemap_url}")
+                    # # print(f"Found child sitemap: {child_sitemap_url}")
                     child_urls = process_sitemap_url(child_sitemap_url)
                     urls.extend(child_urls)
         # Handle regular sitemap
-        elif root.tag.endswith('urlset'):
+        elif root.tag.endswith("urlset"):
             # This is a regular sitemap with URLs
-            for url_elem in root.findall('.//{*}url'):
-                loc_elem = url_elem.find('.//{*}loc')
+            for url_elem in root.findall(".//{*}url"):
+                loc_elem = url_elem.find(".//{*}loc")
                 if loc_elem is not None and loc_elem.text:
                     page_url = loc_elem.text.strip()
                     urls.append(page_url)
     except Exception as e:
-        # print(f"Error parsing sitemap from {base_url}: {str(e)}")
+        # # print(f"Error parsing sitemap from {base_url}: {str(e)}")
         # Fall back to regex-based extraction if XML parsing fails
-        urls.extend(re.findall(r'<loc>(.*?)</loc>', sitemap_content))
-    # # print(f"Extracted {len(urls)} URLs from sitemap")
+        urls.extend(re.findall(r"<loc>(.*?)</loc>", sitemap_content))
+    # # # print(f"Extracted {len(urls)} URLs from sitemap")
     return urls
 
 
@@ -1502,7 +1677,7 @@ def get_all_entry(period, collection):
     return latest
 
 
-@admin_bp.route('/usage/')
+@admin_bp.route("/usage/")
 @admin_required
 def usage():
     usage_service = UsageService(current_app.db)
@@ -1510,8 +1685,9 @@ def usage():
     # Get all unique dates for each period
     daily_dates = list(usage_service.collection.distinct(
         "date", {"period": "daily"}))
-    monthly_dates = list(usage_service.collection.distinct(
-        "date", {"period": "monthly"}))
+    monthly_dates = list(
+        usage_service.collection.distinct("date", {"period": "monthly"})
+    )
     yearly_dates = list(usage_service.collection.distinct(
         "date", {"period": "yearly"}))
 
@@ -1520,16 +1696,18 @@ def usage():
     latest_monthly = get_latest_entry("monthly", usage_service.collection)
     latest_yearly = get_latest_entry("yearly", usage_service.collection)
 
-    return render_template("admin/usage.html",
-                           latest_daily=latest_daily,
-                           latest_monthly=latest_monthly,
-                           latest_yearly=latest_yearly,
-                           daily_dates=daily_dates,
-                           monthly_dates=monthly_dates,
-                           yearly_dates=yearly_dates)
+    return render_template(
+        "admin/usage.html",
+        latest_daily=latest_daily,
+        latest_monthly=latest_monthly,
+        latest_yearly=latest_yearly,
+        daily_dates=daily_dates,
+        monthly_dates=monthly_dates,
+        yearly_dates=yearly_dates,
+    )
 
 
-@admin_bp.route('/api/usage/')
+@admin_bp.route("/api/usage/")
 @admin_required
 def api_usage():
     usage_service = UsageService(current_app.db)
@@ -1549,12 +1727,15 @@ def api_usage():
         if not data:
             return jsonify({"error": "No data found"}), 404
 
-    return jsonify({
-        "date": date,
-        "cost": data["cost"],
-        "input_tokens": data["input_tokens"],
-        "output_tokens": data["output_tokens"]
-    })
+    return jsonify(
+        {
+            "date": date,
+            "cost": data["cost"],
+            "input_tokens": data["input_tokens"],
+            "output_tokens": data["output_tokens"],
+        }
+    )
+
 
 # @admin_bp.route('/chats')
 # @admin_required
@@ -1567,7 +1748,7 @@ def api_usage():
 #     return jsonify(chats_data)
 
 
-@admin_bp.route('/chats/', methods=['GET'])
+@admin_bp.route("/chats/", methods=["GET"])
 # @admin_bp.route('/chats/<string:status>', methods=['GET'])
 @admin_required
 def get_all_chats():
@@ -1577,13 +1758,13 @@ def get_all_chats():
     chats = []
     for c in chats_objs:
         chat = c.to_dict()
-        chat['username'] = user_service.get_user_by_id(c.user_id).name
+        chat["username"] = user_service.get_user_by_id(c.user_id).name
         chats.append(chat)
 
-    print(chats)
+    # print(chats)
 
-    chats.sort(key=lambda x: x['created_at'], reverse=True)
-    return render_template('admin/chats.html', chats=chats)
+    chats.sort(key=lambda x: x["created_at"], reverse=True)
+    return render_template("admin/chats.html", chats=chats)
 
 
 @admin_bp.route("/chat/<string:room_id>/delete", methods=["POST"])
@@ -1594,10 +1775,10 @@ def delete_chat(room_id):
         chat_service.delete([room_id])
         return "", 200
     except Exception as e:
-        # print(e)
+        # # print(e)
         return "Error"
     # for i in chats:
-    #     # print(i)
+    #     # # print(i)
 
 
 @admin_bp.route("/chats/delete", methods=["POST"])
@@ -1607,159 +1788,172 @@ def delete_chats():
     if not data.get("chat_ids"):
         return "", 200
     chats = data["chat_ids"]
-    # print(chats)
+    # # print(chats)
     try:
         chat_service = ChatService(current_app.db)
         chat_service.delete(chats)
         return "", 200
     except Exception as e:
-        # print(e)
+        # # print(e)
         return "Error"
     # for i in chats:
-    #     # print(i)
+    #     # # print(i)
 
 
-CREDENTIALS_FILE = 'credentials.json'
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
-          'https://www.googleapis.com/auth/drive.readonly']
+CREDENTIALS_FILE = "credentials.json"
+SCOPES = [
+    "https://www.googleapis.com/auth/drive.metadata.readonly",
+    "https://www.googleapis.com/auth/drive.readonly",
+]
 
 
-@admin_bp.route('/google-login')
+@admin_bp.route("/google-login")
 @admin_required
 def google_connect():
     flow = InstalledAppFlow.from_client_secrets_file(
-        CREDENTIALS_FILE,
-        scopes=SCOPES
-    )
-    flow.redirect_uri = url_for('admin.oauth2callback', _external=True)
+        CREDENTIALS_FILE, scopes=SCOPES)
+    flow.redirect_uri = url_for("admin.oauth2callback", _external=True)
     auth_url, state = flow.authorization_url(
-        access_type='offline',
-        prompt='consent',
-        include_granted_scopes='true'
+        access_type="offline", prompt="consent", include_granted_scopes="true"
     )
-    session['google_auth_state'] = state
+    session["google_auth_state"] = state
     return redirect(auth_url)
 
 
-@admin_bp.route('/load-folders', methods=['POST'])
+@admin_bp.route("/load-folders", methods=["POST"])
 @admin_required
 def load_folders():
-    selected_folders = request.form.getlist('selected_folders')
+    selected_folders = request.form.getlist("selected_folders")
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
     # Update admin settings with selected folders
-    current_admin.settings['selected_folders'] = selected_folders
+    current_admin.settings["selected_folders"] = selected_folders
 
     # Update in database
     admin_service.admins_collection.update_one(
         {"admin_id": current_admin.admin_id},
-        {"$set": {"settings.selected_folders": selected_folders}}
+        {"$set": {"settings.selected_folders": selected_folders}},
     )
 
     return "", 200
 
 
-@admin_bp.route('/google-files/')
+@admin_bp.route("/google-files/")
 @admin_required
 def google_files():
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if not current_admin.settings.get('google_token'):
-        return render_template('admin/google_files.html', files={})
+    if not current_admin.settings.get("google_token"):
+        return render_template("admin/google_files.html", files={})
 
     try:
         creds = Credentials.from_authorized_user_info(
-            json.loads(current_admin.settings['google_token']), SCOPES)
-        service = build('drive', 'v3', credentials=creds)
+            json.loads(current_admin.settings["google_token"]), SCOPES
+        )
+        service = build("drive", "v3", credentials=creds)
 
         files_by_folder = {}
-        for folder_id in current_admin.settings.get('selected_folders', []):
+        for folder_id in current_admin.settings.get("selected_folders", []):
             try:
                 # Get folder name
-                folder_info = service.files().get(
-                    fileId=folder_id,
-                    fields="name"
-                ).execute()
-                folder_name = folder_info.get('name', f'Folder ({folder_id})')
+                folder_info = (
+                    service.files().get(fileId=folder_id, fields="name").execute()
+                )
+                folder_name = folder_info.get("name", f"Folder ({folder_id})")
 
                 # Get files in folder
-                results = service.files().list(
-                    q=f"'{
-                        folder_id}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'",
-                    pageSize=1000,
-                    fields="files(id, name, mimeType, webViewLink, thumbnailLink)"
-                ).execute()
+                results = (
+                    service.files()
+                    .list(
+                        q=f"'{
+                            folder_id}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'",
+                        pageSize=1000,
+                        fields="files(id, name, mimeType, webViewLink, thumbnailLink)",
+                    )
+                    .execute()
+                )
 
                 files_by_folder[folder_name] = {
-                    'id': folder_id,
-                    'files': results.get('files', [])
+                    "id": folder_id,
+                    "files": results.get("files", []),
                 }
             except Exception as e:
-                current_app.logger.error(f"Error accessing folder {
-                                         folder_id}: {str(e)}")
+                current_app.logger.error(
+                    f"Error accessing folder {
+                        folder_id}: {str(e)}"
+                )
                 continue
 
-        return render_template('admin/google_files.html',
-                               files=files_by_folder,
-                               selected_folders=current_admin.settings.get('selected_folders', []))
+        return render_template(
+            "admin/google_files.html",
+            files=files_by_folder,
+            selected_folders=current_admin.settings.get(
+                "selected_folders", []),
+        )
     except Exception as e:
         current_app.logger.error(f"Failed to access Google Drive: {str(e)}")
-        return render_template('admin/google_files.html',
-                               files={},
-                               error=str(e),
-                               selected_folders=current_admin.settings.get('selected_folders', []))
+        return render_template(
+            "admin/google_files.html",
+            files={},
+            error=str(e),
+            selected_folders=current_admin.settings.get(
+                "selected_folders", []),
+        )
 
 
-@admin_bp.route('/google-files/view/<file_id>')
+@admin_bp.route("/google-files/view/<file_id>")
 @admin_required
 def view_google_file(file_id):
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
     creds = Credentials.from_authorized_user_info(
-        json.loads(current_admin.settings['google_token']), SCOPES)
-    service = build('drive', 'v3', credentials=creds)
+        json.loads(current_admin.settings["google_token"]), SCOPES
+    )
+    service = build("drive", "v3", credentials=creds)
     file = service.files().get(fileId=file_id, fields="webViewLink").execute()
-    return redirect(file.get('webViewLink', '/admin/google-files/'))
+    return redirect(file.get("webViewLink", "/admin/google-files/"))
 
 
-@admin_bp.route('/google-files/download', methods=['POST'])
+@admin_bp.route("/google-files/download", methods=["POST"])
 @admin_required
 def download_google_files():
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if not current_admin.settings.get('google_token'):
-        return redirect('/admin/google-files/')
+    if not current_admin.settings.get("google_token"):
+        return redirect("/admin/google-files/")
 
-    file_ids = request.form.getlist('file_ids')
+    file_ids = request.form.getlist("file_ids")
     if not file_ids:
-        flash('No files selected for download', 'warning')
-        return redirect('/admin/google-files/')
+        flash("No files selected for download", "warning")
+        return redirect("/admin/google-files/")
 
     try:
         # Get the download path from config (you'll need to set this in your config)
-        admin_id = session.get('admin_id')
-        download_path = os.path.join(UPLOAD_FOLDER, f'{admin_id}')
+        admin_id = session.get("admin_id")
+        download_path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
         os.makedirs(download_path, exist_ok=True)
 
         creds = Credentials.from_authorized_user_info(
-            json.loads(current_admin.settings['google_token']), SCOPES)
-        service = build('drive', 'v3', credentials=creds)
+            json.loads(current_admin.settings["google_token"]), SCOPES
+        )
+        service = build("drive", "v3", credentials=creds)
 
         downloaded_files = []
 
         for file_id in file_ids:
             try:
                 # Get file metadata
-                file_meta = service.files().get(
-                    fileId=file_id,
-                    fields="name, mimeType"
-                ).execute()
+                file_meta = (
+                    service.files()
+                    .get(fileId=file_id, fields="name, mimeType")
+                    .execute()
+                )
 
                 # Create safe filename
-                original_name = file_meta['name']
+                original_name = file_meta["name"]
                 safe_name = secure_filename(original_name)
                 file_path = os.path.join(download_path, safe_name)
 
@@ -1776,7 +1970,7 @@ def download_google_files():
                 file_content = request_download.execute()
 
                 # Save to server
-                with open(file_path, 'wb') as f:
+                with open(file_path, "wb") as f:
                     f.write(file_content)
 
                 downloaded_files.append(safe_name)
@@ -1787,27 +1981,32 @@ def download_google_files():
                 continue
 
         if downloaded_files:
-            flash(f"Successfully downloaded {
-                  len(downloaded_files)} file(s) to server", 'success')
+            flash(
+                f"Successfully downloaded {
+                    len(downloaded_files)} file(s) to server",
+                "success",
+            )
         else:
-            flash("No files were downloaded", 'warning')
+            flash("No files were downloaded", "warning")
 
-        return redirect('/admin/google-files/')
+        return redirect("/admin/google-files/")
 
     except Exception as e:
         current_app.logger.error(f"Failed to download files: {str(e)}")
-        flash('Failed to download files', 'error')
-        return redirect('/admin/google-files/')
+        flash("Failed to download files", "error")
+        return redirect("/admin/google-files/")
 
 
-@admin_bp.route('/google-thumbnail/<file_id>')
+@admin_bp.route("/google-thumbnail/<file_id>")
 def google_thumbnail(file_id):
     creds = Credentials.from_authorized_user_info(
-        json.loads(current_app.config['SETTINGS'].get('google-token')), SCOPES)
-    service = build('drive', 'v3', credentials=creds)
+        json.loads(current_app.config["SETTINGS"].get("google-token")), SCOPES
+    )
+    service = build("drive", "v3", credentials=creds)
     request = service.files().get_media(fileId=file_id)
     from googleapiclient.http import MediaIoBaseDownload
     import io
+
     fh = io.BytesIO()
     downloader = MediaIoBaseDownload(fh, request)
     done = False
@@ -1817,107 +2016,155 @@ def google_thumbnail(file_id):
 
     # Send image file with Flask
     from flask import send_file
-    return send_file(fh, mimetype='image/jpeg')
+
+    return send_file(fh, mimetype="image/jpeg")
 
 
-@admin_bp.route('/oauth2callback')
+@admin_bp.route("/oauth2callback")
 @admin_required
 def oauth2callback():
-    state = session['google_auth_state']
+    state = session["google_auth_state"]
     flow = InstalledAppFlow.from_client_secrets_file(
-        CREDENTIALS_FILE,
-        scopes=SCOPES,
-        state=state
+        CREDENTIALS_FILE, scopes=SCOPES, state=state
     )
-    flow.redirect_uri = url_for('admin.oauth2callback', _external=True)
+    flow.redirect_uri = url_for("admin.oauth2callback", _external=True)
     flow.fetch_token(authorization_response=request.url)
 
     # Store credentials in the admin's settings
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
     # Update admin settings with the new token
-    current_admin.settings['google_token'] = flow.credentials.to_json()
+    current_admin.settings["google_token"] = flow.credentials.to_json()
     admin_service.admins_collection.update_one(
         {"admin_id": current_admin.admin_id},
-        {"$set": {"settings.google_token": flow.credentials.to_json()}}
+        {"$set": {"settings.google_token": flow.credentials.to_json()}},
     )
 
-    return redirect(url_for('admin.settings'))
+    return redirect(url_for("admin.settings"))
 
 
-@admin_bp.route('/create-admin', methods=['GET', 'POST'])
-@admin_required(roles=['superadmin'])
+@admin_bp.route("/create-admin", methods=["GET", "POST"])
+@admin_required(roles=["superadmin"])
 def create_admin():
     # return "create admin", 200
-    if request.method == 'GET':
-        return render_template('/admin/create-admin.html')
-    elif request.method == 'POST':
+    if request.method == "GET":
+        return render_template("/admin/create-admin.html")
+    elif request.method == "POST":
         try:
             form_data = request.form.to_dict()
-            # print(form_data)
+            # # print(form_data)
             admin_service = AdminService(current_app.db)
             admin = admin_service.create_admin(
-                username=form_data['username'], password=form_data['password'], email=form_data['email'])
+                username=form_data["username"],
+                password=form_data["password"],
+                email=form_data["email"],
+            )
 
             # SEND_USER = os.environ.get('SMTP_TO')
-            status = send_email(form_data['email'], f'Go Bot account created: {admin.username}', f"Your account has been created.\n\nUsername:{
-                                form_data['username']}\nOne Time Password:{form_data['password']}")
+            status = send_email(
+                form_data["email"],
+                f"Go Bot account created: {admin.username}",
+                f"Your account has been created.\n\nUsername:{
+                    form_data['username']}\nOne Time Password:{form_data['password']}",
+            )
             if status == "SEND":
                 return "", 200
             return "", 500
         except Exception as e:
-            print(e)
+            # print(e)
             return "", 500
 
 
-@admin_bp.route('/settings/domain', methods=['POST'])
+@admin_bp.route("/settings/domain", methods=["POST"])
 @admin_required
 def add_domain():
-    domain = request.form.get('domain')
+    domain = request.form.get("domain")
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role != 'superadmin':
-        current_admin.settings['domains'] = set(
-            current_admin.settings.get('domains', []))
-        current_admin.settings['domains'].add(domain)
+    if current_admin.role != "superadmin":
+        current_admin.settings["domains"] = set(
+            current_admin.settings.get("domains", [])
+        )
+        current_admin.settings["domains"].add(domain)
         admin_service.admins_collection.update_one(
             {"admin_id": current_admin.admin_id},
-            {"$addToSet": {"settings.domains": domain}}
+            {"$addToSet": {"settings.domains": domain}},
         )
     return "", 200
 
 
-@admin_bp.route('/settings/domain/<domain>', methods=['DELETE'])
+@admin_bp.route("/settings/domain/<domain>", methods=["DELETE"])
 @admin_required
 def remove_domain(domain):
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
-    if current_admin.role != 'superadmin':
-        current_admin.settings['domains'] = set(
-            current_admin.settings.get('domains', []))
-        current_admin.settings['domains'].discard(domain)
+    if current_admin.role != "superadmin":
+        current_admin.settings["domains"] = set(
+            current_admin.settings.get("domains", [])
+        )
+        current_admin.settings["domains"].discard(domain)
         admin_service.admins_collection.update_one(
             {"admin_id": current_admin.admin_id},
-            {"$pull": {"settings.domains": domain}}
+            {"$pull": {"settings.domains": domain}},
         )
     return "", 200
 
 
+@admin_bp.route("/notifications/")
+@admin_required
+def get_notifications():
+    noti_service = NotificationService(current_app.db)
+    notis = noti_service.get_notifications(
+        session.get("admin_id"), unread_only=True
+    )
+    chat_service = ChatService(current_app.db)
+    notificaitons = []
+
+    for noti in notis:
+        chat = chat_service.get_chat_by_room_id(noti.get('room_id'))
+        notificaitons.append({**noti, **chat.to_dict()})
+
+    return render_template(
+        "components/notification-list.html", notifications=notificaitons
+    )
+
+@admin_bp.route("/notification/<notification_id>/",methods=['POST'])
+@admin_required
+def viewed_notifications(notification_id):
+    noti_service = NotificationService(current_app.db)
+
+    if noti_service.mark_notification_read(notification_id,session.get('admin_id')):
+
+        return "",200
+    else:
+        return "Notification not updated", 500
+        
+
 def register_admin_socketio_events(socketio):
-    @socketio.on('admin_join')
+    @socketio.on("admin_join")
     def on_admin_join(data):
-        if session.get('role') != 'admin':
-            # print('ret')
+        if session.get("role") != "admin":
+            # # print('ret')
             return
 
-        room = data.get('room')
+        chat_service = ChatService(current_app.db)
+        chats = chat_service.get_all_chats(session.get('admin_id'))
+
+        room = data.get("room")
         if not room:
             return
-
+        [join_room(chat.room_id) for chat in chats]
+        print('ADMIN JOINED CHATS')
         join_room(room)
-        join_room('admin')  # Join the admin room for broadcasts
-        # print('admin joined')
-        emit('status', {'msg': 'Admin has joined the room.'}, room=room)
+        join_room("admin")  # Join the admin room for broadcasts
+        # # print('admin joined')
+        emit("status", {"msg": "Admin has joined the room."}, room=room)
+
+    @socketio.on("admin_required")
+    def on_admin_required(data):
+        # if session.get('admin_id')
+        # room_id = data.get('r')
+        print(f"ADMIN REQUIRED: {data}")

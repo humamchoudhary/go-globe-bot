@@ -25,8 +25,7 @@ class TempUserService:
                 city = geo_data.get("city")
 
                 if not country:
-                    geo = requests.get(
-                        f"https://ipwhois.app/json/{ip}", timeout=5)
+                    geo = requests.get(f"https://ipwhois.app/json/{ip}", timeout=5)
                     geo_data = geo.json()
                     country = geo_data.get("country", None)
                     city = geo_data.get("city")
@@ -34,15 +33,10 @@ class TempUserService:
                 # If geo lookup fails, continue without location data
                 pass
 
-        print(f"City: {city}, Country: {country}")
+        # print(f"City: {city}, Country: {country}")
 
         user = TempUser(
-            name=name,
-            user_id=user_id,
-            ip=ip,
-            role=role,
-            city=city,
-            country=country
+            name=name, user_id=user_id, ip=ip, role=role, city=city, country=country
         )
 
         # Store in memory
@@ -77,7 +71,8 @@ class TempUserService:
         """Remove users inactive for more than specified hours"""
         cutoff_time = datetime.utcnow() - timedelta(hours=hours)
         inactive_users = [
-            user_id for user_id, user in self._users.items()
+            user_id
+            for user_id, user in self._users.items()
             if user.last_active < cutoff_time
         ]
 

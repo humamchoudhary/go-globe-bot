@@ -2,7 +2,7 @@ import os
 import pickle
 import base64
 from io import BytesIO
-# from p# print import pprint
+# from p# # print import p# print
 from dotenv import load_dotenv
 from PIL import Image
 import anthropic
@@ -131,8 +131,8 @@ class Bot:
 
     def responed(self, input, id):
         chat_state = self._load_chat(id)
-        # pprint(self.bot_maps)
-        # print(self.active_bot_name)
+        # p# print(self.bot_maps)
+        # # print(self.active_bot_name)
         if self.active_bot_name not in self.bot_maps:
             raise ValueError(f"Unsupported bot: {self.active_bot_name}")
         return self.bot_maps[self.active_bot_name](input, id)
@@ -144,15 +144,15 @@ class Bot:
     def _is_google_model(self, model_name):
         """Check if the model is a Google model"""
 
-        # # print(f"Bot Name: {model_name}")
+        # # # print(f"Bot Name: {model_name}")
         actual_model = self._get_google_model_name(model_name)
 
-        # # print(f"Bot Name: {actual_model}")
-        # # print(self.google_models)
+        # # # print(f"Bot Name: {actual_model}")
+        # # # print(self.google_models)
         return actual_model in self.google_models
 
     def _set_bot(self, name):
-        # print(f"Bot Name: {name}")
+        # # print(f"Bot Name: {name}")
         if self._is_google_model(name):
             self.active_bot = genai.Client(api_key=self.gm_key)
             self.active_bot_name = name
@@ -440,7 +440,7 @@ class Bot:
             return assistant_message, tokens
 
         except Exception as e:
-            # print(f"Deepseek API error: {str(e)}")
+            # # print(f"Deepseek API error: {str(e)}")
             chat_state["config"]["messages"].pop()
             raise
 
@@ -524,10 +524,10 @@ if __name__ == "__main__":
 
     # Test each bot
     for bot_name, bot_code in bot.get_bots():
-        # print(f"\nTesting {bot_name}...")
+        # # print(f"\nTesting {bot_name}...")
         bot._set_bot(bot_code)
         chat_id = f"test_{bot_code}"
         bot.create_chat(chat_id)
         response, tokens = bot.responed("Hello! What can you do?", chat_id)
-        # print(f"Response: {response[:100]}...")
-        # print(f"Tokens used: {tokens}")
+        # # print(f"Response: {response[:100]}...")
+        # # print(f"Tokens used: {tokens}")

@@ -20,10 +20,10 @@ def send_email(to_email, subject, message, mail, html_message=None):
             html=html_message  # HTML version of the email
         )
         mail.send(msg)
-        print("Email sent successfully.")
+        # print("Email sent successfully.")
         return 'SEND'
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        # print(f"Failed to send email: {e}")
         return f'ERROR: {e}'
 
 

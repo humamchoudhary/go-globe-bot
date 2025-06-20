@@ -1,6 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import os
 import secrets
+from services.timezone import UTCZoneManager
+
+from datetime import datetime
 
 
 class Admin:
@@ -69,7 +72,34 @@ class Admin:
             secret_key=data.get('secret_key'),
             onboarding=data.get('onboarding', False)
         )
-        admin.created_at = data.get("created_at", datetime.utcnow())
+
+        # Store the original created_at in UTC (default to current UTC time if not provided)
+        created_at = data.get("created_at")
+        print(created_at)
+        if created_at is None:
+            created_at = datetime.utcnow()
+
+        # Ensure it's timezone-aware UTC
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
+        elif created_at.tzinfo != timezone.utc:
+            created_at = created_at.astimezone(timezone.utc)
+
+        # Convert to local timezone if specified in settings
+        settings = data.get("settings", {})
+        if settings and isinstance(settings, dict):
+            timezone_str = settings.get("timezone")
+            if timezone_str:
+                manager = UTCZoneManager()
+                admin.created_at = manager.convert_utc_to_timezone(
+                    created_at, timezone_str)
+            else:
+                admin.created_at = created_at
+        else:
+            admin.created_at = created_at
+
+        print(created_at)
+
         return admin
 
     def has_permission(self, required_roles):

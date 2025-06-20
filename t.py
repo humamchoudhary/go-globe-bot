@@ -9,4 +9,4 @@ hp<br />\r\n\t\t\tLine: 714<br />\r\n\t\t\tFunction: data_post\t\t\t</p>\r\n\t\t
 \t\tFile: /var/www/erp_go_globe/data/www/erp.go-globe.com/index.php<br />\r\n\t\t\tLine: 321<br />\r\n\t\t\tFunction: require_once\t\t\t</p>\r\n\t\t\r\n
 \t\r\n\r\n</div>\r\n"""
 
-print(x)
+# print(x)
