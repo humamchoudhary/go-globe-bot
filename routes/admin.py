@@ -394,6 +394,7 @@ def login():
             500,
         )
     mail = Mail(current_app)
+    print(f"TEMP 2FA CODE: {token_info['code']}")
     # Send the 2FA code via email
     status = send_email(
         admin.email,
