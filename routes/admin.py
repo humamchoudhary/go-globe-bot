@@ -527,10 +527,9 @@ def chat(room_id):
 @admin_bp.route('/chats_list/')
 @admin_required
 def get_chat_list():
-
+    room_id = request.referrer.split("/")[-1]
     chat_service = ChatService(current_app.db)
     chats = chat_service.get_all_chats(session.get("admin_id"))
-    print(chats)
 
     user_service = UserService(current_app.db)
     chats_data = []
@@ -539,7 +538,8 @@ def get_chat_list():
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    return render_template("components/chat-list.html", chats=chats_data)
+    cchat =chat_service.get_chat_by_room_id(room_id) 
+    return render_template("components/chat-list.html", chats=chats_data,cur_chat=cchat)
 
 
 @admin_bp.route("/search/", methods=["POST"])

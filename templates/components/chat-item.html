@@ -1,11 +1,12 @@
 <div id="chat-{{ chat.room_id }}"
-     class="chat-row flex flex-col  md:flex-row justify-start md:justify-between py-[12px] px-[24px] {% if request.path.split('/')[-1] == chat.room_id %}bg-[var(--sec-bg-color)]{% endif %} border-y border-y-[var(--border-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
+     class="chat-row flex flex-col  md:flex-row justify-start md:justify-between py-[12px] px-[24px] {% if request.path.split('/')[-1] == chat.room_id or (cur_chat and cur_chat.room_id == chat.room_id ) %}bg-[var(--sec-bg-color)]{% endif %} border-y border-y-[var(--border-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
     <div class="hidden"
          hx-get="/admin/chat/{{ chat.room_id }}"
          hx-target="#chatarea"
          hx-swap="innerHTML"
          hx-trigger="click from:#chat-{{ chat.room_id }}"
-         hx-push-url="true"></div>
+         hx-push-url="true"
+         hx-on::after-request="htmx.ajax('GET', '/admin/chats_list/', { target: '#chat_list_container' })"></div>
     <div class="hidden"
          hx-get="/admin/user/{{ chat.user_id }}/details"
          hx-target="#userInfo"

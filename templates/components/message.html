@@ -9,9 +9,10 @@
       endif %}
     </p>
   </div>
-  <p
+  <div
     class="md-content text-[16px] text-[var(--sec-text)] leading-[22px] text-wrap"
+    data-content="{{ message.content }}"
   >
-    {{ message.content | safe }}
-  </p>
+    {{ message.content }}
+  </div>
 </div>

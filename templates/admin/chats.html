@@ -121,8 +121,11 @@ color:var(--main-color)
 
      document.querySelectorAll('.md-content').forEach(el => {
        // Parse markdown
-       el.innerHTML = marked.parseInline(el.textContent);
 
+ 
+         const content = marked.parse(marked.parse(el.dataset.content));
+         console.log(content)
+         el.innerHTML =content;
        // Fix links
        fixAllLinks(el);
      });
@@ -196,8 +199,11 @@ const messageArea = document.getElementById('messageArea');
 
      document.querySelectorAll('.md-content').forEach(el => {
        // Parse markdown
-       el.innerHTML = marked.parseInline(el.textContent);
 
+ 
+         const content = marked.parse(marked.parse(el.dataset.content));
+         console.log(content)
+         el.innerHTML =content;
        // Fix links
        fixAllLinks(el);
      });
