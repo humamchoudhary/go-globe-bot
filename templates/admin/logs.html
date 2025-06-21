@@ -423,8 +423,14 @@
     }
   });
 
+
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', function() {
+
+ setTimeout(() => {
+    location.reload();
+  }, 5000); 
+
     const logId = "{{ selected_log.log_id | default('null') }}";
     if (logId && logId !== 'null') {
       htmx.ajax('GET', `/admin/log/${logId}`, {
