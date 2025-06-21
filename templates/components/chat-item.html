@@ -45,8 +45,8 @@
     <div class="flex flex-row-reverse mt-[25px] md:mt-0 md:flex-col justify-between md:items-end">
         <span class="message-time {% if chat.viewed %}opacity-60{% endif %}"
               data-utc="{{ chat.created_at.isoformat() }}"
-              title="{{ chat.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}">
-            {{ chat.created_at.strftime("%I:%M %p - %d %B %Y") }}
+              title="{{ chat.updated_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}">
+            {{ chat.updated_at.strftime("%I:%M %p - %d %B %Y") }}
         </span>
         <div class="flex flex-row gap-4">
             {% if not chat.exported %}
