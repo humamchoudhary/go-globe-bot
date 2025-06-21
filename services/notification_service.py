@@ -129,10 +129,9 @@ class NotificationService:
                                            username: str = None) -> str:
         """Create admin required notification"""
         title = "Admin Required"
-        message = f"Chat room {room_id} requires admin attention"
+        message = f"A Chat room requires admin attention"
         if username:
-            message = f"User {username} in chat room {
-                room_id} requires admin attention"
+            message = f"User {username} requires admin attention"
 
         return self.create_notification(
             admin_id=admin_id,
