@@ -381,13 +381,16 @@ def login():
     if not admin:
         return jsonify({"error": "Invalid credentials"}), 401
 
+    if not admin.two_fa:
+        # No 2FA required, complete login
+        return complete_admin_login(admin)
     # Check if IP is trusted (completed 2FA within last 30 mins)
     if admin_service.is_ip_trusted(admin.admin_id, ip_address):
         # IP is trusted, proceed with login
         return complete_admin_login(admin)
 
     # IP not trusted, require 2FA
-    token_info = admin_service.create_2fa_token(admin.admin_id, ip_address)
+    token_info = admin_service.create_2fa_token(admin.admin_id, ip_address,current_app.config['SETTINGS'].get('2fa'))
     if not token_info:
         return (
             jsonify({"error": "Failed to create 2FA token", "requires_2fa": True}),
@@ -538,8 +541,8 @@ def get_chat_list():
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    cchat =chat_service.get_chat_by_room_id(room_id) 
-    return render_template("components/chat-list.html", chats=chats_data,cur_chat=cchat)
+    cchat = chat_service.get_chat_by_room_id(room_id)
+    return render_template("components/chat-list.html", chats=chats_data, cur_chat=cchat)
 
 
 @admin_bp.route("/search/", methods=["POST"])
@@ -732,7 +735,7 @@ def send_message(room_id):
             "new_message",
             {
 
-            'room_id':chat.room_id,
+                'room_id': chat.room_id,
                 "sender": new_message.sender,
                 "content": message,
                 "timestamp": new_message.timestamp.isoformat(),
@@ -1220,6 +1223,10 @@ def settings():
                     current_admin.admin_id}: {str(e)}"
             )
 
+    if current_admin.role == 'superadmin':
+
+        current_app.db.config.update_one({"id":"settings"},{"$set":current_app.config['SETTINGS']})
+
     return render_template(
         "admin/settings.html",
         settings=settings_data,
@@ -1339,6 +1346,35 @@ def add_timing():
         )
 
     return "added", 200
+
+
+@admin_bp.route('/settings/2fa-duration/', methods=['POST'])
+@admin_required
+def set_2fa_duration():
+
+    admin_service = AdminService(current_app.db)
+    current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
+    print(current_app.config['SETTINGS'])
+    if current_admin.role == "superadmin":
+        if not current_app.config['SETTINGS'].get('2fa', None):
+
+            current_app.config['SETTINGS']['2fa'] = {
+                "duration": None, "unit": None}
+        current_app.config['SETTINGS']['2fa']['duration'] = request.form.get(
+            'duration_value')
+        current_app.config['SETTINGS']['2fa']['unit'] = request.form.get(
+            'duration_unit')
+        return "", 200
+    else:
+        return "", 403
+
+
+@admin_bp.route('/settings/2fa/', methods=['POST'])
+@admin_required
+def set_2fa():
+    admin_service = AdminService(current_app.db)
+    admin_service.toggle_two_fa(session.get('admin_id'))
+    return '', 200
 
 
 @admin_bp.route("/settings/timing/<int:id>", methods=["DELETE"])

@@ -64,6 +64,44 @@
                 </p>
               </div>
             </div>
+
+
+<!-- 2FA Toggle (Admin only) -->
+<div class="space-y-3">
+  <h2 class="text-xl font-semibold">Two-Factor Authentication</h2>
+
+  <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--sec-bg-color)]">
+    <div class="flex items-center gap-4">
+      <div class="p-2 rounded-xl bg-[var(--bg-color)]">
+        <i data-lucide="shield-check" class="size-5 text-[var(--main-color)]"></i>
+      </div>
+      <div class="space-y-0.5">
+        <h3 class="font-medium text-[var(--sec-text)]">Enable Two-Factor Authentication</h3>
+        <p class="text-sm text-[var(--sec-text)] opacity-70">Require 2FA for enhanced security</p>
+      </div>
+    </div>
+
+<label class="custom-toggle">
+  <input
+    type="checkbox"
+    {% if settings.two_fa %}checked{% endif %}
+    hx-post="/admin/settings/2fa"
+    hx-trigger="change"
+    hx-swap="none"
+    hx-on::after-request="window.location.reload()"
+  />
+  <span class="custom-slider"></span>
+</label>
+  </div>
+
+  <div class="flex items-center gap-2 text-xs text-[var(--sec-text)] opacity-70">
+    <i data-lucide="info" class="size-4 text-blue-200"></i>
+    <p>Changes take effect immediately for new login sessions</p>
+  </div>
+</div>
+
+
+
           </div>
 
           <!-- Model & Prompt -->
@@ -143,12 +181,57 @@
               {% endfor %}
             </div>
               </div>
+ 
 
-
+              <div class="h-px" style="background-color: var(--border-color)"></div>
+              <!-- 2FA Duration Settings (Superadmin only) -->
+              <div>
+                <h2 class="text-xl font-semibold mb-4">Two-Factor Authentication</h2>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-2 opacity-75">2FA Session Duration</label>
+                    <form
+                      hx-post="/admin/settings/2fa-duration"
+                      hx-trigger="change delay:500ms"
+                      hx-swap="none"
+                      hx-on::after-request="window.location.reload()"
+                      class="flex gap-3"
+                    >
+                      <input
+                        type="number"
+                        name="duration_value"
+                        min="1"
+                        max="9999"
+                        value="{{ settings.get('2fa',{}).get('unit',None) and settings.get('2fa',{}).get('duration',None) or 3 }}"
+                        class="w-24 rounded-lg border px-3 py-2 text-sm outline-none transition-all"
+                        style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
+                        required
+                      />
+                      <select
+                        name="duration_unit"
+                        class="flex-1 rounded-lg border px-3 py-2 text-sm outline-none transition-all"
+                        style="border-color: var(--border-color); background-color: var(--bg-color); color: var(--sec-text)"
+                      >
+                      <option value="minutes" {% if settings.get('2fa',{}).get('unit',None) == 'minutes' %}selected{% endif %}>Minutes</option>
+                        <option value="hours" {% if settings.get('2fa',{}).get('unit',None) == 'hours' %}selected{% endif %}>Hours</option>
+                        <option value="days" {% if settings.get('2fa',{}).get('unit',None) == 'days' or not settings.get('2fa',{}).get('unit',None)%}selected{% endif %}>Days</option>
+                      </select>
+                    </form>
+                    <div class="flex items-center gap-2 mt-2">
+                      <i data-lucide="info" class="size-4 text-blue-200"></i>
+                      <p class="text-xs opacity-70">How long users require new 2FA</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
           </div>
 
           <!-- Theme Selection -->
         </div>
+
+
+
+
         
       {% else %}
         <!-- Admin Settings -->
@@ -243,6 +326,41 @@
               </div>
 
               <div class="h-px" style="background-color: var(--border-color)"></div>
+
+   <!-- 2FA Toggle (Admin only) -->
+<div class="space-y-3">
+  <h2 class="text-xl font-semibold">Two-Factor Authentication</h2>
+
+  <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--sec-bg-color)]">
+    <div class="flex items-center gap-4">
+      <div class="p-2 rounded-xl bg-[var(--bg-color)]">
+        <i data-lucide="shield-check" class="size-5 text-[var(--main-color)]"></i>
+      </div>
+      <div class="space-y-0.5">
+        <h3 class="font-medium text-[var(--sec-text)]">Enable Two-Factor Authentication</h3>
+        <p class="text-sm text-[var(--sec-text)] opacity-70">Require 2FA for enhanced security</p>
+      </div>
+    </div>
+
+<label class="custom-toggle">
+  <input
+    type="checkbox"
+    {% if settings.two_fa %}checked{% endif %}
+    hx-post="/admin/settings/2fa"
+    hx-trigger="change"
+    hx-swap="none"
+    hx-on::after-request="window.location.reload()"
+  />
+  <span class="custom-slider"></span>
+</label>
+  </div>
+
+  <div class="flex items-center gap-2 text-xs text-[var(--sec-text)] opacity-70">
+    <i data-lucide="info" class="size-4 text-blue-200"></i>
+    <p>Changes take effect immediately for new login sessions</p>
+  </div>
+</div>
+
 
 <!-- Add this to your settings.html -->
 <div class="border rounded-xl p-6 transition-all" style="border-color: var(--border-color); background-color: var(--bg-color)">
@@ -548,7 +666,49 @@
   ::-webkit-scrollbar-thumb:hover {
     background: var(--main-color);
   }
-</style>
+
+  .custom-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  .custom-toggle input {
+    display: none;
+  }
+
+  .custom-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: background-color 0.3s;
+    border-radius: 24px;
+  }
+
+  .custom-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: transform 0.3s;
+    border-radius: 50%;
+  }
+
+  .custom-toggle input:checked + .custom-slider {
+    background-color: var(--main-color);
+  }
+
+  .custom-toggle input:checked + .custom-slider::before {
+    transform: translateX(20px);
+  }</style>
 
 <script>
   // Add confirmation for delete actions

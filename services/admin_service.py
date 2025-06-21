@@ -35,6 +35,10 @@ class AdminService:
 
         self.admins_collection.insert_one(admin.to_dict())
         return admin
+    
+    def toggle_two_fa(self,admin_id):
+        admin = self.get_admin_by_id(admin_id)
+        self.admins_collection.update_one({'admin_id':admin_id},{"$set":{'two_fa':not admin.two_fa}})
 
     def get_admin_by_key(self, key):
         admin_data = self.admins_collection.find_one({"secret_key": key})
@@ -211,9 +215,9 @@ class AdminService:
         """Generate a 6-digit 2FA code"""
         return ''.join(random.choices(string.digits, k=6))
 
-    def can_request_2fa(self, admin_id, ip_address):
+    def can_request_2fa(self, admin_id, ip_address,two_fa_setttings):
         """Check if IP can request new 2FA code (30-minute cooldown)"""
-        cutoff_time = datetime.utcnow() - timedelta(days=3)
+        cutoff_time = datetime.utcnow() - timedelta(**{two_fa_setttings["unit"]: int(two_fa_setttings["duration"])})
         existing_token = self.two_fa_collection.find_one({
             "admin_id": admin_id,
             "ip_address": ip_address,
@@ -222,13 +226,13 @@ class AdminService:
         })
         return existing_token is None
 
-    def create_2fa_token(self, admin_id, ip_address):
+    def create_2fa_token(self, admin_id, ip_address,two_fa_setttings):
         """Create a new 2FA token for the IP address"""
         # Clean up expired tokens first
         self.cleanup_expired_2fa_tokens()
 
         # Check if IP can request new 2FA
-        if not self.can_request_2fa(admin_id, ip_address):
+        if not self.can_request_2fa(admin_id, ip_address,two_fa_setttings):
             return None
 
         # Deactivate any existing active tokens for this admin/IP combo

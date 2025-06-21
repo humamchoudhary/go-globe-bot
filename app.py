@@ -119,7 +119,6 @@ def create_app(config_class=Config):
     app.config['MAIL_PASSWORD'] = os.environ.get('SMTP_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('SMTP_USERNAME')
 
-
     from urllib.parse import urlparse
 
     #####################  GO BACK TO THIS CODE ONCE THE HEADER IS ADDED #########################
@@ -203,7 +202,7 @@ def create_app(config_class=Config):
                         'favicon.ico', 'healthcheck', 'robots.txt']
         if any(request.path.startswith(f'/{path}') for path in exempt_paths):
             # print(f"[SKIP] Path '{
-                  # request.path}' is exempted from domain check.")
+            # request.path}' is exempted from domain check.")
             return
 
         admin_id = None
@@ -217,7 +216,7 @@ def create_app(config_class=Config):
         if not admin_id and referer and Config.BACKEND_URL in referer:
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
             # print(
-                # f"[FALLBACK] Referer matches BACKEND_URL. Using DEFAULT_ADMIN_ID: {admin_id}")
+            # f"[FALLBACK] Referer matches BACKEND_URL. Using DEFAULT_ADMIN_ID: {admin_id}")
 
         admin = None
         sec_key = request.headers.get('SECRET_KEY')
@@ -237,7 +236,7 @@ def create_app(config_class=Config):
         if not admin:
             fallback_admin_id = os.environ.get('DEFAULT_ADMIN_ID')
             # print(f"[FALLBACK] No valid admin_id or SECRET_KEY. Using DEFAULT_ADMIN_ID: {
-                  # fallback_admin_id}")
+            # fallback_admin_id}")
             admin = AdminService(app.db).get_admin_by_id(fallback_admin_id)
 
         # Final check
@@ -252,13 +251,13 @@ def create_app(config_class=Config):
         # Check domain access if required
         if 'domains' in admin.settings and admin.settings['domains']:
             # print(f"[SECURITY] Admin has domain restrictions: {
-                  # admin.settings['domains']}")
+            # admin.settings['domains']}")
             if referer:
                 domain = urlparse(referer).netloc
                 # print(f"[DOMAIN] Parsed referer domain: {domain}")
                 if domain not in admin.settings['domains'] and domain not in Config.BACKEND_URL:
                     # print(f"[ACCESS DENIED] Domain '{
-                          # domain}' not allowed for this admin.")
+                    # domain}' not allowed for this admin.")
                     return "Access denied", 403
             else:
                 # print("[WARNING] No referer provided to validate domain.")
@@ -468,6 +467,10 @@ def create_app(config_class=Config):
             'prompt': """you are a customer service assistant..."""
         }
         db.config.insert_one(app.config['SETTINGS'])
+    if not app.config['SETTINGS'].get('2fa'):
+
+        app.config['SETTINGS']['2fa'] = {
+            "duration": 1, "unit": 'days'}
 
     @app.context_processor
     def inject_settings():

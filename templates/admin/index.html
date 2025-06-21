@@ -82,6 +82,7 @@
 We’re building market-leading features that will give you greater control over your generations.
             </p>
             <div class="w-full h-[2px] bg-[var(--border-color)]"></div>
+            {% if session.get('role') =="superadmin" %}
             <div class="flex flex-row gap-2 items-center">
                 <div class="rounded-full size-[12px] bg-green-400"></div>
                 <p class="text-[var(--sec-text)]">{{online_users}} Online</p>
@@ -91,7 +92,7 @@ We’re building market-leading features that will give you greater control over
                 <div class="rounded-full size-[12px] bg-[var(--sec-text)]"></div>
                 <p class="text-[var(--sec-text)]">{{all_users}} Members</p>
             </div>
-        
+            {% endif %}
             </div>
             </div>
     </div>
