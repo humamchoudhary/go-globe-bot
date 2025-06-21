@@ -327,38 +327,6 @@ def reset_password(token):
     )
 
 
-# @admin_bp.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'GET':
-#         return render_template('admin/login.html')
-#
-#     data = request.json
-#     username = data.get('username')
-#     password = data.get('password')
-#
-#     if not username or not password:
-#         return jsonify({"error": "Username and password are required"}), 400
-#
-#     admin_service = AdminService(current_app.db)
-#     admin = admin_service.authenticate_admin(username, password)
-#
-#     if not admin:
-#         return jsonify({"error": "Invalid credentials"}), 401
-#
-#     # Clear session and set admin session
-#     next_url = session.pop('next', None)
-#     session.clear()
-#     session['admin_id'] = admin.admin_id
-#     session['role'] = admin.role
-#     session['username'] = admin.username
-#
-#     # Load admin's personal settings into current_app.config
-#     # current_app.config['CURRENT_ADMIN_SETTINGS'] = admin.settings
-#
-#     if next_url:
-#         return jsonify({"status": "success", "redirect": next_url}), 200
-#
-#     return jsonify({"status": "success", "redirect": url_for('admin.index')}), 200
 
 
 @admin_bp.route("/login", methods=["GET", "POST"])
@@ -827,12 +795,6 @@ def serve_file(file_name):
     return send_from_directory(path, file_name)
 
 
-# @admin_bp.route('/add-admin', methods=['GET', 'POST'])
-# @admin_required
-# def add_admin():
-#     if request.method == "GET":
-#         return render_template('admin/add_admin.html')
-
 
 @admin_bp.route("/upload", methods=["POST"])
 @admin_required
@@ -1095,54 +1057,6 @@ def join_chat(room_id):
 # Socket.IO events for admin
 
 
-# @admin_bp.route('/settings', methods=['GET'])
-# @admin_required
-# def settings():
-#     config = dict(current_app.config)
-#
-#     # Validate logo paths
-#     config['SETTINGS']['logo']['large'] = (
-#         current_app.config['SETTINGS']['logo']['large']
-#         if os.path.exists(os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['large'][1:]))
-#         else ''
-#     )
-#     config['SETTINGS']['logo']['small'] = (
-#         current_app.config['SETTINGS']['logo']['small']
-#         if os.path.exists(os.path.join(os.getcwd(), current_app.config['SETTINGS']['logo']['small'][1:]))
-#         else ''
-#     )
-#
-#     # Define day order and sort timings without converting timezones
-#     day_order = {'monday': 0, 'tuesday': 1, 'wednesday': 2,
-#                  'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
-#
-#     if current_app.config['SETTINGS'].get('timings'):
-#         config['SETTINGS']['timings'] = sorted(
-#             current_app.config['SETTINGS']['timings'],
-#             key=lambda time: day_order[time['day']]
-#         )
-#
-#     ##################################  GOOGLE DRIVE CONNECTION #############################
-#
-#     folders = []
-#     sess_cred = current_app.config['SETTINGS'].get('google-token')
-#     creds = None
-#     if sess_cred:
-#         creds = Credentials.from_authorized_user_info(
-#             json.loads(sess_cred), SCOPES)
-#
-#     if creds:
-#         service = build('drive', 'v3', credentials=creds)
-#         results = service.files().list(
-#             q="mimeType='application/vnd.google-apps.folder'",
-#             fields="files(id, name)").execute()
-#         folders = results.get('files', [])
-#     selected_folders = current_app.config['SETTINGS'].get(
-#         'selected_folder_id', [])
-#
-#     return render_template('admin/settings.html',
-#
-#                            settings=config['SETTINGS'], tzs=UTCZoneManager.get_timezones(), folders=folders, selected_folders=selected_folders)
 
 
 @admin_bp.route("/settings", methods=["GET"])
@@ -1795,17 +1709,6 @@ def api_usage():
     )
 
 
-# @admin_bp.route('/chats')
-# @admin_required
-# def get_chats():
-#     chat_service = ChatService(current_app.db)
-#     chats = chat_service.get_all_chats()
-#
-#     # Convert to dictionary representation
-#     chats_data = [chat.to_dict() for chat in chats if chat.admin_required]
-#     return jsonify(chats_data)
-
-
 @admin_bp.route("/chats/", methods=["GET"])
 # @admin_bp.route('/chats/<string:status>', methods=['GET'])
 @admin_required
@@ -2201,6 +2104,29 @@ def viewed_notifications(notification_id):
         return "", 200
     else:
         return "Notification not updated", 500
+
+
+@admin_bp.route('/contact/',methods=['GET','POST'])
+@admin_required
+def contact():
+    admin_service = AdminService(current_app.db)
+    admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    if request.method == 'GET':
+        return render_template('/admin/contact.html', admin=admin)
+    else:
+        SMTP_USER = os.environ.get('SMTP_TO')
+        form_data = request.json
+        mail = Mail(current_app)
+        print(dict(form_data.items()))
+        send_email(SMTP_USER, f"Go Bot Contact query from: {form_data['name']}", message="New contact", mail=mail,html_message=render_template('email/contact.html',name=form_data['name'],email=form_data['email'],phone=form_data['phone'],subject=form_data['subject'],message=form_data['message'],admin_id=session.get('admin_id'),time=datetime.now()))
+        return jsonify({
+                    'success': True,
+                    'message': 'Your message has been sent successfully!'
+                }), 200
+
+
+
+
 
 
 def register_admin_socketio_events(socketio):
