@@ -77,7 +77,7 @@ class Admin:
 
         # Store the original created_at in UTC (default to current UTC time if not provided)
         created_at = data.get("created_at")
-        print(created_at)
+        # print(created_at)
         if created_at is None:
             created_at = datetime.utcnow()
 
