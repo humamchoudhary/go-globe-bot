@@ -2128,7 +2128,6 @@ def contact():
 
 
 
-
 def register_admin_socketio_events(socketio):
     @socketio.on("admin_join")
     def on_admin_join(data):
