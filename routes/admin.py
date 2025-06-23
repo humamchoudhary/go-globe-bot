@@ -1147,6 +1147,7 @@ def settings():
         tzs=UTCZoneManager.get_timezones(),
         folders=folders,
         selected_folders=selected_folders,
+        audio_file=f"/static/sounds/message.wav"
     )
 
 
@@ -1155,7 +1156,7 @@ def save_settings(settings):
     return True
 
 
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "txt", "svg"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "txt", "svg","mp3","mp4","wav"}
 
 
 def allowed_file(filename):
@@ -1189,6 +1190,33 @@ def upload_logo(file_name):
         return f"File saved at {file_path}", 200
 
     return "Invalid file type", 400
+
+
+@admin_bp.route("/upload-sound", methods=["POST"])
+@admin_required
+def upload_sound():
+    file_name = 'message.wav'
+
+    if "file" not in request.files:
+        return "No file part", 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return "No selected file", 400
+    if file and allowed_file(file_name):
+        # Prevent directory traversal attacks
+        filename = secure_filename(file_name)
+        file_path = os.path.join(current_app.config["SOUND_FOLDER"], filename)
+        file.save(file_path)
+        # current_app.config["SETTINGS"]["logo"][f_type] = os.path.join(
+        #     "/static", "img", filename
+        # )
+        # # # print(current_app.config)
+        print( f"File saved at {file_path}")
+        return f"File saved at {file_path}", 200
+
+    return "Invalid file type", 400
+
 
 
 @admin_bp.route("/settings/timezone", methods=["POST"])

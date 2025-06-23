@@ -66,6 +66,7 @@ def create_app(config_class=Config):
 
     app.config['SESSION_TYPE'] = 'mongodb'
     app.config['LOGOS_FOLDER'] = os.path.join(os.getcwd(), 'static/img/')
+    app.config['SOUND_FOLDER'] = os.path.join(os.getcwd(), 'static/sounds/')
 
     def is_mobile(user_agent):
         mobile_keywords = ['mobile', 'android',

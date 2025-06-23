@@ -9,7 +9,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Logo Settings -->
           <div class="border rounded-xl p-6 transition-all" style="border-color: var(--border-color); background-color: var(--bg-color)">
-            <h2 class="text-xl font-semibold mb-4">Logo Settings</h2>
+            <h2 class="text-xl font-semibold mb-4">Logo and Audio Settings</h2>
             <div class="flex flex-col gap-3">
               <div>
                 <p class="text-sm  font-semibold mb-2 opacity-75">Large Logo</p>
@@ -23,25 +23,15 @@
                 {% set logo = settings.logo.small %}
                 {% include 'components/logo-component.html' %}
               </div>
+
+              <div>
+                <p class="text-sm mb-2 opacity-75">Message and Pop Sound</p>
+                {% set audio_type = 'message' %}
+                {% include 'components/audio-component.html' %}
+              </div>
             </div>
           </div>
 
-          <!-- Audio Settings -->
-          <!-- <div class="border rounded-xl p-6 transition-all" style="border-color: var(--border-color); background-color: var(--bg-color)"> -->
-          <!--   <h2 class="text-xl font-semibold mb-4">Audio Settings</h2> -->
-          <!--   <div class="space-y-6"> -->
-          <!--     <div> -->
-          <!--       <p class="text-sm mb-2 opacity-75">Message Sound</p> -->
-          <!--       {% set audio_type = 'message' %} -->
-          <!--       {% include 'components/audio-component.html' %} -->
-          <!--     </div> -->
-          <!--     <div> -->
-          <!--       <p class="text-sm mb-2 opacity-75">Pop-up Sound</p> -->
-          <!--       {% set audio_type = 'pop-up' %} -->
-          <!--       {% include 'components/audio-component.html' %} -->
-          <!--     </div> -->
-          <!--   </div> -->
-          <!-- </div> -->
 
           <!-- API Keys -->
           <div class="border rounded-xl p-6 transition-all " style="border-color: var(--border-color); background-color: var(--bg-color)">
