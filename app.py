@@ -192,6 +192,9 @@ def create_app(config_class=Config):
 
     @app.before_request
     def set_admin_id():
+
+        if not request.path.startswith('/min/'):
+            return
         origin = request.headers.get('Origin')
         referer = request.headers.get('Referer')
         # print(f"[BEFORE_REQUEST] Incoming request - Path: {request.path}")
@@ -356,7 +359,7 @@ def create_app(config_class=Config):
     def log_response(response):
         """Log response information"""
 
-        admin_id = session.get('admin_id')
+        # admin_id = session.get('admin_id')
         try:
             if hasattr(g, 'log_id') and hasattr(g, 'request_id'):
                 logs_service.logs_collection.update_one(
@@ -403,7 +406,6 @@ def create_app(config_class=Config):
 
 
 # Add request start time tracking
-
 
     @app.before_request
     def start_timer():
