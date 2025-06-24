@@ -216,10 +216,9 @@ class AdminService:
         """Generate a 6-digit 2FA code"""
         return ''.join(random.choices(string.digits, k=6))
 
-    def can_request_2fa(self, admin_id, ip_address, two_fa_setttings):
+    def can_request_2fa(self, admin_id, ip_address):
         """Check if IP can request new 2FA code (30-minute cooldown)"""
-        cutoff_time = datetime.utcnow() - timedelta(**
-                                                    {two_fa_setttings["unit"]: int(two_fa_setttings["duration"])})
+        cutoff_time = datetime.utcnow() - timedelta(minutes=2)
         existing_token = self.two_fa_collection.find_one({
             "admin_id": admin_id,
             "ip_address": ip_address,
@@ -228,13 +227,13 @@ class AdminService:
         })
         return existing_token is None
 
-    def create_2fa_token(self, admin_id, ip_address, two_fa_setttings):
+    def create_2fa_token(self, admin_id, ip_address, two_fa_settings):
         """Create a new 2FA token for the IP address"""
         # Clean up expired tokens first
-        self.cleanup_expired_2fa_tokens()
+        self.cleanup_expired_2fa_tokens(two_fa_settings)
 
         # Check if IP can request new 2FA
-        if not self.can_request_2fa(admin_id, ip_address, two_fa_setttings):
+        if not self.can_request_2fa(admin_id, ip_address):
             return None
 
         # Deactivate any existing active tokens for this admin/IP combo
@@ -313,7 +312,7 @@ class AdminService:
 
     def get_2fa_cooldown_remaining(self, admin_id, ip_address):
         """Get remaining cooldown time in minutes"""
-        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        cutoff_time = datetime.utcnow() - timedelta(minutes=2)
         token = self.two_fa_collection.find_one({
             "admin_id": admin_id,
             "ip_address": ip_address,
@@ -327,16 +326,21 @@ class AdminService:
             return max(0, int(remaining.total_seconds() / 60))
         return 0
 
-    def cleanup_expired_2fa_tokens(self):
+    def cleanup_expired_2fa_tokens(self, two_fa_settings):
         """Clean up expired 2FA tokens (older than 24 hours)"""
-        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+
+        cutoff_time = datetime.utcnow() - timedelta(**
+                                                    {two_fa_settings["unit"]:
+                                                     int(two_fa_settings["duration"])})
         self.two_fa_collection.delete_many({
             "created_at": {"$lt": cutoff_time}
         })
 
-    def get_2fa_stats(self, admin_id, days=7):
+    def get_2fa_stats(self, admin_id, two_fa_settings):
         """Get 2FA usage statistics for an admin"""
-        cutoff_time = datetime.utcnow() - timedelta(days=days)
+        cutoff_time = datetime.utcnow() - timedelta(**
+                                                    {two_fa_settings["unit"]:
+                                                     int(two_fa_settings["duration"])})
         pipeline = [
             {"$match": {
                 "admin_id": admin_id,
@@ -353,9 +357,11 @@ class AdminService:
             stats[item["_id"]] = item["count"]
         return stats
 
-    def is_ip_trusted(self, admin_id, ip_address):
+    def is_ip_trusted(self, admin_id, ip_address, two_fa_settings):
         """Check if IP is trusted (has completed 2FA within last 30 mins)"""
-        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        cutoff_time = datetime.utcnow() - timedelta(**
+                                                    {two_fa_settings["unit"]:
+                                                     int(two_fa_settings["duration"])})
         trusted_ip = self.trusted_ips_collection.find_one({
             "admin_id": admin_id,
             "ip_address": ip_address,
@@ -371,9 +377,11 @@ class AdminService:
             upsert=True
         )
 
-    def cleanup_expired_trusted_ips(self):
+    def cleanup_expired_trusted_ips(self, two_fa_settings):
         """Clean up IPs older than 30 minutes"""
-        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        cutoff_time = datetime.utcnow() - timedelta(**
+                                                    {two_fa_settings["unit"]:
+                                                     int(two_fa_settings["duration"])})
         self.trusted_ips_collection.delete_many({
             "last_verified": {"$lt": cutoff_time}
         })

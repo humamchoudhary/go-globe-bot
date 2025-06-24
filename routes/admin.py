@@ -353,7 +353,7 @@ def login():
         # No 2FA required, complete login
         return complete_admin_login(admin)
     # Check if IP is trusted (completed 2FA within last 30 mins)
-    if admin_service.is_ip_trusted(admin.admin_id, ip_address):
+    if admin_service.is_ip_trusted(admin.admin_id, ip_address,current_app.config['SETTINGS'].get('2fa')):
         # IP is trusted, proceed with login
         return complete_admin_login(admin)
 
@@ -644,30 +644,24 @@ def export_chat(room_id):
             "name": user.name,
             "company": user.name,
             "title": user.desg,
-            "phone": user.phone,
-            "email": f"{user.email}",
-            "country": user.country,
-            "city": user.city,
-            "status": 2,
-            "source": 10,
-            "assigned": 1,
+            "phonenumber": user.phone,
+            "email": f"{user.email}12",
+            "address": f"{user.city},{user.country}",
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
         # print(r.url)
         if r.status_code == 200:
 
-            # data = r.json()
-            # print(r)
-            # print(r.content)
+            data = r.json()
+            print(r)
+            print(r.content)
             if not chat_service.export_chat(room_id, data.get("lead_id", None)):
                 return "Chat not found", 404
         else:
-            raise Exception(f"Error in exporting: {r.status_code}, {r.json()}")
-        # except Exception as e:
-        #     # print(e)
-        #     return "Error pushing", 500
-        return "", 200
+            # raise Exception(f"Error in exporting: {r.status_code}, {r.json()}")
+            return f"Error in exporting: {r.status_code}, {r.json()}",500
+        return "success", 200
 
     return "Chat not found", 404
 

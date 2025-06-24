@@ -124,7 +124,6 @@ color:var(--main-color)
 
  
          const content = marked.parse(marked.parse(el.dataset.content));
-         console.log(content)
          el.innerHTML =content;
        // Fix links
        fixAllLinks(el);
@@ -227,6 +226,33 @@ const messageArea = document.getElementById('messageArea');
   });
 
 
+async function exportChat(roomId) {
+    try {
+        console.log('Starting export for room:', roomId);
+        
+        const response = await fetch(`/admin/chat/${roomId}/export`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        console.log('Export response status:', response.status);
+        
+        if (response.ok) {
+            console.log('Export successful, reloading page...');
+            window.location.reload();
+        } else {
+            console.error('Export failed with status:', response.status);
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            alert('Export failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Export failed. Please try again.');
+    }
+}
 </script>
 
 
