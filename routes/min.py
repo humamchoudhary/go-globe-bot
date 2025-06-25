@@ -250,12 +250,16 @@ def chat(chat_id):
 
     chat_service = ChatService(current_app.db)
     chat = chat_service.get_chat_by_room_id(f'{user.user_id}-{chat_id[:8]}')
-
+    print(chat)
     if not chat:
         if request.headers.get('HX-Request') == 'true':
             response = make_response('Chat not found', 404)
-            response.headers['HX-Redirect'] = url_for('min.onboarding')
+            response.headers['HX-Redirect'] = url_for('min.onboard')
+            print(response)
             return response
+
+        print("simple redir")
+        return redirect(url_for("min.onboard"))
 
     # Return just the chat HTML for HTMX requests
     if request.headers.get('HX-Request') == 'true':
