@@ -658,7 +658,7 @@ def export_chat(room_id):
             # "address": f"{user.city},{user.country}",
             "city":str(user.city),
             "state":str(user.city),
-            "country":get_country_id('tblcountries.json',user.country),
+            "country":int(get_country_id('tblcountries.json',user.country)),
             "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
         }
 
