@@ -624,6 +624,16 @@ def filter_chats(filter):
             ],
         )
 
+import json
+def get_country_id(file_path, target_country):
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+
+    for entry in data:
+        if entry.get('country') == target_country:
+            return entry.get('country_id')
+    
+    return None 
 
 @admin_bp.route("/chat/<room_id>/export", methods=["POST"])
 @admin_required
@@ -647,6 +657,10 @@ def export_chat(room_id):
             "phonenumber": user.phone,
             "email": f"{user.email}",
             "address": f"{user.city},{user.country}",
+            "city":str(user.city),
+            "state":str(user.city),
+            "country":get_country_id('tblcountries.json',user.country),
+            "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
         }
 
         r = requests.post(erp_url, headers=headers, data=data)

@@ -250,7 +250,6 @@ def new_chat(subject):
 @min_bp.route('/chat/<string:chat_id>', methods=['GET'])
 @login_required
 def chat(chat_id):
-    # print(chat_id.__dict__)
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
 
@@ -259,11 +258,6 @@ def chat(chat_id):
     print(chat)
     if not chat:
         if request.headers.get('HX-Request') == 'true':
-            # response = make_response('Chat not found', 404)
-            # response.headers['HX-Redirect'] = url_for('min.onboard')
-            # print(response)
-            # return response
-
             return redirect(url_for("min.onboard"))
 
         print("simple redir")
