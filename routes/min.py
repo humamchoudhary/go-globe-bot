@@ -244,14 +244,14 @@ def new_chat(subject):
     print(chat.chat_id)
     if request.headers.get('HX-Request') == 'true':
 
-        return redirect(url_for('min.chat',chat_id=chat.chat_id))
+        return redirect(url_for('min.view_chat',chat_id=chat.chat_id))
 
-    return redirect(url_for('min.chat', chat_id=chat.chat_id))
+    return redirect(url_for('min.view_chat', chat_id=chat.chat_id))
 
 
 @min_bp.route('/chat/<string:chat_id>', methods=['GET'])
 @login_required
-def chat(chat_id):
+def view_chat(chat_id):
     print(chat_id.__dict__)
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
