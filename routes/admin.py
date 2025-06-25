@@ -628,11 +628,10 @@ import json
 def get_country_id(file_path, target_country):
     with open(file_path, 'r') as f:
         data = json.load(f)
-
     for entry in data:
-        if entry.get('short_name').lower() == target_country.lower():
+        # print(entry.get('short_name'))
+        if entry.get('short_name',"").lower() == target_country.lower():
             return entry.get('country_id')
-    
     return None 
 
 @admin_bp.route("/chat/<room_id>/export", methods=["POST"])
