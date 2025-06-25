@@ -68,6 +68,8 @@ def headers():
 
 @min_bp.route('/')
 def index():
+    print('/')
+    print(session.get('last_visit'))
     if 'last_visit' in session and session['last_visit'] not in ['/min/', '/min/get-headers']:
         response = make_response('', 200)
         response.headers['HX-Redirect'] = session['last_visit']
