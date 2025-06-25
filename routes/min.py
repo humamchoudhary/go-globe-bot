@@ -134,92 +134,56 @@ def generate_random_username():
 #     return "", 200
 
 
-@min_bp.route('/auth', methods=['POST', 'GET'])
-def auth_user():
-    # if request.method == "GET":
-    #     sess_user = session.get('user_id')
-    #     return ('', 204) if sess_user else jsonify(False)
-
-    # Check if request is coming from HTMX or regular JSON
-    is_htmx = request.headers.get('HX-Request') == 'true'
-    # print(is_htmx)
-
-    # Handle different content types
-
-    if request.content_type == 'application/json':
-        data = request.json or {}
-    else:
-        # For form submissions via HTMX
-        data = request.form.to_dict() or {}
-    # print(data)
-    name = data.get('name')
-    email = data.get('email')
-    phone = data.get('phone')
-    subject = data.get('subject')
-    desg = data.get('desg')
-    is_anon = data.get('anonymous')
-    user_ip = request.headers.get(
-        # Automatically fetch IP
-        "X_Real-IP", request.remote_addr).split(",")[0]
+def create_user_and_chat(data, user_ip):
     user_service = UserService(current_app.db)
 
-    if is_anon:
+    if data.get('anonymous'):
         name = generate_random_username()
         user = user_service.create_user(name, ip=user_ip)
     else:
         user = user_service.create_user(
-            name, email=email, phone=phone, ip=user_ip, desg=desg)
+            data.get('name'), email=data.get('email'), phone=data.get('phone'), ip=user_ip, desg=data.get('desg'))
 
-    if not (name or email or phone):
-        if not True:  # Replace with your ALLOW_EMPTY_USERS check
-            error_message = {"error": "Empty users are not allowed."}
-            if is_htmx:
-                return jsonify(error_message), 400
-            return jsonify(error_message), 400
-        name = generate_random_username()
+    chat_service = ChatService(current_app.db)
+    chat = chat_service.create_chat(user.user_id, subject=data.get('subject'), admin_id=session.get('admin_id'))
+    user_service.add_chat_to_user(user.user_id, chat.chat_id)
+
+    admin = AdminService(current_app.db).get_admin_by_id(session.get('admin_id'))
+    current_app.bot.create_chat(chat.room_id, admin)
+
+    return user, chat
+
+@min_bp.route('/auth', methods=['POST', 'GET'])
+def auth_user():
+    is_htmx = request.headers.get('HX-Request') == 'true'
+
+    if request.content_type == 'application/json':
+        data = request.json or {}
+    else:
+        data = request.form.to_dict() or {}
+
+    user_ip = request.headers.get("X_Real-IP", request.remote_addr).split(",")[0]
+
+    user, chat = create_user_and_chat(data, user_ip)
 
     session['user_id'] = user.user_id
     session['role'] = "user"
-    try:
-        r = request.post("https://example.com", json={"name": name,
-                                                      "email": email,
-                                                      "phone": phone,
-                                                      "subject": subject})
 
-        # print("Request send")
+    try:
+        requests.post("https://example.com", json={
+            "name": data.get("name"),
+            "email": data.get("email"),
+            "phone": data.get("phone"),
+            "subject": data.get("subject"),
+        })
     except Exception as e:
         print(e)
+
     if is_htmx:
-        # For HTMX requests, first get the newchat URL
-        # newchat_url = url_for('min.new_chat', subject=subject)
-        chat_id = new_chat(subject)
-        resp = chat(chat_id)
-        session['last_visit'] = f"/min/chat/{chat_id}"
+        session['last_visit'] = url_for("min.view_chat", chat_id=chat.chat_id)
+        return render_template("user/min-index.html", chat=chat, username=user.name)
 
-        # print(session['last_visit'])
-        return render_template_string(resp)
-
-        # Make a server-side request to newchat endpoint
-        # with current_app.test_client() as client:
-        #     # Preserve the session
-        #     with client.session_transaction() as sess:
-        #         sess.update(session)
-        #
-        #     # Follow the redirect chain
-        #     newchat_response = client.get(newchat_url)
-        #     if newchat_response.status_code == 302:
-        #         chat_url = newchat_response.headers['Location']
-        #         chat_response = client.get(chat_url)
-        #         if chat_response.status_code == 200:
-        #             # print(chat_response)
-        #             return chat_response.data, 200
-        #             # print('ads')
-
-        # Fallback if something went wrong with the server-side requests
-        # return redirect(url_for('min.new_chat', subject=subject))
-
-    # Regular request handling
-    return redirect(url_for('min.new_chat', subject=subject))
+    return redirect(url_for("min.view_chat", chat_id=chat.chat_id))
 
 
 @min_bp.route('/newchat', defaults={'subject': "Other"}, methods=['GET'])
