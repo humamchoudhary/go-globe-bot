@@ -73,10 +73,11 @@ def index():
         response.headers['HX-Redirect'] = session['last_visit']
         return response
 
-    response = make_response('', 200)
-    response.headers['HX-Redirect'] = '/min/onboarding'
-    return response
+    # response = make_response('', 200)
+    # response.headers['HX-Redirect'] = '/min/onboarding'
+    # return response
 
+    return redirect('/min/onboarding')
 
 @min_bp.route('login', defaults={'subject': None}, methods=['GET'])
 @min_bp.route('login/<string:subject>', methods=['GET'])
