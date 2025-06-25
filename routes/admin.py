@@ -645,7 +645,7 @@ def export_chat(room_id):
             "company": user.name,
             "title": user.desg,
             "phonenumber": user.phone,
-            "email": f"{user.email}12",
+            "email": f"{user.email}",
             "address": f"{user.city},{user.country}",
         }
 
@@ -657,10 +657,10 @@ def export_chat(room_id):
             print(r)
             print(r.content)
             if not chat_service.export_chat(room_id, data.get("lead_id", None)):
-                return "Chat not found", 404
+                return "Error in exporting: Chat not found", 404
         else:
-            # raise Exception(f"Error in exporting: {r.status_code}, {r.json()}")
-            return f"Error in exporting: {r.status_code}, {r.json()}",500
+
+            return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
         return "success", 200
 
     return "Chat not found", 404

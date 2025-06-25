@@ -250,7 +250,9 @@ def chat(chat_id):
 
     if not chat:
         if request.headers.get('HX-Request') == 'true':
-            return jsonify({'error': 'Chat not found', 'redirect_url': url_for('min.new_chat')}), 404
+
+            return redirect(url_for('min.new_chat'))
+            # return jsonify({'error': 'Chat not found', 'redirect_url': url_for('min.new_chat')}), 404
         return redirect(url_for('min.new_chat'))
 
     # Return just the chat HTML for HTMX requests

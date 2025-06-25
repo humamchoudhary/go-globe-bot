@@ -4,7 +4,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 <script>
         if (!("Notification" in window)) {
-          alert("This browser does not support desktop notification");
         }else if (Notification.permission !== "denied") {
           Notification.requestPermission()
         }
@@ -454,6 +453,8 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
 document.body.addEventListener('htmx:afterSettle', function(event) {
   processMessageTimes();
 });
+
+
 </script>
 
 
