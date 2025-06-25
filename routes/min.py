@@ -23,7 +23,7 @@ import pytz
 @min_bp.before_request
 def before_req():
     path = request.path
-    print(path)
+    print(f"Path: {path}")
     if path.startswith("/min") and (path.split("/")[-1] not in ['auth', 'send_message', 'ping_admin'] and path not in ['/min/', '/min/get-headers']):
         session["last_visit"] = path
 
