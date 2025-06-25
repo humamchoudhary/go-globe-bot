@@ -1,3 +1,4 @@
+from flask import make_response
 from services.notification_service import NotificationService
 from flask_mail import Mail
 from services.admin_service import AdminService
@@ -67,12 +68,14 @@ def headers():
 
 @min_bp.route('/')
 def index():
-
-    # if 'last_visit' in session:
-    #     # print(f" ")
     if 'last_visit' in session and session['last_visit'] not in ['/min/', '/min/get-headers']:
-        return redirect(session['last_visit'])
-    return redirect('/min/onboarding')
+        response = make_response('', 200)
+        response.headers['HX-Redirect'] = session['last_visit']
+        return response
+
+    response = make_response('', 200)
+    response.headers['HX-Redirect'] = '/min/onboarding'
+    return response
 
 
 @min_bp.route('login', defaults={'subject': None}, methods=['GET'])
@@ -250,10 +253,9 @@ def chat(chat_id):
 
     if not chat:
         if request.headers.get('HX-Request') == 'true':
-
-            return redirect(url_for('min.new_chat'))
-            # return jsonify({'error': 'Chat not found', 'redirect_url': url_for('min.new_chat')}), 404
-        return redirect(url_for('min.new_chat'))
+            response = make_response('Chat not found', 404)
+            response.headers['HX-Redirect'] = url_for('min.new_chat')
+            return response
 
     # Return just the chat HTML for HTMX requests
     if request.headers.get('HX-Request') == 'true':
@@ -347,7 +349,7 @@ def ping_admin(chat_id):
             'content': new_message.content,
             'timestamp': new_message.timestamp.isoformat(),
 
-            'room_id':room_id
+            'room_id': room_id
         }, room=room_id)
     else:
         new_message = chat_service.add_message(
@@ -357,7 +359,7 @@ def ping_admin(chat_id):
             'sender': 'SYSTEM',
             'content': new_message.content,
             'timestamp': new_message.timestamp.isoformat(),
-            'room_id':room_id
+            'room_id': room_id
         }, room=room_id)
 
     # print("ANNA PINGED")
@@ -422,7 +424,7 @@ def send_message(chat_id):
         'content': message,
         'timestamp': new_message.timestamp.isoformat(),
 
-            'room_id':chat.room_id
+        'room_id': chat.room_id
     }, room=chat.room_id)
     # print('hello')
 
@@ -437,7 +439,7 @@ def send_message(chat_id):
 
         current_app.socketio.emit('new_message', {
 
-            'room_id':chat.room_id,
+            'room_id': chat.room_id,
             'sender': chat.bot_name,
             'content': msg,
             'timestamp': bot_message.timestamp.isoformat()
@@ -446,7 +448,7 @@ def send_message(chat_id):
 
         current_app.socketio.emit('new_message_admin', {
 
-            'room_id':chat.room_id,
+            'room_id': chat.room_id,
             'sender': user.name,
             'content': message,
             'timestamp': new_message.timestamp.isoformat(),
