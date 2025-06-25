@@ -246,7 +246,7 @@ def new_chat(subject):
         # print(response)
         # return response
 
-        return redirect( url_for('min.chat',chat_id=chat.chat_id))
+        return redirect(url_for('min.chat',chat_id=chat.chat_id))
 
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
@@ -254,7 +254,7 @@ def new_chat(subject):
 @min_bp.route('/chat/<string:chat_id>', methods=['GET'])
 @login_required
 def chat(chat_id):
-    print(chat_id)
+    print(chat_id.__dict__)
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
 
