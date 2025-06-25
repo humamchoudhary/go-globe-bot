@@ -254,7 +254,7 @@ def chat(chat_id):
     if not chat:
         if request.headers.get('HX-Request') == 'true':
             response = make_response('Chat not found', 404)
-            response.headers['HX-Redirect'] = url_for('min.new_chat')
+            response.headers['HX-Redirect'] = url_for('min.onboarding')
             return response
 
     # Return just the chat HTML for HTMX requests
