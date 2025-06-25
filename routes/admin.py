@@ -662,18 +662,18 @@ def export_chat(room_id):
             "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
         }
 
-        # r = requests.post(erp_url, headers=headers, data=data)
+        r = requests.post(erp_url, headers=headers, data=data)
         print(f"DATA: {data}")
-        # if r.status_code == 200:
-        #
-        #     data = r.json()
-        #     print(r)
-        #     print(r.content)
-        #     if not chat_service.export_chat(room_id, data.get("lead_id", None)):
-        #         return "Error in exporting: Chat not found", 404
-        # else:
-        #
-        #     return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
+        if r.status_code == 200:
+
+            data = r.json()
+            print(r)
+            print(r.content)
+            if not chat_service.export_chat(room_id, data.get("lead_id", None)):
+                return "Error in exporting: Chat not found", 404
+        else:
+
+            return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
         return "success", 200
 
     return "Chat not found", 404
