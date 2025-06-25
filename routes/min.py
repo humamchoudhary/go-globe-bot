@@ -240,7 +240,10 @@ def new_chat(subject):
 
     # If HTMX request, return the chat URL instead of redirecting
     if request.headers.get('HX-Request') == 'true':
-        return chat.chat_id
+        response = make_response('Chat not found', 404)
+        response.headers['HX-Redirect'] = url_for('min.chat',chat_id=chat.chat_id)
+        print(response)
+        return response
 
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
