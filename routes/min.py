@@ -259,10 +259,12 @@ def chat(chat_id):
     print(chat)
     if not chat:
         if request.headers.get('HX-Request') == 'true':
-            response = make_response('Chat not found', 404)
-            response.headers['HX-Redirect'] = url_for('min.onboard')
-            print(response)
-            return response
+            # response = make_response('Chat not found', 404)
+            # response.headers['HX-Redirect'] = url_for('min.onboard')
+            # print(response)
+            # return response
+
+            return redirect(url_for("min.onboard"))
 
         print("simple redir")
         return redirect(url_for("min.onboard"))
