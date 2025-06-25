@@ -266,10 +266,11 @@ def view_chat(chat_id):
             # print(response)
             # return response
 
-            return redirect(url_for("min.onboard"))
+            redirect(url_for("min.onboard"))
 
-        print("simple redir")
-        return redirect(url_for("min.onboard"))
+        else:
+            print("simple redir")
+            return redirect(url_for("min.onboard"))
 
     # Return just the chat HTML for HTMX requests
     if request.headers.get('HX-Request') == 'true':
