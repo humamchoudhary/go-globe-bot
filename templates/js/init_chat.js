@@ -79,8 +79,8 @@
   .resize-handle-nw {
     top: 0;
     left: 0;
-    width: 20px;
-    height: 20px;
+    width: 10px;
+    height: 10px;
     cursor: nw-resize;
   }
 
