@@ -46,8 +46,8 @@
     right: 20px;
     width: 350px;
     height: 450px;
-    min-width: 350px;
-    min-height: 450px;
+    min-width: 300px;
+    min-height: 300px;
     max-width: 80vw;
     max-height: 80vh;
     background-color: white;
@@ -74,46 +74,90 @@
   .resize-handle {
     position: absolute;
     background: transparent;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+  }
+
+  .resize-handle:hover {
+    background-color: rgba(255, 88, 0, 0.1);
   }
 
   .resize-handle-nw {
     top: 0;
     left: 0;
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     cursor: nw-resize;
+    border-top: 2px solid transparent;
+    border-left: 2px solid transparent;
+  }
+
+  .resize-handle-nw:hover {
+    border-top-color: rgba(255, 88, 0, 0.6);
+    border-left-color: rgba(255, 88, 0, 0.6);
   }
 
   .resize-handle-n {
     top: 0;
-    left: 20px;
-    right: 10px;
-    height: 10px;
+    left: 12px;
+    right: 6px;
+    height: 6px;
     cursor: n-resize;
+    border-top: 2px solid transparent;
+  }
+
+  .resize-handle-n:hover {
+    border-top-color: rgba(255, 88, 0, 0.6);
   }
 
   .resize-handle-w {
     left: 0;
-    top: 20px;
-    bottom: 10px;
-    width: 10px;
+    top: 12px;
+    bottom: 6px;
+    width: 6px;
     cursor: w-resize;
+    border-left: 2px solid transparent;
+  }
+
+  .resize-handle-w:hover {
+    border-left-color: rgba(255, 88, 0, 0.6);
   }
 
   /* Visual resize indicator in top-left corner */
   .resize-indicator {
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 16px;
-    height: 16px;
-    background: linear-gradient(135deg, 
-      transparent 0%, transparent 25%, 
-      #ccc 25%, #ccc 50%, 
-      transparent 50%, transparent 75%, 
-      #ccc 75%);
+    top: 3px;
+    left: 3px;
+    width: 8px;
+    height: 8px;
     cursor: nw-resize;
-    opacity: 0.6;
+    opacity: 0.4;
+    transition: opacity 0.2s ease;
+  }
+
+  .resize-indicator:hover {
+    opacity: 0.8;
+  }
+
+  .resize-indicator::before,
+  .resize-indicator::after {
+    content: '';
+    position: absolute;
+    background-color: #999;
+  }
+
+  .resize-indicator::before {
+    top: 1px;
+    left: 0;
+    width: 6px;
+    height: 1px;
+  }
+
+  .resize-indicator::after {
+    top: 0;
+    left: 1px;
+    width: 1px;
+    height: 6px;
   }
 
   .resize-indicator:hover {
