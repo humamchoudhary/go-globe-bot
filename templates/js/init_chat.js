@@ -46,6 +46,10 @@
     right: 20px;
     width: 350px;
     height: 450px;
+    min-width: 300px;
+    min-height: 300px;
+    max-width: 80vw;
+    max-height: 80vh;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
@@ -54,6 +58,7 @@
     flex-direction: column;
     overflow: hidden;
     display: none;
+    resize: both;
   }
 
   #chat-container .chat-header {
@@ -63,6 +68,56 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  /* Resize handle styles */
+  .resize-handle {
+    position: absolute;
+    background: transparent;
+  }
+
+  .resize-handle-nw {
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    cursor: nw-resize;
+  }
+
+  .resize-handle-n {
+    top: 0;
+    left: 20px;
+    right: 10px;
+    height: 10px;
+    cursor: n-resize;
+  }
+
+  .resize-handle-w {
+    left: 0;
+    top: 20px;
+    bottom: 10px;
+    width: 10px;
+    cursor: w-resize;
+  }
+
+  /* Visual resize indicator in top-left corner */
+  .resize-indicator {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, 
+      transparent 0%, transparent 25%, 
+      #ccc 25%, #ccc 50%, 
+      transparent 50%, transparent 75%, 
+      #ccc 75%);
+    cursor: nw-resize;
+    opacity: 0.6;
+  }
+
+  .resize-indicator:hover {
+    opacity: 1;
   }
 
   #chatbox {
@@ -178,6 +233,12 @@
        data-base-url="{{backend_url}}">
     <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-radius: 50%; animation: spin 1s linear infinite;"></div>
   </div>
+  
+  <!-- Resize handles -->
+  <div class="resize-handle resize-handle-nw" id="resize-nw"></div>
+  <div class="resize-handle resize-handle-n" id="resize-n"></div>
+  <div class="resize-handle resize-handle-w" id="resize-w"></div>
+  <div class="resize-indicator"></div>
 </div>
   `;
 
@@ -189,6 +250,94 @@
     const chatContainer = document.getElementById("chat-container");
     const closeBtn = document.getElementById("close-chat");
     let isChatOpen = false;
+
+    // Resize functionality
+    let isResizing = false;
+    let currentResizer = null;
+    let startX, startY, startWidth, startHeight;
+
+    const initResize = (e, direction) => {
+      e.preventDefault();
+      isResizing = true;
+      currentResizer = direction;
+      startX = e.clientX;
+      startY = e.clientY;
+      startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
+      startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
+
+      document.addEventListener("mousemove", handleResize);
+      document.addEventListener("mouseup", stopResize);
+      document.body.style.userSelect = "none"; // Prevent text selection while resizing
+    };
+
+    const handleResize = (e) => {
+      if (!isResizing) return;
+
+      const rect = chatContainer.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      if (currentResizer === "nw") {
+        // Northwest corner - resize both width and height, growing up and left
+        let newWidth = startWidth - (e.clientX - startX);
+        let newHeight = startHeight - (e.clientY - startY);
+
+        // Constrain to min/max sizes and viewport
+        newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
+        newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
+
+        // Ensure we don't go beyond viewport boundaries
+        const maxLeft = rect.right - 300; // Minimum width constraint
+        const minLeft = 20; // Padding from left edge
+        const maxTop = rect.bottom - 300; // Minimum height constraint
+        const minTop = 20; // Padding from top edge
+
+        chatContainer.style.width = newWidth + "px";
+        chatContainer.style.height = newHeight + "px";
+      } else if (currentResizer === "n") {
+        // North edge - resize only height, growing upward
+        let newHeight = startHeight - (e.clientY - startY);
+        newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
+
+        // Ensure we don't go beyond viewport top
+        const maxTop = rect.bottom - 300;
+        const minTop = 20;
+
+        chatContainer.style.height = newHeight + "px";
+      } else if (currentResizer === "w") {
+        // West edge - resize only width, growing leftward
+        let newWidth = startWidth - (e.clientX - startX);
+        newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
+
+        // Ensure we don't go beyond viewport left
+        const maxLeft = rect.right - 300;
+        const minLeft = 20;
+
+        chatContainer.style.width = newWidth + "px";
+      }
+    };
+
+    const stopResize = () => {
+      isResizing = false;
+      currentResizer = null;
+      document.removeEventListener("mousemove", handleResize);
+      document.removeEventListener("mouseup", stopResize);
+      document.body.style.userSelect = ""; // Re-enable text selection
+    };
+
+    // Add event listeners for resize handles
+    document
+      .getElementById("resize-nw")
+      .addEventListener("mousedown", (e) => initResize(e, "nw"));
+    document
+      .getElementById("resize-n")
+      .addEventListener("mousedown", (e) => initResize(e, "n"));
+    document
+      .getElementById("resize-w")
+      .addEventListener("mousedown", (e) => initResize(e, "w"));
+    document
+      .querySelector(".resize-indicator")
+      .addEventListener("mousedown", (e) => initResize(e, "nw"));
 
     chatBtn.onclick = () => {
       if (!isChatOpen) {
@@ -278,7 +427,7 @@
     setTimeout(() => {
       const chatContainer = document.getElementById("chat-container");
       if (chatContainer && !isChatOpen) {
-        // Auto-open chat with animations after 4 seconds
+        // Auto-open chat with animations after 10 seconds
         chatBtn.classList.add("chat-button-hidden");
 
         setTimeout(() => {
@@ -288,6 +437,6 @@
           audio.play();
         }, 150);
       }
-    }, 10000); // 4000ms = 4 seconds
+    }, 10000); // 10000ms = 10 seconds
   });
 })();
