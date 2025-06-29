@@ -7,7 +7,7 @@
       <div class="p-2 bg-[var(--border-color)] rounded-lg">
         <i data-lucide="files" class="w-6 h-6 text-[var(--main-color)]"></i>
       </div>
-      <h1 class="text-3xl font-bold text-white">File Manager</h1>
+      <h1 class="text-3xl font-bold text-[var(--white)]">File Manager</h1>
     </div>
     <p class="text-[var(--sec-text)] text-lg">
       Upload, manage, and organize your files and website scrapes
@@ -21,11 +21,11 @@
     <div class="group min-h-[300px] relative bg-[var(--bg-color)] border-2 border-dashed border-[var(--border-color)] hover:border-[var(--main-color)] rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-lg min-h-[200px] flex flex-col justify-center items-center"
          onclick="document.getElementById('scrape-modal').classList.remove('hidden')">
       <div class="w-16 h-16 mb-4 rounded-full bg-[var(--main-color)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-        <i data-lucide="globe" class="w-8 h-8 text-white"></i>
+        <i data-lucide="globe" class="w-8 h-8 text-[var(--white)]"></i>
       </div>
-      <h3 class="font-semibold text-white text-center mb-1">Scrape Website</h3>
+      <h3 class="font-semibold text-[var(--white)] text-center mb-1">Scrape Website</h3>
       <p class="text-sm text-[var(--sec-text)] text-center">Extract content from URLs</p>
-      <div class="absolute top-3 right-3 bg-[var(--main-color)] text-white px-2 py-1 rounded-full text-xs font-medium">
+      <div class="absolute top-3 right-3 bg-[var(--main-color)] text-[var(--white)] px-2 py-1 rounded-full text-xs font-medium">
         New
       </div>
     </div>
@@ -38,9 +38,9 @@
          ondragenter="handleDragEnter(event)"
          ondragleave="handleDragLeave(event)">
       <div class="w-16 h-16 mb-4 rounded-full bg-[var(--main-color)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-        <i data-lucide="upload" class="w-8 h-8 text-white"></i>
+        <i data-lucide="upload" class="w-8 h-8 text-[var(--white)]"></i>
       </div>
-      <h3 class="font-semibold text-white text-center mb-1">Upload Files</h3>
+      <h3 class="font-semibold text-[var(--white)] text-center mb-1">Upload Files</h3>
       <p class="text-sm text-[var(--sec-text)] text-center">Drag & drop or click to select</p>
     </div>
 
@@ -48,9 +48,9 @@
     <a href="/admin/google-files/" 
        class="group relative bg-[var(--bg-color)] border border-[var(--border-color)] hover:border-[var(--main-color)] rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-lg min-h-[200px] flex flex-col justify-center items-center">
       <div class="w-16 h-16 mb-4 rounded-full bg-[var(--main-color)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-        <i data-lucide="folder-open" class="w-8 h-8 text-white"></i>
+        <i data-lucide="folder-open" class="w-8 h-8 text-[var(--white)]"></i>
       </div>
-      <h3 class="font-semibold text-white text-center mb-1">Google Drive</h3>
+      <h3 class="font-semibold text-[var(--white)] text-center mb-1">Google Drive</h3>
       <p class="text-sm text-[var(--sec-text)] text-center">Access connected files</p>
       <div class="absolute top-3 right-3 text-[var(--main-color)]">
         <i data-lucide="external-link" class="w-4 h-4"></i>
@@ -66,7 +66,7 @@
       <button class="absolute top-3 right-3 z-20 p-2 bg-red-500 hover:bg-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg"
               onclick="deleteFile('{{ file }}')" 
               title="Delete file">
-        <i data-lucide="trash-2" class="w-4 h-4 text-white"></i>
+        <i data-lucide="trash-2" class="w-4 h-4 text-[var(--white)]"></i>
       </button>
 
       <!-- File Content -->
@@ -83,36 +83,36 @@
         <div class="aspect-square flex items-center justify-center bg-[var(--sec-bg-color)]">
           {% if file_ext == 'pdf' %}
           <div class="w-16 h-16 bg-red-500 rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="file-text" class="w-8 h-8 text-white"></i>
+            <i data-lucide="file-text" class="w-8 h-8 text-[var(--white)]"></i>
           </div>
           {% elif file_ext in ['doc', 'docx'] %}
           <div class="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="file-text" class="w-8 h-8 text-white"></i>
+            <i data-lucide="file-text" class="w-8 h-8 text-[var(--white)]"></i>
           </div>
           {% elif file_ext in ['xls', 'xlsx', 'csv'] %}
           <div class="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="table" class="w-8 h-8 text-white"></i>
+            <i data-lucide="table" class="w-8 h-8 text-[var(--white)]"></i>
           </div>
           {% elif file_ext in ['txt', 'md'] %}
           <div class="w-16 h-16 bg-gray-500 rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="file-text" class="w-8 h-8 text-white"></i>
+            <i data-lucide="file-text" class="w-8 h-8 text-[var(--white)]"></i>
           </div>
           {% elif file_ext == 'json' %}
           <div class="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="braces" class="w-8 h-8 text-white"></i>
+            <i data-lucide="braces" class="w-8 h-8 text-[var(--white)]"></i>
           </div>
           {% elif file_ext in ['html', 'htm'] %}
           <div class="w-16 h-16 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="code" class="w-8 h-8 text-white"></i>
+            <i data-lucide="code" class="w-8 h-8 text-[var(--white)]"></i>
           </div>
           {% else %}
           <div class="w-16 h-16 bg-gray-500 rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="file" class="w-8 h-8 text-white"></i>
+            <i data-lucide="file" class="w-8 h-8 text-[var(--white)]"></i>
           </div>
           {% endif %}
           
           <!-- File Extension Badge -->
-          <div class="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">
+          <div class="absolute top-2 left-2 bg-black/70 text-[var(--white)] px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">
             {{ file_ext.upper() }}
           </div>
         </div>
@@ -120,7 +120,7 @@
 
         <!-- File Info -->
         <div class="p-4">
-          <h3 class="font-medium text-white truncate mb-2 group-hover:text-[var(--main-color)] transition-colors" title="{{ file }}">
+          <h3 class="font-medium text-[var(--white)] truncate mb-2 group-hover:text-[var(--main-color)] transition-colors" title="{{ file }}">
             {{ file }}
           </h3>
           <div class="flex items-center justify-between">
@@ -159,9 +159,9 @@
       <div class="mb-6">
         <div class="flex items-center gap-3 mb-2">
           <div class="w-10 h-10 bg-[var(--main-color)] rounded-lg flex items-center justify-center">
-            <i data-lucide="globe" class="w-5 h-5 text-white"></i>
+            <i data-lucide="globe" class="w-5 h-5 text-[var(--white)]"></i>
           </div>
-          <h3 class="text-xl font-bold text-white">Scrape Website</h3>
+          <h3 class="text-xl font-bold text-[var(--white)]">Scrape Website</h3>
         </div>
         <p class="text-[var(--sec-text)]">Extract content from web pages by entering URLs below</p>
       </div>
@@ -175,7 +175,7 @@
           <label for="url" class="block text-sm font-medium text-[var(--sec-text)] mb-2">Website URLs</label>
           <textarea id="url" name="url" rows="4"
                     placeholder="https://example.com&#10;https://another-site.com/page"
-                    class="w-full px-4 py-3 bg-[var(--sec-bg-color)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] focus:border-transparent resize-none text-white"
+                    class="w-full px-4 py-3 bg-[var(--sec-bg-color)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] focus:border-transparent resize-none text-[var(--white)]"
                     required></textarea>
           <p class="text-xs text-[var(--sec-text)] mt-2 flex items-center gap-1">
             <i data-lucide="info" class="w-3 h-3"></i>
@@ -190,10 +190,10 @@
             Cancel
           </button>
           <button type="submit"
-                  class="px-6 py-2 text-sm font-medium rounded-lg bg-[var(--main-color)] hover:bg-opacity-90 text-white transition-colors flex items-center gap-2">
+                  class="px-6 py-2 text-sm font-medium rounded-lg bg-[var(--main-color)] hover:bg-opacity-90 text-[var(--white)] transition-colors flex items-center gap-2">
             <span>Start Scraping</span>
             <div id="scrape-loading" class="htmx-indicator">
-              <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+              <svg class="animate-spin h-4 w-4 text-[var(--white)]" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -218,7 +218,7 @@
         <div class="w-16 h-16 mx-auto mb-4 bg-[var(--sec-bg-color)] rounded-full flex items-center justify-center">
           <i data-lucide="trash-2" class="w-8 h-8 text-red-500"></i>
         </div>
-        <h3 class="text-lg font-semibold text-white mb-2">Delete File</h3>
+        <h3 class="text-lg font-semibold text-[var(--white)] mb-2">Delete File</h3>
         <p class="text-[var(--sec-text)] mb-6">Are you sure you want to delete this file? This action cannot be undone.</p>
         
         <div class="flex justify-center space-x-3">
@@ -227,7 +227,7 @@
             Cancel
           </button>
           <button type="button" id="confirm-delete"
-                  class="px-4 py-2 text-sm font-medium rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors">
+                  class="px-4 py-2 text-sm font-medium rounded-lg bg-red-500 hover:bg-red-600 text-[var(--white)] transition-colors">
             Delete
           </button>
         </div>

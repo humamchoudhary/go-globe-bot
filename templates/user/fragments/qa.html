@@ -1,5 +1,5 @@
 <div
-  class="flex flex-col border-2 border-[var(--goglobe-border-color)] rounded-[5px] px-[30px] py-[20px] gap-4 text-white hover:cursor-pointer transition-all duration-200"
+  class="flex flex-col border-2 border-[var(--goglobe-border-color)] rounded-[5px] px-[30px] py-[20px] gap-4 text-[var(--white)] hover:cursor-pointer transition-all duration-200"
   onclick="toggleQA(this)"
 >
   <div class="flex flex-row w-full justify-between items-center">
@@ -11,5 +11,5 @@
       class="toggle-icon text-[var(--goglobe-main-color)] transition-transform duration-300"
     ></i>
   </div>
-  <p class="qa-answer hidden text-white">{{ qa['answer'] }}</p>
+  <p class="qa-answer hidden text-[var(--white)]">{{ qa['answer'] }}</p>
 </div>

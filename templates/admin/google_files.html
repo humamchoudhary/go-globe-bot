@@ -60,7 +60,7 @@
                      onchange="toggleFolderSelection('{{ folder_data.id }}', this.checked)">
             </div>
             <div class="flex items-center gap-3">
-              <div class="p-2 bg-[var(--border-color)] rounded-lg group-hover:bg-[var(--main-color)] group-hover:text-white transition-colors">
+              <div class="p-2 bg-[var(--border-color)] rounded-lg group-hover:bg-[var(--main-color)] group-hover:text-[var(--white)] transition-colors">
                 <i data-lucide="folder" class="w-5 h-5"></i>
               </div>
               <div>
@@ -108,14 +108,14 @@
               <!-- Selection Checkbox -->
               <div class="absolute top-3 left-3 z-20">
                 <input type="checkbox" name="file_ids" value="{{ file.id }}" 
-                       class="file-checkbox w-5 h-5 rounded border-2 border-white bg-white/90 backdrop-blur-sm text-[var(--main-color)] focus:ring-[var(--main-color)] focus:ring-2 shadow-lg" 
+                       class="file-checkbox w-5 h-5 rounded border-2 border-[var(--white)] bg-[var(--white)]/90 backdrop-blur-sm text-[var(--main-color)] focus:ring-[var(--main-color)] focus:ring-2 shadow-lg" 
                        data-folder-id="{{ folder_data.id }}"
                        onchange="updateSelectionCount()" onclick="event.stopPropagation()">
               </div>
               
               <!-- View Link -->
               <a href="{{ url_for('admin.view_google_file', file_id=file.id) }}" class="absolute top-3 right-3 z-20 p-2 bg-black/50 hover:bg-black/70 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" target="_blank" onclick="event.stopPropagation()" title="Open file">
-                <i data-lucide="external-link" class="w-4 h-4 text-white"></i>
+                <i data-lucide="external-link" class="w-4 h-4 text-[var(--white)]"></i>
               </a>
               
               <!-- File Preview -->
@@ -123,40 +123,40 @@
                 <div class="aspect-square bg-gradient-to-br from-[var(--border-color)] to-[var(--bg-color)] flex items-center justify-center relative overflow-hidden">
                   {% if mime.startswith('image/') %}
                   <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="image" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="image" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% elif mime.startswith('video/') %}
                   <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="play" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="play" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% elif mime.startswith('audio/') %}
                   <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="music" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="music" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% elif 'pdf' in mime %}
                   <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="file-text" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="file-text" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% elif 'document' in mime or 'word' in mime %}
                   <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="file-text" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="file-text" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% elif 'spreadsheet' in mime or 'excel' in mime %}
                   <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="table" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="table" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% elif 'presentation' in mime or 'powerpoint' in mime %}
                   <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-700 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="presentation" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="presentation" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% else %}
                   <div class="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="file" class="w-8 h-8 text-white"></i>
+                    <i data-lucide="file" class="w-8 h-8 text-[var(--white)]"></i>
                   </div>
                   {% endif %}
                   
                   <!-- File type badge -->
-                  <div class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">
+                  <div class="absolute top-2 right-2 bg-black/70 text-[var(--white)] px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">
                     {{ file_ext.upper() if file_ext else 'FILE' }}
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %} {% block content %}
-<div class="bg-[var(--bg-color)] text-white min-h-screen p-6">
+<div class="bg-[var(--bg-color)] text-[var(--white)] min-h-screen p-6">
   <div class="max-w-5xl mx-auto">
     <!-- Header with enhanced styling -->
     <div class="mb-12 text-center">
@@ -128,7 +128,7 @@
               <div class="space-y-2">
                 <label
                   for="username"
-                  class="block text-sm font-semibold text-white"
+                  class="block text-sm font-semibold text-[var(--white)]"
                   >Username *</label
                 >
                 <div class="relative">
@@ -138,7 +138,7 @@
                     name="username"
                     required
                     placeholder="Enter username"
-                    class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-white placeholder-[var(--sec-text)]"
+                    class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-[var(--white)] placeholder-[var(--sec-text)]"
                   />
                   <div
                     class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
@@ -166,7 +166,7 @@
               <div class="space-y-2">
                 <label
                   for="email"
-                  class="block text-sm font-semibold text-white"
+                  class="block text-sm font-semibold text-[var(--white)]"
                   >Email Address *</label
                 >
                 <div class="relative">
@@ -176,7 +176,7 @@
                     name="email"
                     required
                     placeholder="admin@example.com"
-                    class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-white placeholder-[var(--sec-text)]"
+                    class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-[var(--white)] placeholder-[var(--sec-text)]"
                   />
                   <div
                     class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
@@ -205,7 +205,7 @@
             <div class="space-y-2">
               <label
                 for="password"
-                class="block text-sm font-semibold text-white"
+                class="block text-sm font-semibold text-[var(--white)]"
                 >Password *</label
               >
               <div class="relative">
@@ -215,7 +215,7 @@
                   name="password"
                   required
                   placeholder="Create a secure password"
-                  class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-white placeholder-[var(--sec-text)]"
+                  class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-[var(--white)] placeholder-[var(--sec-text)]"
                 />
                 <div
                   class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
@@ -258,7 +258,7 @@
           <!--   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8"> -->
           <!--     <!-- Role Selection -->
           <!--     <div class="space-y-2"> -->
-          <!--       <label for="role" class="block text-sm font-semibold text-white" -->
+          <!--       <label for="role" class="block text-sm font-semibold text-[var(--white)]" -->
           <!--         >Administrator Role *</label -->
           <!--       > -->
           <!--       <div class="relative"> -->
@@ -266,15 +266,15 @@
           <!--           id="role" -->
           <!--           name="role" -->
           <!--           required -->
-          <!--           class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-white appearance-none cursor-pointer" -->
+          <!--           class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-[var(--white)] appearance-none cursor-pointer" -->
           <!--         > -->
           <!--           <option value="" class="text-[var(--sec-text)]"> -->
           <!--             Choose access level -->
           <!--           </option> -->
-          <!--           <option value="admin" class="text-white"> -->
+          <!--           <option value="admin" class="text-[var(--white)]"> -->
           <!--             Standard Admin -->
           <!--           </option> -->
-          <!--           <option value="superadmin" class="text-white"> -->
+          <!--           <option value="superadmin" class="text-[var(--white)]"> -->
           <!--             Super Administrator -->
           <!--           </option> -->
           <!--         </select> -->
@@ -305,7 +305,7 @@
           <!--     <div class="space-y-2"> -->
           <!--       <label -->
           <!--         for="status" -->
-          <!--         class="block text-sm font-semibold text-white" -->
+          <!--         class="block text-sm font-semibold text-[var(--white)]" -->
           <!--         >Account Status *</label -->
           <!--       > -->
           <!--       <div class="relative"> -->
@@ -313,13 +313,13 @@
           <!--           id="status" -->
           <!--           name="status" -->
           <!--           required -->
-          <!--           class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-white appearance-none cursor-pointer" -->
+          <!--           class="w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--main-color)] focus:border-[var(--main-color)] transition-all duration-200 text-[var(--white)] appearance-none cursor-pointer" -->
           <!--         > -->
-          <!--           <option value="active" class="text-white">Active</option> -->
-          <!--           <option value="inactive" class="text-white"> -->
+          <!--           <option value="active" class="text-[var(--white)]">Active</option> -->
+          <!--           <option value="inactive" class="text-[var(--white)]"> -->
           <!--             Inactive -->
           <!--           </option> -->
-          <!--           <option value="suspended" class="text-white"> -->
+          <!--           <option value="suspended" class="text-[var(--white)]"> -->
           <!--             Suspended -->
           <!--           </option> -->
           <!--         </select> -->
@@ -360,7 +360,7 @@
             </button>
             <button
               type="submit"
-              class="px-8 py-3 bg-[var(--main-color)] rounded-lg text-white hover:bg-[var(--main-color)]/90 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              class="px-8 py-3 bg-[var(--main-color)] rounded-lg text-[var(--white)] hover:bg-[var(--main-color)]/90 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span class="flex items-center">
                 <svg
