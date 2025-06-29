@@ -46,8 +46,8 @@
     right: 20px;
     width: 350px;
     height: 450px;
-    min-width: 300px;
-    min-height: 300px;
+    min-width: 350px;
+    min-height: 450px;
     max-width: 80vw;
     max-height: 80vh;
     background-color: white;
