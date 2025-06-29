@@ -1768,11 +1768,25 @@ def delete_chat(room_id):
 
     try:
         chat_service = ChatService(current_app.db)
+
+        chats_all = chat_service.get_all_chats(session.get('admin_id'))
+
+        chats_all.sort(key=lambda x: x.updated_at, reverse=True)
+        current_index = next((i for i, chat in enumerate(chats_all) if chat.room_id == room_id), None)
+        next_chat = chats_all[current_index + 1] if current_index is not None and current_index + 1 < len(chats_all) else None
+        print(f"next_chat: {next_chat}")
+        print("chat")
+
+
         chat_service.delete([room_id])
+        # print(request.endpoint)
+        if next_chat:
+            # return redirect(url_for('admin.chat',room_id=next_chat.room_id))
+            return f"/admin/chat/{next_chat.room_id}" ,203
         return "", 200
     except Exception as e:
         # # print(e)
-        return "Error"
+        return f"Error {e}",500
     # for i in chats:
     #     # # print(i)
 
@@ -1787,6 +1801,12 @@ def delete_chats():
     # # print(chats)
     try:
         chat_service = ChatService(current_app.db)
+        chats_all = chat_service.get_all_chats(session.get('admin_id'))
+
+        chats_all.sort(key=lambda x: x.updated_at, reverse=True)
+        current_index = next((i for i, chat in enumerate(chats) if chat.id == chats), None)
+        next_chat = chats[current_index + 1] if current_index is not None and current_index + 1 < len(chats) else None
+        print(f"next_chat: {next_chat}")
         chat_service.delete(chats)
         return "", 200
     except Exception as e:
