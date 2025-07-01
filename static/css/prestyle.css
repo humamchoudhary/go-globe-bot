@@ -5536,7 +5536,7 @@ a.fn__like.no_border .fn__svg {
 
 .goglobe_fn_aichatbot_page .chat__page {
   width: 100%;
-  padding-top: 38px;
+  /* padding-top: 38px; */
   display: -webkit-flex;
   display: -moz-flex;
   display: -ms-flex;
@@ -5894,7 +5894,7 @@ a.fn__like.no_border .fn__svg {
 .goglobe_fn_aichatbot_page .chat__comment {
   margin-top: auto;
   position: sticky;
-  bottom: 0;
+  bottom: -10px;
   padding: 20px 0;
   background-color: var(--goglobe-site-bg-color);
 }
