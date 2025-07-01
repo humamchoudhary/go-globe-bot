@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Al Dar - Demo Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #333;
+      }
+      header {
+        background-color: #f4f4f4;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        border-radius: 5px;
+      }
+      h1 {
+        color: #2c3e50;
+        margin: 0;
+      }
+      .content {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      footer {
+        text-align: center;
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f4f4f4;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Welcome to Al Dar</h1>
+      <p>Your simple demo page</p>
+    </header>
+    <div class="content">
+      <h2>About Al Dar</h2>
+      <p>
+        This is a simple demonstration page for Al Dar. You can add your content
+        here to showcase your services, products, or information.
+      </p>
+      <h2>Features</h2>
+      <ul>
+        <li>Clean and simple design</li>
+        <li>Responsive layout</li>
+        <li>Easy to customize</li>
+      </ul>
+    </div>
+    <footer>
+      <p>&copy; 2023 Al Dar. All rights reserved.</p>
+    </footer>
+    <div
+      hx-get="{{ backend_url }}/min/get-headers"
+      hx-target="head"
+      hx-swap="beforeend"
+      hx-trigger="load"
+    ></div>
+    <script src="{{backend_url}}/render-bot"></script>
+  </body>
+</html>
