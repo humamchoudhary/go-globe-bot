@@ -1,87 +1,87 @@
 @charset "utf-8";
 /*
-/*	Copyright (c) 2023 Frenify
-/*	Author: Frenify
-/*	Item URL: https://themeforest.net/item/goglobe-ai-html-dashboard-for-image-generation-chat-bot/46197058
-/*	This file is made for CURRENT TEMPLATE
+/*      Copyright (c) 2023 Frenify
+/*      Author: Frenify
+/*      Item URL: https://themeforest.net/item/goglobe-ai-html-dashboard-for-image-generation-chat-bot/46197058
+/*      This file is made for CURRENT TEMPLATE
 /*
 
 
-	List of CSS codes:
-	
-	01) ROOT
-	02) Base
-	03) PRELOADER
-	04) Container
-	05) New tags and some custom codes
-	06) Site Structure
-	07) Main Button
-	08) Left Panel
-	09) Header
-	10) Footer
-	11) Page: Home (index)
-	12) Shortcode: Title
-	13) Shortcode: Interactive List
-	14) Shortcode: Members
-	15) Shortcode: Animated Title
-	16) Page Title
-	17) Page: Changelog
-	18) Searchbar
-	19) Shortcode: Accordion
-	20) Page: Community Feed
-	21) Tabs
-	22) Page: Personal Feed
-	23) Shortcode: Gallery Items
-	24) Like Button
-	25) Checkbox
-	26) Image Lightbox
-	27) Follow Button
-	28) Icon Button
-	29) Model Button (used in image lightbox)
-	30) Prompt Details (used in image lightbox)
-	31) Detailed list (used in image lightbox)
-	32) Grid Items (used in image lightbox)
-	33) Reportbox
-	34) Ajax Loader (Loading)
-	35) Page: Sign In and Sign Up
-	36) Select Filter (personal feed page)
-	37) Page: Notifications
-	38) Back To button (notification single page)
-	39) Page: Pricing
-	40) Shortcode: Pricing Mobile
-	41) Page: User Profile
-	42) Shortcode: Options list (used in user profile page)
-	43) Page: User Settings
-	44) Upload Button
-	45) Page: User Billing
-	46) Page: AI Chat Bot
-	47) Page: Documentation
-	48) Page: Image Generation
-	49) Icon Options (icon lightbox)
-	50) Generation Item (used in image generation page)
-	51) Generation List (used in image generation page)
-	52) Input Toggle (custom)
-	53) Select Model (used in image generation page)
-	53) Page: Image Generation
-	54) Input quantity (custom)
-	55) Input Range (custom)
-	56) Page: Privacy Policy
-	57) Contact Form
-	58) Page: Contact
-	59) Page: Models
-	60) Model Items (used in model page)
-	61) Bookmark button
-	62) Font Trigger (used in AI chat bot page)
-	63) Font Trigger Lightbox
-	64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
-	65) Page: Intro
-	66) Media Queries (Responsive)
+        List of CSS codes:
+
+        01) ROOT
+        02) Base
+        03) PRELOADER
+        04) Container
+        05) New tags and some custom codes
+        06) Site Structure
+        07) Main Button
+        08) Left Panel
+        09) Header
+        10) Footer
+        11) Page: Home (index)
+        12) Shortcode: Title
+        13) Shortcode: Interactive List
+        14) Shortcode: Members
+        15) Shortcode: Animated Title
+        16) Page Title
+        17) Page: Changelog
+        18) Searchbar
+        19) Shortcode: Accordion
+        20) Page: Community Feed
+        21) Tabs
+        22) Page: Personal Feed
+        23) Shortcode: Gallery Items
+        24) Like Button
+        25) Checkbox
+        26) Image Lightbox
+        27) Follow Button
+        28) Icon Button
+        29) Model Button (used in image lightbox)
+        30) Prompt Details (used in image lightbox)
+        31) Detailed list (used in image lightbox)
+        32) Grid Items (used in image lightbox)
+        33) Reportbox
+        34) Ajax Loader (Loading)
+        35) Page: Sign In and Sign Up
+        36) Select Filter (personal feed page)
+        37) Page: Notifications
+        38) Back To button (notification single page)
+        39) Page: Pricing
+        40) Shortcode: Pricing Mobile
+        41) Page: User Profile
+        42) Shortcode: Options list (used in user profile page)
+        43) Page: User Settings
+        44) Upload Button
+        45) Page: User Billing
+        46) Page: AI Chat Bot
+        47) Page: Documentation
+        48) Page: Image Generation
+        49) Icon Options (icon lightbox)
+        50) Generation Item (used in image generation page)
+        51) Generation List (used in image generation page)
+        52) Input Toggle (custom)
+        53) Select Model (used in image generation page)
+        53) Page: Image Generation
+        54) Input quantity (custom)
+        55) Input Range (custom)
+        56) Page: Privacy Policy
+        57) Contact Form
+        58) Page: Contact
+        59) Page: Models
+        60) Model Items (used in model page)
+        61) Bookmark button
+        62) Font Trigger (used in AI chat bot page)
+        63) Font Trigger Lightbox
+        64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
+        65) Page: Intro
+        66) Media Queries (Responsive)
 
 
 
 
 /*------------------------------------------------------------------*/
-/*	01) ROOT
+/*      01) ROOT
 /*------------------------------------------------------------------*/
 :root {
   /* color-scheme: dark; */
@@ -94,8 +94,6 @@
   --goglobe-main-color2: #ff5800;
   --goglobe-heading-color: #c0bcca;
   --goglobe-body-color: #c0bcca;
-
-  --goglobe-body-color-2: #012339;
   --goglobe-border-color: #253239;
   --goglobe-button-bg-color: #001f33;
   --goglobe-hover-color: #fff;
@@ -106,47 +104,21 @@
   --goglobe-input-color: #475864;
 }
 
-*::-webkit-scrollbar {
-  display: none;
-}
-
 ::-webkit-scrollbar-track {
   background-color: transparent; /* Background color of the scrollbar */
 }
 
-@media (min-width: 1041px) {
-  .panel-opened:root {
-    --goglobe-left-panel-width: 76px;
-  }
+.chatbot-body {
+  font-family: var(--goglobe-body-font-family);
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--goglobe-body-color);
+  position: relative;
+  word-break: break-word;
+  background-color: var(--goglobe-site-bg-color);
 }
-
-@media (max-width: 1040px) {
-  :root {
-    --goglobe-header-height: 80px;
-  }
-}
-
-[data-goglobe-skin="light"]:root {
-  color-scheme: light;
-  --goglobe-site-bg-color: #fff;
-  --goglobe-header-bg-color: #f5f5f5;
-  --goglobe-some-r-bg-color: #f5f5f5;
-  --goglobe-some-a-bg-color: #e7e7e7;
-  --goglobe-main-color: #ff5800;
-  --goglobe-main-color1: #ff5800;
-  --goglobe-main-color2: #ff5800;
-  --goglobe-heading-color: #333;
-  --goglobe-body-color: #444;
-  --goglobe-border-color: #ddd;
-
-  --goglobe-hover-color: #ddd;
-  --goglobe-button-bg-color: #f5f5f5;
-  --goglobe-hover-color: #000;
-}
-
-/*------------------------------------------------------------------*/
-/*	02) Base
-/*------------------------------------------------------------------*/
 
 .fn__svg {
   fill: var(--goglobe-hover-color);
@@ -158,285 +130,8 @@
   opacity: 1;
 }
 
-p {
-  letter-spacing: 0;
-  /* margin-bottom: 20px; */
-}
-
-ol li {
-  margin-bottom: 17px;
-}
-
-ol li:last-child {
-  margin-bottom: 0;
-}
-
-/* select { */
-/*   display: block; */
-/*   /* height: 40px; */
-*/
-/*   /* width: 100%; */ */
-/*   /* padding: 0 14px; */ */
-/*   /* background-color: var(--goglobe-some-a-bg-color); */ */
-/*   /* border: 2px solid var(--goglobe-border-color); */ */
-/*   border-radius: 5px; */
-/*   outline: none; */
-/*   color: var(--goglobe-heading-color); */
-/*   font-family: var(--goglobe-heading-font-family); */
-/*   font-size: 16px; */
-/*   position: relative; */
-/*   line-height: 40px; */
-/* } */
-
-hr {
-  outline: none;
-  border: none;
-  border-top: 1px solid var(--goglobe-border-color);
-  margin: 0;
-  margin-bottom: 20px;
-}
-
-hr[data-h="2"] {
-  border-top-width: 2px;
-}
-
-hr[data-h="3"] {
-  border-top-width: 3px;
-}
-
-hr[data-h="4"] {
-  border-top-width: 4px;
-}
-
-hr[data-h="5"] {
-  border-top-width: 5px;
-}
-
-hr[data-h="6"] {
-  border-top-width: 6px;
-}
-
-hr[data-h="7"] {
-  border-top-width: 7px;
-}
-
-hr[data-h="8"] {
-  border-top-width: 8px;
-}
-
-hr[data-h="9"] {
-  border-top-width: 9px;
-}
-
-hr[data-h="10"] {
-  border-top-width: 10px;
-}
-
 /*------------------------------------------------------------------*/
-/*	03) PRELOADER
-/*------------------------------------------------------------------*/
-.goglobe_fn_preloader.fn_ready {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.goglobe_fn_preloader.enabled {
-  display: -webkit-flex;
-  display: -moz-flex;
-  display: -ms-flex;
-  display: -o-flex;
-  display: flex;
-}
-
-.goglobe_fn_preloader {
-  position: fixed;
-  padding: 0;
-  margin: 0;
-  z-index: 1000;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  background-color: var(--goglobe-site-bg-color);
-  display: -webkit-flex;
-  display: -moz-flex;
-  display: -ms-flex;
-  display: -o-flex;
-  display: flex;
-  display: none;
-  -ms-align-items: center;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.goglobe_fn_preloader svg {
-  width: 240px;
-  height: 240px;
-  border-radius: 100%;
-  position: relative;
-}
-
-.goglobe_fn_preloader .first_circle {
-  fill: none;
-  stroke-width: 10px;
-  stroke: #080808;
-}
-
-.goglobe_fn_preloader .second_circle {
-  fill: none;
-  stroke-width: 10px;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-  stroke-dasharray: 360;
-  stroke-dashoffset: 100;
-  stroke: var(--goglobe-main-color);
-  animation: goglobe_fn_preloader 10s infinite;
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes goglobe_fn_preloader {
-  0% {
-    stroke-dasharray: 360;
-  }
-
-  50% {
-    stroke-dasharray: 1;
-  }
-
-  100% {
-    stroke-dasharray: 360;
-  }
-}
-
-/*------------------------------------------------------------------*/
-/*	04) Container
-/*------------------------------------------------------------------*/
-.container {
-  width: 100%;
-  max-width: 1400px;
-  padding: 0 40px;
-  margin: 0 auto;
-}
-
-.container.wide {
-  max-width: 1680px;
-}
-
-.container.small {
-  max-width: 780px;
-}
-
-.container.medium {
-  max-width: 980px;
-}
-
-/* .container:after, */
-/* .clearfix:after, */
-/* .clearfix:before { */
-/*   content: ""; */
-/*   clear: both; */
-/*   display: table; */
-/* } */
-
-@media (max-width: 1040px) {
-  .container {
-    padding: 0 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 0 10px;
-  }
-}
-
-/*------------------------------------------------------------------*/
-/*	05) New tags and some custom codes
-/*------------------------------------------------------------------*/
-.fn__full_link {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-frenify_main {
-  color: var(--goglobe-main-color);
-  -webkit-user-select: all;
-  -moz-user-select: all;
-  -ms-user-select: all;
-  -o-user-select: all;
-  user-select: all;
-}
-
-frenify_uselect {
-  -webkit-user-select: all;
-  -moz-user-select: all;
-  -ms-user-select: all;
-  -o-user-select: all;
-  user-select: all;
-}
-
-frenify_typing {
-  display: -webkit-flex;
-  display: -moz-flex;
-  display: -ms-flex;
-  display: -o-flex;
-  display: flex;
-}
-
-frenify_typing h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 400;
-  display: -webkit-flex;
-  display: -moz-flex;
-  display: -ms-flex;
-  display: -o-flex;
-  display: flex;
-}
-
-frenify_typing span {
-  color: var(--goglobe-heading-color);
-  overflow: hidden;
-  border-right: 2px solid var(--goglobe-main-color);
-  white-space: nowrap;
-  -webkit-animation:
-    frenify_typing_animation 1s steps(150, end),
-    frenify_blink_caret 0.5s step-end infinite;
-  animation:
-    frenify_typing_animation 1s steps(150, end),
-    frenify_blink_caret 0.5s step-end infinite;
-}
-
-@keyframes frenify_typing_animation {
-  from {
-    width: 0;
-  }
-
-  to {
-    width: 100%;
-  }
-}
-
-@keyframes frenify_blink_caret {
-  from,
-  to {
-    border-color: transparent;
-  }
-
-  50% {
-    border-color: var(--goglobe-main-color);
-  }
-}
-
-/*------------------------------------------------------------------*/
-/*	06) Site Structure
+/*      06) Site Structure
 /*------------------------------------------------------------------*/
 .goglobe_fn_wrapper,
 .goglobe_fn_wrapper * {
@@ -472,7 +167,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	07) Main Button
+/*      07) Main Button
 /*------------------------------------------------------------------*/
 
 .file-upload-item {
@@ -767,7 +462,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	08) Left Panel
+/*      08) Left Panel
 /*------------------------------------------------------------------*/
 .short_logo {
   display: none;
@@ -1080,7 +775,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	09) Header
+/*      09) Header
 /*------------------------------------------------------------------*/
 .goglobe_fn_header {
   position: fixed;
@@ -1742,7 +1437,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	10) Footer
+/*      10) Footer
 /*------------------------------------------------------------------*/
 .goglobe_fn_footer {
   margin-top: auto;
@@ -1801,7 +1496,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	11) Page: Home (index)
+/*      11) Page: Home (index)
 /*------------------------------------------------------------------*/
 .section_home {
   display: -webkit-flex;
@@ -1845,7 +1540,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	12) Shortcode: Title
+/*      12) Shortcode: Title
 /*------------------------------------------------------------------*/
 .goglobe_fn_title_holder {
   text-align: center;
@@ -1870,7 +1565,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	13) Shortcode: Interactive List
+/*      13) Shortcode: Interactive List
 /*------------------------------------------------------------------*/
 .goglobe_fn_interactive_list ul {
   margin: 0;
@@ -2061,7 +1756,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	14) Shortcode: Members
+/*      14) Shortcode: Members
 /*------------------------------------------------------------------*/
 .fn__members .item {
   position: relative;
@@ -2095,7 +1790,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	15) Shortcode: Animated Title
+/*      15) Shortcode: Animated Title
 /*------------------------------------------------------------------*/
 .fn__animated_text {
   opacity: 0;
@@ -2133,7 +1828,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	16) Page Title
+/*      16) Page Title
 /*------------------------------------------------------------------*/
 .goglobe_fn_pagetitle {
   padding: 34px 40px;
@@ -2155,7 +1850,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	17) Page: Changelog
+/*      17) Page: Changelog
 /*------------------------------------------------------------------*/
 .change_log {
   padding: 40px 0;
@@ -2277,7 +1972,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	18) Searchbar
+/*      18) Searchbar
 /*------------------------------------------------------------------*/
 .goglobe_fn_searchbar {
   opacity: 0;
@@ -2409,7 +2104,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	19) Shortcode: Accordion
+/*      19) Shortcode: Accordion
 /*------------------------------------------------------------------*/
 .goglobe_fn_accordion.small .acc__item {
   border-width: 1px;
@@ -2530,7 +2225,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	20) Page: Community Feed
+/*      20) Page: Community Feed
 /*------------------------------------------------------------------*/
 .goglobe_fn_community_page {
   padding: 36px 0 40px 0;
@@ -2550,7 +2245,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	21) Tabs
+/*      21) Tabs
 /*------------------------------------------------------------------*/
 .fn__tabs {
   border-bottom: 1px solid var(--goglobe-border-color);
@@ -2599,7 +2294,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	22) Page: Personal Feed
+/*      22) Page: Personal Feed
 /*------------------------------------------------------------------*/
 .goglobe_fn_feed .feed__filter {
   display: -webkit-flex;
@@ -2735,7 +2430,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	23) Shortcode: Gallery Items
+/*      23) Shortcode: Gallery Items
 /*------------------------------------------------------------------*/
 .fn__gallery_items {
   margin: 0;
@@ -2923,7 +2618,7 @@ frenify_typing span {
 }
 
 /*------------------------------------------------------------------*/
-/*	24) Like Button
+/*      24) Like Button
 /*------------------------------------------------------------------*/
 a.fn__like {
   text-decoration: none;
@@ -2992,7 +2687,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	25) Checkbox
+/*      25) Checkbox
 /*------------------------------------------------------------------*/
 .fn__checkbox {
   margin: 0;
@@ -3055,7 +2750,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	26) Image Lightbox
+/*      26) Image Lightbox
 /*------------------------------------------------------------------*/
 .goglobe_fn_img_lightbox {
   opacity: 0;
@@ -3272,7 +2967,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	27) Follow Button
+/*      27) Follow Button
 /*------------------------------------------------------------------*/
 .fn__follow {
   padding: 0 10px;
@@ -3307,7 +3002,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	28) Icon Button
+/*      28) Icon Button
 /*------------------------------------------------------------------*/
 .fn__icon_button {
   width: 30px;
@@ -3354,7 +3049,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	29) Model Button (used in image lightbox)
+/*      29) Model Button (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__model {
   position: relative;
@@ -3415,7 +3110,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	30) Prompt Details (used in image lightbox)
+/*      30) Prompt Details (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__prompt_details {
   position: relative;
@@ -3510,7 +3205,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	31) Detailed list (used in image lightbox)
+/*      31) Detailed list (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__details_list {
   padding: 27px 30px 3px;
@@ -3561,7 +3256,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	32) Grid Items (used in image lightbox)
+/*      32) Grid Items (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__grid_items ul {
   margin: 0;
@@ -3598,7 +3293,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	33) Reportbox
+/*      33) Reportbox
 /*------------------------------------------------------------------*/
 .goglobe_fn_report {
   pointer-events: none;
@@ -3705,7 +3400,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	34) Ajax Loader (Loading)
+/*      34) Ajax Loader (Loading)
 /*------------------------------------------------------------------*/
 .fn__preloader {
   opacity: 0;
@@ -3775,7 +3470,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	35) Page: Sign In and Sign Up
+/*      35) Page: Sign In and Sign Up
 /*------------------------------------------------------------------*/
 .goglobe_fn_sign {
   /* position: fixed; */
@@ -3973,7 +3668,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	36) Select Filter (personal feed page)
+/*      36) Select Filter (personal feed page)
 /*------------------------------------------------------------------*/
 .filter__select {
   position: relative;
@@ -4036,7 +3731,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	37) Page: Notifications
+/*      37) Page: Notifications
 /*------------------------------------------------------------------*/
 .goglobe_fn_notifications_content {
   padding: 40px 0;
@@ -4091,7 +3786,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	38) Back To button (notification single page)
+/*      38) Back To button (notification single page)
 /*------------------------------------------------------------------*/
 .fn__backto {
   display: -webkit-flex;
@@ -4141,7 +3836,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	39) Page: Pricing
+/*      39) Page: Pricing
 /*------------------------------------------------------------------*/
 .goglobe_fn_pricing_page {
   padding: 93px 0px 100px;
@@ -4458,7 +4153,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	40) Shortcode: Pricing Mobile
+/*      40) Shortcode: Pricing Mobile
 /*------------------------------------------------------------------*/
 .fn__mobile_pricing {
   display: -webkit-flex;
@@ -4633,7 +4328,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	41) Page: User Profile
+/*      41) Page: User Profile
 /*------------------------------------------------------------------*/
 .goglobe_fn_user_profile {
   padding: 40px 0;
@@ -4784,7 +4479,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	42) Shortcode: Options list (used in user profile page)
+/*      42) Shortcode: Options list (used in user profile page)
 /*------------------------------------------------------------------*/
 .fn__options_list ul {
   display: -webkit-flex;
@@ -4805,7 +4500,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	43) Page: User Settings
+/*      43) Page: User Settings
 /*------------------------------------------------------------------*/
 .goglobe_fn_user_settings {
   padding: 40px 0;
@@ -4893,7 +4588,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	44) Upload Button
+/*      44) Upload Button
 /*------------------------------------------------------------------*/
 .fn__upload {
   cursor: pointer;
@@ -5022,7 +4717,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	45) Page: User Billing
+/*      45) Page: User Billing
 /*------------------------------------------------------------------*/
 
 .goglobe_fn_user_billing {
@@ -5461,7 +5156,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	46) Page: AI Chat Bot
+/*      46) Page: AI Chat Bot
 /*------------------------------------------------------------------*/
 .goglobe_fn_aichatbot_page {
   display: -webkit-flex;
@@ -5474,7 +5169,7 @@ a.fn__like.no_border .fn__svg {
 
 .goglobe_fn_aichatbot_page .chat__page {
   width: 100%;
-  padding-top: 38px;
+  /* padding-top: 38px; */
   display: -webkit-flex;
   display: -moz-flex;
   display: -ms-flex;
@@ -5832,7 +5527,7 @@ a.fn__like.no_border .fn__svg {
 .goglobe_fn_aichatbot_page .chat__comment {
   margin-top: auto;
   position: sticky;
-  bottom: 0;
+  bottom: -10px;
   padding: 20px 0;
   background-color: var(--goglobe-site-bg-color);
 }
@@ -6118,7 +5813,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	47) Page: Documentation
+/*      47) Page: Documentation
 /*------------------------------------------------------------------*/
 .goglobe_fn_doc_page .doccontent {
   padding: 40px 0;
@@ -6212,7 +5907,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	48) Page: Image Generation
+/*      48) Page: Image Generation
 /*------------------------------------------------------------------*/
 .goglobe_fn_image_generation_page .generation__page {
   position: relative;
@@ -6443,7 +6138,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	49) Icon Options (icon lightbox)
+/*      49) Icon Options (icon lightbox)
 /*------------------------------------------------------------------*/
 .fn__icon_options {
   position: relative;
@@ -6526,7 +6221,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	50) Generation Item (used in image generation page)
+/*      50) Generation Item (used in image generation page)
 /*------------------------------------------------------------------*/
 .fn__generation_item {
   padding: 31px 40px 10px;
@@ -6608,7 +6303,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	51) Generation List (used in image generation page)
+/*      51) Generation List (used in image generation page)
 /*------------------------------------------------------------------*/
 .fn__generation_list {
   margin: 0;
@@ -6688,7 +6383,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	52) Input Toggle (custom)
+/*      52) Input Toggle (custom)
 /*------------------------------------------------------------------*/
 .fn__toggle {
   display: -webkit-flex;
@@ -6822,7 +6517,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	53) Select Model (used in image generation page)
+/*      53) Select Model (used in image generation page)
 /*------------------------------------------------------------------*/
 .fn__select_model {
   position: relative;
@@ -6944,7 +6639,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	54) Input quantity (custom)
+/*      54) Input quantity (custom)
 /*------------------------------------------------------------------*/
 .fn__quantity {
   width: 120px;
@@ -7020,7 +6715,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	55) Input Range (custom)
+/*      55) Input Range (custom)
 /*------------------------------------------------------------------*/
 .fn__range {
   position: relative;
@@ -7120,7 +6815,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	56) Page: Privacy Policy
+/*      56) Page: Privacy Policy
 /*------------------------------------------------------------------*/
 .goglobe_fn_privacy_page .privacypage {
   padding: 40px 0;
@@ -7136,7 +6831,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	57) Contact Form
+/*      57) Contact Form
 /*------------------------------------------------------------------*/
 .fn_contact_form .input_list ul {
   margin: 0;
@@ -7247,7 +6942,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	58) Page: Contact
+/*      58) Page: Contact
 /*------------------------------------------------------------------*/
 .goglobe_fn_contact_page .contactpage {
   padding: 40px 0;
@@ -7259,7 +6954,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	59) Page: Models
+/*      59) Page: Models
 /*------------------------------------------------------------------*/
 .goglobe_fn_models_page {
   padding: 36px 0 40px 0;
@@ -7356,7 +7051,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	60) Model Items (used in model page)
+/*      60) Model Items (used in model page)
 /*------------------------------------------------------------------*/
 .fn__model_items {
   margin: 0;
@@ -7544,7 +7239,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	61) Bookmark button
+/*      61) Bookmark button
 /*------------------------------------------------------------------*/
 .fn__bookmark {
   background-color: var(--goglobe-some-r-bg-color);
@@ -7585,7 +7280,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	62) Font Trigger (used in AI chat bot page)
+/*      62) Font Trigger (used in AI chat bot page)
 /*------------------------------------------------------------------*/
 .font__trigger {
   width: 11px;
@@ -7648,7 +7343,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	63) Font Trigger Lightbox
+/*      63) Font Trigger Lightbox
 /*------------------------------------------------------------------*/
 .goglobe_fn_font.opened {
   pointer-events: all;
@@ -7736,7 +7431,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
+/*      64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
 /*------------------------------------------------------------------*/
 .tooltipster-sidetip.tooltipster-goglobe .tooltipster-box {
   border: 1px solid var(--goglobe-border-color);
@@ -7807,7 +7502,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	65) Page: Intro
+/*      65) Page: Intro
 /*------------------------------------------------------------------*/
 .goglobe_fn_intro {
   padding: 150px 20px 100px;
@@ -8131,7 +7826,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*	66) Media Queries (Responsive)
+/*      66) Media Queries (Responsive)
 /*------------------------------------------------------------------*/
 @media (max-width: 1400px) {
   .fn__model_item {
