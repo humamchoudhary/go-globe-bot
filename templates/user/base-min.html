@@ -15,7 +15,7 @@
       name="htmx-config"
       content='{"selfRequestsOnly":false,   "withCredentials": true    }'
     />
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script>
       const fontFiles = {{font_files | safe }};
       const fontFolder = "{{settings['backend_url']}}{{ url_for('static', filename='font/NeueHaas') }}";
@@ -25,7 +25,7 @@
     <link
       rel="stylesheet"
       type="text/css"
-      href="{{ settings['backend_url'] }}{{ url_for('static', filename='css/prestyle-min.css') }}"
+      href="{{ settings['backend_url'] }}{{ url_for('static', filename='css/prestyle.css') }}"
     />
     <link
       rel="stylesheet"
