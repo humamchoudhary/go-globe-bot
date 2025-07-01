@@ -2062,11 +2062,14 @@ def create_admin():
             )
 
             # SEND_USER = os.environ.get('SMTP_TO')
+            mail = Mail(current_app)
+            # status = send_email(current_admin.email, f'Assistance Required: {
+            #     chat.subject}', "Ping", mail, render_template('/email/new_message.html', user=user, chat=chat))
             status = send_email(
                 form_data["email"],
                 f"Go Bot account created: {admin.username}",
                 f"Your account has been created.\n\nUsername:{
-                    form_data['username']}\nOne Time Password:{form_data['password']}",
+                    form_data['username']}\nOne Time Password:{form_data['password']}",mail
             )
             if status == "SEND":
                 return "", 200
