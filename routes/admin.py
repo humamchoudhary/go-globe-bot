@@ -2051,7 +2051,7 @@ def create_admin():
     if request.method == "GET":
         return render_template("/admin/create-admin.html")
     elif request.method == "POST":
-        try:
+        # try:
             form_data = request.form.to_dict()
             # # print(form_data)
             admin_service = AdminService(current_app.db)
@@ -2071,9 +2071,9 @@ def create_admin():
             if status == "SEND":
                 return "", 200
             return "", 500
-        except Exception as e:
-            # print(e)
-            return "", 500
+        # except Exception as e:
+        #     # print(e)
+        #     return f"{e}", 500
 
 
 @admin_bp.route("/settings/domain", methods=["POST"])
