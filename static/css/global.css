@@ -1,31 +1,31 @@
+/* :root { */
+/* --sec-bg-color: #001f33; */
+/* --main-color: #ff5800; */
+/* --bg-color: #001523; */
+/* --border-color: #253239; */
+/* --font-family: "NeueHaas", sans-serif; */
+/* --sec-text: #c0bcca; */
+/* } */
+
 :root {
+  --sec-bg-color: #e0e0e0; /* Secondary background: soft light gray-blue */
+  --main-color: #ff5800; /* Keep accent color the same */
+  --bg-color: #ffffff; /* Primary background: white */
+  --border-color: #dce3eb; /* Light border */
+  --font-family: "NeueHaas", sans-serif;
+  --sec-text: #333333; /* Darker text for readability */
+  --white: #000;
+}
+
+.dark {
   --sec-bg-color: #001f33;
   --main-color: #ff5800;
   --bg-color: #001523;
   --border-color: #253239;
   --font-family: "NeueHaas", sans-serif;
   --sec-text: #c0bcca;
+  --white: #fff;
 }
-
-/* :root { */
-/*   --sec-bg-color: #e0e0e0; */
-/*   --main-color: #ff5800; */
-/*   --bg-color: #ffffff; */
-/*   --border-color: #dce3eb; */
-/*   --font-family: "NeueHaas", sans-serif; */
-/*   --sec-text: #333333; */
-/*   --white: #000; */
-/* } */
-/**/
-/* .dark { */
-/*   --sec-bg-color: #001f33; */
-/*   --main-color: #ff5800; */
-/*   --bg-color: #001523; */
-/*   --border-color: #253239; */
-/*   --font-family: "NeueHaas", sans-serif; */
-/*   --sec-text: #c0bcca; */
-/*   --white: #fff; */
-/* } */
 
 html {
   overflow-x: hidden;
