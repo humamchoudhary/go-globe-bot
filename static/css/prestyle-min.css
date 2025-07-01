@@ -1,87 +1,87 @@
 @charset "utf-8";
 /*
-/*      Copyright (c) 2023 Frenify
-/*      Author: Frenify
-/*      Item URL: https://themeforest.net/item/goglobe-ai-html-dashboard-for-image-generation-chat-bot/46197058
-/*      This file is made for CURRENT TEMPLATE
+/*	Copyright (c) 2023 Frenify
+/*	Author: Frenify
+/*	Item URL: https://themeforest.net/item/goglobe-ai-html-dashboard-for-image-generation-chat-bot/46197058
+/*	This file is made for CURRENT TEMPLATE
 /*
 
 
-        List of CSS codes:
-
-        01) ROOT
-        02) Base
-        03) PRELOADER
-        04) Container
-        05) New tags and some custom codes
-        06) Site Structure
-        07) Main Button
-        08) Left Panel
-        09) Header
-        10) Footer
-        11) Page: Home (index)
-        12) Shortcode: Title
-        13) Shortcode: Interactive List
-        14) Shortcode: Members
-        15) Shortcode: Animated Title
-        16) Page Title
-        17) Page: Changelog
-        18) Searchbar
-        19) Shortcode: Accordion
-        20) Page: Community Feed
-        21) Tabs
-        22) Page: Personal Feed
-        23) Shortcode: Gallery Items
-        24) Like Button
-        25) Checkbox
-        26) Image Lightbox
-        27) Follow Button
-        28) Icon Button
-        29) Model Button (used in image lightbox)
-        30) Prompt Details (used in image lightbox)
-        31) Detailed list (used in image lightbox)
-        32) Grid Items (used in image lightbox)
-        33) Reportbox
-        34) Ajax Loader (Loading)
-        35) Page: Sign In and Sign Up
-        36) Select Filter (personal feed page)
-        37) Page: Notifications
-        38) Back To button (notification single page)
-        39) Page: Pricing
-        40) Shortcode: Pricing Mobile
-        41) Page: User Profile
-        42) Shortcode: Options list (used in user profile page)
-        43) Page: User Settings
-        44) Upload Button
-        45) Page: User Billing
-        46) Page: AI Chat Bot
-        47) Page: Documentation
-        48) Page: Image Generation
-        49) Icon Options (icon lightbox)
-        50) Generation Item (used in image generation page)
-        51) Generation List (used in image generation page)
-        52) Input Toggle (custom)
-        53) Select Model (used in image generation page)
-        53) Page: Image Generation
-        54) Input quantity (custom)
-        55) Input Range (custom)
-        56) Page: Privacy Policy
-        57) Contact Form
-        58) Page: Contact
-        59) Page: Models
-        60) Model Items (used in model page)
-        61) Bookmark button
-        62) Font Trigger (used in AI chat bot page)
-        63) Font Trigger Lightbox
-        64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
-        65) Page: Intro
-        66) Media Queries (Responsive)
+	List of CSS codes:
+	
+	01) ROOT
+	02) Base
+	03) PRELOADER
+	04) Container
+	05) New tags and some custom codes
+	06) Site Structure
+	07) Main Button
+	08) Left Panel
+	09) Header
+	10) Footer
+	11) Page: Home (index)
+	12) Shortcode: Title
+	13) Shortcode: Interactive List
+	14) Shortcode: Members
+	15) Shortcode: Animated Title
+	16) Page Title
+	17) Page: Changelog
+	18) Searchbar
+	19) Shortcode: Accordion
+	20) Page: Community Feed
+	21) Tabs
+	22) Page: Personal Feed
+	23) Shortcode: Gallery Items
+	24) Like Button
+	25) Checkbox
+	26) Image Lightbox
+	27) Follow Button
+	28) Icon Button
+	29) Model Button (used in image lightbox)
+	30) Prompt Details (used in image lightbox)
+	31) Detailed list (used in image lightbox)
+	32) Grid Items (used in image lightbox)
+	33) Reportbox
+	34) Ajax Loader (Loading)
+	35) Page: Sign In and Sign Up
+	36) Select Filter (personal feed page)
+	37) Page: Notifications
+	38) Back To button (notification single page)
+	39) Page: Pricing
+	40) Shortcode: Pricing Mobile
+	41) Page: User Profile
+	42) Shortcode: Options list (used in user profile page)
+	43) Page: User Settings
+	44) Upload Button
+	45) Page: User Billing
+	46) Page: AI Chat Bot
+	47) Page: Documentation
+	48) Page: Image Generation
+	49) Icon Options (icon lightbox)
+	50) Generation Item (used in image generation page)
+	51) Generation List (used in image generation page)
+	52) Input Toggle (custom)
+	53) Select Model (used in image generation page)
+	53) Page: Image Generation
+	54) Input quantity (custom)
+	55) Input Range (custom)
+	56) Page: Privacy Policy
+	57) Contact Form
+	58) Page: Contact
+	59) Page: Models
+	60) Model Items (used in model page)
+	61) Bookmark button
+	62) Font Trigger (used in AI chat bot page)
+	63) Font Trigger Lightbox
+	64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
+	65) Page: Intro
+	66) Media Queries (Responsive)
 
 
 
 
 /*------------------------------------------------------------------*/
-/*      01) ROOT
+/*	01) ROOT
 /*------------------------------------------------------------------*/
 :root {
   /* color-scheme: dark; */
@@ -131,7 +131,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      06) Site Structure
+/*	06) Site Structure
 /*------------------------------------------------------------------*/
 .goglobe_fn_wrapper,
 .goglobe_fn_wrapper * {
@@ -167,7 +167,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      07) Main Button
+/*	07) Main Button
 /*------------------------------------------------------------------*/
 
 .file-upload-item {
@@ -462,7 +462,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      08) Left Panel
+/*	08) Left Panel
 /*------------------------------------------------------------------*/
 .short_logo {
   display: none;
@@ -775,7 +775,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      09) Header
+/*	09) Header
 /*------------------------------------------------------------------*/
 .goglobe_fn_header {
   position: fixed;
@@ -1437,7 +1437,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      10) Footer
+/*	10) Footer
 /*------------------------------------------------------------------*/
 .goglobe_fn_footer {
   margin-top: auto;
@@ -1496,7 +1496,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      11) Page: Home (index)
+/*	11) Page: Home (index)
 /*------------------------------------------------------------------*/
 .section_home {
   display: -webkit-flex;
@@ -1540,7 +1540,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      12) Shortcode: Title
+/*	12) Shortcode: Title
 /*------------------------------------------------------------------*/
 .goglobe_fn_title_holder {
   text-align: center;
@@ -1565,7 +1565,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      13) Shortcode: Interactive List
+/*	13) Shortcode: Interactive List
 /*------------------------------------------------------------------*/
 .goglobe_fn_interactive_list ul {
   margin: 0;
@@ -1756,7 +1756,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      14) Shortcode: Members
+/*	14) Shortcode: Members
 /*------------------------------------------------------------------*/
 .fn__members .item {
   position: relative;
@@ -1790,7 +1790,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      15) Shortcode: Animated Title
+/*	15) Shortcode: Animated Title
 /*------------------------------------------------------------------*/
 .fn__animated_text {
   opacity: 0;
@@ -1828,7 +1828,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      16) Page Title
+/*	16) Page Title
 /*------------------------------------------------------------------*/
 .goglobe_fn_pagetitle {
   padding: 34px 40px;
@@ -1850,7 +1850,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      17) Page: Changelog
+/*	17) Page: Changelog
 /*------------------------------------------------------------------*/
 .change_log {
   padding: 40px 0;
@@ -1972,7 +1972,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      18) Searchbar
+/*	18) Searchbar
 /*------------------------------------------------------------------*/
 .goglobe_fn_searchbar {
   opacity: 0;
@@ -2104,7 +2104,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      19) Shortcode: Accordion
+/*	19) Shortcode: Accordion
 /*------------------------------------------------------------------*/
 .goglobe_fn_accordion.small .acc__item {
   border-width: 1px;
@@ -2225,7 +2225,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      20) Page: Community Feed
+/*	20) Page: Community Feed
 /*------------------------------------------------------------------*/
 .goglobe_fn_community_page {
   padding: 36px 0 40px 0;
@@ -2245,7 +2245,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      21) Tabs
+/*	21) Tabs
 /*------------------------------------------------------------------*/
 .fn__tabs {
   border-bottom: 1px solid var(--goglobe-border-color);
@@ -2294,7 +2294,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      22) Page: Personal Feed
+/*	22) Page: Personal Feed
 /*------------------------------------------------------------------*/
 .goglobe_fn_feed .feed__filter {
   display: -webkit-flex;
@@ -2430,7 +2430,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      23) Shortcode: Gallery Items
+/*	23) Shortcode: Gallery Items
 /*------------------------------------------------------------------*/
 .fn__gallery_items {
   margin: 0;
@@ -2618,7 +2618,7 @@
 }
 
 /*------------------------------------------------------------------*/
-/*      24) Like Button
+/*	24) Like Button
 /*------------------------------------------------------------------*/
 a.fn__like {
   text-decoration: none;
@@ -2687,7 +2687,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      25) Checkbox
+/*	25) Checkbox
 /*------------------------------------------------------------------*/
 .fn__checkbox {
   margin: 0;
@@ -2750,7 +2750,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      26) Image Lightbox
+/*	26) Image Lightbox
 /*------------------------------------------------------------------*/
 .goglobe_fn_img_lightbox {
   opacity: 0;
@@ -2967,7 +2967,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      27) Follow Button
+/*	27) Follow Button
 /*------------------------------------------------------------------*/
 .fn__follow {
   padding: 0 10px;
@@ -3002,7 +3002,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      28) Icon Button
+/*	28) Icon Button
 /*------------------------------------------------------------------*/
 .fn__icon_button {
   width: 30px;
@@ -3049,7 +3049,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      29) Model Button (used in image lightbox)
+/*	29) Model Button (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__model {
   position: relative;
@@ -3110,7 +3110,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      30) Prompt Details (used in image lightbox)
+/*	30) Prompt Details (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__prompt_details {
   position: relative;
@@ -3205,7 +3205,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      31) Detailed list (used in image lightbox)
+/*	31) Detailed list (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__details_list {
   padding: 27px 30px 3px;
@@ -3256,7 +3256,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      32) Grid Items (used in image lightbox)
+/*	32) Grid Items (used in image lightbox)
 /*------------------------------------------------------------------*/
 .fn__grid_items ul {
   margin: 0;
@@ -3293,7 +3293,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      33) Reportbox
+/*	33) Reportbox
 /*------------------------------------------------------------------*/
 .goglobe_fn_report {
   pointer-events: none;
@@ -3400,7 +3400,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      34) Ajax Loader (Loading)
+/*	34) Ajax Loader (Loading)
 /*------------------------------------------------------------------*/
 .fn__preloader {
   opacity: 0;
@@ -3470,7 +3470,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      35) Page: Sign In and Sign Up
+/*	35) Page: Sign In and Sign Up
 /*------------------------------------------------------------------*/
 .goglobe_fn_sign {
   /* position: fixed; */
@@ -3668,7 +3668,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      36) Select Filter (personal feed page)
+/*	36) Select Filter (personal feed page)
 /*------------------------------------------------------------------*/
 .filter__select {
   position: relative;
@@ -3731,7 +3731,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      37) Page: Notifications
+/*	37) Page: Notifications
 /*------------------------------------------------------------------*/
 .goglobe_fn_notifications_content {
   padding: 40px 0;
@@ -3786,7 +3786,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      38) Back To button (notification single page)
+/*	38) Back To button (notification single page)
 /*------------------------------------------------------------------*/
 .fn__backto {
   display: -webkit-flex;
@@ -3836,7 +3836,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      39) Page: Pricing
+/*	39) Page: Pricing
 /*------------------------------------------------------------------*/
 .goglobe_fn_pricing_page {
   padding: 93px 0px 100px;
@@ -4153,7 +4153,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      40) Shortcode: Pricing Mobile
+/*	40) Shortcode: Pricing Mobile
 /*------------------------------------------------------------------*/
 .fn__mobile_pricing {
   display: -webkit-flex;
@@ -4328,7 +4328,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      41) Page: User Profile
+/*	41) Page: User Profile
 /*------------------------------------------------------------------*/
 .goglobe_fn_user_profile {
   padding: 40px 0;
@@ -4479,7 +4479,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      42) Shortcode: Options list (used in user profile page)
+/*	42) Shortcode: Options list (used in user profile page)
 /*------------------------------------------------------------------*/
 .fn__options_list ul {
   display: -webkit-flex;
@@ -4500,7 +4500,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      43) Page: User Settings
+/*	43) Page: User Settings
 /*------------------------------------------------------------------*/
 .goglobe_fn_user_settings {
   padding: 40px 0;
@@ -4588,7 +4588,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      44) Upload Button
+/*	44) Upload Button
 /*------------------------------------------------------------------*/
 .fn__upload {
   cursor: pointer;
@@ -4717,7 +4717,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      45) Page: User Billing
+/*	45) Page: User Billing
 /*------------------------------------------------------------------*/
 
 .goglobe_fn_user_billing {
@@ -5156,7 +5156,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      46) Page: AI Chat Bot
+/*	46) Page: AI Chat Bot
 /*------------------------------------------------------------------*/
 .goglobe_fn_aichatbot_page {
   display: -webkit-flex;
@@ -5813,7 +5813,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      47) Page: Documentation
+/*	47) Page: Documentation
 /*------------------------------------------------------------------*/
 .goglobe_fn_doc_page .doccontent {
   padding: 40px 0;
@@ -5907,7 +5907,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      48) Page: Image Generation
+/*	48) Page: Image Generation
 /*------------------------------------------------------------------*/
 .goglobe_fn_image_generation_page .generation__page {
   position: relative;
@@ -6138,7 +6138,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      49) Icon Options (icon lightbox)
+/*	49) Icon Options (icon lightbox)
 /*------------------------------------------------------------------*/
 .fn__icon_options {
   position: relative;
@@ -6221,7 +6221,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      50) Generation Item (used in image generation page)
+/*	50) Generation Item (used in image generation page)
 /*------------------------------------------------------------------*/
 .fn__generation_item {
   padding: 31px 40px 10px;
@@ -6303,7 +6303,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      51) Generation List (used in image generation page)
+/*	51) Generation List (used in image generation page)
 /*------------------------------------------------------------------*/
 .fn__generation_list {
   margin: 0;
@@ -6383,7 +6383,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      52) Input Toggle (custom)
+/*	52) Input Toggle (custom)
 /*------------------------------------------------------------------*/
 .fn__toggle {
   display: -webkit-flex;
@@ -6517,7 +6517,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      53) Select Model (used in image generation page)
+/*	53) Select Model (used in image generation page)
 /*------------------------------------------------------------------*/
 .fn__select_model {
   position: relative;
@@ -6639,7 +6639,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      54) Input quantity (custom)
+/*	54) Input quantity (custom)
 /*------------------------------------------------------------------*/
 .fn__quantity {
   width: 120px;
@@ -6715,7 +6715,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      55) Input Range (custom)
+/*	55) Input Range (custom)
 /*------------------------------------------------------------------*/
 .fn__range {
   position: relative;
@@ -6815,7 +6815,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      56) Page: Privacy Policy
+/*	56) Page: Privacy Policy
 /*------------------------------------------------------------------*/
 .goglobe_fn_privacy_page .privacypage {
   padding: 40px 0;
@@ -6831,7 +6831,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      57) Contact Form
+/*	57) Contact Form
 /*------------------------------------------------------------------*/
 .fn_contact_form .input_list ul {
   margin: 0;
@@ -6942,7 +6942,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      58) Page: Contact
+/*	58) Page: Contact
 /*------------------------------------------------------------------*/
 .goglobe_fn_contact_page .contactpage {
   padding: 40px 0;
@@ -6954,7 +6954,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      59) Page: Models
+/*	59) Page: Models
 /*------------------------------------------------------------------*/
 .goglobe_fn_models_page {
   padding: 36px 0 40px 0;
@@ -7051,7 +7051,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      60) Model Items (used in model page)
+/*	60) Model Items (used in model page)
 /*------------------------------------------------------------------*/
 .fn__model_items {
   margin: 0;
@@ -7239,7 +7239,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      61) Bookmark button
+/*	61) Bookmark button
 /*------------------------------------------------------------------*/
 .fn__bookmark {
   background-color: var(--goglobe-some-r-bg-color);
@@ -7280,7 +7280,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      62) Font Trigger (used in AI chat bot page)
+/*	62) Font Trigger (used in AI chat bot page)
 /*------------------------------------------------------------------*/
 .font__trigger {
   width: 11px;
@@ -7343,7 +7343,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      63) Font Trigger Lightbox
+/*	63) Font Trigger Lightbox
 /*------------------------------------------------------------------*/
 .goglobe_fn_font.opened {
   pointer-events: all;
@@ -7431,7 +7431,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
+/*	64) Tooltipster custom theme named: tooltipster-goglobe (it can be changed in init.js)
 /*------------------------------------------------------------------*/
 .tooltipster-sidetip.tooltipster-goglobe .tooltipster-box {
   border: 1px solid var(--goglobe-border-color);
@@ -7502,7 +7502,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      65) Page: Intro
+/*	65) Page: Intro
 /*------------------------------------------------------------------*/
 .goglobe_fn_intro {
   padding: 150px 20px 100px;
@@ -7826,7 +7826,7 @@ a.fn__like.no_border .fn__svg {
 }
 
 /*------------------------------------------------------------------*/
-/*      66) Media Queries (Responsive)
+/*	66) Media Queries (Responsive)
 /*------------------------------------------------------------------*/
 @media (max-width: 1400px) {
   .fn__model_item {
