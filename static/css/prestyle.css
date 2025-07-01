@@ -84,7 +84,7 @@
 /*	01) ROOT
 /*------------------------------------------------------------------*/
 :root {
-  color-scheme: dark;
+  /* color-scheme: dark; */
   --goglobe-site-bg-color: #001f33;
   --goglobe-header-bg-color: #001f33;
   --goglobe-some-r-bg-color: #001f33;
