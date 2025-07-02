@@ -13,7 +13,7 @@
   }
 
   .pricing-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-2px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
 
@@ -23,7 +23,7 @@
   }
 
   .popular-card:hover {
-    transform: scale(1.08) translateY(-8px);
+    transform: scale(1.05) translateY(-2px);
   }
 
   .feature-check {
@@ -44,31 +44,25 @@
   }
 </style>
 <div class="flex flex-col w-full items-center pt-10 px-4 pb-10">
-  <div class="bg-[var(--sec-bg-color)] py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <h1
-          class="text-4xl md:text-5xl font-bold text-[var(--main-color)] mb-4"
-        >
-          GO CHAT Bot Pricing
-        </h1>
-        <p class="text-xl text-[var(--sec-text)] opacity-80 max-w-3xl mx-auto">
-          Choose the perfect plan for your business needs. Per user investment
-          model with flexible scaling options.
-        </p>
-        <div
-          class="mt-8 inline-flex items-center bg-orange-100 text-orange-800 px-4 py-2 rounded-full"
-        >
-          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          Driven by Your Success. Since 2005.
-        </div>
-      </div>
+  <div class="text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-[var(--main-color)] mb-4">
+      GO CHAT Bot Pricing
+    </h1>
+    <p class="text-xl text-[var(--sec-text)] opacity-80">
+      Choose the perfect plan for your business needs. Per user investment model
+      with flexible scaling options.
+    </p>
+    <div
+      class="mt-8 inline-flex items-center bg-orange-100 text-orange-800 px-4 py-2 rounded-full"
+    >
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+          clip-rule="evenodd"
+        ></path>
+      </svg>
+      Driven by Your Success. Since 2005.
     </div>
   </div>
   <!-- Pricing Cards Section -->
@@ -158,7 +152,8 @@
             </div>
           </div>
           <button
-            class="w-full bg-[var(--main-color)] hover:bg-[var(--main-color)] text-[var(--white)] font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+            onclick="window.location.href='/admin/contact';"
+            class="w-full bg-[var(--main-color)] hover:cursor-pointer hover:bg-[var(--main-color)] text-[var(--white)] font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
           >
             Get Started
           </button>
@@ -265,7 +260,8 @@
             </div>
           </div>
           <button
-            class="w-full bg-[var(--main-color)] hover:opacity-90 text-[var(--white)] font-semibold py-3 px-6 rounded-lg transition-opacity duration-200"
+            onclick="window.location.href='/admin/contact';"
+            class="w-full bg-[var(--main-color)] hover:cursor-pointer hover:opacity-90 text-[var(--white)] font-semibold py-3 px-6 rounded-lg transition-opacity duration-200"
           >
             Choose Grow
           </button>
@@ -383,7 +379,8 @@
             </div>
           </div>
           <button
-            class="w-full bg-[var(--main-color)] hover:bg-[var(--main-color)] text-[var(--white)] font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+            onclick="window.location.href='/admin/contact';"
+            class="w-full bg-[var(--main-color)] hover:cursor-pointer hover:bg-[var(--main-color)] text-[var(--white)] font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
           >
             Go Premium
           </button>
