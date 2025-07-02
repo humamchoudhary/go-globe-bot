@@ -209,7 +209,6 @@ class Bot:
             init_method = getattr(
                 self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
             chat_state = init_method(text_content, images)
-            print(chat_state)
 
         chat_state["model_name"] = self.active_bot_name
         chat_state["model_config"] = self._get_model_config()
@@ -243,10 +242,8 @@ class Bot:
 
             try:
                 if file_ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
-                    with open(file_path) as img:
-                        images.append(img.read())
-                    # with Image.open(file_path) as img:
-                    #     images.append(img.copy())
+                    with Image.open(file_path) as img:
+                        images.append(img.copy())
                 elif file_ext == '.txt':
                     url = file_name.replace("*", "/").replace(".txt", "")
                     with open(file_path, 'r', encoding='utf-8') as f:
@@ -268,12 +265,11 @@ class Bot:
         # Only add images if the model supports them
         if model_config["supports_images"] and images:
             for img in images:
-                # print(img)
-                # buffered = BytesIO()
-                # img.save(buffered, format="JPEG")
+                buffered = BytesIO()
+                img.save(buffered, format="JPEG")
                 history.append(types.UserContent(
                     types.Part.from_bytes(
-                        data=img, mime_type='image/jpeg')
+                        data=buffered.getvalue(), mime_type='image/jpeg')
                 ))
 
         return {
