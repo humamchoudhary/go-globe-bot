@@ -6,19 +6,6 @@
     <title>Admin Onboarding - GoGlobe</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-      :root {
-        --sec-bg-color: #001f33;
-        --main-color: #ff5800;
-        --bg-color: #001523;
-        --border-color: #253239;
-        --font-family: "NeueHaas", sans-serif;
-        --sec-text: #c0bcca;
-      }
-
-      * {
-        font-family: var(--font-family);
-      }
-
       .step-indicator {
         transition: all 0.3s ease;
       }
@@ -104,6 +91,7 @@
         background: rgba(255, 88, 0, 0.2);
       }
     </style>
+    <link rel="stylesheet" href="/static/css/global.css" />
   </head>
   <body class="m-0 bg-[var(--bg-color)] min-h-screen">
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -354,15 +342,21 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span class="text-[var(--sec-text)]">Username:</span>
-                    <span class="text-[var(--white)] ml-2" id="review-username">-</span>
+                    <span class="text-[var(--white)] ml-2" id="review-username"
+                      >-</span
+                    >
                   </div>
                   <div>
                     <span class="text-[var(--sec-text)]">Email:</span>
-                    <span class="text-[var(--white)] ml-2" id="review-email">-</span>
+                    <span class="text-[var(--white)] ml-2" id="review-email"
+                      >-</span
+                    >
                   </div>
                   <div>
                     <span class="text-[var(--sec-text)]">Phone:</span>
-                    <span class="text-[var(--white)] ml-2" id="review-phone">-</span>
+                    <span class="text-[var(--white)] ml-2" id="review-phone"
+                      >-</span
+                    >
                   </div>
                 </div>
               </div>
