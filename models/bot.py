@@ -273,7 +273,7 @@ class Bot:
                 file_uri = self._upload_image_to_file_api(img)
                 if file_uri:
                     history.append(types.UserContent(
-                        types.Part.from_uri(file_uri, mime_type='image/jpeg')
+                        types.Part.from_uri(file_uri,'image/jpeg')
                     ))
         
         return {
