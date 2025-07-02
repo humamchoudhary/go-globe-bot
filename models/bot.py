@@ -265,13 +265,13 @@ class Bot:
         # Only add images if the model supports them
         if model_config["supports_images"] and images:
             for img in images:
-                print(img)
+                # print(img)
                 # buffered = BytesIO()
                 # img.save(buffered, format="JPEG")
-                # history.append(types.UserContent(
-                #     types.Part.from_bytes(
-                #         data=buffered.getvalue(), mime_type='image/jpeg')
-                # ))
+                history.append(types.UserContent(
+                    types.Part.from_bytes(
+                        data=img, mime_type='image/jpeg')
+                ))
 
         return {
             "client": self.active_bot,
