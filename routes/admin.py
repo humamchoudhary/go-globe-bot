@@ -1583,7 +1583,7 @@ def scrape():
     thread = threading.Thread(target=scrape_urls, args=(all_urls,))
     thread.start()
     # Now scrape all the collected URLs
-    # # p# # print(all_urls)
+    print(all_urls)
     return "", 200
 
 
