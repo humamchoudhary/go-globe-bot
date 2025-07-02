@@ -11,6 +11,9 @@ import requests
 from google import genai
 from google.genai import types
 
+# Add these imports at the top of your file (add to existing imports)
+import tempfile
+import time
 load_dotenv()
 
 
@@ -260,19 +263,19 @@ class Bot:
     def _init_google_chat(self, text_content, images):
         actual_model = self._get_google_model_name(self.active_bot_name)
         model_config = self.google_models[actual_model]
-
+        
         history = []
-
+        
         # Only add images if the model supports them
         if model_config["supports_images"] and images:
             for img in images:
-                buffered = BytesIO()
-                img.save(buffered, format="JPEG")
-                history.append(types.UserContent(
-                    types.Part.from_bytes(
-                        data=buffered.getvalue(), mime_type='image/jpeg')
-                ))
-
+                # Upload image using File API instead of embedding
+                file_uri = self._upload_image_to_file_api(img)
+                if file_uri:
+                    history.append(types.UserContent(
+                        types.Part.from_uri(file_uri, mime_type='image/jpeg')
+                    ))
+        
         return {
             "client": self.active_bot,
             "config": {
@@ -285,6 +288,61 @@ class Bot:
                 "history": history
             }
         }
+
+
+# Add this new method to your Bot class:
+    def _upload_image_to_file_api(self, img):
+        """
+        Upload image to Google's File API and return the file URI
+        """
+        try:
+            # Create a temporary file to save the image
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+                img.save(temp_file.name, format="JPEG")
+                temp_file_path = temp_file.name
+            
+            # Upload the file to Google's File API using the existing client
+            uploaded_file = self.active_bot.files.upload(
+                path=temp_file_path,
+                mime_type='image/jpeg'
+            )
+            
+            # Clean up the temporary file
+            os.unlink(temp_file_path)
+            
+            # Wait for the file to be processed
+            while uploaded_file.state.name == "PROCESSING":
+                time.sleep(1)
+                uploaded_file = self.active_bot.files.get(uploaded_file.name)
+            
+            if uploaded_file.state.name == "FAILED":
+                raise ValueError(f"File upload failed: {uploaded_file.state}")
+            
+            return uploaded_file.uri
+            
+        except Exception as e:
+            print(f"Error uploading image to File API: {e}")
+            # Fallback to original method if File API fails
+            return self._fallback_to_bytes_upload(img)
+
+# Add this fallback method:
+    def _fallback_to_bytes_upload(self, img):
+        """
+        Fallback to original bytes upload method if File API fails
+        """
+        try:
+            buffered = BytesIO()
+            img.save(buffered, format="JPEG")
+            return types.Part.from_bytes(
+                data=buffered.getvalue(), 
+                mime_type='image/jpeg'
+            )
+        except Exception as e:
+            print(f"Fallback upload also failed: {e}")
+            return None
+
+
+
 
     # Keep existing initializers for other models
     def _init_claude_3_chat(self, text_content, images):
