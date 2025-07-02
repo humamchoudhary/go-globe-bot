@@ -857,7 +857,7 @@ def upload_file():
             except Exception as e:
                 file.seek(0)
                 file.save(file_path)
-                # # print(f"PDF conversion error: {e}")
+                print(f"PDF conversion error: {e}")
                 file_items.append(
                     render_template("components/file_item.html",
                                     file=unique_filename)
