@@ -1543,8 +1543,7 @@ def remove_language(language):
         return jsonify({"error": "Failed to remove language"}), 500
 
 
-def scrape_urls(urls):
-    admin_id = session.get('admin_id')
+def scrape_urls(urls,admin_id):
     for url in urls:
         res = scrape_web(url, rotate_user_agents=True, random_delay=True)
         if res and "text" in res:
@@ -1581,7 +1580,8 @@ def scrape():
         collected_urls = process_url(url)
         all_urls.extend(collected_urls)
 
-    thread = threading.Thread(target=scrape_urls, args=(all_urls,))
+    admin_id = session.get('admin_id')
+    thread = threading.Thread(target=scrape_urls, args=(all_urls,admin_id,))
     thread.start()
     # Now scrape all the collected URLs
     print(all_urls)
