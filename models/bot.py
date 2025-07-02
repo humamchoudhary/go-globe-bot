@@ -209,6 +209,7 @@ class Bot:
             init_method = getattr(
                 self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
             chat_state = init_method(text_content, images)
+            print(chat_state)
 
         chat_state["model_name"] = self.active_bot_name
         chat_state["model_config"] = self._get_model_config()
