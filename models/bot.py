@@ -370,6 +370,7 @@ class Bot:
         ).send_message(input)
 
         tokens = self._count_tokens(response)
+        print(tokens)
         self._save_chat(chat_state, id)
         return response.text, tokens
 
