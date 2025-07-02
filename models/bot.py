@@ -243,8 +243,10 @@ class Bot:
 
             try:
                 if file_ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
-                    with Image.open(file_path) as img:
-                        images.append(img.copy())
+                    with open(file_path) as img:
+                        images.append(img.read())
+                    # with Image.open(file_path) as img:
+                    #     images.append(img.copy())
                 elif file_ext == '.txt':
                     url = file_name.replace("*", "/").replace(".txt", "")
                     with open(file_path, 'r', encoding='utf-8') as f:
