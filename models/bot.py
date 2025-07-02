@@ -205,6 +205,7 @@ class Bot:
 
         if self._is_google_model(self.active_bot_name):
             chat_state = self._init_google_chat(text_content, images)
+            print(chat_state)
         else:
             init_method = getattr(
                 self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
