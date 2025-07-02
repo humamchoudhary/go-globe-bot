@@ -1544,7 +1544,7 @@ def remove_language(language):
 
 
 def scrape_urls(urls):
-
+    admin_id = session.get('admin_id')
     for url in urls:
         res = scrape_web(url, rotate_user_agents=True, random_delay=True)
         if res and "text" in res:
@@ -1560,7 +1560,8 @@ def scrape_urls(urls):
             if not filename:
                 # Use domain if path is empty
                 filename = urlparse(res["url"]).netloc
-            filepath = f"{os.getcwd()}/files/{filename}.txt"
+            filepath = f"{os.getcwd()}/files/{admin_id}/{filename}.txt"
+            print(filepath)
             with open(filepath, "w") as f:
                 # # # print(f"Saving content to {f.name}")
                 # if len(lines) > 500:
