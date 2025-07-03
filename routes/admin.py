@@ -1033,33 +1033,63 @@ def get_empty_stats():
     }
 
 
-def get_user(chat,user_service):
-    chat.__setattr__('username',user_service.get_user_by_id(chat.user_id).name)
+def get_user(chat, user_service):
+    start_time = time.time()
+    chat.__setattr__('username', user_service.get_user_by_id(chat.user_id).name)
+    end_time = time.time()
+    print(f"get_user executed in {end_time - start_time:.4f} seconds")
     return chat
-
 
 @admin_bp.route("/")
 @admin_bp.route("/dashboard")
 @admin_required
 def index():
-
+    function_start = time.time()
+    
+    # Admin retrieval timing
+    admin_start = time.time()
     admin = AdminService(current_app.db).get_admin_by_id(
         session.get("admin_id"))
+    admin_end = time.time()
+    print(f"Admin retrieval: {admin_end - admin_start:.4f} seconds")
+    
     if admin.onboarding:
         return redirect(url_for("admin.onboard"))
-
+    
+    # Service initialization timing
+    service_init_start = time.time()
     chat_service = ChatService(current_app.db)
-
     user_service = UserService(current_app.db)
+    service_init_end = time.time()
+    print(f"Service initialization: {service_init_end - service_init_start:.4f} seconds")
+    
+    # User retrieval timing
+    users_start = time.time()
     all_users = user_service.get_all_users()
+    users_end = time.time()
+    print(f"All users retrieval: {users_end - users_start:.4f} seconds")
+    
+    # Chat retrieval timing
+    chats_start = time.time()
     chats = chat_service.get_all_chats(session.get("admin_id"))
-
-    chats_ary = [(lambda chat:get_user(chat,user_service))(chat) for chat in chats]
-
-
+    chats_end = time.time()
+    print(f"Chats retrieval: {chats_end - chats_start:.4f} seconds")
+    
+    # Stats generation timing
+    stats_start = time.time()
     data = generate_stats(chats)
-
-    return render_template(
+    stats_end = time.time()
+    print(f"Stats generation: {stats_end - stats_start:.4f} seconds")
+    
+    # Chat processing timing
+    processing_start = time.time()
+    chats_ary = [(lambda chat: get_user(chat, user_service))(chat) for chat in chats]
+    processing_end = time.time()
+    print(f"Chat processing: {processing_end - processing_start:.4f} seconds")
+    
+    # Template rendering timing
+    render_start = time.time()
+    result = render_template(
         "admin/index.html",
         chats=chats_ary,
         data=data,
@@ -1067,6 +1097,15 @@ def index():
         online_users=current_app.config["ONLINE_USERS"],
         all_users=len(all_users),
     )
+    render_end = time.time()
+    print(f"Template rendering: {render_end - render_start:.4f} seconds")
+    
+    # Total function timing
+    function_end = time.time()
+    total_time = function_end - function_start
+    print(f"Total index function execution: {total_time:.4f} seconds")
+    
+    return result
 
 
 @admin_bp.route("/join/<room_id>")
