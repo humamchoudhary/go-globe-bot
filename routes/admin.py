@@ -475,7 +475,7 @@ def chat(room_id):
     chat = chat_service.get_chat_by_room_id(room_id)
     if not chat:
         return redirect(url_for("admin.get_all_chats"))
-    chats = chat_service.get_all_chats(session.get("admin_id"),limit=10)
+    chats = chat_service.get_all_chats(session.get("admin_id"))
 
     # chats_data = [c for c in chats]
     chats_data = []
@@ -1071,7 +1071,7 @@ def index():
     
     # Chat retrieval timing
     chats_start = time.time()
-    chats = chat_service.get_all_chats(session.get("admin_id"))
+    chats = chat_service.get_all_chats(session.get("admin_id"),limit=10)
     chats_end = time.time()
     print(f"Chats retrieval: {chats_end - chats_start:.4f} seconds")
     
