@@ -1064,10 +1064,10 @@ def index():
     print(f"Service initialization: {service_init_end - service_init_start:.4f} seconds")
     
     # User retrieval timing
-    users_start = time.time()
-    all_users = user_service.get_all_users()
-    users_end = time.time()
-    print(f"All users retrieval: {users_end - users_start:.4f} seconds")
+    # users_start = time.time()
+    # all_users = user_service.get_all_users()
+    # users_end = time.time()
+    # print(f"All users retrieval: {users_end - users_start:.4f} seconds")
     
     # Chat retrieval timing
     chats_start = time.time()
@@ -1095,7 +1095,7 @@ def index():
         data=data,
         username="Ana",
         online_users=current_app.config["ONLINE_USERS"],
-        all_users=len(all_users),
+        # all_users=len(all_users),
     )
     render_end = time.time()
     print(f"Template rendering: {render_end - render_start:.4f} seconds")
