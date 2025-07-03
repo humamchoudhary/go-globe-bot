@@ -75,20 +75,20 @@ def create_app(config_class=Config):
         user_agent_lower = user_agent.string.lower()
         return any(keyword in user_agent_lower for keyword in mobile_keywords)
 
-    # @app.before_request
-    # def start_timer():
-    #     g.start_time = time.time()
-    #
-    #
-    # @app.after_request
-    # def log_request_time(response):
-    #     if hasattr(g, 'start_time'):
-    #         duration = time.time() - g.start_time
-    #         endpoint = request.endpoint or 'unknown'
-    #         method = request.method
-    #         path = request.path
-    #         print(f"[{method}] {path} (endpoint: {endpoint}) took {duration:.4f} seconds")
-    #     return response
+    @app.before_request
+    def start_timer():
+        g.start_time = time.time()
+
+
+    @app.after_request
+    def log_request_time(response):
+        if hasattr(g, 'start_time'):
+            duration = time.time() - g.start_time
+            endpoint = request.endpoint or 'unknown'
+            method = request.method
+            path = request.path
+            print(f"[{method}] {path} (endpoint: {endpoint}) took {duration:.4f} seconds")
+        return response
 
 
     app.jinja_env.tests['mobile'] = is_mobile
