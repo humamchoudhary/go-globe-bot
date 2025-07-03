@@ -32,6 +32,7 @@ class AdminService:
             phone=phone,
             created_by=created_by
         )
+        admin.onboarding = False
 
         self.admins_collection.insert_one(admin.to_dict())
         return admin

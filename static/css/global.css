@@ -11,7 +11,9 @@
   --sec-bg-color: #e0e0e0; /* Secondary background: soft light gray-blue */
   --main-color: #ff5800; /* Keep accent color the same */
   --bg-color: #ffffff; /* Primary background: white */
-  --border-color: #dce3eb; /* Light border */
+  /* --border-color: #dce3eb; /* Light border */ */
+
+  --border-color: #25323922;
   --font-family: "NeueHaas", sans-serif;
   --sec-text: #333333; /* Darker text for readability */
   --white: #000;
@@ -28,6 +30,7 @@
 }
 
 html {
+
   overflow-x: hidden;
   padding: 0px;
   margin: 0px;

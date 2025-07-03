@@ -44,7 +44,10 @@ from services.logs_service import LogsService
 from models.log import LogLevel, LogTag
 from services.admin_service import AdminService
 from services.email_service import send_email
-
+from datetime import datetime, timedelta
+from collections import Counter, defaultdict
+import calendar
+from functools import lru_cache
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "files")
 
@@ -881,129 +884,158 @@ def logout():
 
 
 def generate_stats(chat_list):
+    """Optimized version of generate_stats with better performance."""
+    if not chat_list:
+        return get_empty_stats()
+    
     now = datetime.utcnow()
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    week_start = today_start - timedelta(days=today_start.weekday())
-    year_start = now.replace(month=1, day=1, hour=0,
-                             minute=0, second=0, microsecond=0)
-    month_start = now.replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
-    )  # <-- this-month start
-
-    # Containers
-    today_hourly = Counter()
-    today_admin_hourly = Counter()
-
-    week_daily = Counter()
-    week_admin_daily = Counter()
-
-    month_daily = Counter()  # <-- this-month counters
-    month_admin_daily = Counter()
-
-    year_monthly = Counter()
-    year_admin_monthly = Counter()
-
-    all_time_yearly = Counter()
-    all_time_admin_yearly = Counter()
-
+    
+    # Pre-calculate time boundaries
+    time_boundaries = calculate_time_boundaries(now)
+    
+    # Initialize counters using defaultdict for cleaner code
+    counters = {
+        'today_hourly': defaultdict(int),
+        'today_admin_hourly': defaultdict(int),
+        'week_daily': defaultdict(int),
+        'week_admin_daily': defaultdict(int),
+        'month_daily': defaultdict(int),
+        'month_admin_daily': defaultdict(int),
+        'year_monthly': defaultdict(int),
+        'year_admin_monthly': defaultdict(int),
+        'all_time_yearly': defaultdict(int),
+        'all_time_admin_yearly': defaultdict(int),
+    }
+    
+    # Single pass through chats with optimized logic
     for chat in chat_list:
         created = chat.created_at
-
-        # === TODAY (hourly) ===
-        if created >= today_start:
+        is_admin_required = chat.admin_required
+        
+        # TODAY (hourly)
+        if created >= time_boundaries['today_start']:
             hour_label = created.strftime("%H:00")
-            today_hourly[hour_label] += 1
-            if chat.admin_required:
-                today_admin_hourly[hour_label] += 1
-
-        # === THIS WEEK (daily) ===
-        if created >= week_start:
+            counters['today_hourly'][hour_label] += 1
+            if is_admin_required:
+                counters['today_admin_hourly'][hour_label] += 1
+        
+        # THIS WEEK (daily)
+        if created >= time_boundaries['week_start']:
             day_label = created.strftime("%A")
-            week_daily[day_label] += 1
-            if chat.admin_required:
-                week_admin_daily[day_label] += 1
-
-        # === THIS MONTH (daily) ===
-        if created >= month_start:
-            day_label = created.day  # integer day of month
-            month_daily[day_label] += 1
-            if chat.admin_required:
-                month_admin_daily[day_label] += 1
-
-        # === THIS YEAR (monthly) ===
-        if created >= year_start:
+            counters['week_daily'][day_label] += 1
+            if is_admin_required:
+                counters['week_admin_daily'][day_label] += 1
+        
+        # THIS MONTH (daily)
+        if created >= time_boundaries['month_start']:
+            day_label = created.day
+            counters['month_daily'][day_label] += 1
+            if is_admin_required:
+                counters['month_admin_daily'][day_label] += 1
+        
+        # THIS YEAR (monthly)
+        if created >= time_boundaries['year_start']:
             month_label = created.strftime("%b")
-            year_monthly[month_label] += 1
-            if chat.admin_required:
-                year_admin_monthly[month_label] += 1
-
-        # === ALL TIME (yearly) ===
+            counters['year_monthly'][month_label] += 1
+            if is_admin_required:
+                counters['year_admin_monthly'][month_label] += 1
+        
+        # ALL TIME (yearly)
         year_label = created.strftime("%Y")
-        all_time_yearly[year_label] += 1
-        if chat.admin_required:
-            all_time_admin_yearly[year_label] += 1
-
-    # Fill missing labels for consistency
-    full_hours = [f"{str(h).zfill(2)}:00" for h in range(24)]
-    full_days = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-    ]
-    full_months = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ]
-
-    # Get number of days in current month (handles month length)
-    import calendar
-
-    days_in_month = calendar.monthrange(now.year, now.month)[1]
-    full_days_in_month = list(range(1, days_in_month + 1))
-
+        counters['all_time_yearly'][year_label] += 1
+        if is_admin_required:
+            counters['all_time_admin_yearly'][year_label] += 1
+    
+    # Build response using pre-calculated labels
+    labels = get_time_labels(now)
+    
     return {
         "today": {
-            "labels": full_hours,
-            "totalChats": [today_hourly[h] for h in full_hours],
-            "adminRequired": [today_admin_hourly[h] for h in full_hours],
+            "labels": labels['hours'],
+            "totalChats": [counters['today_hourly'][h] for h in labels['hours']],
+            "adminRequired": [counters['today_admin_hourly'][h] for h in labels['hours']],
         },
         "this-week": {
-            "labels": full_days,
-            "totalChats": [week_daily[d] for d in full_days],
-            "adminRequired": [week_admin_daily[d] for d in full_days],
+            "labels": labels['days'],
+            "totalChats": [counters['week_daily'][d] for d in labels['days']],
+            "adminRequired": [counters['week_admin_daily'][d] for d in labels['days']],
         },
-        "this-month": {  # <-- added this-month
-            "labels": full_days_in_month,
-            "totalChats": [month_daily[d] for d in full_days_in_month],
-            "adminRequired": [month_admin_daily[d] for d in full_days_in_month],
+        "this-month": {
+            "labels": labels['days_in_month'],
+            "totalChats": [counters['month_daily'][d] for d in labels['days_in_month']],
+            "adminRequired": [counters['month_admin_daily'][d] for d in labels['days_in_month']],
         },
         "this-year": {
-            "labels": full_months,
-            "totalChats": [year_monthly[m] for m in full_months],
-            "adminRequired": [year_admin_monthly[m] for m in full_months],
+            "labels": labels['months'],
+            "totalChats": [counters['year_monthly'][m] for m in labels['months']],
+            "adminRequired": [counters['year_admin_monthly'][m] for m in labels['months']],
         },
         "all-time": {
-            "labels": sorted(all_time_yearly.keys()),
-            "totalChats": [all_time_yearly[y] for y in sorted(all_time_yearly.keys())],
-            "adminRequired": [
-                all_time_admin_yearly[y] for y in sorted(all_time_admin_yearly.keys())
-            ],
+            "labels": sorted(counters['all_time_yearly'].keys()),
+            "totalChats": [counters['all_time_yearly'][y] for y in sorted(counters['all_time_yearly'].keys())],
+            "adminRequired": [counters['all_time_admin_yearly'][y] for y in sorted(counters['all_time_admin_yearly'].keys())],
         },
     }
+
+def calculate_time_boundaries(now):
+    """Pre-calculate all time boundaries."""
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    return {
+        'today_start': today_start,
+        'week_start': today_start - timedelta(days=today_start.weekday()),
+        'month_start': now.replace(day=1, hour=0, minute=0, second=0, microsecond=0),
+        'year_start': now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0),
+    }
+
+@lru_cache(maxsize=32)
+def get_time_labels(now):
+    """Get all time labels with caching."""
+    days_in_month = calendar.monthrange(now.year, now.month)[1]
+    
+    return {
+        'hours': [f"{str(h).zfill(2)}:00" for h in range(24)],
+        'days': ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        'days_in_month': list(range(1, days_in_month + 1)),
+        'months': ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    }
+
+def get_empty_stats():
+    """Return empty stats structure when no chats exist."""
+    now = datetime.utcnow()
+    labels = get_time_labels(now)
+    
+    return {
+        "today": {
+            "labels": labels['hours'],
+            "totalChats": [0] * 24,
+            "adminRequired": [0] * 24,
+        },
+        "this-week": {
+            "labels": labels['days'],
+            "totalChats": [0] * 7,
+            "adminRequired": [0] * 7,
+        },
+        "this-month": {
+            "labels": labels['days_in_month'],
+            "totalChats": [0] * len(labels['days_in_month']),
+            "adminRequired": [0] * len(labels['days_in_month']),
+        },
+        "this-year": {
+            "labels": labels['months'],
+            "totalChats": [0] * 12,
+            "adminRequired": [0] * 12,
+        },
+        "all-time": {
+            "labels": [],
+            "totalChats": [],
+            "adminRequired": [],
+        },
+    }
+
+
+def get_user(chat):
+    chat.__setattr__('username',user_service.get_user_by_id(c.user_id).name)
+    return chat
 
 
 @admin_bp.route("/")
@@ -1022,12 +1054,8 @@ def index():
     all_users = user_service.get_all_users()
     chats = chat_service.get_all_chats(session.get("admin_id"))
 
-    chats_ary = []
-    for c in chats:
-        # print(c.to_dict())
-        chat = c.to_dict()
-        chat["username"] = user_service.get_user_by_id(c.user_id).name
-        chats_ary.append(chat)
+    chats_ary = [(lambda chat:get_user(chat))(chat) for chat in chats]
+
 
     data = generate_stats(chats)
 

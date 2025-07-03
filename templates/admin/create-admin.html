@@ -420,7 +420,8 @@
   });
 
   document.body.addEventListener("htmx:afterRequest", function (evt) {
-    if (evt.detail.xhr.status === 200) {
+      console.log(evt)
+    if (evt.detail.xhr.status === 200 && evt.detail.pathInfo.finalRequestPath === '/admin/create-admin') {
       const successDiv = document.getElementById("success-message");
       const errorDiv = document.getElementById("error-message");
       const form = document.getElementById("admin-form");
