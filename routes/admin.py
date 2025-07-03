@@ -1052,7 +1052,7 @@ def index():
 
     user_service = UserService(current_app.db)
     # all_users = user_service.get_all_users()
-    chats = chat_service.get_all_chats(session.get("admin_id"),limit=5)
+    chats = chat_service.get_all_chats(session.get("admin_id"))
 
 
 
