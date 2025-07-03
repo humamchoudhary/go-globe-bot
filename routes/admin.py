@@ -1034,7 +1034,7 @@ def get_empty_stats():
 
 
 def get_user(chat,user_service):
-    chat.__setattr__('username',user_service.get_user_by_id(c.user_id).name)
+    chat.__setattr__('username',user_service.get_user_by_id(chat.user_id).name)
     return chat
 
 
