@@ -1033,7 +1033,7 @@ def get_empty_stats():
     }
 
 
-def get_user(chat):
+def get_user(chat,user_service):
     chat.__setattr__('username',user_service.get_user_by_id(c.user_id).name)
     return chat
 
@@ -1054,7 +1054,7 @@ def index():
     all_users = user_service.get_all_users()
     chats = chat_service.get_all_chats(session.get("admin_id"))
 
-    chats_ary = [(lambda chat:get_user(chat))(chat) for chat in chats]
+    chats_ary = [(lambda chat:get_user(chat,user_service))(chat) for chat in chats]
 
 
     data = generate_stats(chats)
