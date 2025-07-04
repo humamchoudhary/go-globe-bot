@@ -118,7 +118,7 @@ def view_logs():
     # Regular admins only see their own logs
     admin_filter = session.get(
         "admin_id") if admin.role != "superadmin" else None
-    logs = logs_service.get_recent_logs(admin_filter, 10000)
+    logs = logs_service.get_recent_logs(admin_filter, 1000)
 
     return render_template("admin/logs.html", logs=logs, selected_log=None)
 
@@ -138,7 +138,7 @@ def filter_logs():
     admin_id = admin.admin_id
     message_search = request.args.get("message_search", "").strip()
     sort_order = request.args.get("sort", "timestamp_desc")
-    limit = request.args.get("limit", 10000)
+    limit = request.args.get("limit", 1000)
 
     # Parse dates
     start_date = end_date = None
