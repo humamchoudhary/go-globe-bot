@@ -1038,35 +1038,128 @@ def get_user(chat,user_service):
     return chat
 
 
+# @admin_bp.route("/")
+# @admin_bp.route("/dashboard")
+# @admin_required
+# def index():
+#
+#     admin = AdminService(current_app.db).get_admin_by_id(
+#         session.get("admin_id"))
+#     if admin.onboarding:
+#         return redirect(url_for("admin.onboard"))
+#
+#     chat_service = ChatService(current_app.db)
+#
+#     user_service = UserService(current_app.db)
+#     # all_users = user_service.get_all_users()
+#     chats = chat_service.get_all_chats(session.get("admin_id"))
+#
+#
+#
+#     data = generate_stats(chats)
+#     chats_ary = [(lambda chat:get_user(chat,user_service))(chat) for chat in chats]
+#
+#     return render_template(
+#         "admin/index.html",
+#         chats=chats_ary,
+#         data=data,
+#         username="Ana",
+#         online_users=current_app.config["ONLINE_USERS"],
+#         # all_users=len(all_users),
+#     )
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+
+@lru_cache(maxsize=256)
+def get_cached_user(user_id, user_service):
+    """Cache user lookups to avoid repeated database calls."""
+    try:
+        return user_service.get_user_by_id(user_id)
+    except Exception as e:
+        logger.warning(f"Failed to get user {user_id}: {e}")
+        return None
+
+def enrich_chats_with_usernames(chats, user_service):
+    """Efficiently add usernames to chats using parallel processing."""
+    if not chats:
+        return []
+    
+    # Get unique user IDs to minimize database calls
+    unique_user_ids = list(set(chat.user_id for chat in chats if hasattr(chat, 'user_id')))
+    
+    # Fetch users in parallel
+    user_cache = {}
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_user_id = {
+            executor.submit(get_cached_user, user_id, user_service): user_id 
+            for user_id in unique_user_ids
+        }
+        
+        for future in as_completed(future_to_user_id):
+            user_id = future_to_user_id[future]
+            try:
+                user = future.result()
+                user_cache[user_id] = user.name if user else "Unknown User"
+            except Exception as e:
+                logger.warning(f"Failed to fetch user {user_id}: {e}")
+                user_cache[user_id] = "Unknown User"
+    
+    # Add usernames to chats
+    for chat in chats:
+        if hasattr(chat, 'user_id'):
+            chat.username = user_cache.get(chat.user_id, "Unknown User")
+    
+    return chats
+
+def get_dashboard_data(admin_id, chat_service, user_service, limit=50):
+    """Get optimized dashboard data with minimal database calls."""
+    # Get chats without full message history for better performance
+    chats = chat_service.get_all_chats(admin_id, limit=limit)
+    
+    # Only get full messages for chats that actually need them (e.g., for stats)
+    chats_for_stats = chat_service.get_chats_with_full_messages(admin_id, limit=1000)
+    
+    # Generate stats from the full dataset
+    stats_data = generate_stats(chats_for_stats)
+    
+    # Enrich chats with usernames efficiently
+    enriched_chats = enrich_chats_with_usernames(chats, user_service)
+    
+    return enriched_chats, stats_data
+
+
 @admin_bp.route("/")
 @admin_bp.route("/dashboard")
 @admin_required
 def index():
-
-    admin = AdminService(current_app.db).get_admin_by_id(
-        session.get("admin_id"))
+    admin_service = AdminService(current_app.db)
+    admin = admin_service.get_admin_by_id(session.get("admin_id"))
+    
     if admin.onboarding:
         return redirect(url_for("admin.onboard"))
-
+    
     chat_service = ChatService(current_app.db)
-
     user_service = UserService(current_app.db)
-    # all_users = user_service.get_all_users()
-    chats = chat_service.get_all_chats(session.get("admin_id"))
-
-
-
-    data = generate_stats(chats)
-    chats_ary = [(lambda chat:get_user(chat,user_service))(chat) for chat in chats]
-
+    
+    # Use the optimized function
+    admin_id = session.get("admin_id")
+    enriched_chats, stats_data = get_dashboard_data(admin_id, chat_service, user_service)
+    
     return render_template(
         "admin/index.html",
-        chats=chats_ary,
-        data=data,
+        chats=enriched_chats,
+        data=stats_data,
         username="Ana",
-        online_users=current_app.config["ONLINE_USERS"],
-        # all_users=len(all_users),
+        online_users=current_app.config.get("ONLINE_USERS", 0),
     )
+
+
 
 
 @admin_bp.route("/join/<room_id>")
