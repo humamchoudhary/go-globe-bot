@@ -416,24 +416,23 @@ class ChatService:
             base_filter["exported"] = True
 
         # Optimized projection - only get necessary fields for list view
-        projection = {
-            "_id": 0,
-            "room_id": 1,
-            "user_id": 1,
-            "subject": 1,
-            "updated_at": 1,
-            "viewed": 1,
-            "admin_required": 1,
-            "exported": 1,
-            "messages": {"$slice": -1}  # Only get the last message
-        }
+        # projection = {
+        #     "_id": 0,
+        #     "room_id": 1,
+        #     "user_id": 1,
+        #     "subject": 1,
+        #     "updated_at": 1,
+        #     "viewed": 1,
+        #     "admin_required": 1,
+        #     "exported": 1,
+        #     "messages": {"$slice": -1}  # Only get the last message
+        # }
 
         # try:
         cursor = self.chats_collection.find(
             base_filter,
-            projection
+            {"messages": {"$slice": -1}, '_id': 0}  # Only get the last message
         ).sort("updated_at", -1).skip(skip).limit(limit)
-
         return [Chat.from_dict(chat_data) for chat_data in cursor]
         # except Exception as e:
         #     logger.error(f"Error getting filtered chats: {e}")
