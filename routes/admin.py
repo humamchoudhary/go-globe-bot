@@ -502,7 +502,8 @@ def chat(room_id):
             chat=chat, 
             user=user, 
             username="Ana",
-            chat_counts=chat_counts
+            chat_counts=chat_counts,
+        # has_more=len(chats_data) == 20,
         )
 
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
@@ -512,6 +513,8 @@ def chat(room_id):
         chats=chats_data, 
         user=user, 
         username="Ana",
+
+        has_more=len(chats_data) == 20,
             chat_counts=chat_counts
     )
 
@@ -1944,7 +1947,7 @@ def get_all_chats():
         chats_data.append(data)
     
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    print(chat_counts)
+    # print(chat_counts)
     
     return render_template(
         "admin/chats.html",
