@@ -503,7 +503,7 @@ def chat(room_id):
 def get_chat_list():
     room_id = request.referrer.split("/")[-1]
     chat_service = ChatService(current_app.db)
-    chats = chat_service.get_all_chats(session.get("admin_id"))
+    chats = chat_service.get_chats_with_limited_messages(session.get("admin_id"))
 
     user_service = UserService(current_app.db)
     chats_data = []

@@ -321,7 +321,8 @@ class ChatService:
 
     def get_chats_with_limited_messages(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0, message_limit: int = 1) -> List[Chat]:
         """Get chats with limited number of messages per chat for list views."""
-        filter_query = {"admin_id": admin_id} if admin_id else {}
+        filter_query = {"admin_id": admin_id, "subject": {
+            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {}
 
         # Use projection to limit messages (e.g., only last message for list view)
         projection = {
