@@ -129,14 +129,33 @@ class ChatService:
                 ("admin_id", 1),
                 ("updated_at", -1)
             ])
-            self.chats_collection.create_index("chat_id")
-            self.chats_collection.create_index("room_id")
-            self.chats_collection.create_index("user_id")
+
+            # Index for filtering
             self.chats_collection.create_index([
                 ("admin_id", 1),
                 ("admin_required", 1),
                 ("updated_at", -1)
             ])
+
+            self.chats_collection.create_index([
+                ("admin_id", 1),
+                ("exported", 1),
+                ("updated_at", -1)
+            ])
+
+            # Index for message existence check
+            self.chats_collection.create_index([
+                ("admin_id", 1),
+                ("subject", 1),
+                ("messages.1", 1),
+                ("updated_at", -1)
+            ])
+
+            # Basic indexes
+            self.chats_collection.create_index("chat_id")
+            self.chats_collection.create_index("room_id")
+            self.chats_collection.create_index("user_id")
+
         except Exception as e:
             logger.warning(f"Index creation failed: {e}")
 
@@ -373,3 +392,97 @@ class ChatService:
         """Clear LRU caches."""
         self.get_chat_by_id.cache_clear()
         self.get_chat_by_room_id.cache_clear()
+
+    def get_filtered_chats_paginated(
+        self,
+        admin_id: Optional[str] = None,
+        filter_type: str = 'all',
+        limit: int = 20,
+        skip: int = 0
+    ) -> List[Chat]:
+        """Get filtered chats with pagination support."""
+
+        # Base filter query
+        base_filter = {
+            "admin_id": admin_id,
+            "subject": {"$nin": ["Job"]},
+            "messages.1": {"$exists": True}
+        } if admin_id else {}
+
+        # Apply specific filters
+        if filter_type == "active":
+            base_filter["admin_required"] = True
+        elif filter_type == "exported":
+            base_filter["exported"] = True
+
+        # Optimized projection - only get necessary fields for list view
+        projection = {
+            "_id": 0,
+            "room_id": 1,
+            "user_id": 1,
+            "subject": 1,
+            "updated_at": 1,
+            "viewed": 1,
+            "admin_required": 1,
+            "exported": 1,
+            "messages": {"$slice": -1}  # Only get the last message
+        }
+
+        # try:
+        cursor = self.chats_collection.find(
+            base_filter,
+            projection
+        ).sort("updated_at", -1).skip(skip).limit(limit)
+
+        return [Chat.from_dict(chat_data) for chat_data in cursor]
+        # except Exception as e:
+        #     logger.error(f"Error getting filtered chats: {e}")
+        #     return []
+
+    def get_chat_counts_by_filter(self, admin_id: Optional[str] = None) -> Dict[str, int]:
+        """Get chat counts for all filter types using aggregation."""
+
+        base_match = {
+            "admin_id": admin_id,
+            "subject": {"$nin": ["Job"]},
+            "messages.1": {"$exists": True}
+        } if admin_id else {}
+
+        pipeline = [
+            {"$match": base_match},
+            {
+                "$group": {
+                    "_id": None,
+                    "total": {"$sum": 1},
+                    "active": {
+                        "$sum": {"$cond": [{"$eq": ["$admin_required", True]}, 1, 0]}
+                    },
+                    "exported": {
+                        "$sum": {"$cond": [{"$eq": ["$exported", True]}, 1, 0]}
+                    }
+                }
+            }
+        ]
+
+        try:
+            result = list(self.chats_collection.aggregate(pipeline))
+            if result:
+                return {
+                    "all": result[0]["total"],
+                    "active": result[0]["active"],
+                    "exported": result[0]["exported"]
+                }
+            return {"all": 0, "active": 0, "exported": 0}
+        except Exception as e:
+            logger.error(f"Error getting chat counts: {e}")
+            return {"all": 0, "active": 0, "exported": 0}
+
+    def get_chat_counts_for_header(self, admin_id: Optional[str] = None) -> Dict[str, int]:
+        """Get chat counts for header display with caching."""
+
+        # Use a simple cache key based on admin_id
+        cache_key = f"chat_counts_{admin_id}"
+
+        # You can implement simple in-memory caching here if needed
+        # For now, we'll call the database each time but it's optimized
+        return self.get_chat_counts_by_filter(admin_id)

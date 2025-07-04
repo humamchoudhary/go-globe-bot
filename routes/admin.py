@@ -468,52 +468,102 @@ def onboard():
 @admin_bp.route("/chat/<room_id>", methods=["GET"])
 @admin_required
 def chat(room_id):
-
     chat_service = ChatService(current_app.db)
-
     user_service = UserService(current_app.db)
+    
     chat = chat_service.get_chat_by_room_id(room_id)
     if not chat:
         return redirect(url_for("admin.get_all_chats"))
-    chats = chat_service.get_all_chats(session.get("admin_id"))
-
-    # chats_data = [c for c in chats]
+    
+    # Get initial chats with pagination
+    chats = chat_service.get_chats_with_limited_messages(
+        admin_id=session.get("admin_id"),
+        limit=20,
+        skip=0
+    )
+    
+    # Prepare chat data with usernames
     chats_data = []
     for c in chats:
         data = c.to_dict()
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
+    
     user = user_service.get_user_by_id(chat.user_id)
     if not chat:
         return redirect(url_for("admin.index"))
+    
     chat_service.set_chat_viewed(chat.room_id)
+    chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
+    
     if request.headers.get("HX-Request"):
         return render_template(
-            "components/chat-area.html", chat=chat, user=user, username="Ana"
+            "components/chat-area.html", 
+            chat=chat, 
+            user=user, 
+            username="Ana",
+            chat_counts=chat_counts
         )
 
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     return render_template(
-        "admin/chats.html", chat=chat, chats=chats_data, user=user, username="Ana"
+        "admin/chats.html", 
+        chat=chat, 
+        chats=chats_data, 
+        user=user, 
+        username="Ana",
+            chat_counts=chat_counts
     )
 
 
 @admin_bp.route('/chats_list/')
 @admin_required
 def get_chat_list():
-    room_id = request.referrer.split("/")[-1]
+    page = request.args.get('page', 0, type=int)
+    limit = request.args.get('limit', 20, type=int)
+    filter_type = request.args.get('filter', 'all')
+    
+    room_id = None
+    if request.referrer:
+        room_id = request.referrer.split("/")[-1]
+    
     chat_service = ChatService(current_app.db)
-    chats = chat_service.get_chats_with_limited_messages(session.get("admin_id"))
-
     user_service = UserService(current_app.db)
+    
+    # Get chats based on filter with pagination
+    chats = chat_service.get_filtered_chats_paginated(
+        admin_id=session.get("admin_id"),
+        filter_type=filter_type,
+        limit=limit,
+        skip=page * limit
+    )
+    
+    # Prepare chat data with usernames
     chats_data = []
     for c in chats:
         data = c.to_dict()
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
+    
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    cchat = chat_service.get_chat_by_room_id(room_id)
-    return render_template("components/chat-list.html", chats=chats_data, cur_chat=cchat)
+    cchat = chat_service.get_chat_by_room_id(room_id) if room_id else None
+    
+    # Check if this is a pagination request
+    is_pagination = request.args.get('pagination') == 'true'
+    if is_pagination:
+        # Return only the chat items for infinite scroll
+        return render_template(
+            "components/chat-items-only.html", 
+            chats=chats_data, 
+            cur_chat=cchat,
+        )
+    return render_template(
+        "components/chat-list.html", 
+        chats=chats_data, 
+        cur_chat=cchat,
+        has_more=len(chats_data) == limit,
+        next_page=page + 1,
+    )
 
 
 @admin_bp.route("/search/", methods=["POST"])
@@ -584,49 +634,44 @@ def get_user_details(user_id):
 @admin_bp.route("/chats/<string:filter>", methods=["GET"])
 @admin_required
 def filter_chats(filter):
-
+    page = request.args.get('page', 0, type=int)
+    limit = request.args.get('limit', 20, type=int)
+    
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
 
-    chats = chat_service.get_all_chats(session.get("admin_id"))
-
-    if filter == "all":
+    # Get filtered chats with pagination
+    chats = chat_service.get_filtered_chats_paginated(
+        admin_id=session.get("admin_id"),
+        filter_type=filter,
+        limit=limit,
+        skip=page * limit
+    )
+    
+    # Prepare chat data with usernames
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data["username"] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    
+    # Check if this is a pagination request
+    is_pagination = request.args.get('pagination') == 'true'
+    
+    if is_pagination:
+        # Return only the chat items for infinite scroll
         return render_template(
-            "components/chat-list.html",
-            chats=[
-                {
-                    **chat.to_dict(),
-                    "username": user_service.get_user_by_id(chat.user_id).name,
-                }
-                for chat in chats
-            ],
+            "components/chat-items-only.html", 
+            chats=chats_data
         )
-    elif filter == "active":
-        return render_template(
-            "components/chat-list.html",
-            chats=[
-                {
-                    **chat.to_dict(),
-                    "username": user_service.get_user_by_id(chat.user_id).name,
-                }
-                for chat in chats
-                if chat.admin_required
-            ],
-        )
-    elif filter == "exported":
-
-        return render_template(
-            "components/chat-list.html",
-            chats=[
-                {
-                    **chat.to_dict(),
-                    "username": user_service.get_user_by_id(chat.user_id).name,
-                }
-                for chat in chats
-                if chat.exported
-            ],
-        )
-
+    
+    return render_template(
+        "components/chat-list.html",
+        chats=chats_data,
+        has_more=len(chats_data) == limit,
+        next_page=page + 1,
+        current_filter=filter
+    )
 import json
 def get_country_id(file_path, target_country):
     with open(file_path, 'r') as f:
@@ -1865,23 +1910,50 @@ def api_usage():
     )
 
 
+@admin_bp.route('/chat-counts', methods=['GET'])
+@admin_required
+def get_chat_counts():
+    """API endpoint to get chat counts for dynamic updating."""
+    chat_service = ChatService(current_app.db)
+    counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
+    return jsonify(counts)
+
+# Also update your main chat route to include counts
 @admin_bp.route("/chats/", methods=["GET"])
-# @admin_bp.route('/chats/<string:status>', methods=['GET'])
 @admin_required
 def get_all_chats():
+    """Main chats page with initial data."""
     chat_service = ChatService(current_app.db)
-    chats_objs = chat_service.get_all_chats(session.get("admin_id"))
     user_service = UserService(current_app.db)
-    chats = []
-    for c in chats_objs:
-        chat = c.to_dict()
-        chat["username"] = user_service.get_user_by_id(c.user_id).name
-        chats.append(chat)
-
-    # print(chats)
-
-    chats.sort(key=lambda x: x["updated_at"], reverse=True)
-    return render_template("admin/chats.html", chats=chats)
+    
+    # Get initial chats
+    chats = chat_service.get_chats_with_limited_messages(
+        admin_id=session.get("admin_id"),
+        limit=20,
+        skip=0
+    )
+    
+    # Get chat counts for header
+    chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
+    
+    # Prepare chat data with usernames
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data["username"] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    
+    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    print(chat_counts)
+    
+    return render_template(
+        "admin/chats.html",
+        chats=chats_data,
+        chat_counts=chat_counts,
+        has_more=len(chats_data) == 20,
+        next_page=1,
+        current_filter='all'
+    )
 
 
 @admin_bp.route("/chat/<string:room_id>/delete", methods=["POST"])
