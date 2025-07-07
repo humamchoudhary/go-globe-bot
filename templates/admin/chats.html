@@ -274,8 +274,17 @@ function handleDeleteResponse(event, roomId) {
         chatItem.remove();
     }
 
+
     // Update chat counts
     updateChatCounts();
+
+ if (window.location.pathname.includes(`/chat/${roomId}`)) {
+     const chatArea = document.getElementById(`chatarea-${roomId}`)
+     if (chatArea){
+chatArea.remove()
+     }
+        }
+
 if (status === 203) {
         const url = event.detail.xhr.responseText.trim();
         console.log(url)
