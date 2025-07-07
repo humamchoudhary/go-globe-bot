@@ -1971,16 +1971,16 @@ def get_all_chats():
 @admin_bp.route("/chat/<string:room_id>/delete", methods=["POST"])
 def delete_chat(room_id):
     chat_service = ChatService(current_app.db)
-    chats_all = chat_service.get_all_chats(session.get('admin_id'))
-    chats_all.sort(key=lambda x: x.updated_at, reverse=True)
-    current_index = next((i for i, chat in enumerate(chats_all) if chat.room_id == room_id), None)
-    next_chat = chats_all[current_index + 1] if current_index is not None and current_index + 1 < len(chats_all) else None
-
-    print(chat_service.get_chat_by_room_id(room_id).to_dict())
+    # chats_all = chat_service.get_all_chats(session.get('admin_id'),limit=100)
+    # chats_all.sort(key=lambda x: x.updated_at, reverse=True)
+    # current_index = next((i for i, chat in enumerate(chats_all) if chat.room_id == room_id), None)
+    # next_chat = chats_all[current_index + 1] if current_index is not None and current_index + 1 < len(chats_all) else None
+    #
+    # # print(chat_service.get_chat_by_room_id(room_id).to_dict())
     print(f"Deleted: {chat_service.delete([room_id])}")
 
-    if next_chat and "/admin/chats" not in request.headers.get('Hx-Current-Url'):
-        return f"/admin/chat/{next_chat.room_id}" ,203
+    # if next_chat and "/admin/chats" not in request.headers.get('Hx-Current-Url'):
+    #     return f"/admin/chat/{next_chat.room_id}" ,203
     return "", 200
 
 
