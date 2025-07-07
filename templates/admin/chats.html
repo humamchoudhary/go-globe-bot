@@ -269,28 +269,22 @@ function handleDeleteResponse(event, roomId) {
     const status = event.detail.xhr.status;
     console.log(status)
 
-    if (status === 200) {
-        // Remove the chat item
-        const chatItem = document.getElementById(`chat-${roomId}`);
-        if (chatItem) {
-            chatItem.remove();
-        }
+    const chatItem = document.getElementById(`chat-${roomId}`);
+    if (chatItem) {
+        chatItem.remove();
+    }
 
-        // Update chat counts
-        updateChatCounts();
-
-        // If the deleted chat was the active one, redirect to chats page
-
-    } else if (status === 203) {
+    // Update chat counts
+    updateChatCounts();
+if (status === 203) {
         const url = event.detail.xhr.responseText.trim();
         console.log(url)
 
-        htmx.ajax('GET', url, {
+history.pushState({}, '', url);
+    htmx.ajax('GET', url, {
             target: '#chatarea',
             swap: 'innerHTML',
         });
-    }else{
-window.location.reload()
     }
 }
 
