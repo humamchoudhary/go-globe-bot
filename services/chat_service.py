@@ -327,9 +327,7 @@ class ChatService:
     def get_all_chats(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0) -> List[Chat]:
         """Get all chats with optimized query and projection."""
         filter_query = {"admin_id": admin_id, "subject": {
-            "$nin": ["Job"]}, 
-                        # "messages.1": {'$exists': True}
-                        } if admin_id else {}
+            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {}
 
         # For better performance, you can optionally limit messages
         # But let's keep it simple and load all for now
@@ -408,7 +406,7 @@ class ChatService:
         base_filter = {
             "admin_id": admin_id,
             "subject": {"$nin": ["Job"]},
-            # "messages.1": {"$exists": True}
+            "messages.1": {"$exists": True}
         } if admin_id else {}
 
         # Apply specific filters
