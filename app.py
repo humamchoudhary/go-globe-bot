@@ -421,6 +421,116 @@ def create_app(config_class=Config):
                              str(e)}\n{traceback.format_exc()}")
         return error
 
+    SKIP_PATHS = {
+        '/static', '/favicon.ico', '/robots.txt', '/sitemap.xml'
+    }
+
+# Skip these extensions
+    SKIP_EXTENSIONS = {
+        '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', 
+        '.woff', '.woff2', '.ttf', '.eot', '.map'
+    }
+
+    def should_skip_logging(path):
+        """Check if request should be skipped from logging"""
+        # Skip static files and common assets
+        for skip_path in SKIP_PATHS:
+            if path.startswith(skip_path):
+                return True
+        
+        # Skip by extension
+        for ext in SKIP_EXTENSIONS:
+            if path.endswith(ext):
+                return True
+        
+        # Skip socket.io and websocket requests
+        if '/socket.io/' in path or path.startswith('/ws'):
+            return True
+        
+        return False
+
+    @app.before_request
+    def before_request():
+        """Store request start time"""
+        g.start_time = time.time()
+
+    @app.after_request
+    def after_request(response):
+        """Log request details after processing"""
+        if should_skip_logging(request.path):
+            return response
+        
+        # Calculate response time
+        response_time = round((time.time() - g.start_time) * 1000, 2)
+        
+        # Get timestamp
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Get client IP (handle proxy headers)
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        if client_ip and ',' in client_ip:
+            client_ip = client_ip.split(',')[0].strip()
+        
+        # Format the log message
+        status_code = response.status_code
+        method = request.method
+        path = request.path
+        user_agent = request.headers.get('User-Agent', 'Unknown')[:100]  # Truncate long user agents
+        
+        # Color coding for status codes
+        if status_code < 300:
+            status_color = f"\033[92m{status_code}\033[0m"  # Green
+        elif status_code < 400:
+            status_color = f"\033[93m{status_code}\033[0m"  # Yellow
+        else:
+            status_color = f"\033[91m{status_code}\033[0m"  # Red
+        
+        # Basic log format
+        log_msg = f"[{timestamp}] {client_ip} | {method:6} | {status_color} | {response_time:6.2f}ms | {path}"
+        
+        # Add query parameters if present
+        if request.query_string:
+            log_msg += f"?{request.query_string.decode('utf-8')}"
+        
+        print(log_msg)
+        
+        # Print user agent for non-GET requests or errors
+        if method != 'GET' or status_code >= 400:
+            print(f"    └─ User-Agent: {user_agent}")
+        
+        return response
+
+    @app.errorhandler(404)
+    def not_found(error):
+        """Handle 404 errors"""
+        return {'error': 'Not found'}, 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle 500 errors"""
+        # Log the actual error for debugging
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(f"[{timestamp}] \033[91mERROR 500\033[0m: {str(error)}")
+        return {'error': 'Internal server error'}, 500
+
+    @app.errorhandler(Exception)
+    def handle_exception(error):
+        """Handle all other exceptions"""
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        if client_ip and ',' in client_ip:
+            client_ip = client_ip.split(',')[0].strip()
+        
+        print(f"[{timestamp}] \033[91mEXCEPTION\033[0m: {client_ip} | {request.method} | {request.path}")
+        print(f"    └─ Error: {str(error)}")
+        print(f"    └─ Type: {type(error).__name__}")
+        
+        return {'error': 'Something went wrong'}, 500
+
+
+
+
+
 
 # Add request start time tracking
 
