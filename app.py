@@ -26,6 +26,9 @@ from services.admin_service import AdminService
 from urllib.parse import urlparse
 from flask_mail import Mail, Message
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)  # or logging.CRITICAL to silence everything
 
 def get_font_data():
     # Path to your font directory

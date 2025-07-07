@@ -495,7 +495,6 @@ def chat(room_id):
     
     chat_service.set_chat_viewed(chat.room_id)
     chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
-    
     if request.headers.get("HX-Request"):
         return render_template(
             "components/chat-area.html", 
@@ -709,7 +708,7 @@ def export_chat(room_id):
             # "address": f"{user.city},{user.country}",
             "city":str(user.city),
             "state":str(user.city),
-            "country":int(get_country_id('tblcountries.json',user.country or "Pakistan")),
+            "country":int(get_country_id('tblcountries.json',user.country)),
             "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
         }
 
@@ -726,13 +725,18 @@ def export_chat(room_id):
             print(r.json())
 
             return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
-        # return "success", 200
-        chat = chat.to_dict()
-        chat['username'] = user.name
-        return render_template('components/chat-item.html',chat=chat)
+        return "success", 200
 
     return "Chat not found", 404
 
+@admin_bp.route('/chat-counts')
+@admin_required
+def chat_couts():
+    chat_service = ChatService(current_app.db)
+  
+    return jsonify(
+        
+            chat_service.get_chat_counts_by_filter(session.get('admin_id'))             )
 
 @admin_bp.route("/chat/<room_id>/send_message", methods=["POST"])
 @admin_required
@@ -1971,7 +1975,9 @@ def delete_chat(room_id):
     chats_all.sort(key=lambda x: x.updated_at, reverse=True)
     current_index = next((i for i, chat in enumerate(chats_all) if chat.room_id == room_id), None)
     next_chat = chats_all[current_index + 1] if current_index is not None and current_index + 1 < len(chats_all) else None
-    chat_service.delete([room_id])
+
+    print(chat_service.get_chat_by_room_id(room_id).to_dict())
+    print(f"Deleted: {chat_service.delete([room_id])}")
 
     if next_chat and "/admin/chats" not in request.headers.get('Hx-Current-Url'):
         return f"/admin/chat/{next_chat.room_id}" ,203
@@ -1985,7 +1991,7 @@ def delete_chats():
     if not data.get("chat_ids"):
         return "", 200
     chats = data["chat_ids"]
-    # # print(chats)
+    print(chats)
     try:
         chat_service = ChatService(current_app.db)
         chats_all = chat_service.get_all_chats(session.get('admin_id'))
@@ -2385,7 +2391,6 @@ def register_admin_socketio_events(socketio):
         if not room:
             return
         [join_room(chat.room_id) for chat in chats]
-        print('ADMIN JOINED CHATS')
         join_room(room)
         join_room("admin")  # Join the admin room for broadcasts
         # # print('admin joined')
