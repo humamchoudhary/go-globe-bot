@@ -169,51 +169,122 @@ function updateChatCounts() {
 }
 
 document.body.addEventListener('htmx:afterSwap', (event) => {
-    const textarea = document.getElementById("message");
-    if (textarea) textarea.value = "";
-    
-    if (!event.detail.isOOBSwap && window.lucide) {
-        lucide.createIcons();
+    try {
+        // Clear message textarea if it exists
+        const textarea = document.getElementById("message");
+        if (textarea) textarea.value = "";
+        
+        // Reinitialize Lucide icons
+        if (!event.detail.isOOBSwap && window.lucide) {
+            lucide.createIcons();
+        }
+        
+        console.log('HTMX afterSwap event:', event);
+        
+        // Check if we have the necessary event details
+        if (!event.detail || !event.detail.pathInfo) {
+            console.warn('Missing pathInfo in HTMX event details');
+            return;
+        }
+        
+        const url = event.detail.pathInfo.requestPath;
+        console.log('Request path:', url);
+        
+        // Handle admin chat URL patterns
+        if (url && url.startsWith("/admin/chat/")) {
+            const urlParts = url.split("/");
+            console.log('URL parts:', urlParts);
+            
+            // More robust room ID extraction
+            let roomId = null;
+            
+            // Handle different URL patterns:
+            // /admin/chat/room-123
+            // /admin/chat/room-123/export
+            if (urlParts.length >= 4) {
+                roomId = urlParts[3]; // Get the room ID part
+                
+                // If it's an export request, the room ID might be before 'export'
+                if (urlParts[4] === 'export') {
+                    roomId = urlParts[3];
+                }
+            }
+            
+            console.log('Extracted room ID:', roomId);
+            
+            if (roomId && roomId !== 'export') {
+                // Initialize socket connection
+                if (typeof io !== 'undefined') {
+                    const socket = io();
+                    
+                    socket.on("connect", function () {
+                        console.log('Socket connected for room:', roomId);
+                        socket.emit("admin_join", { room: roomId });
+                    });
+                    
+                    socket.on("new_message", function (data) {
+                        console.log('New message received:', data);
+                        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
+                        if (typeof updateChatCounts === 'function') {
+                            updateChatCounts();
+                        }
+                    });
+                    
+                    socket.on("admin_required", function (data) {
+                        console.log('Admin required event:', data);
+                        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
+                        if (typeof updateChatCounts === 'function') {
+                            updateChatCounts();
+                        }
+                    });
+                    
+                    socket.on("error", function (error) {
+                        console.error('Socket error:', error);
+                    });
+                } else {
+                    console.warn('Socket.IO not available');
+                }
+            }
+        }
+        
+        // Auto-scroll message area
+        const messageArea = document.getElementById('messageArea');
+        if (messageArea) {
+            messageArea.scrollTo({
+                top: messageArea.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Process markdown content
+        if (typeof marked !== 'undefined') {
+            document.querySelectorAll('.md-content').forEach(el => {
+                try {
+                    if (el.dataset.content) {
+                        const content = marked.parse(el.dataset.content);
+                        el.innerHTML = content;
+                        
+                        // Fix links if function exists
+                        if (typeof fixAllLinks === 'function') {
+                            fixAllLinks(el);
+                        }
+                    }
+                } catch (markdownError) {
+                    console.error('Error processing markdown:', markdownError);
+                }
+            });
+        } else {
+            console.warn('Marked library not available');
+        }
+        
+    } catch (error) {
+        console.error('Error in htmx:afterSwap handler:', error);
+        console.error('Event details:', event.detail);
     }
-    
-    const url = event.detail.pathInfo.requestPath;
-    if (url.startsWith("/admin/chat/")) {
-        const roomId = url.split("/").splice(-1)[0];
-        const socket = io();
-
-        socket.on("connect", function () {
-            console.log('connect');
-            socket.emit("admin_join", { room: roomId });
-        });
-
-        socket.on("new_message", function (data) {
-            htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
-            updateChatCounts();
-        });
-
-        socket.on("admin_required", function (data) {
-            htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
-            updateChatCounts();
-        });
-    }
-
-    const messageArea = document.getElementById('messageArea');
-    if (messageArea) {
-        messageArea.scrollTo({
-            top: messageArea.scrollHeight,
-            behavior: 'smooth'
-        });
-    }
-
-    document.querySelectorAll('.md-content').forEach(el => {
-        const content = marked.parse(marked.parse(el.dataset.content));
-        el.innerHTML = content;
-        fixAllLinks(el);
-    });
 });
 
 document.body.addEventListener("htmx:afterSwap", function (evt) {
-    if (evt.detail.target.id === "chatArea") {
+    if (evt.detail.target && evt.detail.target.id === "chatArea") {
         document.querySelectorAll(".chat-row").forEach(el => {
             el.classList.remove("bg-[var(--sec-bg-color)]");
         });
@@ -226,33 +297,6 @@ document.body.addEventListener("htmx:afterSwap", function (evt) {
     }
 });
 
-async function exportChat(roomId) {
-    try {
-        console.log('Starting export for room:', roomId);
-        
-        const response = await fetch(`/admin/chat/${roomId}/export`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        
-        console.log('Export response status:', response.status);
-        
-        if (response.ok) {
-            console.log('Export successful, reloading page...');
-            window.location.reload();
-        } else {
-            console.error('Export failed with status:', response.status);
-            const errorText = await response.text();
-            console.error('Error response:', errorText);
-            alert(`Export failed.\n${errorText}`);
-        }
-    } catch (error) {
-        console.error('Export error:', error);
-        alert(`Export failed.\n${error.message}`);
-    }
-}
 </script>
 
 {% endblock %}

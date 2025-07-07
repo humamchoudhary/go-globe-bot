@@ -709,7 +709,7 @@ def export_chat(room_id):
             # "address": f"{user.city},{user.country}",
             "city":str(user.city),
             "state":str(user.city),
-            "country":int(get_country_id('tblcountries.json',user.country)),
+            "country":int(get_country_id('tblcountries.json',user.country or "Pakistan")),
             "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
         }
 
@@ -726,7 +726,10 @@ def export_chat(room_id):
             print(r.json())
 
             return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
-        return "success", 200
+        # return "success", 200
+        chat = chat.to_dict()
+        chat['username'] = user.name
+        return render_template('components/chat-item.html',chat=chat)
 
     return "Chat not found", 404
 

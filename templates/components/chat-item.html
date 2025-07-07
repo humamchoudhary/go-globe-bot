@@ -49,14 +49,20 @@
             {{ chat.updated_at.strftime("%I:%M %p - %d %B %Y") }}
         </span>
         <div class="flex flex-row gap-4">
-            {% if not chat.exported %}
-                <div onclick="event.stopPropagation();  exportChat('{{ chat.room_id }}')"
-                     class="flex flex-row gap-4 hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
-                    <i data-lucide="square-arrow-out-up-right"
-                       class="text-[var(--main-color)] size-[18px]"></i>
-                    <p class="text-sm font-bold text-[var(--main-color)]">Export Chat</p>
-                </div>
-            {% endif %}
+{% if not chat.exported %}
+    <div hx-post="/admin/chat/{{ chat.room_id }}/export"
+         hx-target="#chat-{{ chat.room_id }}"
+         hx-swap="outerHTML"
+         hx-trigger="click"
+         hx-on::click="event.stopPropagation()"
+         hx-on::before-request="console.log('Starting export for room:', '{{ chat.room_id }}')"
+         hx-on::after-request="console.log('Export completed for room:', '{{ chat.room_id }}')"
+         class="flex flex-row gap-4 hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
+        <i data-lucide="square-arrow-out-up-right"
+           class="text-[var(--main-color)] size-[18px]"></i>
+        <p class="text-sm font-bold text-[var(--main-color)]">Export Chat</p>
+    </div>
+      {% endif %}
             <div hx-post="/admin/chat/{{ chat.room_id }}/delete"
                  hx-trigger="click"
                  hx-swap="none"
