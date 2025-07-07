@@ -8,113 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
 logger = logging.getLogger(__name__)
-# class ChatService:
-#     def __init__(self, db):
-#         self.db = db
-#         self.chats_collection = db.chats
-#
-#     def create_chat(self, user_id, subject, admin_id):
-#         chat_id = str(uuid.uuid4())
-#         # if not room_id:
-#         #     room_id = f"{user_id}-{chat_id[:8]}"
-#
-#         # Add default bot message
-#         initial_messages = [Message("bot", "How may I help you")]
-#
-#         chat = Chat(
-#             chat_id=chat_id,
-#             # room_id=room_id,
-#             user_id=user_id,
-#             admin_id=admin_id,
-#             messages=initial_messages,
-#             subject=subject,
-#         )
-#
-#         self.chats_collection.insert_one(chat.to_dict())
-#         return chat
-#
-#     def count_chats(self,room_id=None):
-#         if room_id:
-#             return self.chats_collection.count_documents({"room_id":room_id})
-#         return self.chats_collection.count_documents({})
-#
-#
-#     def get_chat_by_id(self, chat_id):
-#         chat_data = self.chats_collection.find_one({"chat_id": chat_id})
-#         if chat_data:
-#             return Chat.from_dict(chat_data)
-#         return None
-#
-#     def delete(self, room_ids):
-#         self.chats_collection.delete_many({"room_id": {"$in": room_ids}})
-#         for id in room_ids:
-#             # print(id)
-#             os.remove(f"./bin/chat/{id}.chatpl")
-#
-#     def get_chat_by_room_id(self, room_id):
-#         chat_data = self.chats_collection.find_one({"room_id": room_id})
-#         if chat_data:
-#             return Chat.from_dict(chat_data)
-#         return None
-#
-#     def export_chat(self, room_id, lead_id):
-#         chat = self.get_chat_by_room_id(room_id)
-#         if not chat:
-#             return False
-#         self.chats_collection.update_one(
-#             {"room_id": room_id}, {"$set": {"exported": True, "lead_id": lead_id}}
-#         )
-#         return True
-#
-#     def add_message(self, room_id, sender, content):
-#         chat = self.get_chat_by_room_id(room_id)
-#         if not chat:
-#             return None
-#
-#         message = Message(sender, content)
-#
-#         self.chats_collection.update_one(
-#             {"room_id": room_id},
-#             {
-#                 "$push": {"messages": message.to_dict()},
-#                 "$set": {"updated_at": message.timestamp, 'viewed': False},
-#             },
-#         )
-#
-#         return message
-#
-#     def set_admin_required(self, room_id, required=True):
-#         self.chats_collection.update_one(
-#             {"room_id": room_id}, {
-#                 "$set": {"admin_required": required, "viewed": False}}
-#         )
-#
-#     def set_chat_viewed(self, room_id):
-#         self.chats_collection.update_one(
-#             {"room_id": room_id}, {
-#                 "$set": {"viewed": True}}
-#         )
-#
-#     def set_admin_present(self, room_id, present=True):
-#         self.chats_collection.update_one(
-#             {"room_id": room_id}, {"$set": {"admin_present": present}}
-#         )
-#
-#     def close_chat(self, room_id):
-#         self.chats_collection.update_one(
-#             {"room_id": room_id}, {"$set": {"open": False}}
-#         )
-#
-#     def get_all_chats(self, admin_id=None, limit=100, skip=0):
-#         chats_data = list(
-#             self.chats_collection.find({"admin_id": admin_id})
-#             .sort("updated_at", -1)
-#             .skip(skip)
-#             .limit(limit)
-#         )
-#         return [Chat.from_dict(chat_data) for chat_data in chats_data]
-
-
 class ChatService:
     def __init__(self, db):
         self.db = db
@@ -246,13 +139,22 @@ class ChatService:
 
     def get_chats_with_full_messages(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0) -> List[Chat]:
         """Get chats with all messages - use only when needed."""
-        filter_query = {"admin_id": admin_id} if admin_id else {}
+        match_stage = {"$match": {"admin_id": admin_id}} if admin_id else {"$match": {}}
 
-        cursor = self.chats_collection.find(
-            filter_query,
-            {"_id": 0}
-        ).sort("updated_at", -1).skip(skip).limit(limit)
+        pipeline = [
+            match_stage,
+            {
+                "$addFields": {
+                    "sort_date": {"$ifNull": ["$updated_at", "$created_at"]}
+                }
+            },
+            {"$sort": {"sort_date": -1}},
+            {"$skip": skip},
+            {"$limit": limit},
+            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+        ]
 
+        cursor = self.chats_collection.aggregate(pipeline)
         return [Chat.from_dict(chat_data) for chat_data in cursor]
 
     def add_message(self, room_id: str, sender: str, content: str) -> Optional[Message]:
@@ -326,36 +228,69 @@ class ChatService:
 
     def get_all_chats(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0) -> List[Chat]:
         """Get all chats with optimized query and projection."""
-        filter_query = {"admin_id": admin_id, "subject": {
-            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {"subject": {
-            "$nin": ["Job"]}, "messages.1": {'$exists': True}}
+        match_stage = {
+            "$match": {
+                "admin_id": admin_id,
+                "subject": {"$nin": ["Job"]},
+                "messages.1": {"$exists": True}
+            }
+        } if admin_id else {
+            "$match": {
+                "subject": {"$nin": ["Job"]},
+                "messages.1": {"$exists": True}
+            }
+        }
 
-        # Ensure sorting by updated_at desc before applying limit
-        cursor = self.chats_collection.find(
-            filter_query,
-            {"_id": 0}  # Exclude MongoDB's _id field
-        ).sort("updated_at", -1).skip(skip).limit(limit)
+        pipeline = [
+            match_stage,
+            {
+                "$addFields": {
+                    "sort_date": {"$ifNull": ["$updated_at", "$created_at"]}
+                }
+            },
+            {"$sort": {"sort_date": -1}},
+            {"$skip": skip},
+            {"$limit": limit},
+            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+        ]
 
+        cursor = self.chats_collection.aggregate(pipeline)
         return [Chat.from_dict(chat_data) for chat_data in cursor]
 
     def get_chats_with_limited_messages(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0, message_limit: int = 1) -> List[Chat]:
         """Get chats with limited number of messages per chat for list views."""
-        filter_query = {"admin_id": admin_id, "subject": {
-            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {"subject": {
-            "$nin": ["Job"]}, "messages.1": {'$exists': True}}
-
-        # Use projection to limit messages (e.g., only last message for list view)
-        projection = {
-            "_id": 0,
-            "messages": {"$slice": -message_limit}  # Get last N messages
+        match_stage = {
+            "$match": {
+                "admin_id": admin_id,
+                "subject": {"$nin": ["Job"]},
+                "messages.1": {"$exists": True}
+            }
+        } if admin_id else {
+            "$match": {
+                "subject": {"$nin": ["Job"]},
+                "messages.1": {"$exists": True}
+            }
         }
 
-        # Ensure sorting by updated_at desc before applying limit
-        cursor = self.chats_collection.find(
-            filter_query,
-            projection
-        ).sort("updated_at", -1).skip(skip).limit(limit)
+        pipeline = [
+            match_stage,
+            {
+                "$addFields": {
+                    "sort_date": {"$ifNull": ["$updated_at", "$created_at"]}
+                }
+            },
+            {"$sort": {"sort_date": -1}},
+            {"$skip": skip},
+            {"$limit": limit},
+            {
+                "$addFields": {
+                    "messages": {"$slice": ["$messages", -message_limit]}  # Get last N messages
+                }
+            },
+            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+        ]
 
+        cursor = self.chats_collection.aggregate(pipeline)
         return [Chat.from_dict(chat_data) for chat_data in cursor]
 
     def get_chat_stats(self, admin_id: Optional[str] = None) -> Dict[str, Any]:
@@ -420,11 +355,25 @@ class ChatService:
         elif filter_type == "exported":
             base_filter["exported"] = True
 
-        # Ensure sorting by updated_at desc before applying limit
-        cursor = self.chats_collection.find(
-            base_filter,
-            {"messages": {"$slice": -1}, '_id': 0}  # Only get the last message
-        ).sort("updated_at", -1).skip(skip).limit(limit)
+        pipeline = [
+            {"$match": base_filter},
+            {
+                "$addFields": {
+                    "sort_date": {"$ifNull": ["$updated_at", "$created_at"]}
+                }
+            },
+            {"$sort": {"sort_date": -1}},
+            {"$skip": skip},
+            {"$limit": limit},
+            {
+                "$addFields": {
+                    "messages": {"$slice": ["$messages", -1]}  # Only get the last message
+                }
+            },
+            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+        ]
+
+        cursor = self.chats_collection.aggregate(pipeline)
         return [Chat.from_dict(chat_data) for chat_data in cursor]
 
     def get_chat_counts_by_filter(self, admin_id: Optional[str] = None) -> Dict[str, int]:
@@ -468,3 +417,12 @@ class ChatService:
             logger.error(f"Error getting chat counts: {e}")
             return {"all": 0, "active": 0, "exported": 0}
 
+    def get_chat_counts_for_header(self, admin_id: Optional[str] = None) -> Dict[str, int]:
+        """Get chat counts for header display with caching."""
+
+        # Use a simple cache key based on admin_id
+        cache_key = f"chat_counts_{admin_id}"
+
+        # You can implement simple in-memory caching here if needed
+        # For now, we'll call the database each time but it's optimized
+        return self.get_chat_counts_by_filter(admin_id)
