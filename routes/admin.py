@@ -44,7 +44,10 @@ from services.logs_service import LogsService
 from models.log import LogLevel, LogTag
 from services.admin_service import AdminService
 from services.email_service import send_email
-
+from datetime import datetime, timedelta
+from collections import Counter, defaultdict
+import calendar
+from functools import lru_cache
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "files")
 
@@ -115,7 +118,7 @@ def view_logs():
     # Regular admins only see their own logs
     admin_filter = session.get(
         "admin_id") if admin.role != "superadmin" else None
-    logs = logs_service.get_recent_logs(admin_filter, 10000)
+    logs = logs_service.get_recent_logs(admin_filter, 1000)
 
     return render_template("admin/logs.html", logs=logs, selected_log=None)
 
@@ -135,7 +138,7 @@ def filter_logs():
     admin_id = admin.admin_id
     message_search = request.args.get("message_search", "").strip()
     sort_order = request.args.get("sort", "timestamp_desc")
-    limit = request.args.get("limit", 10000)
+    limit = request.args.get("limit", 1000)
 
     # Parse dates
     start_date = end_date = None
@@ -465,52 +468,105 @@ def onboard():
 @admin_bp.route("/chat/<room_id>", methods=["GET"])
 @admin_required
 def chat(room_id):
-
     chat_service = ChatService(current_app.db)
-
     user_service = UserService(current_app.db)
+    
     chat = chat_service.get_chat_by_room_id(room_id)
     if not chat:
         return redirect(url_for("admin.get_all_chats"))
-    chats = chat_service.get_all_chats(session.get("admin_id"))
-
-    # chats_data = [c for c in chats]
+    
+    # Get initial chats with pagination
+    chats = chat_service.get_chats_with_limited_messages(
+        admin_id=session.get("admin_id"),
+        limit=20,
+        skip=0
+    )
+    
+    # Prepare chat data with usernames
     chats_data = []
     for c in chats:
         data = c.to_dict()
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
+    
     user = user_service.get_user_by_id(chat.user_id)
     if not chat:
         return redirect(url_for("admin.index"))
+    
     chat_service.set_chat_viewed(chat.room_id)
+    chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
+    
     if request.headers.get("HX-Request"):
         return render_template(
-            "components/chat-area.html", chat=chat, user=user, username="Ana"
+            "components/chat-area.html", 
+            chat=chat, 
+            user=user, 
+            username="Ana",
+            chat_counts=chat_counts,
+        # has_more=len(chats_data) == 20,
         )
 
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     return render_template(
-        "admin/chats.html", chat=chat, chats=chats_data, user=user, username="Ana"
+        "admin/chats.html", 
+        chat=chat, 
+        chats=chats_data, 
+        user=user, 
+        username="Ana",
+
+        has_more=len(chats_data) == 20,
+            chat_counts=chat_counts
     )
 
 
 @admin_bp.route('/chats_list/')
 @admin_required
 def get_chat_list():
-    room_id = request.referrer.split("/")[-1]
+    page = request.args.get('page', 0, type=int)
+    limit = request.args.get('limit', 20, type=int)
+    filter_type = request.args.get('filter', 'all')
+    
+    room_id = None
+    if request.referrer:
+        room_id = request.referrer.split("/")[-1]
+    
     chat_service = ChatService(current_app.db)
-    chats = chat_service.get_all_chats(session.get("admin_id"))
-
     user_service = UserService(current_app.db)
+    
+    # Get chats based on filter with pagination
+    chats = chat_service.get_filtered_chats_paginated(
+        admin_id=session.get("admin_id"),
+        filter_type=filter_type,
+        limit=limit,
+        skip=page * limit
+    )
+    
+    # Prepare chat data with usernames
     chats_data = []
     for c in chats:
         data = c.to_dict()
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
+    
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    cchat = chat_service.get_chat_by_room_id(room_id)
-    return render_template("components/chat-list.html", chats=chats_data, cur_chat=cchat)
+    cchat = chat_service.get_chat_by_room_id(room_id) if room_id else None
+    
+    # Check if this is a pagination request
+    is_pagination = request.args.get('pagination') == 'true'
+    if is_pagination:
+        # Return only the chat items for infinite scroll
+        return render_template(
+            "components/chat-items-only.html", 
+            chats=chats_data, 
+            cur_chat=cchat,
+        )
+    return render_template(
+        "components/chat-list.html", 
+        chats=chats_data, 
+        cur_chat=cchat,
+        has_more=len(chats_data) == limit,
+        next_page=page + 1,
+    )
 
 
 @admin_bp.route("/search/", methods=["POST"])
@@ -581,49 +637,44 @@ def get_user_details(user_id):
 @admin_bp.route("/chats/<string:filter>", methods=["GET"])
 @admin_required
 def filter_chats(filter):
-
+    page = request.args.get('page', 0, type=int)
+    limit = request.args.get('limit', 20, type=int)
+    
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
 
-    chats = chat_service.get_all_chats(session.get("admin_id"))
-
-    if filter == "all":
+    # Get filtered chats with pagination
+    chats = chat_service.get_filtered_chats_paginated(
+        admin_id=session.get("admin_id"),
+        filter_type=filter,
+        limit=limit,
+        skip=page * limit
+    )
+    
+    # Prepare chat data with usernames
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data["username"] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    
+    # Check if this is a pagination request
+    is_pagination = request.args.get('pagination') == 'true'
+    
+    if is_pagination:
+        # Return only the chat items for infinite scroll
         return render_template(
-            "components/chat-list.html",
-            chats=[
-                {
-                    **chat.to_dict(),
-                    "username": user_service.get_user_by_id(chat.user_id).name,
-                }
-                for chat in chats
-            ],
+            "components/chat-items-only.html", 
+            chats=chats_data
         )
-    elif filter == "active":
-        return render_template(
-            "components/chat-list.html",
-            chats=[
-                {
-                    **chat.to_dict(),
-                    "username": user_service.get_user_by_id(chat.user_id).name,
-                }
-                for chat in chats
-                if chat.admin_required
-            ],
-        )
-    elif filter == "exported":
-
-        return render_template(
-            "components/chat-list.html",
-            chats=[
-                {
-                    **chat.to_dict(),
-                    "username": user_service.get_user_by_id(chat.user_id).name,
-                }
-                for chat in chats
-                if chat.exported
-            ],
-        )
-
+    
+    return render_template(
+        "components/chat-list.html",
+        chats=chats_data,
+        has_more=len(chats_data) == limit,
+        next_page=page + 1,
+        current_filter=filter
+    )
 import json
 def get_country_id(file_path, target_country):
     with open(file_path, 'r') as f:
@@ -672,6 +723,7 @@ def export_chat(room_id):
             if not chat_service.export_chat(room_id, data.get("lead_id", None)):
                 return "Error in exporting: Chat not found", 404
         else:
+            print(r.json())
 
             return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
         return "success", 200
@@ -881,164 +933,282 @@ def logout():
 
 
 def generate_stats(chat_list):
+    """Optimized version of generate_stats with better performance."""
+    if not chat_list:
+        return get_empty_stats()
+    
     now = datetime.utcnow()
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    week_start = today_start - timedelta(days=today_start.weekday())
-    year_start = now.replace(month=1, day=1, hour=0,
-                             minute=0, second=0, microsecond=0)
-    month_start = now.replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
-    )  # <-- this-month start
-
-    # Containers
-    today_hourly = Counter()
-    today_admin_hourly = Counter()
-
-    week_daily = Counter()
-    week_admin_daily = Counter()
-
-    month_daily = Counter()  # <-- this-month counters
-    month_admin_daily = Counter()
-
-    year_monthly = Counter()
-    year_admin_monthly = Counter()
-
-    all_time_yearly = Counter()
-    all_time_admin_yearly = Counter()
-
+    
+    # Pre-calculate time boundaries
+    time_boundaries = calculate_time_boundaries(now)
+    
+    # Initialize counters using defaultdict for cleaner code
+    counters = {
+        'today_hourly': defaultdict(int),
+        'today_admin_hourly': defaultdict(int),
+        'week_daily': defaultdict(int),
+        'week_admin_daily': defaultdict(int),
+        'month_daily': defaultdict(int),
+        'month_admin_daily': defaultdict(int),
+        'year_monthly': defaultdict(int),
+        'year_admin_monthly': defaultdict(int),
+        'all_time_yearly': defaultdict(int),
+        'all_time_admin_yearly': defaultdict(int),
+    }
+    
+    # Single pass through chats with optimized logic
     for chat in chat_list:
         created = chat.created_at
-
-        # === TODAY (hourly) ===
-        if created >= today_start:
+        is_admin_required = chat.admin_required
+        
+        # TODAY (hourly)
+        if created >= time_boundaries['today_start']:
             hour_label = created.strftime("%H:00")
-            today_hourly[hour_label] += 1
-            if chat.admin_required:
-                today_admin_hourly[hour_label] += 1
-
-        # === THIS WEEK (daily) ===
-        if created >= week_start:
+            counters['today_hourly'][hour_label] += 1
+            if is_admin_required:
+                counters['today_admin_hourly'][hour_label] += 1
+        
+        # THIS WEEK (daily)
+        if created >= time_boundaries['week_start']:
             day_label = created.strftime("%A")
-            week_daily[day_label] += 1
-            if chat.admin_required:
-                week_admin_daily[day_label] += 1
-
-        # === THIS MONTH (daily) ===
-        if created >= month_start:
-            day_label = created.day  # integer day of month
-            month_daily[day_label] += 1
-            if chat.admin_required:
-                month_admin_daily[day_label] += 1
-
-        # === THIS YEAR (monthly) ===
-        if created >= year_start:
+            counters['week_daily'][day_label] += 1
+            if is_admin_required:
+                counters['week_admin_daily'][day_label] += 1
+        
+        # THIS MONTH (daily)
+        if created >= time_boundaries['month_start']:
+            day_label = created.day
+            counters['month_daily'][day_label] += 1
+            if is_admin_required:
+                counters['month_admin_daily'][day_label] += 1
+        
+        # THIS YEAR (monthly)
+        if created >= time_boundaries['year_start']:
             month_label = created.strftime("%b")
-            year_monthly[month_label] += 1
-            if chat.admin_required:
-                year_admin_monthly[month_label] += 1
-
-        # === ALL TIME (yearly) ===
+            counters['year_monthly'][month_label] += 1
+            if is_admin_required:
+                counters['year_admin_monthly'][month_label] += 1
+        
+        # ALL TIME (yearly)
         year_label = created.strftime("%Y")
-        all_time_yearly[year_label] += 1
-        if chat.admin_required:
-            all_time_admin_yearly[year_label] += 1
-
-    # Fill missing labels for consistency
-    full_hours = [f"{str(h).zfill(2)}:00" for h in range(24)]
-    full_days = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-    ]
-    full_months = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ]
-
-    # Get number of days in current month (handles month length)
-    import calendar
-
-    days_in_month = calendar.monthrange(now.year, now.month)[1]
-    full_days_in_month = list(range(1, days_in_month + 1))
-
+        counters['all_time_yearly'][year_label] += 1
+        if is_admin_required:
+            counters['all_time_admin_yearly'][year_label] += 1
+    
+    # Build response using pre-calculated labels
+    labels = get_time_labels(now)
+    
     return {
         "today": {
-            "labels": full_hours,
-            "totalChats": [today_hourly[h] for h in full_hours],
-            "adminRequired": [today_admin_hourly[h] for h in full_hours],
+            "labels": labels['hours'],
+            "totalChats": [counters['today_hourly'][h] for h in labels['hours']],
+            "adminRequired": [counters['today_admin_hourly'][h] for h in labels['hours']],
         },
         "this-week": {
-            "labels": full_days,
-            "totalChats": [week_daily[d] for d in full_days],
-            "adminRequired": [week_admin_daily[d] for d in full_days],
+            "labels": labels['days'],
+            "totalChats": [counters['week_daily'][d] for d in labels['days']],
+            "adminRequired": [counters['week_admin_daily'][d] for d in labels['days']],
         },
-        "this-month": {  # <-- added this-month
-            "labels": full_days_in_month,
-            "totalChats": [month_daily[d] for d in full_days_in_month],
-            "adminRequired": [month_admin_daily[d] for d in full_days_in_month],
+        "this-month": {
+            "labels": labels['days_in_month'],
+            "totalChats": [counters['month_daily'][d] for d in labels['days_in_month']],
+            "adminRequired": [counters['month_admin_daily'][d] for d in labels['days_in_month']],
         },
         "this-year": {
-            "labels": full_months,
-            "totalChats": [year_monthly[m] for m in full_months],
-            "adminRequired": [year_admin_monthly[m] for m in full_months],
+            "labels": labels['months'],
+            "totalChats": [counters['year_monthly'][m] for m in labels['months']],
+            "adminRequired": [counters['year_admin_monthly'][m] for m in labels['months']],
         },
         "all-time": {
-            "labels": sorted(all_time_yearly.keys()),
-            "totalChats": [all_time_yearly[y] for y in sorted(all_time_yearly.keys())],
-            "adminRequired": [
-                all_time_admin_yearly[y] for y in sorted(all_time_admin_yearly.keys())
-            ],
+            "labels": sorted(counters['all_time_yearly'].keys()),
+            "totalChats": [counters['all_time_yearly'][y] for y in sorted(counters['all_time_yearly'].keys())],
+            "adminRequired": [counters['all_time_admin_yearly'][y] for y in sorted(counters['all_time_admin_yearly'].keys())],
         },
     }
+
+def calculate_time_boundaries(now):
+    """Pre-calculate all time boundaries."""
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    return {
+        'today_start': today_start,
+        'week_start': today_start - timedelta(days=today_start.weekday()),
+        'month_start': now.replace(day=1, hour=0, minute=0, second=0, microsecond=0),
+        'year_start': now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0),
+    }
+
+@lru_cache(maxsize=32)
+def get_time_labels(now):
+    """Get all time labels with caching."""
+    days_in_month = calendar.monthrange(now.year, now.month)[1]
+    
+    return {
+        'hours': [f"{str(h).zfill(2)}:00" for h in range(24)],
+        'days': ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        'days_in_month': list(range(1, days_in_month + 1)),
+        'months': ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    }
+
+def get_empty_stats():
+    """Return empty stats structure when no chats exist."""
+    now = datetime.utcnow()
+    labels = get_time_labels(now)
+    
+    return {
+        "today": {
+            "labels": labels['hours'],
+            "totalChats": [0] * 24,
+            "adminRequired": [0] * 24,
+        },
+        "this-week": {
+            "labels": labels['days'],
+            "totalChats": [0] * 7,
+            "adminRequired": [0] * 7,
+        },
+        "this-month": {
+            "labels": labels['days_in_month'],
+            "totalChats": [0] * len(labels['days_in_month']),
+            "adminRequired": [0] * len(labels['days_in_month']),
+        },
+        "this-year": {
+            "labels": labels['months'],
+            "totalChats": [0] * 12,
+            "adminRequired": [0] * 12,
+        },
+        "all-time": {
+            "labels": [],
+            "totalChats": [],
+            "adminRequired": [],
+        },
+    }
+
+
+def get_user(chat,user_service):
+    chat.__setattr__('username',user_service.get_user_by_id(chat.user_id).name)
+    return chat
+
+
+# @admin_bp.route("/")
+# @admin_bp.route("/dashboard")
+# @admin_required
+# def index():
+#
+#     admin = AdminService(current_app.db).get_admin_by_id(
+#         session.get("admin_id"))
+#     if admin.onboarding:
+#         return redirect(url_for("admin.onboard"))
+#
+#     chat_service = ChatService(current_app.db)
+#
+#     user_service = UserService(current_app.db)
+#     # all_users = user_service.get_all_users()
+#     chats = chat_service.get_all_chats(session.get("admin_id"))
+#
+#
+#
+#     data = generate_stats(chats)
+#     chats_ary = [(lambda chat:get_user(chat,user_service))(chat) for chat in chats]
+#
+#     return render_template(
+#         "admin/index.html",
+#         chats=chats_ary,
+#         data=data,
+#         username="Ana",
+#         online_users=current_app.config["ONLINE_USERS"],
+#         # all_users=len(all_users),
+#     )
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+
+@lru_cache(maxsize=256)
+def get_cached_user(user_id, user_service):
+    """Cache user lookups to avoid repeated database calls."""
+    try:
+        return user_service.get_user_by_id(user_id)
+    except Exception as e:
+        logger.warning(f"Failed to get user {user_id}: {e}")
+        return None
+
+def enrich_chats_with_usernames(chats, user_service):
+    """Efficiently add usernames to chats using parallel processing."""
+    if not chats:
+        return []
+    
+    # Get unique user IDs to minimize database calls
+    unique_user_ids = list(set(chat.user_id for chat in chats if hasattr(chat, 'user_id')))
+    
+    # Fetch users in parallel
+    user_cache = {}
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_user_id = {
+            executor.submit(get_cached_user, user_id, user_service): user_id 
+            for user_id in unique_user_ids
+        }
+        
+        for future in as_completed(future_to_user_id):
+            user_id = future_to_user_id[future]
+            try:
+                user = future.result()
+                user_cache[user_id] = user.name if user else "Unknown User"
+            except Exception as e:
+                logger.warning(f"Failed to fetch user {user_id}: {e}")
+                user_cache[user_id] = "Unknown User"
+    
+    # Add usernames to chats
+    for chat in chats:
+        if hasattr(chat, 'user_id'):
+            chat.username = user_cache.get(chat.user_id, "Unknown User")
+    
+    return chats
+
+def get_dashboard_data(admin_id, chat_service, user_service, limit=50):
+    """Get optimized dashboard data with minimal database calls."""
+    # Get chats without full message history for better performance
+    chats = chat_service.get_all_chats(admin_id, limit=limit)
+    
+    # Only get full messages for chats that actually need them (e.g., for stats)
+    chats_for_stats = chat_service.get_chats_with_full_messages(admin_id, limit=1000)
+    
+    # Generate stats from the full dataset
+    stats_data = generate_stats(chats_for_stats)
+    
+    # Enrich chats with usernames efficiently
+    enriched_chats = enrich_chats_with_usernames(chats, user_service)
+    
+    return enriched_chats, stats_data
 
 
 @admin_bp.route("/")
 @admin_bp.route("/dashboard")
 @admin_required
 def index():
-
-    admin = AdminService(current_app.db).get_admin_by_id(
-        session.get("admin_id"))
+    admin_service = AdminService(current_app.db)
+    admin = admin_service.get_admin_by_id(session.get("admin_id"))
+    
     if admin.onboarding:
         return redirect(url_for("admin.onboard"))
-
+    
     chat_service = ChatService(current_app.db)
-
     user_service = UserService(current_app.db)
-    all_users = user_service.get_all_users()
-    chats = chat_service.get_all_chats(session.get("admin_id"))
-
-    chats_ary = []
-    for c in chats:
-        # print(c.to_dict())
-        chat = c.to_dict()
-        chat["username"] = user_service.get_user_by_id(c.user_id).name
-        chats_ary.append(chat)
-
-    data = generate_stats(chats)
-
+    
+    # Use the optimized function
+    admin_id = session.get("admin_id")
+    enriched_chats, stats_data = get_dashboard_data(admin_id, chat_service, user_service)
+    
     return render_template(
         "admin/index.html",
-        chats=chats_ary,
-        data=data,
+        chats=enriched_chats,
+        data=stats_data,
         username="Ana",
-        online_users=current_app.config["ONLINE_USERS"],
-        all_users=len(all_users),
+        online_users=current_app.config.get("ONLINE_USERS", 0),
     )
+
+
 
 
 @admin_bp.route("/join/<room_id>")
@@ -1745,23 +1915,50 @@ def api_usage():
     )
 
 
+@admin_bp.route('/chat-counts', methods=['GET'])
+@admin_required
+def get_chat_counts():
+    """API endpoint to get chat counts for dynamic updating."""
+    chat_service = ChatService(current_app.db)
+    counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
+    return jsonify(counts)
+
+# Also update your main chat route to include counts
 @admin_bp.route("/chats/", methods=["GET"])
-# @admin_bp.route('/chats/<string:status>', methods=['GET'])
 @admin_required
 def get_all_chats():
+    """Main chats page with initial data."""
     chat_service = ChatService(current_app.db)
-    chats_objs = chat_service.get_all_chats(session.get("admin_id"))
     user_service = UserService(current_app.db)
-    chats = []
-    for c in chats_objs:
-        chat = c.to_dict()
-        chat["username"] = user_service.get_user_by_id(c.user_id).name
-        chats.append(chat)
-
-    # print(chats)
-
-    chats.sort(key=lambda x: x["updated_at"], reverse=True)
-    return render_template("admin/chats.html", chats=chats)
+    
+    # Get initial chats
+    chats = chat_service.get_chats_with_limited_messages(
+        admin_id=session.get("admin_id"),
+        limit=20,
+        skip=0
+    )
+    
+    # Get chat counts for header
+    chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
+    
+    # Prepare chat data with usernames
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data["username"] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    
+    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    # print(chat_counts)
+    
+    return render_template(
+        "admin/chats.html",
+        chats=chats_data,
+        chat_counts=chat_counts,
+        has_more=len(chats_data) == 20,
+        next_page=1,
+        current_filter='all'
+    )
 
 
 @admin_bp.route("/chat/<string:room_id>/delete", methods=["POST"])

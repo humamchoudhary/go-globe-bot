@@ -1,10 +1,21 @@
 /* :root { */
-/* --sec-bg-color: #001f33; */
-/* --main-color: #ff5800; */
-/* --bg-color: #001523; */
-/* --border-color: #253239; */
-/* --font-family: "NeueHaas", sans-serif; */
-/* --sec-text: #c0bcca; */
+<<<<<<< HEAD
+/*   --sec-bg-color: #001f33; */
+/*   --main-color: #ff5800; */
+/*   --bg-color: #001523; */
+/*   --border-color: #253239; */
+/*   --font-family: "NeueHaas", sans-serif; */
+/*   --sec-text: #c0bcca; */
+/* } */
+
+/* :root { */
+/*   --sec-bg-color: #e0e0e0; */
+/*   --main-color: #ff5800; */
+/*   --bg-color: #ffffff; */
+/*   --border-color: #dce3eb; */
+/*   --font-family: "NeueHaas", sans-serif; */
+/*   --sec-text: #333333; */
+/*   --white: #000; */
 /* } */
 
 :root {

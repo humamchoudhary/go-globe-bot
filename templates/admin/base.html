@@ -462,7 +462,7 @@ document.body.addEventListener('htmx:afterSettle', function(event) {
 <script>
   function setThemeIcon(theme) {
     const icon = document.getElementById('themeIcon');
-    icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+    icon.setAttribute('data-lucide', theme === 'dark' ? 'moon' : 'sun');
     lucide.createIcons(); // Re-render Lucide icon
   }
 
@@ -478,7 +478,9 @@ document.body.addEventListener('htmx:afterSettle', function(event) {
   // On page load
   const savedTheme = localStorage.getItem('theme');
   const defaultTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  document.documentElement.classList.add(defaultTheme);
+  console.log(savedTheme);
+  console.log(defaultTheme);
+  document.documentElement.classList = defaultTheme;
   setThemeIcon(defaultTheme);
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>

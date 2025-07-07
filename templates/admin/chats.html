@@ -4,227 +4,227 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 {% endblock %}
 
-{% set title = "Chats" %} {% block content %}
+{% set title = "Chats" %} 
+{% block content %}
 <style>
-
 .active-chats{
-background-color:var(--sec-bg-color);
-color:var(--main-color);
-border-radius:5px;
-border:1px solid var(--border-color);
-
+    background-color:var(--sec-bg-color);
+    color:var(--main-color);
+    border-radius:5px;
+    border:1px solid var(--border-color);
 }
 
-
 @media (max-width: 768px) {
-
- .active-chats{
-
-display:none;
-            }}
+    .active-chats{
+        display:none;
+    }
+}
            
-            .message a{
-color:var(--main-color)
-            }
+.message a{
+    color:var(--main-color)
+}
 
+.chat-list-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
 
+.chat-list-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-list-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-list-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
+}
 </style>
+
 <div class="flex flex-col w-full h-full items-center justify-center">
-  <div class="flex flex-row w-full min-h-[80vh]">
-    <div
-      class="flex flex-col gap-[25px] w-full h-[93vh] overflow-y-scroll"
-    >
-    <div class="flex flex-row gap-[32px] items-start justify-between mx-[24px] mt-[24px] ">
-      <p class=" text-[18px] md:text-[26px] text-[var(--sec-text)]">
-        Chats
-      </p>
-<div class="flex flex-row gap-2 md:gap-[24px] flex-wrap items-end md:items-center">
-<div
-  hx-get="/admin/chats/all"
-  hx-target="#chat_list_container"
-  hx-trigger="click"
-  hx-on:click="switchActiveChat(this)"
-  class="chat-tab px-[8px] md:px-[18px] py-[4px] font-bold active-chats leading-[40px] hover:cursor-pointer">
-  <p  class="text-[12px] md:text-[14px]">All Chats ({{ chats|length }})</p>
-</div>
+    <div class="flex flex-row w-full min-h-[80vh]">
+        <div class="flex flex-col gap-[25px] w-full h-[93vh] overflow-y-scroll chat-list-scroll">
+            <div class="flex flex-row gap-[32px] items-start justify-between mx-[24px] mt-[24px]">
+                <p class="text-[18px] md:text-[26px] text-[var(--sec-text)]">Chats</p>
+                
+                <div class="flex flex-row gap-2 md:gap-[24px] flex-wrap items-end md:items-center" id="chat-tabs">
+                    <div hx-get="/admin/chats/all?page=0"
+                         hx-target="#chat_list_container"
+                         hx-trigger="click"
+                         hx-on:click="switchActiveChat(this)"
+                         hx-indicator="#loading-indicator"
+                         class="chat-tab px-[8px] md:px-[18px] py-[4px] font-bold active-chats leading-[40px] hover:cursor-pointer">
+                        <p class="text-[12px] md:text-[14px]">All Chats <span id="all-count">({{ chat_counts.all or chats|length }})</span></p>
+                    </div>
 
-<div
-  hx-get="/admin/chats/active"
-  hx-target="#chat_list_container"
-  hx-trigger="click"
-  hx-on:click="switchActiveChat(this)"
-  class="chat-tab  px-[8px] md:px-[18px] font-bold leading-[40px] hover:cursor-pointer">
-  <p  class="text-[12px] md:text-[14px]">Admin Chats ({{ chats|selectattr('admin_required', 'equalto', true)|list|length }})</p>
-</div>
+                    <div hx-get="/admin/chats/active?page=0"
+                         hx-target="#chat_list_container"
+                         hx-trigger="click"
+                         hx-on:click="switchActiveChat(this)"
+                         hx-indicator="#loading-indicator"
+                         class="chat-tab px-[8px] md:px-[18px] font-bold leading-[40px] hover:cursor-pointer">
+                        <p class="text-[12px] md:text-[14px]">Admin Chats <span id="active-count">({{ chat_counts.active or chats|selectattr('admin_required', 'equalto', true)|list|length }})</span></p>
+                    </div>
 
-<div
-  hx-get="/admin/chats/exported"
-  hx-target="#chat_list_container"
-  hx-trigger="click"
-  hx-on:click="switchActiveChat(this)"
-  class="chat-tab  px-[8px] md:px-[18px] font-bold leading-[40px] hover:cursor-pointer">
-  <p  class="text-[12px] md:text-[14px]">Exported Chats ({{ chats|selectattr('exported', 'equalto', true)|list|length }})</p>
-</div>
-
-
+                    <div hx-get="/admin/chats/exported?page=0"
+                         hx-target="#chat_list_container"
+                         hx-trigger="click"
+                         hx-on:click="switchActiveChat(this)"
+                         hx-indicator="#loading-indicator"
+                         class="chat-tab px-[8px] md:px-[18px] font-bold leading-[40px] hover:cursor-pointer">
+                        <p class="text-[12px] md:text-[14px]">Exported Chats <span id="exported-count">({{ chat_counts.exported or chats|selectattr('exported', 'equalto', true)|list|length }})</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="flex flex-col" id="chat_list_container">
+                {% include 'components/chat-list.html' %}
+            </div>
         </div>
-    </div>
-        <div class="flex flex-col" id="chat_list_container">
-            {% include 'components/chat-list.html' %}
-        </div>
-    </div>
-    <div id="chatarea" class="w-max h-[90vh] md:h-[93vh]" id="chatArea" class="flex">
         
-        {% if chat %}
-        {% set active_chat = chat %}
-        {% include 'components/chat-area.html' %}
-        {% endif  %}
+        <div id="chatarea" class="w-max h-[90vh] md:h-[93vh]" class="flex">
+            {% if chat %}
+                {% set active_chat = chat %}
+                {% include 'components/chat-area.html' %}
+            {% endif %}
+        </div>
+        
+        <div id="userInfo" class="w-min h-full border-l border-[var(--border-color)] hidden md:flex">
+            {% include 'components/chat-user-info.html' %}
+        </div>
     </div>
-    <div id="userInfo" class="w-min h-full border-l border-[var(--border-color)] hidden md:flex">
-
-        {% include 'components/chat-user-info.html' %}
-
-    </div>
-  </div>
 </div>
+
 <script>
-
-
-  function switchActiveChat(clickedTab) {
+function switchActiveChat(clickedTab) {
     document.querySelectorAll('.chat-tab').forEach(tab => {
-      tab.classList.remove('active-chats');
+        tab.classList.remove('active-chats');
     });
     clickedTab.classList.add('active-chats');
-  }
-     function fixAllLinks(element) {
-       const links = element.querySelectorAll('a');
+    
+    // Reset scroll position when switching tabs
+    const chatListContainer = document.getElementById('chat_list_container');
+    if (chatListContainer) {
+        chatListContainer.scrollTop = 0;
+    }
+}
 
-       links.forEach(link => {
-         // Add target="_blank" to open in new tab
-         link.setAttribute('target', '_blank');
-         link.setAttribute('rel', 'noopener noreferrer');
+function fixAllLinks(element) {
+    const links = element.querySelectorAll('a');
+    links.forEach(link => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+        let href = link.getAttribute('href');
+        if (href && !/^https?:\/\//i.test(href)) {
+            link.setAttribute('href', 'https://' + href);
+        }
+    });
+}
 
-         // Fix URLs without http/https
-         let href = link.getAttribute('href');
-         if (href && !/^https?:\/\//i.test(href)) {
-           link.setAttribute('href', 'https://' + href);
-         }
-       });
-     }
+window.addEventListener("DOMContentLoaded", function () {
+    const textarea = document.getElementById("message");
+    if (textarea) textarea.value = "";
 
+    document.querySelectorAll('.md-content').forEach(el => {
+        const content = marked.parse(marked.parse(el.dataset.content));
+        el.innerHTML = content;
+        fixAllLinks(el);
+    });
 
-  window.addEventListener("DOMContentLoaded", function () {
+    const socket = io();
 
+    socket.on("new_message", function (data) {
+        // Refresh chat list and update counts
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
+        updateChatCounts();
+    });
 
-  const textarea = document.getElementById("message");
-      if (textarea) textarea.value = "";
+    socket.on("admin_required", function (data) {
+        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
+        updateChatCounts();
+    });
 
-     document.querySelectorAll('.md-content').forEach(el => {
-       // Parse markdown
-
- 
-         const content = marked.parse(marked.parse(el.dataset.content));
-         el.innerHTML =content;
-       // Fix links
-       fixAllLinks(el);
-     });
-
-
-      const socket = io();
-
-
-      socket.on("new_message", function (data) {
-        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
-      });
-
-      socket.on("admin_required", function (data) {
-
-        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
-      });
-
-      socket.on("new_message", function (data) {
-        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
-      });
-
-
-const messageArea = document.getElementById('messageArea');
-      if (messageArea){
-          messageArea.scrollTo({
-
-  top: messageArea.scrollHeight,
-  behavior: 'smooth'
-          });}
-
-
+    const messageArea = document.getElementById('messageArea');
+    if (messageArea) {
+        messageArea.scrollTo({
+            top: messageArea.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
 });
 
-  document.body.addEventListener('htmx:afterSwap', (event) => {
+function updateChatCounts() {
+    // Update chat counts via AJAX
+    fetch('/admin/chat-counts')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('all-count').textContent = `(${data.all})`;
+            document.getElementById('active-count').textContent = `(${data.active})`;
+            document.getElementById('exported-count').textContent = `(${data.exported})`;
+        })
+        .catch(error => console.error('Error updating chat counts:', error));
+}
 
-  const textarea = document.getElementById("message");
-      if (textarea) textarea.value = "";
-      // Only rerun Lucide on content swaps, not OOB (out-of-band)
+document.body.addEventListener('htmx:afterSwap', (event) => {
+    const textarea = document.getElementById("message");
+    if (textarea) textarea.value = "";
+    
     if (!event.detail.isOOBSwap && window.lucide) {
-      lucide.createIcons();
+        lucide.createIcons();
     }
     
     const url = event.detail.pathInfo.requestPath;
     if (url.startsWith("/admin/chat/")) {
-      const roomId = url.split("/").splice(-1)[0];
+        const roomId = url.split("/").splice(-1)[0];
+        const socket = io();
 
-      const socket = io();
+        socket.on("connect", function () {
+            console.log('connect');
+            socket.emit("admin_join", { room: roomId });
+        });
 
-      socket.on("connect", function () {
-          console.log('connect')
-        socket.emit("admin_join", { room: roomId });
-      });
+        socket.on("new_message", function (data) {
+            htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
+            updateChatCounts();
+        });
 
-      socket.on("new_message", function (data) {
-        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
-      });
-
-      socket.on("admin_required", function (data) {
-
-        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
-      });
+        socket.on("admin_required", function (data) {
+            htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container');
+            updateChatCounts();
+        });
     }
 
-const messageArea = document.getElementById('messageArea');
-      if(messageArea){
-          messageArea.scrollTo({
+    const messageArea = document.getElementById('messageArea');
+    if (messageArea) {
+        messageArea.scrollTo({
+            top: messageArea.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
 
-  top: messageArea.scrollHeight,
-  behavior: 'smooth'
-          });}
+    document.querySelectorAll('.md-content').forEach(el => {
+        const content = marked.parse(marked.parse(el.dataset.content));
+        el.innerHTML = content;
+        fixAllLinks(el);
+    });
+});
 
-     document.querySelectorAll('.md-content').forEach(el => {
-       // Parse markdown
-
- 
-         const content = marked.parse(marked.parse(el.dataset.content));
-         console.log(content)
-         el.innerHTML =content;
-       // Fix links
-       fixAllLinks(el);
-     });
-
-  });
-
-  document.body.addEventListener("htmx:afterSwap", function (evt) {
+document.body.addEventListener("htmx:afterSwap", function (evt) {
     if (evt.detail.target.id === "chatArea") {
-      // Remove highlight class from all chat rows
-      document.querySelectorAll(".chat-row").forEach(el => {
-        el.classList.remove("bg-[var(--sec-bg-color)]");
-      });
+        document.querySelectorAll(".chat-row").forEach(el => {
+            el.classList.remove("bg-[var(--sec-bg-color)]");
+        });
 
-      // Get the new room ID from URL (last part of /admin/chat/<room_id>)
-      const roomId = window.location.pathname.split("/").pop();
-      const activeRow = document.getElementById("chat-" + roomId);
-      if (activeRow) {
-        activeRow.classList.add("bg-[var(--sec-bg-color)]");
-      }
+        const roomId = window.location.pathname.split("/").pop();
+        const activeRow = document.getElementById("chat-" + roomId);
+        if (activeRow) {
+            activeRow.classList.add("bg-[var(--sec-bg-color)]");
+        }
     }
-  });
-
+});
 
 async function exportChat(roomId) {
     try {
@@ -250,10 +250,9 @@ async function exportChat(roomId) {
         }
     } catch (error) {
         console.error('Export error:', error);
-            alert(`Export failed.\n${errorText}`);
+        alert(`Export failed.\n${error.message}`);
     }
 }
 </script>
-
 
 {% endblock %}
