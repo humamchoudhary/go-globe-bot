@@ -280,8 +280,12 @@ function handleDeleteResponse(event, roomId) {
 
  if (window.location.pathname.includes(`/chat/${roomId}`)) {
      const chatArea = document.getElementById(`chatarea-${roomId}`)
+     const userInfo = document.getElementById(`userInfo`)
      if (chatArea){
 chatArea.remove()
+         userInfo.innerHTML = `{% include 'components/chat-user-info.html' %}     `
+
+history.pushState({}, '', '/admin/chats');
      }
         }
 

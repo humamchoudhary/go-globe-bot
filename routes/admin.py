@@ -489,6 +489,7 @@ def chat(room_id):
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
     
+    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     user = user_service.get_user_by_id(chat.user_id)
     if not chat:
         return redirect(url_for("admin.index"))
@@ -548,6 +549,8 @@ def get_chat_list():
         chats_data.append(data)
     
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    for i in chats_data:
+        print(i['updated_at'])
     cchat = chat_service.get_chat_by_room_id(room_id) if room_id else None
     
     # Check if this is a pagination request
@@ -1956,6 +1959,8 @@ def get_all_chats():
         chats_data.append(data)
     
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    for i in chats_data:
+        print(i['updated_at'])
     # print(chat_counts)
     
     return render_template(

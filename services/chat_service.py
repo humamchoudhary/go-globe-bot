@@ -327,10 +327,10 @@ class ChatService:
     def get_all_chats(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0) -> List[Chat]:
         """Get all chats with optimized query and projection."""
         filter_query = {"admin_id": admin_id, "subject": {
-            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {}
+            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {"subject": {
+            "$nin": ["Job"]}, "messages.1": {'$exists': True}}
 
-        # For better performance, you can optionally limit messages
-        # But let's keep it simple and load all for now
+        # Ensure sorting by updated_at desc before applying limit
         cursor = self.chats_collection.find(
             filter_query,
             {"_id": 0}  # Exclude MongoDB's _id field
@@ -341,7 +341,8 @@ class ChatService:
     def get_chats_with_limited_messages(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0, message_limit: int = 1) -> List[Chat]:
         """Get chats with limited number of messages per chat for list views."""
         filter_query = {"admin_id": admin_id, "subject": {
-            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {}
+            "$nin": ["Job"]}, "messages.1": {'$exists': True}} if admin_id else {"subject": {
+            "$nin": ["Job"]}, "messages.1": {'$exists': True}}
 
         # Use projection to limit messages (e.g., only last message for list view)
         projection = {
@@ -349,6 +350,7 @@ class ChatService:
             "messages": {"$slice": -message_limit}  # Get last N messages
         }
 
+        # Ensure sorting by updated_at desc before applying limit
         cursor = self.chats_collection.find(
             filter_query,
             projection
@@ -407,7 +409,10 @@ class ChatService:
             "admin_id": admin_id,
             "subject": {"$nin": ["Job"]},
             "messages.1": {"$exists": True}
-        } if admin_id else {}
+        } if admin_id else {
+            "subject": {"$nin": ["Job"]},
+            "messages.1": {"$exists": True}
+        }
 
         # Apply specific filters
         if filter_type == "active":
@@ -415,28 +420,12 @@ class ChatService:
         elif filter_type == "exported":
             base_filter["exported"] = True
 
-        # Optimized projection - only get necessary fields for list view
-        # projection = {
-        #     "_id": 0,
-        #     "room_id": 1,
-        #     "user_id": 1,
-        #     "subject": 1,
-        #     "updated_at": 1,
-        #     "viewed": 1,
-        #     "admin_required": 1,
-        #     "exported": 1,
-        #     "messages": {"$slice": -1}  # Only get the last message
-        # }
-
-        # try:
+        # Ensure sorting by updated_at desc before applying limit
         cursor = self.chats_collection.find(
             base_filter,
             {"messages": {"$slice": -1}, '_id': 0}  # Only get the last message
         ).sort("updated_at", -1).skip(skip).limit(limit)
         return [Chat.from_dict(chat_data) for chat_data in cursor]
-        # except Exception as e:
-        #     logger.error(f"Error getting filtered chats: {e}")
-        #     return []
 
     def get_chat_counts_by_filter(self, admin_id: Optional[str] = None) -> Dict[str, int]:
         """Get chat counts for all filter types using aggregation."""
@@ -445,7 +434,10 @@ class ChatService:
             "admin_id": admin_id,
             "subject": {"$nin": ["Job"]},
             "messages.1": {"$exists": True}
-        } if admin_id else {}
+        } if admin_id else {
+            "subject": {"$nin": ["Job"]},
+            "messages.1": {"$exists": True}
+        }
 
         pipeline = [
             {"$match": base_match},
@@ -476,12 +468,3 @@ class ChatService:
             logger.error(f"Error getting chat counts: {e}")
             return {"all": 0, "active": 0, "exported": 0}
 
-    def get_chat_counts_for_header(self, admin_id: Optional[str] = None) -> Dict[str, int]:
-        """Get chat counts for header display with caching."""
-
-        # Use a simple cache key based on admin_id
-        cache_key = f"chat_counts_{admin_id}"
-
-        # You can implement simple in-memory caching here if needed
-        # For now, we'll call the database each time but it's optimized
-        return self.get_chat_counts_by_filter(admin_id)
