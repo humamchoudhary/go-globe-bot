@@ -61,10 +61,10 @@
             <div id="notification-badge" class="absolute -top-1 -right-1 bg-red-500 text-[var(--white)] rounded-full w-4 h-4 flex items-center justify-center text-xs hidden">0</div>
         </div>
 
-<!-- <div onclick="toggleTheme()" id="themeToggle" -->
-<!--      class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all"> -->
-<!--   <i id="themeIcon" data-lucide="sun" class="text-[var(--white)] size-[22px]"></i> -->
-<!-- </div> -->
+<div onclick="toggleTheme()" id="themeToggle"
+     class="size-[40px] flex items-center justify-center rounded-[5px] bg-[var(--main-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all">
+  <i id="themeIcon" data-lucide="sun" class="text-[var(--white)] size-[22px]"></i>
+</div>
     </div>
     <div id="search-menu" style="display: none;" class="z-200 absolute items-center flex-col w-screen h-screen overflow-hidden left-0 top-0 pt-[150px]">
         <div id="close-search" class=" bg-black/60 absolute w-screen h-screen top-0 right-0"></div>
@@ -459,7 +459,7 @@ document.body.addEventListener('htmx:afterSettle', function(event) {
 
 </script>
 
-<!-- <script>
+<script>
   function setThemeIcon(theme) {
     const icon = document.getElementById('themeIcon');
     icon.setAttribute('data-lucide', theme === 'dark' ? 'moon' : 'sun');
@@ -482,6 +482,6 @@ document.body.addEventListener('htmx:afterSettle', function(event) {
   console.log(defaultTheme);
   document.documentElement.classList = defaultTheme;
   setThemeIcon(defaultTheme);
-</script> -->
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
  {% endblock %}
