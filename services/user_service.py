@@ -59,6 +59,10 @@ class UserService:
             return User.from_dict(user_data)
         return None
 
+    def get_users_by_ids(self, user_ids):
+        user_data = self.users_collection.find({"user_id": {"$in": user_ids}})
+        return {user['user_id']: user for user in user_data}
+
     def get_all_users(self):
         users = self.users_collection.find()
         return [User.from_dict(user) for user in users]

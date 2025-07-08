@@ -8,14 +8,14 @@
 /* } */
 
 :root {
-    --sec-bg-color: #e0e0e0; /* Secondary background: soft light gray-blue */
+  --sec-bg-color: #f0f4f8; /* Secondary background: soft light gray-blue */
   --main-color: #ff5800; /* Keep accent color the same */
   --bg-color: #ffffff; /* Primary background: white */
-  /* --border-color: #dce3eb; /* Light border */ */
+  --border-color: #d0d7de; /* Light border */
+  /* --border-color: #25323922; */
+  --sec-text: #333244; /* Darker text for readability */
 
-  --border-color: #25323922;
   --font-family: "NeueHaas", sans-serif;
-  --sec-text: #333333; /* Darker text for readability */
   --white: #000;
 }
 
@@ -24,13 +24,12 @@
   --main-color: #ff5800;
   --bg-color: #001523;
   --border-color: #253239;
-  --font-family: "NeueHaas", sans-serif;
   --sec-text: #c0bcca;
+  --font-family: "NeueHaas", sans-serif;
   --white: #fff;
 }
 
 html {
-
   overflow-x: hidden;
   padding: 0px;
   margin: 0px;
@@ -54,8 +53,11 @@ body {
   white-space: nowrap;
 }
 
-
 @media (max-width: 900px) {
-p,h1,h2,h3 {
-text-wrap:wrap;
-}}
+  p,
+  h1,
+  h2,
+  h3 {
+    text-wrap: wrap;
+  }
+}

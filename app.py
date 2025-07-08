@@ -521,6 +521,8 @@ def create_app(config_class=Config):
 
     @app.errorhandler(Exception)
     def handle_exception(error):
+
+        import traceback
         """Handle all other exceptions"""
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
@@ -531,6 +533,7 @@ def create_app(config_class=Config):
               client_ip} | {request.method} | {request.path}")
         print(f"    └─ Error: {str(error)}")
         print(f"    └─ Type: {type(error).__name__}")
+        print(f"    └─ Trace: {traceback.format_exc()}")
 
         return {'error': 'Something went wrong'}, 500
 

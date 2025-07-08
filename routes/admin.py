@@ -470,30 +470,17 @@ def onboard():
 def chat(room_id):
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
-    
     chat = chat_service.get_chat_by_room_id(room_id)
     if not chat:
         return redirect(url_for("admin.get_all_chats"))
-    
     # Get initial chats with pagination
     chats = chat_service.get_chats_with_limited_messages(
         admin_id=session.get("admin_id"),
         limit=20,
         skip=0
     )
-    
     # Prepare chat data with usernames
-    chats_data = []
-    for c in chats:
-        data = c.to_dict()
-        data["username"] = user_service.get_user_by_id(c.user_id).name
-        chats_data.append(data)
-    
-    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     user = user_service.get_user_by_id(chat.user_id)
-    if not chat:
-        return redirect(url_for("admin.index"))
-    
     chat_service.set_chat_viewed(chat.room_id)
     chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
     if request.headers.get("HX-Request"):
@@ -505,16 +492,21 @@ def chat(room_id):
             chat_counts=chat_counts,
         # has_more=len(chats_data) == 20,
         )
-
-    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    # chats_data = []
+    # for c in chats:
+    #     data = c.to_dict()
+    #     data["username"] = user_service.get_user_by_id(c.user_id).name
+    #     chats_data.append(data)
+    # chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    # chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     return render_template(
         "admin/chats.html", 
         chat=chat, 
-        chats=chats_data, 
+        # chats=chats_data, 
         user=user, 
         username="Ana",
 
-        has_more=len(chats_data) == 20,
+        has_more=len(chats) == 20,
             chat_counts=chat_counts
     )
 
@@ -648,10 +640,15 @@ def get_user_details(user_id):
 def filter_chats(filter):
     page = request.args.get('page', 0, type=int)
     limit = request.args.get('limit', 20, type=int)
+    is_pagination = request.args.get('pagination') == 'true'
+    
+    # Validate and sanitize inputs
+    limit = min(max(limit, 1), 100)  # Limit between 1-100
+    page = max(page, 0)  # Ensure non-negative page
     
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
-
+    
     # Get filtered chats with pagination
     chats = chat_service.get_filtered_chats_paginated(
         admin_id=session.get("admin_id"),
@@ -660,30 +657,34 @@ def filter_chats(filter):
         skip=page * limit
     )
     
-    # Prepare chat data with usernames
-    chats_data = []
-    for c in chats:
-        data = c.to_dict()
-        data["username"] = user_service.get_user_by_id(c.user_id).name
-        chats_data.append(data)
+    # Batch fetch users to reduce individual queries
+    user_ids = [c.user_id for c in chats]
+    users_dict = user_service.get_users_by_ids(user_ids)  # Single query for all users
+    # print(users_dict)
     
-    # Check if this is a pagination request
-    is_pagination = request.args.get('pagination') == 'true'
+    # Build chat data with usernames
+    chats_data = [
+        {**chat.to_dict(), "username": users_dict[chat.user_id]['name']}
+        for chat in chats
+    ]
     
-    if is_pagination:
-        # Return only the chat items for infinite scroll
-        return render_template(
-            "components/chat-items-only.html", 
-            chats=chats_data
-        )
-    
-    return render_template(
-        "components/chat-list.html",
-        chats=chats_data,
-        has_more=len(chats_data) == limit,
-        next_page=page + 1,
-        current_filter=filter
+    # Determine template based on request type
+    template = (
+        "components/chat-items-only.html" if is_pagination 
+        else "components/chat-list.html"
     )
+    
+    # Build context conditionally
+    context = {"chats": chats_data}
+    if not is_pagination:
+        context.update({
+            "has_more": len(chats_data) == limit,
+            "next_page": page + 1,
+            "current_filter": filter
+        })
+    
+    return render_template(template, **context)
+
 import json
 def get_country_id(file_path, target_country):
     with open(file_path, 'r') as f:
@@ -1957,24 +1958,11 @@ def get_all_chats():
     
     # Get chat counts for header
     chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
-    
-    # Prepare chat data with usernames
-    chats_data = []
-    for c in chats:
-        data = c.to_dict()
-        data["username"] = user_service.get_user_by_id(c.user_id).name
-        chats_data.append(data)
-    
-    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    for i in chats_data:
-        print(i['updated_at'])
-    # print(chat_counts)
-    
     return render_template(
         "admin/chats.html",
-        chats=chats_data,
+        # chats=chats_data,
         chat_counts=chat_counts,
-        has_more=len(chats_data) == 20,
+        has_more=len(chats) == 20,
         next_page=1,
         current_filter='all'
     )
