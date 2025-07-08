@@ -574,7 +574,7 @@ def get_chat_list():
 @admin_bp.route("/search/", methods=["POST"])
 @admin_required
 def search():
-    query = request.form.get("search-q")
+    query = request.form.get("search-q").lower()
     if not query:
         return render_template("components/search-results.html", search_chats=[])
 
@@ -592,15 +592,15 @@ def search():
 
         # Match against user fields
         if (
-            query in user.name or
-            (user.country and query in user.country) or
-            (user.city and query in user.city)
+            query in user.name.lower() or
+            (user.country and query in user.country.lower()) or
+            (user.city and query in user.city.lower())
         ):
             search_chats.add(chat)
             continue
 
         # Match against messages
-        if any(query in message.content for message in chat.messages):
+        if any(query in message.content.lower() for message in chat.messages):
             search_chats.add(chat)
 
     return render_template(
