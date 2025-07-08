@@ -871,7 +871,7 @@ def serve_file(file_name):
     return send_from_directory(path, file_name)
 
 
-
+import pdfplumber
 @admin_bp.route("/upload", methods=["POST"])
 @admin_required
 def upload_file():
@@ -894,49 +894,49 @@ def upload_file():
         path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
         file_path = os.path.join(path, unique_filename)
 
-        if file_extension == ".pdf":
-            try:
-                temp_path = os.path.join(path, f"temp_{unique_filename}")
+    if file_extension == ".pdf":
+        try:
+            temp_path = os.path.join(path, f"temp_{unique_filename}")
+            file.save(temp_path)
 
-                file.save(temp_path)
-                images = pdf2image.convert_from_path(temp_path)
+            text = ""
+            with pdfplumber.open(temp_path) as pdf:
+                for page in pdf.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
 
-                if images:
-                    image_filenames = []
-                    # Save each page as a separate image
-                    for i, image in enumerate(images):
-                        image_filename = f"{base_filename}_{i+1}.png"
-                        image_path = os.path.join(path, image_filename)
-                        image.save(image_path, "PNG")
-                        image_filenames.append(image_filename)
-                        file_items.append(
-                            render_template(
-                                "components/file_item.html", file=image_filename
-                            )
-                        )
+            os.remove(temp_path)
 
-                    os.remove(temp_path)
-                else:
-                    file.save(file_path)
-                    file_items.append(
-                        render_template(
-                            "components/file_item.html", file=unique_filename
-                        )
-                    )
-            except Exception as e:
-                file.seek(0)
-                file.save(file_path)
-                print(f"PDF conversion error: {e}")
+            if text.strip():
+                # Save extracted text as .txt file
+                text_filename = f"{base_filename}.txt"
+                text_path = os.path.join(path, text_filename)
+                with open(text_path, "w", encoding="utf-8") as f:
+                    f.write(text)
+
                 file_items.append(
-                    render_template("components/file_item.html",
-                                    file=unique_filename)
+                    render_template("components/file_item.html", file=text_filename)
                 )
-        else:
+            else:
+                # If no text extracted, fall back to saving the PDF as is
+                file.save(file_path)
+                file_items.append(
+                    render_template("components/file_item.html", file=unique_filename)
+                )
+
+        except Exception as e:
+            file.seek(0)
             file.save(file_path)
+            print(f"PDF text extraction error: {e}")
             file_items.append(
-                render_template("components/file_item.html",
-                                file=unique_filename)
+                render_template("components/file_item.html", file=unique_filename)
             )
+    else:
+        file.save(file_path)
+        file_items.append(
+            render_template("components/file_item.html", file=unique_filename)
+        )
 
     return "".join(file_items), 200  # Return all file items as HTML
 

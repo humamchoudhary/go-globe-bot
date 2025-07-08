@@ -138,15 +138,15 @@
   </div>
 
   <!-- Hidden File Input -->
-  <input type="file" id="file-input" class="hidden"
-         hx-post="{{ url_for('admin.upload_file') }}"
-         hx-target="#file-grid"
-         hx-swap="beforeend"
-         hx-trigger="change"
-         hx-encoding="multipart/form-data"
-         name="files"
-         multiple
-         accept=".png, .jpg, .jpeg, .gif, .bmp, .webp, .svg, .txt, .md, .csv, .log, .json, .xml, .pdf, .html" />
+<input type="file" id="file-input" class="hidden"
+       hx-post="{{ url_for('admin.upload_file') }}"
+       hx-target="#file-grid"
+       hx-swap="beforeend"
+       hx-trigger="change"
+       hx-encoding="multipart/form-data"
+       name="files"
+       multiple
+       accept=".txt,.md,.csv,.log,.json,.xml,.pdf,.html,.htm,.js,.css,.py,.java,.cpp,.c,.h,.sql,.yaml,.yml,.toml,.ini,.conf,.config,.rtf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" />
 
   <!-- Scrape Modal -->
   <div id="scrape-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
