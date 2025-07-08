@@ -28,15 +28,15 @@
         <div class="border-r border-[var(--border-color)] flex flex-col gap-[25px] w-full">
         <p class="text-[26px] text-[var(--sec-text)] mx-[24px] mt-[24px]">Statistics</p>
         <div class="flex flex-col md:flex-row gap-[35px]  mx-[24px]">
-            <div class="p-[16px] bg-[var(--sec-bg-color)] rounded-md flex flex-row items-center justify-center gap-2 rounded-md w-min text-nowrap">
+            <div class="p-[16px] bg-[var(--sec-bg-color)] rounded-md flex flex-row items-center justify-center gap-2 rounded-md w-max md:w-min text-nowrap">
                 <p class="text-[28px] border-r border-[var(--border-color)] pr-[9px]">{{data['all-time']['totalChats'] | sum }}</p>
                 <p class="text-[16px] text-[var(--sec-text)] pl-[9px]">Total Chats</p>
             </div>
-            <div class="p-[16px] bg-[var(--sec-bg-color)] rounded-md flex flex-row items-center justify-center gap-2 rounded-md w-min text-nowrap">
+            <div class="p-[16px] bg-[var(--sec-bg-color)] rounded-md flex flex-row items-center justify-center gap-2 rounded-md w-max md:w-min text-nowrap">
                 <p class="text-[28px] border-r border-[var(--border-color)] pr-[9px]">{{ data['today']['totalChats'] | sum }}</p>
                 <p class="text-[16px] text-[var(--sec-text)] pl-[9px]">New Chats Today</p>
             </div>
-            <div class="p-[16px] bg-[var(--sec-bg-color)] rounded-md flex flex-row items-center justify-center gap-2 rounded-md w-min text-nowrap">
+            <div class="p-[16px] bg-[var(--sec-bg-color)] rounded-md flex flex-row items-center justify-center gap-2 rounded-md w-max md:w-min text-nowrap">
                 <p class="text-[28px] border-r border-[var(--border-color)] pr-[9px]">{{ data['this-month']['totalChats'] | sum }}</p>
                 <p class="text-[16px] text-[var(--sec-text)] pl-[9px]">New Chats This Month</p>
             </div>

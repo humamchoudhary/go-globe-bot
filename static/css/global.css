@@ -53,3 +53,9 @@ body {
 
   white-space: nowrap;
 }
+
+
+@media (max-width: 900px) {
+p,h1,h2,h3 {
+text-wrap:wrap;
+}}

@@ -1,3 +1,4 @@
+import time
 from datetime import timedelta
 from flask import Flask, session, url_for, jsonify, Response, g
 import uuid
@@ -30,6 +31,7 @@ import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)  # or logging.CRITICAL to silence everything
 
+
 def get_font_data():
     # Path to your font directory
     # font_dir = os.path.join(
@@ -48,7 +50,7 @@ def get_font_data():
 
     return font_files
 
-import time
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     CORS(app, origins=["*"],
@@ -92,7 +94,6 @@ def create_app(config_class=Config):
     #         path = request.path
     #         print(f"[{method}] {path} (endpoint: {endpoint}) took {duration:.4f} seconds")
     #     return response
-
 
     app.jinja_env.tests['mobile'] = is_mobile
 
@@ -430,7 +431,7 @@ def create_app(config_class=Config):
 
 # Skip these extensions
     SKIP_EXTENSIONS = {
-        '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', 
+        '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg',
         '.woff', '.woff2', '.ttf', '.eot', '.map'
     }
 
@@ -440,16 +441,16 @@ def create_app(config_class=Config):
         for skip_path in SKIP_PATHS:
             if path.startswith(skip_path):
                 return True
-        
+
         # Skip by extension
         for ext in SKIP_EXTENSIONS:
             if path.endswith(ext):
                 return True
-        
+
         # Skip socket.io and websocket requests
         if '/socket.io/' in path or path.startswith('/ws'):
             return True
-        
+
         return False
 
     @app.before_request
@@ -462,24 +463,25 @@ def create_app(config_class=Config):
         """Log request details after processing"""
         if should_skip_logging(request.path):
             return response
-        
+
         # Calculate response time
-        response_time = round((time.time() - g.start_time) * 1000, 2)
-        
+        response_time = round((time.time() - (g.get("start_time") or 0)) * 1000, 2)
+
         # Get timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
+
         # Get client IP (handle proxy headers)
         client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         if client_ip and ',' in client_ip:
             client_ip = client_ip.split(',')[0].strip()
-        
+
         # Format the log message
         status_code = response.status_code
         method = request.method
         path = request.path
-        user_agent = request.headers.get('User-Agent', 'Unknown')[:100]  # Truncate long user agents
-        
+        user_agent = request.headers.get(
+            'User-Agent', 'Unknown')[:100]  # Truncate long user agents
+
         # Color coding for status codes
         if status_code < 300:
             status_color = f"\033[92m{status_code}\033[0m"  # Green
@@ -487,20 +489,21 @@ def create_app(config_class=Config):
             status_color = f"\033[93m{status_code}\033[0m"  # Yellow
         else:
             status_color = f"\033[91m{status_code}\033[0m"  # Red
-        
+
         # Basic log format
-        log_msg = f"[{timestamp}] {client_ip} | {method:6} | {status_color} | {response_time:6.2f}ms | {path}"
-        
+        log_msg = f"[{timestamp}] {client_ip} | {method:6} | {
+            status_color} | {response_time:6.2f}ms | {path}"
+
         # Add query parameters if present
         if request.query_string:
             log_msg += f"?{request.query_string.decode('utf-8')}"
-        
+
         print(log_msg)
-        
+
         # Print user agent for non-GET requests or errors
         if method != 'GET' or status_code >= 400:
             print(f"    └─ User-Agent: {user_agent}")
-        
+
         return response
 
     @app.errorhandler(404)
@@ -523,57 +526,13 @@ def create_app(config_class=Config):
         client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         if client_ip and ',' in client_ip:
             client_ip = client_ip.split(',')[0].strip()
-        
-        print(f"[{timestamp}] \033[91mEXCEPTION\033[0m: {client_ip} | {request.method} | {request.path}")
+
+        print(f"[{timestamp}] \033[91mEXCEPTION\033[0m: {
+              client_ip} | {request.method} | {request.path}")
         print(f"    └─ Error: {str(error)}")
         print(f"    └─ Type: {type(error).__name__}")
-        
+
         return {'error': 'Something went wrong'}, 500
-
-
-
-
-
-
-# Add request start time tracking
-
-    @app.before_request
-    def start_timer():
-        g.request_start_time = datetime.utcnow()
-
-    # @app.context_processor
-    # def settings():
-    #     admin_id = session.get('admin_id')
-    #     # Start with global settings
-    #     settings_data = current_app.config['SETTINGS'].copy()
-    #
-    #     if admin_id:
-    #         admin_service = AdminService(current_app.db)
-    #         admin = admin_service.get_admin_by_id(admin_id)
-    #         if admin and admin.settings:
-    #             # Merge admin settings with global settings
-    #             settings_data.update(admin.settings)
-    #
-    #     # Process subjects and languages
-    #     settings_data['subjects'] = list(settings_data.get('subjects', []))
-    #     settings_data['languages'] = list(
-    #         settings_data.get('languages', ['English']))
-    #
-    #     # Save to database (only global settings)
-    #     if not admin_id:  # Only superadmin can update global settings
-    #         db.config.replace_one(
-    #             {"id": "settings"},
-    #             {"id": "settings", **settings_data, "apiKeys": "removed"},
-    #             upsert=True
-    #         )
-    #
-    #     # Sort for display
-    #     settings_data['subjects'] = sorted(
-    #         settings_data['subjects'], key=len, reverse=True)
-    #     settings_data['languages'] = sorted(
-    #         settings_data['languages'], key=len, reverse=True)
-    #
-    #     return {'settings': settings_data}
 
     conf = db.config.find_one({"id": "settings"})
     if conf:
