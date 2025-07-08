@@ -574,31 +574,38 @@ def get_chat_list():
 @admin_bp.route("/search/", methods=["POST"])
 @admin_required
 def search():
-    search = request.form.get("search-q")
+    query = request.form.get("search-q")
+    if not query:
+        return render_template("components/search-results.html", search_chats=[])
 
     chat_service = ChatService(current_app.db)
+    user_service = UserService(current_app.db)
     chats = chat_service.get_all_chats(session.get("admin_id"))
 
-    user_service = UserService(current_app.db)
     search_chats = set()
     for chat in chats:
         user = user_service.get_user_by_id(chat.user_id)
+        if not user:
+            continue
+
         chat.username = user.name
 
+        # Match against user fields
         if (
-            search in user.name
-            or (user.country and search in user.country)
-            or (user.city and search in user.city)
+            query in user.name or
+            (user.country and query in user.country) or
+            (user.city and query in user.city)
         ):
             search_chats.add(chat)
             continue
-        for message in chat.messages:
-            if search in message.content:
-                search_chats.add(chat)
-                break
+
+        # Match against messages
+        if any(query in message.content for message in chat.messages):
+            search_chats.add(chat)
 
     return render_template(
-        "components/search-results.html", search_chats=list(search_chats)
+        "components/search-results.html",
+        search_chats=list(search_chats)
     )
 
 
