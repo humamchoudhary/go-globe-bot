@@ -8,7 +8,7 @@
 /* } */
 
 :root {
-  --sec-bg-color: #e0e0e0; /* Secondary background: soft light gray-blue */
+    --sec-bg-color: #e0e0e0; /* Secondary background: soft light gray-blue */
   --main-color: #ff5800; /* Keep accent color the same */
   --bg-color: #ffffff; /* Primary background: white */
   /* --border-color: #dce3eb; /* Light border */ */
