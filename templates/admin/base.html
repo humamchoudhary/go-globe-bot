@@ -68,7 +68,7 @@
     </div>
     <div id="search-menu" style="display: none;" class="z-200 absolute items-center flex-col w-screen h-screen overflow-hidden left-0 top-0 pt-[150px]">
         <div id="close-search" class=" bg-black/60 absolute w-screen h-screen top-0 right-0"></div>
-        <div class="z-250 flex flex-col gap-[30px] w-[680px] items-center">
+        <div class="z-250 flex flex-col gap-[30px] md:w-[680px] items-center">
             <form
                 hx-post="/admin/search/"
                 hx-swap="innerHTML"
@@ -93,7 +93,7 @@
     <!-- Updated notification menu in base.html -->
     <div id="notification-menu" style="display: none;" class="z-200 absolute items-center flex-col w-screen h-screen overflow-hidden left-0 top-0 pt-[150px]">
       <div id="close-notifications" class="bg-black/60 absolute w-screen h-screen top-0 right-0"></div>
-      <div class="z-250 flex flex-col gap-[30px] w-[680px] items-center">
+      <div class="z-250 flex flex-col gap-[30px] md:w-[680px] items-center">
         <div class="w-full rounded-[5px] border border-[var(--border-color)] bg-[var(--sec-bg-color)]">
           <div id="notification-list" class="max-h-[500px] overflow-y-auto"
                hx-get="/admin/notifications/"
