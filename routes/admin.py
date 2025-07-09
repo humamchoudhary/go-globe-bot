@@ -507,7 +507,7 @@ def chat(room_id):
         username="Ana",
 
         has_more=len(chats) == 20,
-            chat_counts=chat_counts
+            chat_counts=chat_counts,next_page=1
     )
 
 
@@ -1965,7 +1965,7 @@ def get_all_chats():
         # chats=chats_data,
         chat_counts=chat_counts,
         has_more=len(chats) == 20,
-        next_page=1,
+        next_page=0,
         current_filter='all'
     )
 

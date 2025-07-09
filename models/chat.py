@@ -72,7 +72,6 @@ class Chat:
 
     @classmethod
     def from_dict(cls, data):
-        pprint(data.get('chat_id',"NONE"))
         messages = [Message.from_dict(m) for m in data.get("messages", [])]
         chat = cls(
             chat_id=data.get('chat_id'),
