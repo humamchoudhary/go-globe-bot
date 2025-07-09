@@ -344,8 +344,7 @@ class ChatService:
         limit: int = 20,
         skip: int = 0
     ) -> List[Chat]:
-        """Get filtered chats with pagination support."""
-
+        """Get filtered chats with pagination support using find()."""
         # Base filter query
         base_filter = {
             "admin_id": admin_id,
@@ -362,28 +361,15 @@ class ChatService:
         elif filter_type == "exported":
             base_filter["exported"] = True
 
-        pipeline = [
-            {"$match": base_filter},
-            {
-                "$addFields": {
-                    "sort_date": {"$ifNull": ["$updated_at", "$created_at"]}
-                }
-            },
-            {"$sort": {"updated_at": -1}},
-            {"$skip": skip},
-            {"$limit": limit},
-            {
-                "$addFields": {
-                    # Only get the last message
-                    "messages": {"$slice": ["$messages", -1]}
-                }
-            },
-            # Remove _id and temporary sort_date field
-            {"$project": {"_id": 0, "sort_date": 0}}
-        ]
-
-        cursor = self.chats_collection.aggregate(pipeline)
-        return [Chat.from_dict(chat_data) for chat_data in cursor]
+        # Use find() with sort, skip, limit (equivalent to Mongoose pattern)
+        cursor = (self.chats_collection
+                  .find(base_filter, {"_id": 0})
+                  .sort("updated_at", -1)
+                  .skip(skip)
+                  .limit(limit)
+                  )
+        print(cursor)
+        return [Chat.from_dict(chat_data) for chat_data in cursor if chat_data]
 
     def get_chat_counts_by_filter(self, admin_id: Optional[str] = None) -> Dict[str, int]:
         """Get chat counts for all filter types using aggregation."""
