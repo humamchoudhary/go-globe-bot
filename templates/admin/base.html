@@ -262,16 +262,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-      socket.on("new_message", function (data) {
-        htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
+socket.on("new_message", function (data) {
+    htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
+    const currentPath = window.location.pathname;
+    const lastPathSegment = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+    console.log(data)
+    console.log(currentPath)
+    console.log(lastPathSegment)
+    if (lastPathSegment === data['room_id']) {
+        console.log('req')
+        // Use setTimeout to ensure HTMX is ready
+        setTimeout(() => {
+            htmx.ajax('GET', `/admin/chat/${data['room_id']}`, {
+                target:'#chatarea',
+                swap:"innerHTML"
+            });
+        }, 100);
+    }
+});
 
-          {% if chat %}
-          var chatid = '{{chat.room_id}}' 
-          if (chatid == data['room_id']){
-              htmx.ajax('GET', '/admin/chat/{{chat.room_id}}', '#chatarea') 
-          }
-          {% endif%}
-      });
+
+
 
       socket.on("admin_required", function (data) {
 

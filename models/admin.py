@@ -83,7 +83,7 @@ class Admin:
             created_at = datetime.utcnow()
         elif type(created_at) == dict:
             created_at = datetime.fromisoformat(created_at.get("$date"))
-        print(created_at)
+        # print(created_at)
         # Ensure it's timezone-aware UTC
         if created_at.tzinfo is None:
             created_at = created_at.replace(tzinfo=timezone.utc)

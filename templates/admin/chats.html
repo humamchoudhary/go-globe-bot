@@ -149,11 +149,8 @@ window.addEventListener("DOMContentLoaded", function () {
 
     const messageArea = document.getElementById('messageArea');
     if (messageArea) {
-        messageArea.scrollTo({
-            top: messageArea.scrollHeight,
-            behavior: 'smooth'
-        });
-    }
+
+messageArea.scrollTop = messageArea.scrollHeight ;    }
 });
 
 function updateChatCounts() {

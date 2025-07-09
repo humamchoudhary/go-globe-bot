@@ -541,8 +541,6 @@ def get_chat_list():
         chats_data.append(data)
     
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    for i in chats_data:
-        print(i['updated_at'])
     cchat = chat_service.get_chat_by_room_id(room_id) if room_id else None
     
     # Check if this is a pagination request
