@@ -641,11 +641,10 @@ def filter_chats(filter):
     page = request.args.get('page', 0, type=int)
     limit = request.args.get('limit', 20, type=int)
     is_pagination = request.args.get('pagination') == 'true'
-    
+
     # Validate and sanitize inputs
     limit = min(max(limit, 1), 100)  # Limit between 1-100
     page = max(page, 0)  # Ensure non-negative page
-    
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
     
@@ -1957,7 +1956,7 @@ def get_all_chats():
     )
     
     # Get chat counts for header
-    chat_counts = chat_service.get_chat_counts_by_filter(session.get("admin_id"))
+    chat_counts = chat_service.get_chat_counts_by_filter()
     return render_template(
         "admin/chats.html",
         # chats=chats_data,

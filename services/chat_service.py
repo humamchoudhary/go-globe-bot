@@ -8,6 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
 logger = logging.getLogger(__name__)
+
+
 class ChatService:
     def __init__(self, db):
         self.db = db
@@ -139,7 +141,8 @@ class ChatService:
 
     def get_chats_with_full_messages(self, admin_id: Optional[str] = None, limit: int = 100, skip: int = 0) -> List[Chat]:
         """Get chats with all messages - use only when needed."""
-        match_stage = {"$match": {"admin_id": admin_id}} if admin_id else {"$match": {}}
+        match_stage = {"$match": {"admin_id": admin_id}
+                       } if admin_id else {"$match": {}}
 
         pipeline = [
             match_stage,
@@ -151,7 +154,8 @@ class ChatService:
             {"$sort": {"sort_date": -1}},
             {"$skip": skip},
             {"$limit": limit},
-            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+            # Remove _id and temporary sort_date field
+            {"$project": {"_id": 0, "sort_date": 0}}
         ]
 
         cursor = self.chats_collection.aggregate(pipeline)
@@ -251,7 +255,8 @@ class ChatService:
             {"$sort": {"sort_date": -1}},
             {"$skip": skip},
             {"$limit": limit},
-            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+            # Remove _id and temporary sort_date field
+            {"$project": {"_id": 0, "sort_date": 0}}
         ]
 
         cursor = self.chats_collection.aggregate(pipeline)
@@ -284,10 +289,12 @@ class ChatService:
             {"$limit": limit},
             {
                 "$addFields": {
-                    "messages": {"$slice": ["$messages", -message_limit]}  # Get last N messages
+                    # Get last N messages
+                    "messages": {"$slice": ["$messages", -message_limit]}
                 }
             },
-            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+            # Remove _id and temporary sort_date field
+            {"$project": {"_id": 0, "sort_date": 0}}
         ]
 
         cursor = self.chats_collection.aggregate(pipeline)
@@ -362,15 +369,17 @@ class ChatService:
                     "sort_date": {"$ifNull": ["$updated_at", "$created_at"]}
                 }
             },
-            {"$sort": {"sort_date": -1}},
+            {"$sort": {"updated_at": -1}},
             {"$skip": skip},
             {"$limit": limit},
             {
                 "$addFields": {
-                    "messages": {"$slice": ["$messages", -1]}  # Only get the last message
+                    # Only get the last message
+                    "messages": {"$slice": ["$messages", -1]}
                 }
             },
-            {"$project": {"_id": 0, "sort_date": 0}}  # Remove _id and temporary sort_date field
+            # Remove _id and temporary sort_date field
+            {"$project": {"_id": 0, "sort_date": 0}}
         ]
 
         cursor = self.chats_collection.aggregate(pipeline)
