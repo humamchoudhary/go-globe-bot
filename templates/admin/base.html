@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 {% block header %}
 
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  const defaultTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.classList = defaultTheme;
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
 <script>
         if (!("Notification" in window)) {
@@ -489,10 +494,13 @@ logos.forEach(logo => {
   }
 
   // On page load
+
+window.addEventListener('DOMContentLoaded', function() {
   const savedTheme = localStorage.getItem('theme');
   const defaultTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   document.documentElement.classList = defaultTheme;
   setThemeIcon(defaultTheme);
+})
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
  {% endblock %}

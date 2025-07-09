@@ -2202,6 +2202,19 @@ def download_google_files():
         flash("Failed to download files", "error")
         return redirect("/admin/google-files/")
 
+@admin_bp.route('/google/logout',methods=['POST'])
+def google_logout():
+    flow = InstalledAppFlow.from_client_secrets_file(
+        CREDENTIALS_FILE, scopes=SCOPES)
+    
+    admin_service = AdminService(current_app.db)
+    admin_service.admins_collection.update_one(
+
+        {"admin_id": session.get('admin_id')},
+        {"$set": {"settings.google_token": None}},
+    )
+    return "",200
+
 
 @admin_bp.route("/google-thumbnail/<file_id>")
 def google_thumbnail(file_id):
