@@ -371,6 +371,7 @@ class ChatService:
         print(cursor)
         return [Chat.from_dict(chat_data) for chat_data in cursor if chat_data]
 
+
     def get_chat_counts_by_filter(self, admin_id: Optional[str] = None) -> Dict[str, int]:
         """Get chat counts for all filter types using aggregation."""
 

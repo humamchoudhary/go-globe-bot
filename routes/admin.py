@@ -49,7 +49,7 @@ from collections import Counter, defaultdict
 import calendar
 from functools import lru_cache
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "files")
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "user_data")
 
 
 def admin_required(_func=None, *, roles=None):
@@ -799,7 +799,7 @@ def send_message(room_id):
 @admin_required
 def files():
     admin_id = session.get("admin_id")
-    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}","files")
     os.makedirs(path, exist_ok=True)
     return render_template("admin/files.html", files=sorted(os.listdir(path)))
 
@@ -819,7 +819,7 @@ def file_page(file_name):
     file_readable = False
 
     admin_id = session.get("admin_id")
-    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}","files")
     file_path = os.path.join(path, file_name)
     if os.path.exists(file_path):
         file["filename"] = file_name
@@ -845,7 +845,7 @@ def file_page(file_name):
 def delete_file(file_name):
 
     admin_id = session.get("admin_id")
-    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}","files")
     try:
         file_path = os.path.join(path, file_name)
         # Check if file exists before attempting to delete
@@ -867,7 +867,7 @@ def delete_file(file_name):
 def serve_file(file_name):
 
     admin_id = session.get("admin_id")
-    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}","files")
     # Securely serve the file from the UPLOAD_FOLDER
     return send_from_directory(path, file_name)
 
@@ -892,7 +892,7 @@ def upload_file():
         unique_filename = f"{uuid.uuid4().hex}{file_extension}"
 
         admin_id = session.get("admin_id")
-        path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
+        path = os.path.join(UPLOAD_FOLDER, f"{admin_id}","files")
         file_path = os.path.join(path, unique_filename)
 
     if file_extension == ".pdf":
@@ -1747,7 +1747,7 @@ def scrape_urls(urls,admin_id):
             if not filename:
                 # Use domain if path is empty
                 filename = urlparse(res["url"]).netloc
-            filepath = f"{os.getcwd()}/files/{admin_id}/{filename}.txt"
+            filepath = f"{os.getcwd()}/user_data/{admin_id}/files/{filename}.txt"
             print(filepath)
             with open(filepath, "w") as f:
                 # # # print(f"Saving content to {f.name}")
@@ -2140,7 +2140,7 @@ def download_google_files():
     try:
         # Get the download path from config (you'll need to set this in your config)
         admin_id = session.get("admin_id")
-        download_path = os.path.join(UPLOAD_FOLDER, f"{admin_id}")
+        download_path = os.path.join(UPLOAD_FOLDER, f"{admin_id}","files")
         os.makedirs(download_path, exist_ok=True)
 
         creds = Credentials.from_authorized_user_info(
@@ -2387,7 +2387,464 @@ def contact():
                 }), 200
 
 
+import pickle 
+from services.database_service import DatabaseCrawler
+import os
 
+
+def get_user_crawler(admin_id: str) -> DatabaseCrawler:
+    """Get or create user's database crawler"""
+    user_dir = os.path.join('user_data', admin_id)
+    os.makedirs(user_dir, exist_ok=True)
+    
+    db_path = os.path.join(user_dir, 'db_connection.pkl')
+    
+    if os.path.exists(db_path):
+        with open(db_path, 'rb') as f:
+            return pickle.load(f)
+    else:
+        return DatabaseCrawler()
+
+import dill
+
+def save_user_crawler(admin_id: str, crawler: DatabaseCrawler):
+    """Save user's database crawler"""
+    user_dir = os.path.join('user_data', admin_id)
+    os.makedirs(user_dir, exist_ok=True)
+    
+    db_path = os.path.join(user_dir, 'db_connection.pkl')
+    print(crawler)
+    print(db_path)
+
+    print(f"crawler: {crawler}")
+    print(f"crawler.connectors: {crawler.connectors}")
+
+    with open(db_path, 'wb') as f:
+        pickle.dump(crawler, f)
+
+@admin_bp.route('/database/')
+@admin_required
+def database_homepage():
+    admin_id = session.get('admin_id')
+    crawler =get_user_crawler(admin_id) 
+    print(f"{crawler}")
+    # path = os.path.join('user_data',admin_id,"db_connection.pkl") 
+    # if os.path.exists(path):
+    #     with open(path, 'rb') as file:
+    #         connection = pickle.load(file)
+    # else:
+    #     crawler = DatabaseCrawler()
+    return render_template('admin/database.html',crawler=crawler)
+
+@admin_bp.route('/test_database_connection', methods=['POST'])
+@admin_required
+def test_database_connection():
+    """Test database connection"""
+    data = request.form
+    
+    try:
+        # Create temporary connection for testing
+        connection_type = data['type']
+        host = data['host']
+        port = int(data['port'])
+        username = data.get('username')
+        password = data.get('password')
+        database = data.get('database')
+        
+        temp_crawler = DatabaseCrawler()
+        
+        if connection_type == 'mysql':
+            temp_crawler.add_mysql_connection(
+                name='temp_test',
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                database=database
+            )
+        elif connection_type == 'mongodb':
+            temp_crawler.add_mongodb_connection(
+                name='temp_test',
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                database=database
+            )
+        else:
+            return jsonify({'status': 'failed', 'message': 'Invalid database type'})
+        
+        # Test the connection
+        result = temp_crawler.test_connection('temp_test')
+        temp_crawler.close_all()
+        
+        return jsonify(result)
+    except Exception as e:
+        return e
+
+
+
+
+@admin_bp.route('/add_database_connection', methods=['POST'])
+@admin_required
+def add_database_connection():
+    """Add new database connection"""
+    admin_id = session.get('admin_id')
+    data = request.form
+    
+    # Validate required fields
+    if not all(key in data for key in ['name', 'type', 'host', 'port']):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        crawler = get_user_crawler(admin_id)
+        
+        # Check if connection name already exists
+        if data['name'] in crawler.connectors:
+            return jsonify({'error': 'Connection name already exists'}), 400
+        
+        # Add the new connection
+        connection_type = data['type']
+        name = data['name']
+        host = data['host']
+        port = int(data['port'])
+        username = data.get('username')
+        password = data.get('password')
+        database = data.get('database')
+        
+        if connection_type == 'mysql':
+            crawler.add_mysql_connection(
+                name=name,
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                database=database
+            )
+        elif connection_type == 'mongodb':
+            crawler.add_mongodb_connection(
+                name=name,
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                database=database
+            )
+        else:
+            return jsonify({'error': 'Invalid database type'}), 400
+        
+        # Save the updated crawler
+        save_user_crawler(admin_id, crawler)
+        
+        return jsonify({'success': True, 'message': 'Connection added successfully'})
+    
+    except ValueError as e:
+        return jsonify({'error': f'Invalid port number: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Failed to add connection: {str(e)}'}), 500
+
+
+
+@admin_bp.route('/test_db/<string:connection_name>',methods=['POST'])
+@admin_required
+def test_connection(connection_name):
+
+    admin_id = session.get('admin_id')
+    # connection_name = request.args.get('connection')
+    
+    if not connection_name:
+        return jsonify({'error': 'Connection name required'}), 400
+    
+    try:
+        crawler = get_user_crawler(admin_id)
+
+        if connection_name not in crawler.connectors:
+            return jsonify({'error': 'Connection not found'}), 404
+
+        # connection = crawler.connectors[connection_name]
+        # data = connection.test_connection()
+        data = crawler.test_connection(connection_name)
+        # crawler.connectors[connection_name] = connection
+        # print(f"{connection}")
+        # print(f"{crawler}")
+        save_user_crawler(admin_id,crawler)
+        return data, 200 if data['status'] == 'success' else 500
+    
+    except Exception as e:
+        return jsonify({'error': f'Failed to get tables: {str(e)}'}), 500
+
+@admin_bp.route('/get_database_tables')
+@admin_required
+def get_database_tables():
+    """Get tables for a specific connection"""
+    admin_id = session.get('admin_id')
+    connection_name = request.args.get('connection')
+    
+    if not connection_name:
+        return jsonify({'error': 'Connection name required'}), 400
+    
+    try:
+        crawler = get_user_crawler(admin_id)
+    
+        
+        if connection_name not in crawler.connectors:
+            return jsonify({'error': 'Connection not found'}), 404
+        
+        tables = crawler.get_tables(connection_name)
+        
+        return jsonify({
+            'success': True,
+            'tables': tables,
+            'connection': connection_name
+        })
+    
+    except Exception as e:
+        return jsonify({'error': f'Failed to get tables: {str(e)}'}), 500
+
+
+@admin_bp.route('/get_table_data', methods=['POST'])
+@admin_required
+def get_table_data():
+    """Get data from a specific table with optional query"""
+    admin_id = session.get('admin_id')
+    data = request.json
+    
+    if not all(key in data for key in ['connection', 'table']):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        crawler = get_user_crawler(admin_id)
+        
+        if data['connection'] not in crawler.connectors:
+            return jsonify({'error': 'Connection not found'}), 404
+        
+        # Get the query (if provided)
+        query = data.get('query', '')
+        limit = data.get('limit', 3)
+        
+        # For MySQL, add LIMIT if not already in query
+        if crawler.connectors[data['connection']].type == 'mysql':
+            if query and 'limit' not in query.lower():
+                if 'where' in query.lower():
+                    query += f" LIMIT {limit}"
+                else:
+                    query = f"SELECT * FROM {data['table']} LIMIT {limit}"
+            elif not query:
+                query = f"SELECT * FROM {data['table']} LIMIT {limit}"
+        
+        # Execute the query
+        result = crawler.execute_query(data['connection'], query, data['table'])
+        
+        # Apply limit if not already applied in query (for MongoDB)
+        if 'limit' not in query.lower() and len(result['data']) > limit:
+            result['data'] = result['data'][:limit]
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({'error': f'Failed to get table data: {str(e)}'}), 500
+import json
+
+def save_db_data(result, connection_name, admin_id, query=None):
+    # Create directory if it doesn't exist
+    db_dir = os.path.join('user_data', admin_id, 'db')
+    os.makedirs(db_dir, exist_ok=True)
+    
+    # Prepare data to save in the new format
+    data_to_save = {
+        'query': query or '',
+        'data': result['data']
+    }
+    
+    with open(os.path.join(db_dir, f"{connection_name}-{result['table_names'][0]}.json"), "w") as file:
+        json.dump(data_to_save, file, indent=4, default=str)
+
+@admin_bp.route('/save_data', methods=['POST'])
+@admin_required
+def save_data():
+    """Save selected data to backend"""
+    admin_id = session.get('admin_id')
+    data = request.json
+    print(data)
+    
+    if not all(key in data for key in ['connection', 'table']):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        crawler = get_user_crawler(admin_id)
+        
+        if data['connection'] not in crawler.connectors:
+            return jsonify({'error': 'Connection not found'}), 404
+        
+        # Get the query (if provided)
+        query = data.get('query')
+        
+        # Execute the query to get all data (not just preview)
+        if not query:
+            query =f'SELECT * from {data['table']}' 
+
+        result = crawler.execute_query(data['connection'], query, data['table'])
+        
+        if 'error' in result:
+            return jsonify({'success': False, 'error': result['error']})
+        
+        # Save the data
+        save_db_data(result, data['connection'], admin_id, query)
+        
+        return jsonify({
+            'success': True,
+            'message': f"Saved {len(result['data'])} rows from {data['table']}",
+            'row_count': len(result['data'])
+        })
+    
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Failed to save data: {str(e)}'})
+
+from glob import glob
+
+@admin_bp.route('/get_saved_data')
+@admin_required
+def get_saved_data():
+    """Get all saved data collections"""
+    admin_id = session.get('admin_id')
+    db_dir = os.path.join('user_data', admin_id, 'db')
+    
+    if not os.path.exists(db_dir):
+        return jsonify({'collections': []})
+    
+    # Group files by connection name
+    collections = {}
+    for file_path in glob(os.path.join(db_dir, '*.json')):
+        filename = os.path.basename(file_path)
+        try:
+            # Extract connection and table name from filename
+            parts = filename.split('-', 1)
+            if len(parts) != 2:
+                continue
+                
+            connection_name = parts[0]
+            table_name = parts[1].replace('.json', '')
+            
+            # Get file stats for last modified time
+            stat = os.stat(file_path)
+            saved_at = datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M')
+            
+            # Get row count
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+                row_count = len(data)
+            
+            # Add to collections
+            if connection_name not in collections:
+                collections[connection_name] = {
+                    'connection_name': connection_name,
+                    'tables': []
+                }
+            
+            collections[connection_name]['tables'].append({
+                'name': table_name,
+                'row_count': row_count,
+                'saved_at': saved_at,
+                # Try to get query from metadata if available
+                'query': data[0].get('_query') if data and isinstance(data, list) and len(data) > 0 else None
+            })
+        except Exception as e:
+            print(f"Error processing {filename}: {str(e)}")
+            continue
+    
+    return jsonify({
+        'collections': list(collections.values())
+    })
+
+@admin_bp.route('/get_saved_tables')
+@admin_required
+def get_saved_tables():
+    """Get tables for a specific saved collection"""
+    admin_id = session.get('admin_id')
+    connection_name = request.args.get('connection')
+    
+    if not connection_name:
+        return jsonify({'error': 'Connection name required'}), 400
+    
+    try:
+        db_dir = os.path.join('user_data', admin_id, 'db')
+        if not os.path.exists(db_dir):
+            return jsonify({'tables': []})
+            
+        tables = []
+        for file_path in glob(os.path.join(db_dir, f'{connection_name}-*.json')):
+            try:
+                filename = os.path.basename(file_path)
+                table_name = filename[len(connection_name)+1:-5]  # Remove connection- and .json
+                
+                # Get file stats
+                stat = os.stat(file_path)
+                saved_at = datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M')
+                
+                # Get row count and query
+                with open(file_path, 'r') as f:
+                    saved_data = json.load(f)
+                    if isinstance(saved_data, dict) and 'data' in saved_data:
+                        row_count = len(saved_data['data'])
+                        query = saved_data.get('query', '')
+                    else:
+                        row_count = len(saved_data)
+                        query = ''
+                
+                tables.append({
+                    'name': table_name,
+                    'row_count': row_count,
+                    'saved_at': saved_at,
+                    'query': query,'data':saved_data['data']
+                })
+            except Exception as e:
+                print(f"Error processing {filename}: {str(e)}")
+                continue
+        print(tables)
+        
+        return jsonify({'tables': tables})
+    
+    except Exception as e:
+        print(f"Error in get_saved_tables: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+
+@admin_bp.route('/get_saved_table_data')
+@admin_required
+def get_saved_table_data():
+    """Get data for a specific saved table"""
+    admin_id = session.get('admin_id')
+    connection_name = request.args.get('connection')
+    table_name = request.args.get('table')
+    
+    if not connection_name or not table_name:
+        return jsonify({'error': 'Connection and table name required'}), 400
+    
+    file_path = os.path.join('user_data', admin_id, 'db', f'{connection_name}-{table_name}.json')
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'Table data not found'}), 404
+    
+    try:
+        with open(file_path, 'r') as f:
+            saved_data = json.load(f)
+            
+            # Handle both old and new formats
+            if isinstance(saved_data, dict) and 'data' in saved_data:
+                # New format
+                return jsonify({
+                    'data': saved_data['data'],
+                    'query': saved_data.get('query', '')
+                })
+            else:
+                # Old format (array)
+                return jsonify({
+                    'data': saved_data,
+                    'query': ''
+                })
+    except Exception as e:
+        return jsonify({'error': f'Failed to load table data: {str(e)}'}), 500
 
 
 def register_admin_socketio_events(socketio):

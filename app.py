@@ -644,6 +644,7 @@ def create_app(config_class=Config):
             if "GET" in rule.methods and has_no_empty_params(rule):
                 url = url_for(rule.endpoint, **(rule.defaults or {}))
                 links.append((url, rule.endpoint))
+        print(links)
         return jsonify(links)
 
     @app.route('/privacy')

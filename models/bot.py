@@ -237,8 +237,8 @@ class Bot:
             return "", []
 
         for file_name in os.listdir(os.path.join(os.getcwd(), 'files', f"{admin_id}")):
-            file_path = os.path.join(os.getcwd(), 'files', f"{
-                                     admin_id}", file_name)
+            file_path = os.path.join(os.getcwd(), 'user_data', f"{
+                                     admin_id}", "files", file_name)
             file_ext = os.path.splitext(file_name)[1].lower()
 
             try:
