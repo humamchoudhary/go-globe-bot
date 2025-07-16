@@ -263,11 +263,13 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,flask
 files/*
 bin/chat/*
-
+user_data/*
 *.pem
 *.csr
 node_modules
 node_modules/*
+
+
 
 credentials.json
 
