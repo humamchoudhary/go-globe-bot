@@ -63,7 +63,7 @@
     <div
       class="group relative bg-[var(--bg-color)] border border-[var(--border-color)] hover:border-[var(--main-color)] rounded-xl p-6 transition-all duration-300 hover:shadow-lg min-h-[200px] flex flex-col"
 
-  onclick="openDataSelectionModal('{{name}}')"    >
+  onclick="event.stopPropagation();openDataSelectionModal('{{name}}')"    >
       <div class="flex items-center gap-3 mb-4">
         <div
           class="w-12 h-12 rounded-full bg-[var(--sec-bg-color)] flex items-center justify-center"
@@ -99,6 +99,7 @@
             hx-on::after-request="window.location.reload()"
             hx-swap="none"
             class="flex-1 py-2 text-xs font-medium rounded-lg border border-[var(--border-color)] hover:bg-[var(--sec-bg-color)] text-[var(--sec-text)] transition-colors flex items-center justify-center gap-1"
+            onclick="event.stopPropagation()"
           >
             <i data-lucide="wifi" class="w-3 h-3"></i> Test
           </button>
