@@ -10,7 +10,7 @@ import openai
 import requests
 from google import genai
 from google.genai import types
-
+import json
 import pdfplumber
 load_dotenv()
 
@@ -232,27 +232,50 @@ class Bot:
     def _process_files(self, admin_id):
         text_content = []
         images = []
+        base_path = os.path.join(os.getcwd(), 'user_data', str(admin_id))
 
-        if not os.path.exists(os.path.join(os.getcwd(), 'files', f"{admin_id}")):
+        # Check if files directory exists
+        files_dir = os.path.join(base_path, "files")
+        if not os.path.exists(files_dir):
             return "", []
 
-        for file_name in os.listdir(os.path.join(os.getcwd(), 'files', f"{admin_id}")):
-            file_path = os.path.join(os.getcwd(), 'user_data', f"{
-                                     admin_id}", "files", file_name)
+        # Process files in files directory
+        for file_name in os.listdir(files_dir):
+            file_path = os.path.join(files_dir, file_name)
             file_ext = os.path.splitext(file_name)[1].lower()
 
             try:
-                if file_ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                if file_ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp'):
                     with Image.open(file_path) as img:
                         images.append(img.copy())
                 elif file_ext == '.txt':
                     url = file_name.replace("*", "/").replace(".txt", "")
                     with open(file_path, 'r', encoding='utf-8') as f:
-                        text_content.append(f"<url>{url}</url>")
-                        text_content.append(
-                            f"<file url='{url}'>{f.read()}</file>")
+                        text_content.extend([
+                            f"<url>{url}</url>",
+                            f"<file url='{url}'>{f.read()}</file>"
+                        ])
             except Exception as e:
                 print(f"Error processing {file_name}: {str(e)}")
+
+        # Process files in db directory
+        db_dir = os.path.join(base_path, "db")
+        if os.path.exists(db_dir):
+            for file_name in os.listdir(db_dir):
+                file_path = os.path.join(db_dir, file_name)
+                try:
+                    with open(file_path, 'r') as f:
+                        data = json.load(f).get('data', [])
+                    string_re = "\n".join(
+                        f"{k} : {v}"
+                        for d in data
+                        for k, v in d.items()
+                    )
+                    if string_re:
+                        text_content.append(string_re)
+                except Exception as e:
+                    print(f"Error processing DB file {file_name}: {str(e)}")
+        print(text_content)
 
         return "\n".join(text_content), images
 

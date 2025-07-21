@@ -39,18 +39,17 @@ class DatabaseConnector(ABC):
         """Close database connection"""
         pass
 
-
-
     def __getstate__(self):
         """Exclude non-pickleable DB connection."""
         state = self.__dict__.copy()
         state['connection'] = None
+        state['is_connected'] = False
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.connection = None  # Reconnect can be triggered manually
-
+        self.connection = None
+        self.is_connected = False
 
     def __str__(self):
         return f"config: {self.connection_config}\nconnection: {self.connection}\nstatus: {self.is_connected}"
@@ -69,7 +68,6 @@ class MySQLConnector(DatabaseConnector):
             'password': password,
             'database': database
         }
-
         super().__init__(config)
 
     def connect(self) -> bool:
@@ -82,10 +80,9 @@ class MySQLConnector(DatabaseConnector):
                 password=self.connection_config['password'],
                 database=self.connection_config['database'],
                 cursorclass=pymysql.cursors.DictCursor,
-
                 connect_timeout=5,
-                init_command="SET SESSION TRANSACTION READ ONLY")
-
+                init_command="SET SESSION TRANSACTION READ ONLY"
+            )
             self.is_connected = True
             return True
         except Exception as e:
@@ -109,7 +106,6 @@ class MySQLConnector(DatabaseConnector):
             with self.connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
             self.is_connected = True
-                # result = cursor.fetchone()
 
             return {
                 'status': 'success',
@@ -153,7 +149,6 @@ class MySQLConnector(DatabaseConnector):
 
                 # Get table name from query if not provided
                 if not table_name:
-                    # Simple extraction - can be improved with SQL parsing
                     query_lower = query.lower()
                     if 'from' in query_lower:
                         table_name = query_lower.split(
@@ -179,8 +174,6 @@ class MySQLConnector(DatabaseConnector):
             self.connection.close()
             self.is_connected = False
 
-
-
     def __setstate__(self, state):
         super().__setstate__(state)
         # Optional: Reconnect immediately (can be disabled if needed)
@@ -192,6 +185,8 @@ class MySQLConnector(DatabaseConnector):
 
 class MongoDBConnector(DatabaseConnector):
     """MongoDB database connector"""
+
+    type = 'mongodb'
 
     def __init__(self, host: str, port: int, username: str = None, password: str = None, database: str = None):
         config = {
@@ -216,7 +211,12 @@ class MongoDBConnector(DatabaseConnector):
                     self.connection_config['port']}"
 
             self.connection = pymongo.MongoClient(
-                connection_string, serverSelectionTimeoutMS=5000)
+                connection_string,
+                serverSelectionTimeoutMS=5000,
+                # Add these options for better pickle compatibility
+                connect=False,  # Don't connect immediately
+                maxPoolSize=1,  # Minimize connection pool
+            )
 
             # Force connection check
             self.connection.admin.command('ping')
@@ -276,8 +276,8 @@ class MongoDBConnector(DatabaseConnector):
         try:
             if not self.is_connected:
                 self.connect()
-
-            if not self.database:
+            print(self.database)
+            if self.database == None:
                 # If no specific database, list all databases
                 databases = self.connection.list_database_names()
                 return [f"database: {db}" for db in databases]
@@ -294,7 +294,9 @@ class MongoDBConnector(DatabaseConnector):
             if not self.is_connected:
                 self.connect()
 
-            if not self.database:
+            print(self.database)
+            print(self.is_connected)
+            if self.database == None:
                 return {
                     'table_names': [],
                     'data': [],
@@ -351,17 +353,27 @@ class MongoDBConnector(DatabaseConnector):
             self.connection.close()
             self.is_connected = False
 
-
-
+    def __getstate__(self):
+        """Custom pickle state for MongoDB connector"""
+        state = self.__dict__.copy()
+        # Remove non-pickleable objects
+        state['connection'] = None
+        state['database'] = None
+        state['is_connected'] = False
+        return state
 
     def __setstate__(self, state):
-        super().__setstate__(state)
+        """Custom unpickle state for MongoDB connector"""
+        self.__dict__.update(state)
+        self.connection = None
         self.database = None
+        self.is_connected = False
         # Optional: Reconnect immediately
         try:
             self.connect()
         except Exception as e:
             print(f"MongoDB reconnect failed on load: {e}")
+
 
 class DatabaseCrawler:
     """Main database crawler class"""
@@ -415,22 +427,25 @@ class DatabaseCrawler:
             connector.close()
 
     def __getstate__(self):
-        return self.__dict__
+        """Custom pickle state for DatabaseCrawler"""
+        return self.__dict__.copy()
 
     def __setstate__(self, state):
+        """Custom unpickle state for DatabaseCrawler"""
         self.__dict__.update(state)
 
-
-
     def __str__(self):
-        return f"{[name+" : "+str(connection) for name,connection in self.connectors.items()]}"
+        return f"{[name + ' : ' + str(connection) for name, connection in self.connectors.items()]}"
 
 
+# Example usage and testing
 if __name__ == "__main__":
+    import pickle
+
     # Initialize crawler
     crawler = DatabaseCrawler()
 
-    # Add MySQL connection
+    # Add connections
     crawler.add_mysql_connection(
         name="mysql_db",
         host="localhost",
@@ -440,50 +455,34 @@ if __name__ == "__main__":
         database="blogdb"
     )
 
-    # Add MongoDB connection
     crawler.add_mongodb_connection(
         name="mongo_db",
         host="localhost",
         port=27017,
-        username=None,  # No auth
+        username=None,
         password=None,
         database="test_db"
     )
 
-    # Test connections
-    print("Testing MySQL connection:")
-    mysql_test = crawler.test_connection("mysql_db")
-    print(json.dumps(mysql_test, indent=2))
+    # Test pickling
+    print("Testing pickle functionality...")
+    try:
+        # Serialize
+        pickled_data = pickle.dumps(crawler)
+        print("✓ Pickling successful")
 
-    print("\nTesting MongoDB connection:")
-    mongo_test = crawler.test_connection("mongo_db")
-    print(json.dumps(mongo_test, indent=2))
+        # Deserialize
+        unpickled_crawler = pickle.loads(pickled_data)
+        print("✓ Unpickling successful")
 
-    # Get tables/collections
-    if mysql_test['status'] == 'success':
-        print("\nMySQL tables:")
-        mysql_tables = crawler.get_tables("mysql_db")
-        print(mysql_tables)
+        # Test that connections work after unpickling
+        print("\nTesting connections after unpickling:")
+        for name in unpickled_crawler.connectors.keys():
+            result = unpickled_crawler.test_connection(name)
+            print(f"{name}: {result['status']}")
 
-        # Execute MySQL query
-        if mysql_tables:
-            result = crawler.execute_query(
-                "mysql_db", f"SELECT * FROM {mysql_tables[0]} LIMIT 10")
-            print(f"\nMySQL query result:")
-            print(json.dumps(result, indent=2, default=str))
-
-    if mongo_test['status'] == 'success':
-        print("\nMongoDB collections:")
-        mongo_collections = crawler.get_tables("mongo_db")
-        print(mongo_collections)
-
-        # Execute MongoDB query
-        if mongo_collections:
-            result = crawler.execute_query(
-                # Empty filter = get all
-                "mongo_db", '{}', mongo_collections[0])
-            print(f"\nMongoDB query result:")
-            print(json.dumps(result, indent=2))
+    except Exception as e:
+        print(f"✗ Pickle failed: {e}")
 
     # Close all connections
     crawler.close_all()
