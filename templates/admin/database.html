@@ -60,7 +60,8 @@
     {% for name,connection in crawler.connectors.items() %}
     <div
       class="group relative bg-[var(--bg-color)] border border-[var(--border-color)] hover:border-[var(--main-color)] rounded-xl p-6 transition-all duration-300 hover:shadow-lg min-h-[200px] flex flex-col"
-    >
+
+  onclick="openDataSelectionModal('{{name}}')"    >
       <div class="flex items-center gap-3 mb-4">
         <div
           class="w-12 h-12 rounded-full bg-[var(--sec-bg-color)] flex items-center justify-center"
@@ -834,19 +835,33 @@
   let currentTable = null;
 
   // Open data selection modal
-  function openDataSelectionModal() {
-    document.getElementById("data-selection-modal").classList.remove("hidden");
-    // Reset selections
-    currentConnection = null;
-    currentTable = null;
-    document.getElementById("data-connection-select").value = "";
-    document.getElementById("data-table-select").value = "";
+// Update the openDataSelectionModal function
+function openDataSelectionModal(connectionName = null) {
+  const modal = document.getElementById("data-selection-modal");
+  const connectionSelect = document.getElementById("data-connection-select");
+  
+  modal.classList.remove("hidden");
+  
+  // Reset selections except if connectionName is provided
+  currentConnection = connectionName || null;
+  currentTable = null;
+  
+  if (connectionName) {
+    connectionSelect.value = connectionName;
+    // Trigger table loading
+    loadTablesForConnection(connectionName);
+  } else {
+    connectionSelect.value = "";
     document.getElementById("data-table-select").disabled = true;
-    document.getElementById("table-data-preview").innerHTML =
-      '<p class="text-sm text-[var(--sec-text)] text-center py-8">Select a table to preview data</p>';
-    document.getElementById("data-query-input").value = "";
-    document.getElementById("save-data-btn").disabled = true;
+    document.getElementById("data-table-select").innerHTML = 
+      '<option value="" disabled selected>Select a table</option>';
   }
+  
+  document.getElementById("table-data-preview").innerHTML =
+    '<p class="text-sm text-[var(--sec-text)] text-center py-8">Select a table to preview data</p>';
+  document.getElementById("data-query-input").value = "";
+  document.getElementById("save-data-btn").disabled = true;
+}
 
   // Load tables for selected connection
   function loadTablesForConnection(connectionName) {
