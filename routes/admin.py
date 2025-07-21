@@ -2807,8 +2807,38 @@ def get_saved_tables():
     except Exception as e:
         print(f"Error in get_saved_tables: {str(e)}")
         return jsonify({'error': str(e)}), 500
+@admin_bp.route('/delete_database_connection/<connection_name>',methods=['DELETE'])
+@admin_required
+def delete_connection(connection_name):
 
+    admin_id = session.get('admin_id')
 
+    if not connection_name:
+        return jsonify({'error': 'Connection and table name required'}), 400
+    try:
+
+        crawler = get_user_crawler(admin_id)
+        del crawler.connectors[connection_name]
+
+        save_user_crawler(admin_id,crawler)
+        return "success",200
+    except Exception as e:
+        return jsonify({'error':e}),400
+
+@admin_bp.route('/delete_saved_table/<connection_name>/<table_name>',methods=['DELETE'])
+@admin_required
+def delete_table(connection_name,table_name):
+    admin_id = session.get('admin_id')
+
+    if not connection_name or not table_name:
+        return jsonify({'error': 'Connection and table name required'}), 400
+
+    file_path = os.path.join('user_data', admin_id, 'db', f'{connection_name}-{table_name}.json')
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'Table data not found'}), 404
+    os.remove(file_path)
+    return "deleted",200
 
 @admin_bp.route('/get_saved_table_data')
 @admin_required
