@@ -57,7 +57,7 @@ def create_app(config_class=Config):
          resources={r"/*": {
              "origins": "*",
              "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-             "allow_headers": ["hx-current-url", "hx-request", "hx-target", "hx-trigger", "Content-Type", "Authorization"],
+             "allow_headers": "*",
              "supports_credentials": True
          }})
     app.config.from_object(config_class)
