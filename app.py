@@ -57,8 +57,7 @@ def create_app(config_class=Config):
          supports_credentials=True,
          allow_headers=["*"],
          expose_headers=["Content-Disposition"],
-         methods=['*']
-         )
+         methods=["GET", "POST", "OPTIONS"])
     app.config.from_object(config_class)
 
     # Setup MongoDB
