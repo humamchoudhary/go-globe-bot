@@ -22,9 +22,6 @@ function loadHeaders() {
         htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
         htmxScript.crossOrigin = 'anonymous';
         htmxScript.onload = () => {
-            const corsExtScript = document.createElement('script');
-            corsExtScript.src = 'https://unpkg.com/htmx.org/dist/ext/cors.js';
-            document.head.appendChild(corsExtScript);
             console.log('HTMX loaded successfully');
 
             // Wait for HTMX to be fully available
@@ -38,8 +35,6 @@ function loadHeaders() {
 
                 console.log('HTMX initialized with config:', htmx.config);
             }
-
-
 
 
             // Set HTMX config meta
@@ -581,6 +576,10 @@ function init() {
 
 }
 
+    document.addEventListener('htmx:configRequest', (evt) => {
+        console.log('config')
+        evt.detail.headers = [];
+    });
 // Start the initialization
 init();
 }) ();
