@@ -53,12 +53,10 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    CORS(app, origins=["*"],
+    CORS(app, origins=["https://gobot.go-globe.com","https://gobot.go-globe.dev"],
          supports_credentials=True,
-         # allow_headers=['Content-Type',"hx-current-url","hx-request","hx-target","hx-trigger"],
+         allow_headers=['Content-Type',"hx-current-url","hx-request","hx-target","hx-trigger"],
          methods=['GET', 'POST'],
-         allow_headers=["*"],
-         expose_headers=["*"],
          )
     app.config.from_object(config_class)
 

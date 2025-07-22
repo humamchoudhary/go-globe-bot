@@ -1,3 +1,4 @@
+import markdown
 from flask import make_response
 from services.notification_service import NotificationService
 from flask_mail import Mail
@@ -71,19 +72,6 @@ def headers():
 @min_bp.route('/')
 def index():
 
-
-    if request.method == 'OPTIONS':
-        # Manually handle preflight
-        response = jsonify()
-        response.headers.add('Access-Control-Allow-Origin', 'https://go-globe.dev')
-        response.headers.add('Access-Control-Allow-Methods', 'GET, OPTIONS')
-        response.headers.add('Access-Control-Allow-Headers', 
-                           'hx-current-url, hx-request, hx-target, hx-trigger, Content-Type')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Max-Age', '86400')  # Cache for 24 hours
-        return response
-
-
     print(session.get('last_visit'))
     if 'last_visit' in session and session['last_visit'] not in ['/min/', '/min/get-headers']:
         # response = make_response('', 200)
@@ -96,6 +84,7 @@ def index():
     # return response
 
     return redirect('/min/onboarding')
+
 
 @min_bp.route('login', defaults={'subject': None}, methods=['GET'])
 @min_bp.route('login/<string:subject>', methods=['GET'])
@@ -257,7 +246,7 @@ def new_chat(subject):
     # If HTMX request, return the chat URL instead of redirecting
     if request.headers.get('HX-Request') == 'true':
 
-        return redirect(url_for('min.chat',chat_id=chat.chat_id))
+        return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
     return redirect(url_for('min.chat', chat_id=chat.chat_id))
 
@@ -371,7 +360,7 @@ def ping_admin(chat_id):
             'timestamp': new_message.timestamp.isoformat(),
 
             'room_id': room_id,
-            "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name),
+            "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
         }, room=room_id)
     else:
         new_message = chat_service.add_message(
@@ -381,7 +370,7 @@ def ping_admin(chat_id):
             'sender': 'SYSTEM',
             'content': new_message.content,
 
-            "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name),
+            "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
             'timestamp': new_message.timestamp.isoformat(),
             'room_id': room_id
         }, room=room_id)
@@ -417,7 +406,6 @@ Auto Generated Message"""
 
     return jsonify({"status": "Ana has been notified"}), 200
 
-import markdown
 
 @min_bp.route('/chat/<chat_id>/send_message', methods=['POST', 'GET'])
 @login_required
@@ -449,7 +437,7 @@ def send_message(chat_id):
         'content': message,
         'timestamp': new_message.timestamp.isoformat(),
         'room_id': chat.room_id,
-        "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name)
+        "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name)
     }, room=chat.room_id)
     # print('hello')
 
@@ -464,7 +452,7 @@ def send_message(chat_id):
 
         current_app.socketio.emit('new_message', {
 
-            "html":render_template("/user/fragments/chat_message.html",message=bot_message,username=user.name),
+            "html": render_template("/user/fragments/chat_message.html", message=bot_message, username=user.name),
             'room_id': chat.room_id,
             'sender': chat.bot_name,
             'content': msg,
@@ -474,7 +462,7 @@ def send_message(chat_id):
 
         current_app.socketio.emit('new_message_admin', {
 
-            "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name),
+            "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
             'room_id': chat.room_id,
             'sender': user.name,
             'content': message,
