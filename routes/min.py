@@ -23,6 +23,7 @@ import pytz
 @min_bp.before_request
 def before_req():
     path = request.path
+    print(session.items())
     print(f"Path: {path}")
     if path.startswith("/min") and (path.split("/")[-1] not in ['auth', 'send_message', 'ping_admin'] and path not in ['/min/', '/min/get-headers']):
         session["last_visit"] = path
@@ -57,9 +58,9 @@ def login_required(f):
     return decorated_function
 
 
-@min_bp.route('/test')
-def test_model():
-    return render_template('user/test.html')
+# @min_bp.route('/test')
+# def test_model():
+#     return render_template('user/test.html')
 
 
 @min_bp.route('/get-headers')
@@ -355,7 +356,8 @@ def ping_admin(chat_id):
             'content': new_message.content,
             'timestamp': new_message.timestamp.isoformat(),
 
-            'room_id': room_id
+            'room_id': room_id,
+            "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name),
         }, room=room_id)
     else:
         new_message = chat_service.add_message(
@@ -364,6 +366,8 @@ def ping_admin(chat_id):
         current_app.socketio.emit('new_message', {
             'sender': 'SYSTEM',
             'content': new_message.content,
+
+            "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name),
             'timestamp': new_message.timestamp.isoformat(),
             'room_id': room_id
         }, room=room_id)
@@ -399,6 +403,7 @@ Auto Generated Message"""
 
     return jsonify({"status": "Ana has been notified"}), 200
 
+import markdown
 
 @min_bp.route('/chat/<chat_id>/send_message', methods=['POST', 'GET'])
 @login_required
@@ -424,13 +429,13 @@ def send_message(chat_id):
         chat.room_id, user.name, message)
 
     # # print(f'{session["user_id"]}-{chat_id[:8]}')
-
+    new_message.content = markdown.markdown(new_message.content)
     current_app.socketio.emit('new_message', {
         'sender': user.name,
         'content': message,
         'timestamp': new_message.timestamp.isoformat(),
-
-        'room_id': chat.room_id
+        'room_id': chat.room_id,
+        "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name)
     }, room=chat.room_id)
     # print('hello')
 
@@ -445,6 +450,7 @@ def send_message(chat_id):
 
         current_app.socketio.emit('new_message', {
 
+            "html":render_template("/user/fragments/chat_message.html",message=bot_message,username=user.name),
             'room_id': chat.room_id,
             'sender': chat.bot_name,
             'content': msg,
@@ -454,6 +460,7 @@ def send_message(chat_id):
 
         current_app.socketio.emit('new_message_admin', {
 
+            "html":render_template("/user/fragments/chat_message.html",message=new_message,username=user.name),
             'room_id': chat.room_id,
             'sender': user.name,
             'content': message,

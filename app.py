@@ -465,7 +465,8 @@ def create_app(config_class=Config):
             return response
 
         # Calculate response time
-        response_time = round((time.time() - (g.get("start_time") or 0)) * 1000, 2)
+        response_time = round(
+            (time.time() - (g.get("start_time") or 0)) * 1000, 2)
 
         # Get timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -624,6 +625,10 @@ def create_app(config_class=Config):
         defaults = rule.defaults if rule.defaults is not None else ()
         arguments = rule.arguments if rule.arguments is not None else ()
         return len(defaults) >= len(arguments)
+    import markdown
+    @app.template_filter('markdown')
+    def markdown_filter(text):
+        return markdown.markdown(text)
 
     @app.context_processor
     def inject_font_data():
@@ -632,8 +637,20 @@ def create_app(config_class=Config):
         # print('fonts called')
         return {'font_files': get_font_data()}
 
-    @app.route('/render-bot')
-    def render_chatbot():
+    @app.route('/render-bot/', defaults={'client_sec': ""})
+    @app.route('/render-bot/<string:client_sec>')
+    def render_chatbot(client_sec):
+        if client_sec:
+            admin_service = AdminService(app.db)
+            admin = admin_service.get_admin_from_sec(client_sec)
+            if admin:
+
+                session['admin_id'] = admin.admin_id
+            else:
+                return "Invalid Secrect Key",403
+        else:
+            admin_id = os.environ.get('DEFAULT_ADMIN_ID')
+            session['admin_id'] = admin_id
 
         return Response(render_template('js/init_chat.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
 

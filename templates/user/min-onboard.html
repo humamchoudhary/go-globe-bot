@@ -1,6 +1,6 @@
 {% extends 'user/base-min.html' %} {% block content %}
 <!-- AI Chat Bot Page -->
-<div class="goglobe_fn_aichatbot_page fn__chatbot" style="min-height: 100%">
+<div style="display: flex; min-height: calc(100vh - var(--goglobe-header-height) - 71px)">
   <div
     class="chat__page"
     style="
@@ -8,6 +8,10 @@
       display: flex;
       justify-content: flex-start;
       padding-bottom: 2.5rem;
+      width: 100%;
+      flex-direction: column;
+      position: relative;
+      z-index: 3;
     "
   >
     <!-- REPLACE WITH HTMX --->
@@ -28,19 +32,22 @@
         style="
           font-family: var(--goglobe-body-font-family) !important;
           font-size: 18px !important;
-          padding: 15px 24px;
+          padding: 10px 24px;
           border-radius:6px;
           font-size: 1.5rem;
           border: 2px solid var(--goglobe-border-color);
           transition-duration: 150ms;
           transition-property: all;
           cursor: pointer;
-          font-weight:bold; background:var(--goglobe-main-color);
+          font-weight:bold; 
+          background:var(--goglobe-main-color);
           color:white;
           text-decoration:none;
+          display: block;
+          min-height: 40px;
+          line-height: 40px;
         "
         href="/min/login/{{subject}}"
-
       >
         {{subject}}
       </a>

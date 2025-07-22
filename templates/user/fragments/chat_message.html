@@ -1,10 +1,29 @@
-<div
-  class="chat__box {{'your__chat' if message.sender==username else 'bot__chat'}}"
->
-  <div class="author">
-    <span>{{ message.sender if message.sender != username else 'You' }}</span>
+<div style="position: relative; margin-bottom: 20px">
+  <div
+    style="
+      position: absolute;
+      left: 30px;
+      top: -10px;
+      display: block;
+      height: 20px;
+      padding: 0 15px;
+      background-color: var(--goglobe-main-color);
+      color: #fff;
+      font-family: var(--goglobe-heading-font-family);
+      font-weight: 500;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      line-height: 20px;
+      border-radius: 10px;
+    "
+  >
+    <span>{{ 'You' if message.sender == username else message.sender }}</span>
   </div>
-  <div class="chat">
-    <p class="md-content">{{ message.content }}</p>
+  <div
+    class="md-content"
+    style="padding: 15px; border-radius: 5px; font-size: 16px; font-weight: 400; line-height: 1.375; font-family: var(--goglobe-heading-font-family); background-color: {% if message.sender == username %}var(--goglobe-some-a-bg-color){% else %}var(--goglobe-some-r-bg-color){% endif %}; color: var(--goglobe-heading-color); border: 1px solid var(--goglobe-border-color);"
+  >
+    {{ message.content|markdown|safe }}
   </div>
 </div>

@@ -1955,7 +1955,7 @@ def get_all_chats():
         limit=20,
         skip=0
     )
-    
+    # print(chats)   
     # Get chat counts for header
     chat_counts = chat_service.get_chat_counts_by_filter()
     return render_template(
