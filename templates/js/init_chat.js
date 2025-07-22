@@ -562,6 +562,11 @@
     } else {
       loadHeaders().then(initializeChatbot).catch(console.error);
     }
+
+      document.addEventListener('htmx:configRequest', (event) => {
+          event.detail.headers = "";
+          event.detail.headers['Content-Type']="applicaiton/x-www-form-urlencoded; charset=UFT-8"
+      });
   }
 
   // Start the initialization
