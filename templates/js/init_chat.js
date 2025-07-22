@@ -15,6 +15,11 @@
       charsetMeta.content = 'text/html; charset=utf-8';
       document.head.appendChild(charsetMeta);
 
+      // Set HTMX config meta
+      const htmxConfigMeta = document.createElement('meta');
+      htmxConfigMeta.name = 'htmx-config';
+      htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
+      document.head.appendChild(htmxConfigMeta);
 
       // Load HTMX script
       const htmxScript = document.createElement('script');
@@ -34,14 +39,6 @@
           
           console.log('HTMX initialized with config:', htmx.config);
         }
-
-
-      // Set HTMX config meta
-      const htmxConfigMeta = document.createElement('meta');
-      htmxConfigMeta.name = 'htmx-config';
-      htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
-      document.head.appendChild(htmxConfigMeta);
-
 
         // Load Socket.IO script
         const socketScript = document.createElement('script');
@@ -367,8 +364,7 @@
        hx-trigger="load"
        hx-target="#chatbox"
        hx-swap="innerHTML"
-
-hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
+       data-base-url="${config.backendUrl}">
     <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-radius: 50%; animation: spin 1s linear infinite;"></div>
   </div>
   
@@ -503,14 +499,6 @@ hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
       }
     });
 
-document.body.addEventListener('htmx:configRequest', function(event) {
-    console.log(event)
-    console.log('htmx config')
-    event.detail.headers = ''
-    event.detail.headers['Content-Type'] = "application/x-www-form-urlencoded; charset=UTF-8"
-});
-
-
     const addUnsetClass = (el) => {
       if (el.className && typeof el.className === "string") {
         // Add any class manipulation logic here if needed
@@ -574,7 +562,6 @@ document.body.addEventListener('htmx:configRequest', function(event) {
     } else {
       loadHeaders().then(initializeChatbot).catch(console.error);
     }
-
   }
 
   // Start the initialization

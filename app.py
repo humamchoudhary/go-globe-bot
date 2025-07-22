@@ -53,10 +53,11 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    CORS(app, origins=["https://go-globe.com","https://go-globe.dev"],
+    CORS(app, origins=["*"],
          supports_credentials=True,
-         allow_headers=['Content-Type',"hx-current-url","hx-request","hx-target","hx-trigger"],
-         methods=['GET', 'POST'],
+         allow_headers=["*"],
+         expose_headers=["Content-Disposition"],
+         methods=['*']
          )
     app.config.from_object(config_class)
 
@@ -626,7 +627,6 @@ def create_app(config_class=Config):
         arguments = rule.arguments if rule.arguments is not None else ()
         return len(defaults) >= len(arguments)
     import markdown
-
     @app.template_filter('markdown')
     def markdown_filter(text):
         return markdown.markdown(text)
@@ -651,7 +651,7 @@ def create_app(config_class=Config):
 
                 session['admin_id'] = admin.admin_id
             else:
-                return "Invalid Secrect Key", 403
+                return "Invalid Secrect Key",403
         else:
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
             session['admin_id'] = admin_id
