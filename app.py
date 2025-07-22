@@ -54,13 +54,12 @@ def get_font_data():
 def create_app(config_class=Config):
     app = Flask(__name__)
     CORS(app, 
-         supports_credentials=True,
-         allow_headers=["*"],
-         expose_headers=["Content-Disposition"],
-         origins=["https://go-globe.dev","https://go-globe.com"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-
-         )
+         resources={r"/*": {
+             "origins": "*",
+             "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+             "allow_headers": ["hx-current-url", "hx-request", "hx-target", "hx-trigger", "Content-Type", "Authorization"],
+             "supports_credentials": True
+         }})
     app.config.from_object(config_class)
 
     # Setup MongoDB
