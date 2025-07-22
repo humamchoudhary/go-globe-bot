@@ -70,6 +70,20 @@ def headers():
 
 @min_bp.route('/')
 def index():
+
+
+    if request.method == 'OPTIONS':
+        # Manually handle preflight
+        response = jsonify()
+        response.headers.add('Access-Control-Allow-Origin', 'https://go-globe.dev')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 
+                           'hx-current-url, hx-request, hx-target, hx-trigger, Content-Type')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        response.headers.add('Access-Control-Max-Age', '86400')  # Cache for 24 hours
+        return response
+
+
     print(session.get('last_visit'))
     if 'last_visit' in session and session['last_visit'] not in ['/min/', '/min/get-headers']:
         # response = make_response('', 200)
