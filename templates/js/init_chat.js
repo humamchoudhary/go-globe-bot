@@ -367,7 +367,8 @@
        hx-trigger="load"
        hx-target="#chatbox"
        hx-swap="innerHTML"
-       data-base-url="${config.backendUrl}">
+
+hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
     <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-radius: 50%; animation: spin 1s linear infinite;"></div>
   </div>
   
@@ -504,6 +505,7 @@
 
 document.body.addEventListener('htmx:configRequest', function(event) {
     console.log(event)
+    console.log('htmx config')
     event.detail.headers = ''
     event.detail.headers['Content-Type'] = "application/x-www-form-urlencoded; charset=UTF-8"
 });
