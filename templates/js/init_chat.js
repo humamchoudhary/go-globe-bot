@@ -502,6 +502,13 @@
       }
     });
 
+document.body.addEventListener('htmx:configRequest', function(event) {
+    console.log(event)
+    event.detail.headers = ''
+    event.detail.headers['Content-Type'] = "application/x-www-form-urlencoded; charset=UTF-8"
+});
+
+
     const addUnsetClass = (el) => {
       if (el.className && typeof el.className === "string") {
         // Add any class manipulation logic here if needed
