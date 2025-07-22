@@ -24,7 +24,6 @@
       // Load HTMX script
       const htmxScript = document.createElement('script');
       htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
-      htmxScript.integrity = 'sha384-oeUn82QNXPuVkGCkcrInrS1twIxKhkZiFfr2TdiuObZ3n3yIeMiqcRzkIcguaof1';
       htmxScript.crossOrigin = 'anonymous';
       htmxScript.onload = () => {
         console.log('HTMX loaded successfully');
