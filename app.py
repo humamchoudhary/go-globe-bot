@@ -640,6 +640,7 @@ def create_app(config_class=Config):
     @app.route('/render-bot/', defaults={'client_sec': ""})
     @app.route('/render-bot/<string:client_sec>')
     def render_chatbot(client_sec):
+        print(session.items())
         if client_sec:
             admin_service = AdminService(app.db)
             admin = admin_service.get_admin_from_sec(client_sec)
