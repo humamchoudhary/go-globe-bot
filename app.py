@@ -55,7 +55,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     CORS(app, origins=["https://go-globe.dev","https://go-globe.com"],
          supports_credentials=True,
-         allow_headers=['Content-Type'], methods=['GET', 'POST', 'OPTIONS'],
+         allow_headers=['Content-Type',"hx-current-url","hx-request","hx-target","hx-trigger"], methods=['GET', 'POST', 'OPTIONS'],
          expose_headers=["Content-Disposition"],
          )
     app.config.from_object(config_class)
