@@ -56,7 +56,7 @@ def create_app(config_class=Config):
     CORS(app, origins=["*"],
          supports_credentials=True,
          # allow_headers=['Content-Type',"hx-current-url","hx-request","hx-target","hx-trigger"],
-         methods=['GET', 'POST', 'OPTIONS'],
+         methods=['GET', 'POST'],
          allow_headers=['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
          expose_headers=["Content-Disposition"],
          )
