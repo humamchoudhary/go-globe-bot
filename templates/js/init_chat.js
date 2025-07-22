@@ -366,7 +366,7 @@ function initializeChatbot() {
   <div id="chatbox"
        hx-get="${config.backendUrl}/min/"
 
- hx-boost="false"
+hx-request='{"noHeaders": true}' hx-boost="false"
       hx-trigger="load"
        hx-target="#chatbox"
        hx-swap="innerHTML"
