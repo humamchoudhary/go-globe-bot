@@ -577,7 +577,8 @@ function init() {
 }
 
     document.addEventListener('htmx:configRequest', (evt) => {
-        console.log('config')
+        console.log('config');
+        console.log(evt)
         evt.detail.headers = [];
     });
 // Start the initialization
