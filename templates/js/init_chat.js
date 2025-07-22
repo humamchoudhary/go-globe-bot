@@ -15,11 +15,6 @@
       charsetMeta.content = 'text/html; charset=utf-8';
       document.head.appendChild(charsetMeta);
 
-      // Set HTMX config meta
-      const htmxConfigMeta = document.createElement('meta');
-      htmxConfigMeta.name = 'htmx-config';
-      htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
-      document.head.appendChild(htmxConfigMeta);
 
       // Load HTMX script
       const htmxScript = document.createElement('script');
@@ -39,6 +34,14 @@
           
           console.log('HTMX initialized with config:', htmx.config);
         }
+
+
+      // Set HTMX config meta
+      const htmxConfigMeta = document.createElement('meta');
+      htmxConfigMeta.name = 'htmx-config';
+      htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
+      document.head.appendChild(htmxConfigMeta);
+
 
         // Load Socket.IO script
         const socketScript = document.createElement('script');
@@ -563,10 +566,6 @@
       loadHeaders().then(initializeChatbot).catch(console.error);
     }
 
-      document.addEventListener('htmx:configRequest', (event) => {
-          event.detail.headers = "";
-          event.detail.headers['Content-Type']="applicaiton/x-www-form-urlencoded; charset=UFT-8"
-      });
   }
 
   // Start the initialization
