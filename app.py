@@ -56,7 +56,7 @@ def create_app(config_class=Config):
     CORS(app, origins=["*"],
          supports_credentials=True,
          allow_headers=["*"],
-         expose_headers=["Content-Disposition"],
+         # expose_headers=["Content-Disposition"],
          methods=['*']
          )
     app.config.from_object(config_class)
