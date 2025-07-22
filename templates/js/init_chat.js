@@ -22,6 +22,9 @@ function loadHeaders() {
         htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
         htmxScript.crossOrigin = 'anonymous';
         htmxScript.onload = () => {
+            const corsExtScript = document.createElement('script');
+            corsExtScript.src = 'https://unpkg.com/htmx.org/dist/ext/cors.js';
+            document.head.appendChild(corsExtScript);
             console.log('HTMX loaded successfully');
 
             // Wait for HTMX to be fully available
@@ -35,6 +38,8 @@ function loadHeaders() {
 
                 console.log('HTMX initialized with config:', htmx.config);
             }
+
+
 
 
             // Set HTMX config meta
@@ -363,15 +368,14 @@ function initializeChatbot() {
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>        </div>
       </div>
     </div>
-  <div id="chatbox"
-       hx-get="${config.backendUrl}/min/"
-
-hx-request='{"noHeaders": true}' hx-boost="false"
-      hx-trigger="load"
-       hx-target="#chatbox"
-       hx-swap="innerHTML"
-
-hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
+<div id="chatbox"
+     hx-get="${config.backendUrl}/min/"
+     hx-trigger="load"
+     hx-target="#chatbox"
+     hx-swap="innerHTML"
+     hx-ext="cors"  <!-- Enable CORS extension -->
+     hx-headers='{"Accept": "application/json", "X-Requested-With": "XMLHttpRequest"}'
+     data-base-url="${config.backendUrl}">
     <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-radius: 50%; animation: spin 1s linear infinite;"></div>
   </div>
   
@@ -509,7 +513,7 @@ hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
     document.addEventListener('htmx:configRequest', (evt) => {
         evt.detail.headers = [];
     });
- 
+
     const addUnsetClass = (el) => {
         if (el.className && typeof el.className === "string") {
             // Add any class manipulation logic here if needed
