@@ -364,7 +364,9 @@
     </div>
   <div id="chatbox"
        hx-get="${config.backendUrl}/min/"
-       hx-trigger="load"
+
+ hx-boost="false"
+      hx-trigger="load"
        hx-target="#chatbox"
        hx-swap="innerHTML"
 
