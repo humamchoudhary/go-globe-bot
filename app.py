@@ -643,6 +643,8 @@ def create_app(config_class=Config):
         if client_sec:
             admin_service = AdminService(app.db)
             admin = admin_service.get_admin_from_sec(client_sec)
+            if session.get('admin_id') != admin.admin_id:
+                session.clear()
             if admin:
 
                 session['admin_id'] = admin.admin_id
