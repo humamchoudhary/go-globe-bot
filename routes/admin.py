@@ -1957,7 +1957,7 @@ def get_all_chats():
     )
     # print(chats)   
     # Get chat counts for header
-    chat_counts = chat_service.get_chat_counts_by_filter()
+    chat_counts = chat_service.get_chat_counts_by_filter(session.get('admin_id'))
     return render_template(
         "admin/chats.html",
         # chats=chats_data,
