@@ -574,6 +574,7 @@ document.body.addEventListener('htmx:configRequest', function(event) {
     } else {
       loadHeaders().then(initializeChatbot).catch(console.error);
     }
+      console.log(htmx.config)
 
   }
 
