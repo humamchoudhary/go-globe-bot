@@ -1,102 +1,103 @@
 (function() {
-  // Configuration - Update these values as needed
-  const config = {
-    backendUrl: '{{backend_url}}', // Replace with your actual backend URL
-    fontFiles: {{font_files | safe}}, // Replace with your font files array
-    fontFolder: '{{settings["backend_url"]}}{{ url_for("static", filename="font/NeueHaas") }}' // Replace with your font folder path
+    // Configuration - Update these values as needed
+    const config = {
+        backendUrl: '{{backend_url}}', // Replace with your actual backend URL
+        fontFiles: {{ font_files | safe
+}}, // Replace with your font files array
+fontFolder: '{{settings["backend_url"]}}{{ url_for("static", filename="font/NeueHaas") }}' // Replace with your font folder path
   };
 
-  // Function to load headers and dependencies
-  function loadHeaders() {
+// Function to load headers and dependencies
+function loadHeaders() {
     return new Promise((resolve, reject) => {
-      // Set meta charset
-      const charsetMeta = document.createElement('meta');
-      charsetMeta.httpEquiv = 'Content-Type';
-      charsetMeta.content = 'text/html; charset=utf-8';
-      document.head.appendChild(charsetMeta);
+        // Set meta charset
+        const charsetMeta = document.createElement('meta');
+        charsetMeta.httpEquiv = 'Content-Type';
+        charsetMeta.content = 'text/html; charset=utf-8';
+        document.head.appendChild(charsetMeta);
 
 
-      // Load HTMX script
-      const htmxScript = document.createElement('script');
-      htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
-      htmxScript.crossOrigin = 'anonymous';
-      htmxScript.onload = () => {
-        console.log('HTMX loaded successfully');
-        
-        // Wait for HTMX to be fully available
-        if (typeof htmx !== 'undefined') {
-          // Configure HTMX
-          htmx.config.selfRequestsOnly = false;
-          htmx.config.withCredentials = true;
-          
-          // Initialize HTMX on the document
-          htmx.process(document.body);
-          
-          console.log('HTMX initialized with config:', htmx.config);
-        }
+        // Load HTMX script
+        const htmxScript = document.createElement('script');
+        htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
+        htmxScript.crossOrigin = 'anonymous';
+        htmxScript.onload = () => {
+            console.log('HTMX loaded successfully');
+
+            // Wait for HTMX to be fully available
+            if (typeof htmx !== 'undefined') {
+                // Configure HTMX
+                htmx.config.selfRequestsOnly = false;
+                htmx.config.withCredentials = true;
+
+                // Initialize HTMX on the document
+                htmx.process(document.body);
+
+                console.log('HTMX initialized with config:', htmx.config);
+            }
 
 
-      // Set HTMX config meta
-      const htmxConfigMeta = document.createElement('meta');
-      htmxConfigMeta.name = 'htmx-config';
-      htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
-      document.head.appendChild(htmxConfigMeta);
+            // Set HTMX config meta
+            const htmxConfigMeta = document.createElement('meta');
+            htmxConfigMeta.name = 'htmx-config';
+            htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
+            document.head.appendChild(htmxConfigMeta);
 
 
-        // Load Socket.IO script
-        const socketScript = document.createElement('script');
-        socketScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js';
-        socketScript.onload = () => {
-          console.log('Socket.IO loaded successfully');
-          
-          // Add font configuration to window
-          window.fontFiles = config.fontFiles;
-          window.fontFolder = config.fontFolder;
+            // Load Socket.IO script
+            const socketScript = document.createElement('script');
+            socketScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js';
+            socketScript.onload = () => {
+                console.log('Socket.IO loaded successfully');
 
-          // Load font loader script
-          const fontLoaderScript = document.createElement('script');
-          fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
-          fontLoaderScript.onload = () => {
-            console.log('Font loader loaded successfully');
-            // Give all libraries a moment to fully initialize before resolving
-            setTimeout(resolve, 100);
-          };
-          fontLoaderScript.onerror = () => {
-            console.warn('Font loader failed to load, continuing anyway');
-            // Give all libraries a moment to fully initialize before resolving
-            setTimeout(resolve, 100);
-          };
-          document.head.appendChild(fontLoaderScript);
+                // Add font configuration to window
+                window.fontFiles = config.fontFiles;
+                window.fontFolder = config.fontFolder;
+
+                // Load font loader script
+                const fontLoaderScript = document.createElement('script');
+                fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
+                fontLoaderScript.onload = () => {
+                    console.log('Font loader loaded successfully');
+                    // Give all libraries a moment to fully initialize before resolving
+                    setTimeout(resolve, 100);
+                };
+                fontLoaderScript.onerror = () => {
+                    console.warn('Font loader failed to load, continuing anyway');
+                    // Give all libraries a moment to fully initialize before resolving
+                    setTimeout(resolve, 100);
+                };
+                document.head.appendChild(fontLoaderScript);
+            };
+            socketScript.onerror = () => {
+                console.warn('Socket.IO failed to load, continuing anyway');
+                // Continue without Socket.IO if it fails
+                window.fontFiles = config.fontFiles;
+                window.fontFolder = config.fontFolder;
+
+                const fontLoaderScript = document.createElement('script');
+                fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
+                fontLoaderScript.onload = () => {
+                    console.log('Font loader loaded successfully');
+                    setTimeout(resolve, 100);
+                };
+                fontLoaderScript.onerror = () => {
+                    console.warn('Font loader failed to load, continuing anyway');
+                    setTimeout(resolve, 100);
+                };
+                document.head.appendChild(fontLoaderScript);
+            };
+            document.head.appendChild(socketScript);
         };
-        socketScript.onerror = () => {
-          console.warn('Socket.IO failed to load, continuing anyway');
-          // Continue without Socket.IO if it fails
-          window.fontFiles = config.fontFiles;
-          window.fontFolder = config.fontFolder;
-
-          const fontLoaderScript = document.createElement('script');
-          fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
-          fontLoaderScript.onload = () => {
-            console.log('Font loader loaded successfully');
-            setTimeout(resolve, 100);
-          };
-          fontLoaderScript.onerror = () => {
-            console.warn('Font loader failed to load, continuing anyway');
-            setTimeout(resolve, 100);
-          };
-          document.head.appendChild(fontLoaderScript);
+        htmxScript.onerror = () => {
+            reject(new Error('Failed to load HTMX'));
         };
-        document.head.appendChild(socketScript);
-      };
-      htmxScript.onerror = () => {
-        reject(new Error('Failed to load HTMX'));
-      };
-      document.head.appendChild(htmxScript);
+        document.head.appendChild(htmxScript);
     });
-  }
+}
 
-  // Function to initialize the chatbot
-  function initializeChatbot() {
+// Function to initialize the chatbot
+function initializeChatbot() {
     const insertHtml = `
 <style>
   @keyframes pulse-glow {
@@ -387,10 +388,10 @@ hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
     // Process the newly added HTML with HTMX
     const chatContainer = document.getElementById("chat-container");
     const chatbox = document.getElementById("chatbox");
-    
+
     if (typeof htmx !== 'undefined') {
-      htmx.process(chatContainer);
-      console.log('HTMX processed chatbot elements');
+        htmx.process(chatContainer);
+        console.log('HTMX processed chatbot elements');
     }
 
     // Initialize chatbot functionality
@@ -405,52 +406,52 @@ hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
     let startX, startY, startWidth, startHeight;
 
     const initResize = (e, direction) => {
-      e.preventDefault();
-      isResizing = true;
-      currentResizer = direction;
-      startX = e.clientX;
-      startY = e.clientY;
-      startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
-      startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
+        e.preventDefault();
+        isResizing = true;
+        currentResizer = direction;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
+        startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
 
-      document.addEventListener("mousemove", handleResize);
-      document.addEventListener("mouseup", stopResize);
-      document.body.style.userSelect = "none";
+        document.addEventListener("mousemove", handleResize);
+        document.addEventListener("mouseup", stopResize);
+        document.body.style.userSelect = "none";
     };
 
     const handleResize = (e) => {
-      if (!isResizing) return;
+        if (!isResizing) return;
 
-      const rect = chatContainer.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+        const rect = chatContainer.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-      if (currentResizer === "nw") {
-        let newWidth = startWidth - (e.clientX - startX);
-        let newHeight = startHeight - (e.clientY - startY);
+        if (currentResizer === "nw") {
+            let newWidth = startWidth - (e.clientX - startX);
+            let newHeight = startHeight - (e.clientY - startY);
 
-        newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
-        newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
+            newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
+            newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
 
-        chatContainer.style.width = newWidth + "px";
-        chatContainer.style.height = newHeight + "px";
-      } else if (currentResizer === "n") {
-        let newHeight = startHeight - (e.clientY - startY);
-        newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
-        chatContainer.style.height = newHeight + "px";
-      } else if (currentResizer === "w") {
-        let newWidth = startWidth - (e.clientX - startX);
-        newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
-        chatContainer.style.width = newWidth + "px";
-      }
+            chatContainer.style.width = newWidth + "px";
+            chatContainer.style.height = newHeight + "px";
+        } else if (currentResizer === "n") {
+            let newHeight = startHeight - (e.clientY - startY);
+            newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
+            chatContainer.style.height = newHeight + "px";
+        } else if (currentResizer === "w") {
+            let newWidth = startWidth - (e.clientX - startX);
+            newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
+            chatContainer.style.width = newWidth + "px";
+        }
     };
 
     const stopResize = () => {
-      isResizing = false;
-      currentResizer = null;
-      document.removeEventListener("mousemove", handleResize);
-      document.removeEventListener("mouseup", stopResize);
-      document.body.style.userSelect = "";
+        isResizing = false;
+        currentResizer = null;
+        document.removeEventListener("mousemove", handleResize);
+        document.removeEventListener("mouseup", stopResize);
+        document.body.style.userSelect = "";
     };
 
     // Add event listeners for resize handles
@@ -460,126 +461,122 @@ hx-request='{"noHeaders": true}'       data-base-url="${config.backendUrl}">
     document.querySelector(".resize-indicator").addEventListener("mousedown", (e) => initResize(e, "nw"));
 
     chatBtn.onclick = () => {
-      if (!isChatOpen) {
-        chatBtn.classList.add("chat-button-hidden");
-        setTimeout(() => {
-          chatContainer.classList.add("chat-container-open");
-          isChatOpen = true;
-          const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
-          audio.play().catch(() => {}); // Ignore audio errors
-        }, 150);
-      }
+        if (!isChatOpen) {
+            chatBtn.classList.add("chat-button-hidden");
+            setTimeout(() => {
+                chatContainer.classList.add("chat-container-open");
+                isChatOpen = true;
+                const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
+                audio.play().catch(() => { }); // Ignore audio errors
+            }, 150);
+        }
     };
 
     closeBtn.onclick = () => {
-      if (isChatOpen) {
-        chatContainer.classList.add("chat-container-closing");
-        setTimeout(() => {
-          chatBtn.classList.remove("chat-button-hidden");
-          chatBtn.classList.add("chat-button-visible");
-        }, 150);
+        if (isChatOpen) {
+            chatContainer.classList.add("chat-container-closing");
+            setTimeout(() => {
+                chatBtn.classList.remove("chat-button-hidden");
+                chatBtn.classList.add("chat-button-visible");
+            }, 150);
 
-        setTimeout(() => {
-          chatContainer.classList.remove("chat-container-open", "chat-container-closing");
-          chatBtn.classList.remove("chat-button-visible");
-          isChatOpen = false;
-        }, 400);
-      }
+            setTimeout(() => {
+                chatContainer.classList.remove("chat-container-open", "chat-container-closing");
+                chatBtn.classList.remove("chat-button-visible");
+                isChatOpen = false;
+            }, 400);
+        }
     };
 
     document.body.addEventListener("htmx:afterSwap", (evt) => {
-      if (evt.target.id === "chatbox") {
-        const anchors = evt.target.querySelectorAll("a[href^='/']");
-        anchors.forEach((a) => {
-          const original = a.getAttribute("href");
-          a.setAttribute("hx-get", baseURL + original);
-          a.setAttribute("hx-target", "#chatbox");
-          a.setAttribute("hx-swap", "innerHTML");
-          a.removeAttribute("href");
-        });
-        
-        // Process new content with HTMX
-        if (typeof htmx !== 'undefined') {
-          htmx.process(evt.target);
+        if (evt.target.id === "chatbox") {
+            const anchors = evt.target.querySelectorAll("a[href^='/']");
+            anchors.forEach((a) => {
+                const original = a.getAttribute("href");
+                a.setAttribute("hx-get", baseURL + original);
+                a.setAttribute("hx-target", "#chatbox");
+                a.setAttribute("hx-swap", "innerHTML");
+                a.removeAttribute("href");
+            });
+
+            // Process new content with HTMX
+            if (typeof htmx !== 'undefined') {
+                htmx.process(evt.target);
+            }
         }
-      }
     });
 
-document.body.addEventListener('htmx:configRequest', function(event) {
-    console.log(event)
-    console.log('htmx config')
-    event.detail.headers = ''
-    event.detail.headers['Content-Type'] = "application/x-www-form-urlencoded; charset=UTF-8"
-});
-
-
+    document.addEventListener('htmx:configRequest', (evt) => {
+        evt.detail.headers = [];
+    });
+ 
     const addUnsetClass = (el) => {
-      if (el.className && typeof el.className === "string") {
-        // Add any class manipulation logic here if needed
-      }
+        if (el.className && typeof el.className === "string") {
+            // Add any class manipulation logic here if needed
+        }
     };
 
     const processChatContentElements = () => {
-      const chatContent = document.querySelector('[style*="flex: 1; overflow: auto;"]');
-      if (!chatContent) return;
-      chatContent.querySelectorAll("*").forEach(addUnsetClass);
+        const chatContent = document.querySelector('[style*="flex: 1; overflow: auto;"]');
+        if (!chatContent) return;
+        chatContent.querySelectorAll("*").forEach(addUnsetClass);
 
-      new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === 1) {
-              addUnsetClass(node);
-              node.querySelectorAll("*").forEach(addUnsetClass);
-            }
-          });
-        });
-      }).observe(chatContent, { childList: true, subtree: true });
+        new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) {
+                        addUnsetClass(node);
+                        node.querySelectorAll("*").forEach(addUnsetClass);
+                    }
+                });
+            });
+        }).observe(chatContent, { childList: true, subtree: true });
     };
 
     document.body.addEventListener("htmx:afterSwap", (evt) => {
-      if (evt.detail.target.id === "chatbox") {
-        setTimeout(() => {
-          processChatContentElements();
-          // Re-process with HTMX after DOM changes
-          if (typeof htmx !== 'undefined') {
-            htmx.process(evt.detail.target);
-          }
-        }, 0);
-      }
+        if (evt.detail.target.id === "chatbox") {
+            setTimeout(() => {
+                processChatContentElements();
+                // Re-process with HTMX after DOM changes
+                if (typeof htmx !== 'undefined') {
+                    htmx.process(evt.detail.target);
+                }
+            }, 0);
+        }
     });
 
     processChatContentElements();
 
     // Auto-open chat after 10 seconds
     setTimeout(() => {
-      const chatContainer = document.getElementById("chat-container");
-      if (chatContainer && !isChatOpen) {
-        chatBtn.classList.add("chat-button-hidden");
-        setTimeout(() => {
-          chatContainer.classList.add("chat-container-open");
-          isChatOpen = true;
-          const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
-          audio.play().catch(() => {}); // Ignore audio errors
-        }, 150);
-      }
+        const chatContainer = document.getElementById("chat-container");
+        if (chatContainer && !isChatOpen) {
+            chatBtn.classList.add("chat-button-hidden");
+            setTimeout(() => {
+                chatContainer.classList.add("chat-container-open");
+                isChatOpen = true;
+                const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
+                audio.play().catch(() => { }); // Ignore audio errors
+            }, 150);
+        }
     }, 10000);
 
     console.log('Chatbot initialized successfully');
-  }
+}
 
-  // Main execution
-  function init() {
+// Main execution
+function init() {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        loadHeaders().then(initializeChatbot).catch(console.error);
-      });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHeaders().then(initializeChatbot).catch(console.error);
+        });
     } else {
-      loadHeaders().then(initializeChatbot).catch(console.error);
+        loadHeaders().then(initializeChatbot).catch(console.error);
     }
-      console.log(htmx.config)
+    console.log(htmx.config)
 
-  }
+}
 
-  // Start the initialization
-  init();
-})();
+// Start the initialization
+init();
+}) ();
