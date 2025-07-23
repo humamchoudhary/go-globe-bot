@@ -76,7 +76,7 @@
         <div>
           <h3 class="font-semibold text-[var(--white)]">{{ name }}</h3>
           <p class="text-xs text-[var(--sec-text)]">
-            {{ connection.type|upper }} • {{ connection.connection_config.host || connection.connection_config.connection_uri.split('@').slice(-1)[0] }}
+            {{ connection.type|upper }} • {{ connection.connection_config.host}}
           </p>
         </div>
       </div>
