@@ -570,6 +570,52 @@
     </div>
   </div>
 
+ <div
+    id="tables-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden"
+  >
+    <div
+      class="relative bg-[var(--bg-color)] rounded-xl shadow-2xl p-6 w-full max-w-2xl mx-4 border border-[var(--border-color)] max-h-[80vh] flex flex-col"
+    >
+      <button
+        onclick="document.getElementById('tables-modal').classList.add('hidden')"
+        class="absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--border-color)] transition-colors"
+      >
+        <i data-lucide="x" class="w-5 h-5 text-[var(--sec-text)]"></i>
+      </button>
+
+      <div class="mb-6">
+        <h3
+          class="text-xl font-bold text-[var(--white)]"
+          id="tables-modal-title"
+        >
+          Database Tables
+        </h3>
+        <p class="text-[var(--sec-text)]" id="tables-modal-subtitle">
+          Loading tables...
+        </p>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"
+          id="tables-list"
+        >
+          <!-- Tables will be loaded here -->
+        </div>
+      </div>
+
+      <div class="pt-4 mt-4 border-t border-[var(--border-color)]">
+        <button
+          onclick="document.getElementById('tables-modal').classList.add('hidden')"
+          class="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border-color)] hover:bg-[var(--sec-bg-color)] text-[var(--sec-text)] transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div
     id="delete-modal"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden"
