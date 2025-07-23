@@ -26,6 +26,7 @@ def before_req():
     path = request.path
     print(session.items())
     print(f"Path: {path}")
+    print(f"LastVisit: {session.get('last_visit')}")
     if path.startswith("/min") and (path.split("/")[-1] not in ['auth', 'send_message', 'ping_admin'] and path not in ['/min/', '/min/get-headers']):
         session["last_visit"] = path
 
