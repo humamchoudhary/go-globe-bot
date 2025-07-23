@@ -374,7 +374,7 @@ function initializeChatbot() {
        hx-target="#chatbox"
        hx-swap="innerHTML"
        data-base-url="${config.backendUrl}">
-    <div stlye="display:flex; flex-direction:column;align-items:center; justify-content:center">
+    <div style="display:flex; flex-direction:column;align-items:center; justify-content:center">
                     <svg class="spin " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
 style="animation: spin 1s linear infinite; color:white; width:45px; height:45px"
     >
