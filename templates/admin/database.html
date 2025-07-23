@@ -413,8 +413,137 @@
     </div>
   </div>
 
-  <!-- Rest of your existing modals (data-selection-modal, tables-modal, delete-modal) remain the same -->
-  <!-- ... -->
+  <div
+    id="data-selection-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden"
+  >
+    <div
+      class="relative bg-[var(--bg-color)] rounded-xl shadow-2xl p-6 w-full max-w-4xl mx-4 border border-[var(--border-color)] max-h-[90vh] flex flex-col"
+    >
+      <button
+        onclick="document.getElementById('data-selection-modal').classList.add('hidden')"
+        class="absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--border-color)] transition-colors"
+      >
+        <i data-lucide="x" class="w-5 h-5 text-[var(--sec-text)]"></i>
+      </button>
+
+      <div class="mb-6">
+        <h3 class="text-xl font-bold text-[var(--white)]">Select Data</h3>
+        <p class="text-[var(--sec-text)]">Choose data to save</p>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-6 px-1">
+        <!-- Connection Selection -->
+        <div>
+          <label class="block text-sm font-medium text-[var(--sec-text)] mb-2"
+            >Database Connection</label
+          >
+          <select
+            id="data-connection-select"
+            class="w-full px-4 py-3 bg-[var(--sec-bg-color)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] focus:border-transparent text-[var(--white)]"
+            onchange="loadTablesForConnection(this.value)"
+          >
+            <option value="" disabled selected>Select a connection</option>
+            {% for name,connection in crawler.connectors.items() %}
+            <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Table Selection -->
+        <div>
+          <label class="block text-sm font-medium text-[var(--sec-text)] mb-2"
+            >Table</label
+          >
+          <select
+            id="data-table-select"
+            class="w-full px-4 py-3 bg-[var(--sec-bg-color)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] focus:border-transparent text-[var(--white)]"
+            disabled
+            onchange="loadTableData(this.value)"
+          >
+            <option value="" disabled selected>Select a table</option>
+          </select>
+        </div>
+
+        <!-- Table Data Preview -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <label class="block text-sm font-medium text-[var(--sec-text)]"
+              >Data Preview (First 3 entries)</label
+            >
+            <button
+              id="refresh-data-btn"
+              onclick="refreshTableData()"
+              class="text-xs flex items-center gap-1 text-[var(--sec-text)] hover:text-[var(--white)]"
+            >
+              <i data-lucide="refresh-ccw" class="w-3 h-3"></i>
+              Refresh
+            </button>
+          </div>
+          <div
+            id="table-data-preview"
+            class="bg-[var(--sec-bg-color)] border border-[var(--border-color)] rounded-lg p-4 max-h-60 overflow-y-auto"
+          >
+            <p class="text-sm text-[var(--sec-text)] text-center py-8">
+              Select a table to preview data
+            </p>
+          </div>
+        </div>
+
+        <!-- Query Field -->
+        <div>
+          <label class="block text-sm font-medium text-[var(--sec-text)] mb-2"
+            >Custom Query (Optional)</label
+          >
+          <textarea
+            id="data-query-input"
+            class="w-full px-4 py-3 bg-[var(--sec-bg-color)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] focus:border-transparent text-[var(--white)]"
+            placeholder="Enter your query (e.g., WHERE condition for SQL or JSON filter for MongoDB)"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <div
+        class="pt-4 mt-4 border-t border-[var(--border-color)] flex justify-end"
+      >
+        <button
+          onclick="document.getElementById('data-selection-modal').classList.add('hidden')"
+          class="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border-color)] hover:bg-[var(--sec-bg-color)] text-[var(--sec-text)] transition-colors mr-3"
+        >
+          Cancel
+        </button>
+        <button
+          id="save-data-btn"
+          onclick="saveSelectedData()"
+          class="px-6 py-2 text-sm font-medium rounded-lg bg-[var(--main-color)] hover:bg-opacity-90 text-[var(--white)] transition-colors flex items-center gap-2"
+          disabled
+        >
+          <span>Save Data</span>
+          <div id="save-data-loading" class="htmx-indicator">
+            <svg
+              class="animate-spin h-4 w-4 text-[var(--white)]"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Saved Data Section -->
   <div class="mt-12">
