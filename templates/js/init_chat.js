@@ -351,8 +351,8 @@
   <img src="data:image/svg+xml,%3Csvg%20width%3D%2230%22%20height%3D%2231%22%20viewBox%3D%220%200%2030%2031%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2.967%2022.226l-.025.008s7.698%2013.9%2026.975%205.546c0%200-1.495-1.752-4.384-3.52a14.067%2014.067%200%200%200%202.588-14.047c-2.655-7.297-10.7-11.07-17.964-8.425C2.89%204.433-.847%2012.492%201.81%2019.79c.313.863.703%201.677%201.157%202.436z%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E" alt="Chat" />
 </a>
 
-<div id="chat-container" style="background-color: var(--goglobe-site-bg-color);">
- <div style="padding: 10px 15px; background-color: var(--goglobe-site-bg-color); color: white; display: flex; justify-content: space-between; align-items: center;">
+<div id="chat-container" style="background-color: #001f33;">
+ <div style="padding: 10px 15px; background-color: #001f33;color: white; display: flex; justify-content: space-between; align-items: center;">
       <h3 style="color: white; font-size:16px">Welcome, How can we help you?</h3>
       <div style="display: flex; flex-direction: row; gap: 9px; align-items: center;">
         <div id="close-chat" style="background: none; border: none; color: #ff5800; font-size: 24px; cursor: pointer;">
