@@ -1,5 +1,61 @@
 from datetime import datetime
 import requests
+import re
+
+
+def extract_custom_domain_emails(text: str):
+    """
+    Extract emails with custom domains, filtering out common providers
+    and their variations/typos.
+    """
+
+    # Common email providers and their variations/typos
+    blocked_domains = {
+        # Gmail variations
+        'gmail.com', 'gmial.com', 'gmai.com', 'gmall.com', 'gmaill.com',
+        'gmail.co', 'gmeil.com', 'gmal.com', 'gmaiil.com', 'gmil.com',
+
+        # Yahoo variations
+        'yahoo.com', 'yahoo.co.uk', 'yahoo.co.in', 'yaho.com', 'yahooo.com',
+        'yahoo.ca', 'yahoo.fr', 'yahoo.de', 'yahho.com', 'ymail.com',
+
+        # Outlook/Hotmail variations
+        'outlook.com', 'hotmail.com', 'live.com', 'msn.com', 'outlook.co.uk',
+        'hotmail.co.uk', 'hotmial.com', 'outlok.com', 'hotmall.com',
+
+        # Other common providers
+        'aol.com', 'icloud.com', 'me.com', 'mac.com', 'protonmail.com',
+        'mail.com', 'zoho.com', 'tutanota.com', 'fastmail.com',
+        'rediffmail.com', 'qq.com', '163.com', '126.com',
+
+        # Regional providers
+        'mail.ru', 'yandex.ru', 'yandex.com', 'rambler.ru',
+        'web.de', 'gmx.de', 'gmx.com', 't-online.de',
+        'naver.com', 'daum.net', 'hanmail.net',
+    }
+
+    # Email regex pattern
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+    # Find all emails
+    emails = re.findall(email_pattern, text)
+
+    # Filter out blocked domains
+    custom_emails = []
+    for email in emails:
+        domain = email.split('@')[1].lower()
+        if domain not in blocked_domains:
+            custom_emails.append(email)
+
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_emails = []
+    for email in custom_emails:
+        if email.lower() not in seen:
+            seen.add(email.lower())
+            unique_emails.append(email)
+
+    return unique_emails
 
 
 class User:
@@ -16,7 +72,7 @@ class User:
         chat_ids=None,
         desg=None,
         loc=None,
-        db=None,
+        db=None, company=None
     ):
         self.user_id = user_id
         self.name = name
@@ -32,6 +88,7 @@ class User:
         self.city = city
         self.desg = desg
         self.loc = loc
+        self.company = company
 
         if ip.split(".")[0] not in ["192", "127"] and (city == None or country == None):
 
@@ -43,9 +100,39 @@ class User:
             self.city = geo.get("city")
             if geo["status"] != "fail" and db != None:
                 x = db.update_one(
-                    {"user_id": user_id}, {"$set": {"city": city, "country": country}}
+                    {"user_id": user_id}, {
+                        "$set": {"city": city, "country": country}}
                 )
                 # print(x)
+        if not self.company:
+
+            blocked_domains = {
+                # Gmail variations
+                'gmail.com', 'gmial.com', 'gmai.com', 'gmall.com', 'gmaill.com',
+                'gmail.co', 'gmeil.com', 'gmal.com', 'gmaiil.com', 'gmil.com',
+
+                # Yahoo variations
+                'yahoo.com', 'yahoo.co.uk', 'yahoo.co.in', 'yaho.com', 'yahooo.com',
+                'yahoo.ca', 'yahoo.fr', 'yahoo.de', 'yahho.com', 'ymail.com',
+
+                # Outlook/Hotmail variations
+                'outlook.com', 'hotmail.com', 'live.com', 'msn.com', 'outlook.co.uk',
+                'hotmail.co.uk', 'hotmial.com', 'outlok.com', 'hotmall.com',
+
+                # Other common providers
+                'aol.com', 'icloud.com', 'me.com', 'mac.com', 'protonmail.com',
+                'mail.com', 'zoho.com', 'tutanota.com', 'fastmail.com',
+                'rediffmail.com', 'qq.com', '163.com', '126.com',
+
+                # Regional providers
+                'mail.ru', 'yandex.ru', 'yandex.com', 'rambler.ru',
+                'web.de', 'gmx.de', 'gmx.com', 't-online.de',
+                'naver.com', 'daum.net', 'hanmail.net',
+            }
+            if self.email.split("@")[-1] not in blocked_domains:
+                self.company = self.email.split('@')[-1]
+            else:
+                self.company = self.name
 
     def to_dict(self):
         if self.loc and not (self.city and self.country):
@@ -64,7 +151,7 @@ class User:
             "city": self.city,
             "country": self.country,
             "desg": self.desg,
-            "loc": self.loc,
+            "loc": self.loc, 'company': self.company
         }
 
     @classmethod
@@ -81,7 +168,7 @@ class User:
             phone=data.get("phone"),
             desg=data.get("desg"),
             loc=data.get("loc"),
-            db=data.get("db", None),
+            db=data.get("db", None), company=data.get('company', None)
         )
         user.created_at = data.get("created_at", datetime.utcnow())
         user.last_active = data.get("last_active", datetime.utcnow())
