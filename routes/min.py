@@ -47,7 +47,7 @@ def login_required(f):
         if 'user_id' not in session:
             # # print(session.get('user_id'))
             # print('No user')
-            return redirect('/')
+            return redirect(url_for("min.index"))
 
         user_service = UserService(current_app.db)
         user = user_service.get_user_by_id(session['user_id'])
@@ -55,7 +55,7 @@ def login_required(f):
         if not user:
 
             # print('No user')
-            return redirect('/')
+            return redirect(url_for("min.index"))
         return f(*args, **kwargs)
     return decorated_function
 
