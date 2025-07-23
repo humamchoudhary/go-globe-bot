@@ -712,7 +712,7 @@ def export_chat(room_id):
         }
         data = {
             "name": user.name,
-            "company": user.name,
+            "company": user.company,
             "title": user.desg,
             "phonenumber": user.phone,
             "email": f"{user.email}",
