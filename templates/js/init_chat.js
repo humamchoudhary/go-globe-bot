@@ -362,7 +362,7 @@ function initializeChatbot() {
 
 <div id="chat-container" style="background-color: #001f33;">
  <div style="padding: 10px 15px; background-color: #001f33;color: white; display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="color: white; font-size:16px">Welcome, How can we help you?</h3>
+      <h3 style="color: white; font-size:16px;margin:0px">Welcome, How can we help you?</h3>
       <div style="display: flex; flex-direction: row; gap: 9px; align-items: center;">
         <div id="close-chat" style="background: none; border: none; color: #ff5800; font-size: 24px; cursor: pointer;">
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>        </div>
