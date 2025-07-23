@@ -163,7 +163,7 @@ def filter_logs():
     # Regular admins can't filter by other admin_ids
     current_admin_id = session.get(
         "admin_id") if admin.role != "superadmin" else None
-
+    print(message_search)
     logs = logs_service.search_logs_advanced(
         levels=level_enums or None,
         tags=tag_enums or None,
@@ -2443,36 +2443,45 @@ def test_database_connection():
     data = request.form
     
     try:
-        # Create temporary connection for testing
         connection_type = data['type']
-        host = data['host']
-        port = int(data['port'])
-        username = data.get('username')
-        password = data.get('password')
-        database = data.get('database')
-        
         temp_crawler = DatabaseCrawler()
         
         if connection_type == 'mysql':
+            # MySQL connection test
             temp_crawler.add_mysql_connection(
                 name='temp_test',
-                host=host,
-                port=port,
-                username=username,
-                password=password,
-                database=database
+                host=data['host'],
+                port=int(data['port']),
+                username=data.get('username'),
+                password=data.get('password'),
+                database=data.get('database')
             )
         elif connection_type == 'mongodb':
-            temp_crawler.add_mongodb_connection(
-                name='temp_test',
-                host=host,
-                port=port,
-                username=username,
-                password=password,
-                database=database
-            )
+            # Check if we're using URI or standard connection
+            if 'connection_uri' in data:
+                # MongoDB URI connection test
+                temp_crawler.add_mongodb_connection(
+                    name='temp_test',
+                    connection_uri=data['connection_uri'],
+                    database=data.get('mongodb_database')
+                )
+            else:
+                # Standard MongoDB connection test
+                temp_crawler.add_mongodb_connection(
+                    name='temp_test',
+                    host=data['host'],
+                    port=int(data['port']),
+                    username=data.get('username'),
+                    password=data.get('password'),
+                    database=data.get('database')
+                )
         else:
-            return jsonify({'status': 'failed', 'message': 'Invalid database type'})
+            return jsonify({
+                'status': 'failed',
+                'database_type': connection_type,
+                'message': 'Invalid database type',
+                'timestamp': datetime.now().isoformat()
+            }), 400
         
         # Test the connection
         result = temp_crawler.test_connection('temp_test')
@@ -2480,10 +2489,13 @@ def test_database_connection():
         
         return jsonify(result)
     except Exception as e:
-        return e
-
-
-
+        print(f"Error testing connection: {str(e)}")
+        return jsonify({
+            'status': 'failed',
+            'database_type': data.get('type', 'unknown'),
+            'message': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 400
 
 @admin_bp.route('/add_database_connection', methods=['POST'])
 @admin_required
@@ -2491,53 +2503,62 @@ def add_database_connection():
     """Add new database connection"""
     admin_id = session.get('admin_id')
     data = request.form
-    
+
     # Validate required fields
-    if not all(key in data for key in ['name', 'type', 'host', 'port']):
+    if not all(key in data for key in ['name', 'type']):
         return jsonify({'error': 'Missing required fields'}), 400
-    
+
     try:
         crawler = get_user_crawler(admin_id)
-        
+
         # Check if connection name already exists
         if data['name'] in crawler.connectors:
             return jsonify({'error': 'Connection name already exists'}), 400
-        
-        # Add the new connection
+
         connection_type = data['type']
         name = data['name']
-        host = data['host']
-        port = int(data['port'])
-        username = data.get('username')
-        password = data.get('password')
-        database = data.get('database')
-        
+
         if connection_type == 'mysql':
+            # Validate required MySQL fields
+            if not all(key in data for key in ['host', 'port']):
+                return jsonify({'error': 'Missing MySQL connection parameters'}), 400
+
             crawler.add_mysql_connection(
                 name=name,
-                host=host,
-                port=port,
-                username=username,
-                password=password,
-                database=database
+                host=data['host'],
+                port=int(data['port']),
+                username=data.get('username'),
+                password=data.get('password'),
+                database=data.get('database')
             )
+
         elif connection_type == 'mongodb':
-            crawler.add_mongodb_connection(
-                name=name,
-                host=host,
-                port=port,
-                username=username,
-                password=password,
-                database=database
-            )
+            if 'connection_uri' in data:
+                crawler.add_mongodb_connection(
+                    name=name,
+                    connection_uri=data['connection_uri'],
+                    database=data.get('mongodb_database')
+                )
+            else:
+                if not all(key in data for key in ['host', 'port']):
+                    return jsonify({'error': 'Missing MongoDB connection parameters'}), 400
+
+                crawler.add_mongodb_connection(
+                    name=name,
+                    host=data['host'],
+                    port=int(data['port']),
+                    username=data.get('username'),
+                    password=data.get('password'),
+                    database=data.get('database')
+                )
         else:
             return jsonify({'error': 'Invalid database type'}), 400
-        
+
         # Save the updated crawler
         save_user_crawler(admin_id, crawler)
-        
+
         return jsonify({'success': True, 'message': 'Connection added successfully'})
-    
+
     except ValueError as e:
         return jsonify({'error': f'Invalid port number: {str(e)}'}), 400
     except Exception as e:

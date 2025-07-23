@@ -188,34 +188,22 @@ class MongoDBConnector(DatabaseConnector):
 
     type = 'mongodb'
 
-    def __init__(self, host: str, port: int, username: str = None, password: str = None, database: str = None):
+    def __init__(self, connection_uri: str, database: str = None):
         config = {
-            'host': host,
-            'port': port,
-            'username': username,
-            'password': password,
+            'connection_uri': connection_uri,
             'database': database
         }
         super().__init__(config)
         self.database = None
 
     def connect(self) -> bool:
-        """Establish MongoDB connection in read-only mode and fail if database does not exist"""
+        """Establish MongoDB connection using connection URI"""
         try:
-            # Build connection string
-            if self.connection_config['username'] and self.connection_config['password']:
-                connection_string = f"mongodb://{self.connection_config['username']}:{
-                    self.connection_config['password']}@{self.connection_config['host']}:{self.connection_config['port']}"
-            else:
-                connection_string = f"mongodb://{self.connection_config['host']}:{
-                    self.connection_config['port']}"
-
             self.connection = pymongo.MongoClient(
-                connection_string,
+                self.connection_config['connection_uri'],
                 serverSelectionTimeoutMS=5000,
-                # Add these options for better pickle compatibility
-                connect=False,  # Don't connect immediately
-                maxPoolSize=1,  # Minimize connection pool
+                connect=False,
+                maxPoolSize=1,
             )
 
             # Force connection check
@@ -223,12 +211,11 @@ class MongoDBConnector(DatabaseConnector):
 
             db_name = self.connection_config['database']
             if db_name:
-                # Check if database actually exists
+                # Check if database exists
                 existing_dbs = self.connection.list_database_names()
                 if db_name not in existing_dbs:
                     raise ValueError(f"MongoDB database '{
                                      db_name}' does not exist.")
-
                 self.database = self.connection[db_name]
 
             self.is_connected = True
@@ -386,10 +373,9 @@ class DatabaseCrawler:
         self.connectors[name] = MySQLConnector(
             host, port, username, password, database)
 
-    def add_mongodb_connection(self, name: str, host: str, port: int, username: str = None, password: str = None, database: str = None):
-        """Add MongoDB connection"""
-        self.connectors[name] = MongoDBConnector(
-            host, port, username, password, database)
+    def add_mongodb_connection(self, name: str, connection_uri: str, database: str = None):
+        """Add MongoDB connection using connection URI"""
+        self.connectors[name] = MongoDBConnector(connection_uri, database)
 
     def test_connection(self, connection_name: str) -> Dict[str, Any]:
         """Test specific connection"""
