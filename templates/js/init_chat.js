@@ -24,7 +24,7 @@ function loadHeaders() {
 
         const cssLink = document.createElement('link');
         cssLink.rel = 'stylesheet';
-        cssLink.href = `${config.backendUrl}/css/output.css`; // Replace with your actual CSS file path
+        cssLink.href = `${config.backendUrl}/static/css/output.css`; // Replace with your actual CSS file path
         document.head.appendChild(cssLink);      // Load HTMX script
         const htmxScript = document.createElement('script');
         htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
