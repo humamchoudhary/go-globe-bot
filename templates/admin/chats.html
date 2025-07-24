@@ -253,11 +253,11 @@ async function exportChat(roomId) {
             console.error('Export failed with status:', response.status);
             const errorText = await response.text();
             console.error('Error response:', errorText);
-            alert(`Export failed.\n${errorText}`);
+            customAlert(`Export failed.\n${errorText}`);
         }
     } catch (error) {
         console.error('Export error:', error);
-        alert(`Export failed.\n${error.message}`);
+        customAlert(`Export failed.\n${error.message}`);
     }
 }
 

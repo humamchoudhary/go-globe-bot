@@ -695,7 +695,7 @@
     if (xhr.status === 200) {
       window.location.reload();
     } else {
-      alert("Failed to save connection: " + xhr.responseText);
+      customAlert("Failed to save connection: " + xhr.responseText);
     }
   }
 
@@ -872,12 +872,12 @@
           if (response.ok) {
             location.reload();
           } else {
-            alert("Failed to delete connection");
+            customAlert("Failed to delete connection");
           }
         })
         .catch((error) => {
           console.error("Error:", error);
-          alert("Failed to delete connection");
+          customAlert("Failed to delete connection");
         });
     }
     document.getElementById("delete-modal").classList.add("hidden");
@@ -1098,15 +1098,15 @@
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          alert("Data saved successfully!");
+          customAlert("Data saved successfully!");
           document.getElementById("data-selection-modal").classList.add("hidden");
           loadSavedData();
         } else {
-          alert(`Failed to save data: ${data.error || "Unknown error"}`);
+          customAlert(`Failed to save data: ${data.error || "Unknown error"}`);
         }
       })
       .catch((error) => {
-        alert(`Failed to save data: ${error.message}`);
+        customAlert(`Failed to save data: ${error.message}`);
       })
       .finally(() => {
         saveBtn.disabled = false;
@@ -1463,7 +1463,6 @@
       });
   }
 
-  // Sync a single table
   function syncTable(connectionName, tableName, query) {
     if (
       confirm(
@@ -1502,11 +1501,11 @@
             }
             alert(`Table "${tableName}" synced successfully!`);
           } else {
-            alert(`Failed to sync table: ${data.error || "Unknown error"}`);
+            alert(`Failed to sync table1: ${data.error || "Unknown error"}`);
           }
         })
         .catch((error) => {
-          alert(`Failed to sync table: ${error.message}`);
+          alert(`Failed to sync table2: ${error.message}`);
         })
         .finally(() => {
           const saveBtn = document.querySelector(
@@ -1528,7 +1527,7 @@
         `Are you sure you want to sync all tables in "${connectionName}"? This will overwrite existing data.`,
       )
     ) {
-      alert(`Syncing all tables in ${connectionName} would go here`);
+      customAlert(`Syncing all tables in ${connectionName}`);
     }
   }
 </script>

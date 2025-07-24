@@ -199,11 +199,11 @@
         if (response.ok) {
           location.reload();
         } else {
-          alert('Failed to delete file');
+          customAlert('Failed to delete file');
         }
       }).catch(error => {
         console.error('Error:', error);
-        alert('Failed to delete file');
+        customAlert('Failed to delete file');
       });
     }
     document.getElementById('delete-modal').classList.add('hidden');
@@ -264,7 +264,7 @@ function handleScrapeResponse(event) {
     }, 3000);
   } else {
     // Handle error case
-    alert('Failed to start scraping. Please try again.');
+    customAlert('Failed to start scraping. Please try again.');
   }
 }
 

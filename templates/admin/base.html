@@ -52,7 +52,101 @@
 
 #notification-list::-webkit-scrollbar-thumb:hover {
     background: #555;
-}</style>
+}
+
+/* Custom Alert Styles */
+#custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+}
+
+#custom-alert-container {
+    background: var(--sec-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-width: 320px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: alertSlideIn 0.3s ease-out;
+}
+
+@keyframes alertSlideIn {
+    from {
+        transform: translateY(-20px) scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+#custom-alert-header {
+    padding: 20px 20px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#custom-alert-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--main-color);
+}
+
+#custom-alert-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+#custom-alert-message {
+    padding: 15px 20px 25px 20px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--sec-text);
+    word-wrap: break-word;
+}
+
+#custom-alert-actions {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.alert-button {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background: var(--main-color);
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.alert-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.alert-button:active {
+    transform: translateY(0);
+}
+</style>
 
 {% endblock %}
 {% block header_items %}
@@ -133,6 +227,22 @@
   </div>
 </div>
 
+
+
+<!-- Custom Alert Overlay -->
+<!-- Custom Alert Overlay -->
+<div id="custom-alert-overlay">
+    <div id="custom-alert-container">
+        <div id="custom-alert-header">
+            <i id="custom-alert-icon" data-lucide="info"></i>
+            <span id="custom-alert-title">Alert</span>
+        </div>
+        <div id="custom-alert-message"></div>
+        <div id="custom-alert-actions">
+            <!-- Buttons will be dynamically created -->
+        </div>
+    </div>
+</div>
 
 
 <script>
@@ -514,4 +624,147 @@ window.addEventListener('DOMContentLoaded', function() {
 })
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+
+
+<script>
+// Custom Alert Function
+function customAlert(message, title = 'Alert', icon = 'info') {
+    const overlay = document.getElementById('custom-alert-overlay');
+    const messageEl = document.getElementById('custom-alert-message');
+    const titleEl = document.getElementById('custom-alert-title');
+    const iconEl = document.getElementById('custom-alert-icon');
+    const actionsEl = document.getElementById('custom-alert-actions');
+    
+    // Set content
+    messageEl.textContent = message;
+    titleEl.textContent = title;
+    iconEl.setAttribute('data-lucide', icon);
+    
+    // Create OK button (reset the actions area)
+    actionsEl.innerHTML = `
+        <button id="custom-alert-ok" class="alert-button">OK</button>
+    `;
+    
+    // Show overlay
+    overlay.style.display = 'flex';
+    
+    // Recreate icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    // Handle OK button
+    document.getElementById('custom-alert-ok').onclick = () => {
+        overlay.style.display = 'none';
+    };
+    
+    // Handle overlay click
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            overlay.style.display = 'none';
+        }
+    };
+    
+    // Handle ESC key
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            overlay.style.display = 'none';
+            document.removeEventListener('keydown', handleEsc);
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+}
+
+// Override native alert
+window.alert = customAlert;
+
+// Enhanced Custom Alert with Confirm support
+function customConfirm(message, title = 'Confirm', icon = 'alert-triangle') {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('custom-alert-overlay');
+        const messageEl = document.getElementById('custom-alert-message');
+        const titleEl = document.getElementById('custom-alert-title');
+        const iconEl = document.getElementById('custom-alert-icon');
+        const actionsEl = document.getElementById('custom-alert-actions');
+        
+        // Set content
+        messageEl.textContent = message;
+        titleEl.textContent = title;
+        iconEl.setAttribute('data-lucide', icon);
+        
+        // Create confirm buttons
+        actionsEl.innerHTML = `
+            <button id="custom-alert-cancel" class="alert-button secondary">Cancel</button>
+            <button id="custom-alert-confirm" class="alert-button">Confirm</button>
+        `;
+        
+        // Show overlay
+        overlay.style.display = 'flex';
+        
+        // Recreate icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        
+        // Clean up function
+        const cleanup = () => {
+            overlay.style.display = 'none';
+            overlay.onclick = null;
+            document.removeEventListener('keydown', handleEsc);
+        };
+        
+        // Handle buttons
+        const cancelBtn = document.getElementById('custom-alert-cancel');
+        const confirmBtn = document.getElementById('custom-alert-confirm');
+        
+        cancelBtn.onclick = (e) => {
+            e.stopPropagation();
+            cleanup();
+            resolve(false);
+        };
+        
+        confirmBtn.onclick = (e) => {
+            e.stopPropagation();
+            cleanup();
+            resolve(true);
+        };
+        
+        // Handle overlay click
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                cleanup();
+                resolve(false);
+            }
+        };
+        
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                cleanup();
+                resolve(false);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
+}
+
+window.confirm = customConfirm;
+
+// Override HTMX confirm to use custom alert
+document.body.addEventListener('htmx:confirm', function(evt) {
+    if (!evt.defaultPrevented) {
+        evt.preventDefault(); // Prevent default confirm
+        if (evt.detail.question) {
+            customConfirm(evt.detail.question || 'Are you sure?', 'Confirm Action', 'alert-triangle')
+                .then((confirmed) => {
+                    if (confirmed) {
+                        evt.detail.issueRequest(true); // Pass true to skip confirmation
+                    }
+                });
+        } else {
+            evt.detail.issueRequest(true); // Pass true to skip confirmation
+        }
+    }
+});
+</script>
  {% endblock %}

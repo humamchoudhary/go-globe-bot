@@ -2654,7 +2654,9 @@ def get_table_data():
                 query = f"SELECT * FROM {data['table']} LIMIT {limit}"
         
         # Execute the query
+        print(data['connection'])
         result = crawler.execute_query(data['connection'], query, data['table'])
+        print(result)
         
         # Apply limit if not already applied in query (for MongoDB)
         if 'limit' not in query.lower() and len(result['data']) > limit:

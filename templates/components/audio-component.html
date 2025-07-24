@@ -105,7 +105,7 @@
   function uploadAudio(audioType) {
     const fileInput = document.getElementById(`${audioType}-audio`);
     if (fileInput.files.length === 0) {
-      alert("Please select a file.");
+      customAlert("Please select a file.");
       return;
     }
 
@@ -122,7 +122,7 @@
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("Upload failed. Please try again.");
+        customAlert("Upload failed. Please try again.");
       });
   }
 </script>

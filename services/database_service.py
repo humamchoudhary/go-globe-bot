@@ -292,9 +292,11 @@ class MongoDBConnector(DatabaseConnector):
                 }
 
             # Parse query as JSON filter
+            print(query)
             try:
                 filter_dict = json.loads(query) if query.strip() else {}
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
+                print(e)
                 return {
                     'table_names': [],
                     'data': [],
@@ -327,6 +329,7 @@ class MongoDBConnector(DatabaseConnector):
                 'timestamp': datetime.now().isoformat()
             }
         except Exception as e:
+            print(e)
             return {
                 'table_names': [],
                 'data': [],
