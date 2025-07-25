@@ -421,6 +421,9 @@ def send_message(chat_id):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
+    # print(session.get('admin_id'))
+    admin = AdminService(current_app.db).get_admin_by_id(
+        session.get('admin_id'))
 
     chat = chat_service.get_chat_by_room_id(f'{user.user_id}-{chat_id[:8]}')
     if not chat:
@@ -441,6 +444,11 @@ def send_message(chat_id):
         "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name)
     }, room=chat.room_id)
     # print('hello')
+    if "job" not in chat.subject.lower():
+
+        mail = Mail(current_app)
+        status = send_email(admin.email, f'New Message: {
+            chat.subject}', "Message", mail, render_template('/email/new_message.html', user=user, chat=chat))
 
     if (not chat.admin_required):
         msg, usage = current_app.bot.responed(

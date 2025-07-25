@@ -19,6 +19,7 @@ def send_email(to_email, subject, message, mail, html_message=None):
             body=message,
             html=html_message  # HTML version of the email
         )
+        print(msg)
         mail.send(msg)
         # print("Email sent successfully.")
         return 'SEND'
