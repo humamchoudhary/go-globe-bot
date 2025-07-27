@@ -1,6 +1,7 @@
 from datetime import datetime
 from pprint import pprint
 
+
 class Message:
     def __init__(self, sender, content, timestamp=None):
         self.sender = sender
@@ -28,7 +29,7 @@ class Message:
 
 class Chat:
     def __init__(self, chat_id, user_id, bot_name="bot", messages=None,
-                 admin_required=False, admin_present=False, open=True, subject=None, exported=False, admin_id=None, lead_id=None, viewed=False):
+                 admin_required=False, admin_present=False, open=True, subject=None, exported=False, admin_id=None, lead_id=None, viewed=False, archived=False):
         self.chat_id = chat_id
         # Generate room_id from user_id and first 8 chars of chat_id
         self.room_id = f"{user_id}-{chat_id[:8]}"
@@ -45,6 +46,7 @@ class Chat:
         self.admin_id = admin_id
         self.lead_id = lead_id
         self.viewed = viewed
+        self.archived = archived
 
     def add_message(self, sender, content):
         message = Message(sender, content)
@@ -67,7 +69,8 @@ class Chat:
             "exported": self.exported,
             "admin_id": self.admin_id,
             'lead_id': self.lead_id,
-            'viewed': self.viewed
+            'viewed': self.viewed,
+            'archived': self.archived
         }
 
     @classmethod
@@ -84,7 +87,8 @@ class Chat:
             exported=data.get('exported', False),
             admin_id=data.get('admin_id', None),
             lead_id=data.get("lead_id", None),
-            viewed=data.get('viewed', False)
+            viewed=data.get('viewed', False),
+            archived=data.get('archived', False)
         )
         # Make sure to load the room_id from the data
         chat.room_id = data.get("room_id")

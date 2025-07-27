@@ -510,6 +510,7 @@ def chat(room_id):
             chat_counts=chat_counts,next_page=1
     )
 
+from pprint import pprint
 
 @admin_bp.route('/chats_list/')
 @admin_required
@@ -539,7 +540,6 @@ def get_chat_list():
         data = c.to_dict()
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
-    
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     cchat = chat_service.get_chat_by_room_id(room_id) if room_id else None
     
@@ -682,7 +682,7 @@ def filter_chats(filter):
             "next_page": page + 1,
             "current_filter": filter
         })
-    
+    pprint(chats_data)    
     return render_template(template, **context)
 
 import json
@@ -706,39 +706,58 @@ def export_chat(room_id):
         user = user_service.get_user_by_id(chat.user_id)
         # try:
         erp_url = os.environ.get("ERP_URL")
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "authtoken": f"{os.environ.get('ERP_TOKEN')}",
-        }
-        data = {
-            "name": user.name,
-            "company": user.company,
-            "title": user.desg,
-            "phonenumber": user.phone,
-            "email": f"{user.email}",
-            # "address": f"{user.city},{user.country}",
-            "city":str(user.city),
-            "state":str(user.city),
-            "country":int(get_country_id('tblcountries.json',user.country)),
-            "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
-        }
+        # headers = {
+        #     "Content-Type": "application/x-www-form-urlencoded",
+        #     "authtoken": f"{os.environ.get('ERP_TOKEN')}",
+        # }
+        # data = {
+        #     "name": user.name,
+        #     "company": user.company,
+        #     "title": user.desg,
+        #     "phonenumber": user.phone,
+        #     "email": f"{user.email}",
+        #     # "address": f"{user.city},{user.country}",
+        #     "city":str(user.city),
+        #     "state":str(user.city),
+        #     "country":int(get_country_id('tblcountries.json',user.country)),
+        #     "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
+        # }
+        #
+        # r = requests.post(erp_url, headers=headers, data=data)
+        # print(f"DATA: {data}")
+        # if r.status_code == 200:
+        if True:
 
-        r = requests.post(erp_url, headers=headers, data=data)
-        print(f"DATA: {data}")
-        if r.status_code == 200:
-
-            data = r.json()
-            print(r)
-            print(r.content)
-            if not chat_service.export_chat(room_id, data.get("lead_id", None)):
+            # data = r.json()
+            # print(r)
+            # print(r.content)
+            if not chat_service.export_chat(room_id, None):
                 return "Error in exporting: Chat not found", 404
         else:
-            print(r.json())
+            # print(r.json())
 
-            return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
+            # return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
+            return f"Error",500
         return "success", 200
 
     return "Chat not found", 404
+
+
+@admin_bp.route("/chat/<room_id>/archive", methods=["POST"])
+@admin_required
+def archive_chat(room_id):
+    chat_service = ChatService(current_app.db)
+    chat = chat_service.get_chat_by_room_id(room_id)
+
+    if chat:
+        if not chat_service.archive_chat(room_id):
+            return "Error in exporting: Chat not found", 404
+
+        return "success", 200
+
+    return "Chat not found", 404
+
+
 
 @admin_bp.route('/chat-counts')
 @admin_required
@@ -1957,6 +1976,8 @@ def get_all_chats():
     )
     # print(chats)   
     # Get chat counts for header
+
+    pprint(chats)
     chat_counts = chat_service.get_chat_counts_by_filter(session.get('admin_id'))
     return render_template(
         "admin/chats.html",
@@ -2898,6 +2919,7 @@ def get_saved_table_data():
                 })
     except Exception as e:
         return jsonify({'error': f'Failed to load table data: {str(e)}'}), 500
+
 
 
 def register_admin_socketio_events(socketio):

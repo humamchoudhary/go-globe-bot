@@ -131,11 +131,19 @@ class ChatService:
         )
         return Chat.from_dict(chat_data) if chat_data else None
 
+    def archive_chat(self, room_id: str) -> bool:
+        """Export chat with optimized existence check."""
+        result = self.chats_collection.update_one(
+            {"room_id": room_id},
+            {"$set": {"archived": True}}
+        )
+        return result.modified_count > 0
+
     def export_chat(self, room_id: str, lead_id: str) -> bool:
         """Export chat with optimized existence check."""
         result = self.chats_collection.update_one(
             {"room_id": room_id},
-            {"$set": {"exported": True, "lead_id": lead_id}}
+            {"$set": {"exported": True, "lead_id": lead_id, "archived": True}}
         )
         return result.modified_count > 0
 
@@ -236,11 +244,14 @@ class ChatService:
             "$match": {
                 "admin_id": admin_id,
                 "subject": {"$nin": ["Job"]},
+                "$or": [{"archived": False}, {"archived": {"$exists": False}}],
                 "messages.1": {"$exists": True}
             }
         } if admin_id else {
             "$match": {
                 "subject": {"$nin": ["Job"]},
+
+                "$or": [{"archived": False}, {"archived": {"$exists": False}}],
                 "messages.1": {"$exists": True}
             }
         }
@@ -267,11 +278,15 @@ class ChatService:
         match_stage = {
             "$match": {
                 "admin_id": admin_id,
+
+                "$or": [{"archived": False}, {"archived": {"$exists": False}}],
                 "subject": {"$nin": ["Job"]},
                 "messages.1": {"$exists": True}
             }
         } if admin_id else {
             "$match": {
+
+                "$or": [{"archived": False}, {"archived": {"$exists": False}}],
                 "subject": {"$nin": ["Job"]},
                 "messages.1": {"$exists": True}
             }
@@ -345,46 +360,68 @@ class ChatService:
         skip: int = 0
     ) -> List[Chat]:
         """Get filtered chats with pagination support using find()."""
-        # Base filter query
+
+        # Common subject and message constraints
         base_filter = {
-            "admin_id": admin_id,
-            "subject": {"$nin": ["Job"]},
-            "messages.1": {"$exists": True}
-        } if admin_id else {
             "subject": {"$nin": ["Job"]},
             "messages.1": {"$exists": True}
         }
 
-        # Apply specific filters
-        if filter_type == "active":
-            base_filter["admin_required"] = True
+        if admin_id:
+            base_filter["admin_id"] = admin_id
+
+        # Apply filter logic
+        if filter_type in ["archived"]:
+            base_filter["archived"] = True
+        elif filter_type in ["all","active"]:
+            # For 'all', 'active', and 'exported', include only unarchived or missing archived field
+            base_filter["$or"] = [{"archived": False},
+                                  {"archived": {"$exists": False}}]
+
+            if filter_type == "active":
+                base_filter["admin_required"] = True
         elif filter_type == "exported":
             base_filter["exported"] = True
 
-        # Use find() with sort, skip, limit (equivalent to Mongoose pattern)
+        # Query with pagination
         cursor = (self.chats_collection
                   .find(base_filter, {"_id": 0})
                   .sort("updated_at", -1)
                   .skip(skip)
                   .limit(limit)
                   )
-        print(cursor)
+
         return [Chat.from_dict(chat_data) for chat_data in cursor if chat_data]
 
-
     def get_chat_counts_by_filter(self, admin_id: Optional[str] = None) -> Dict[str, int]:
-        """Get chat counts for all filter types using aggregation."""
+        """Get chat counts for all filter types using aggregation, including a separate archived count."""
 
+        # Base match for unarchived or missing archived field
         base_match = {
             "admin_id": admin_id,
             "subject": {"$nin": ["Job"]},
+            "$or": [{"archived": False}, {"archived": {"$exists": False}}],
             "messages.1": {"$exists": True}
         } if admin_id else {
             "subject": {"$nin": ["Job"]},
+            "$or": [{"archived": False}, {"archived": {"$exists": False}}],
             "messages.1": {"$exists": True}
         }
 
-        pipeline = [
+        # Base match for archived
+        archived_match = {
+            "admin_id": admin_id,
+            "subject": {"$nin": ["Job"]},
+            "archived": True,
+            "messages.1": {"$exists": True}
+        } if admin_id else {
+            "subject": {"$nin": ["Job"]},
+            "archived": True,
+            "messages.1": {"$exists": True}
+        }
+
+        # Main aggregation (unarchived chats)
+        pipeline_main = [
             {"$match": base_match},
             {
                 "$group": {
@@ -400,18 +437,42 @@ class ChatService:
             }
         ]
 
-        try:
-            result = list(self.chats_collection.aggregate(pipeline))
-            if result:
-                return {
-                    "all": result[0]["total"],
-                    "active": result[0]["active"],
-                    "exported": result[0]["exported"]
+        # Archived aggregation (count + exported only)
+        pipeline_archived = [
+            {"$match": archived_match},
+            {
+                "$group": {
+                    "_id": None,
+                    "archived": {"$sum": 1},
+                    "archived_exported": {
+                        "$sum": {"$cond": [{"$eq": ["$exported", True]}, 1, 0]}
+                    }
                 }
-            return {"all": 0, "active": 0, "exported": 0}
+            }
+        ]
+
+        try:
+            result_main = list(self.chats_collection.aggregate(pipeline_main))
+            result_archived = list(
+                self.chats_collection.aggregate(pipeline_archived))
+
+            total = result_main[0]["total"] if result_main else 0
+            active = result_main[0]["active"] if result_main else 0
+            exported_main = result_main[0]["exported"] if result_main else 0
+
+            archived = result_archived[0]["archived"] if result_archived else 0
+            archived_exported = result_archived[0]["archived_exported"] if result_archived else 0
+
+            return {
+                "all": total,
+                "active": active,
+                "exported": exported_main + archived_exported,
+                "archived": archived
+            }
+
         except Exception as e:
             logger.error(f"Error getting chat counts: {e}")
-            return {"all": 0, "active": 0, "exported": 0}
+            return {"all": 0, "active": 0, "exported": 0, "archived": 0}
 
     def get_chat_counts_for_header(self, admin_id: Optional[str] = None) -> Dict[str, int]:
         """Get chat counts for header display with caching."""
