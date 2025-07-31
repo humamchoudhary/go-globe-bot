@@ -538,6 +538,7 @@ style="animation: spin 1s linear infinite; color:white; width:25px; height:25px"
     };
 
     document.body.addEventListener("htmx:afterSwap", (evt) => {
+        console.log(evt)
         if (evt.detail.target.id === "chatbox") {
             setTimeout(() => {
                 processChatContentElements();

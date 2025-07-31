@@ -106,7 +106,7 @@ def create_app(config_class=Config):
     app.config.update(
         SESSION_COOKIE_SECURE=True,  # Required for cross-origin iframes with HTTPS
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='None'
+        SESSION_COOKIE_SAMESITE='secure'
     )
 
     app.config.update(
