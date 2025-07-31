@@ -106,7 +106,7 @@ def create_app(config_class=Config):
     app.config.update(
         SESSION_COOKIE_SECURE=True,  # Required for cross-origin iframes with HTTPS
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='secure'
+        SESSION_COOKIE_SAMESITE='None'
     )
 
     app.config.update(
@@ -130,6 +130,12 @@ def create_app(config_class=Config):
         'X-Api-Key',
         'X-CSRFToken', 'password'
     }
+
+    @app.before_request
+    def skip_auth_on_options():
+        if request.method == 'OPTIONS':
+            return Response(status=204)
+
     logs_service = LogsService(app.db)
 
     app.config['MAIL_SERVER'] = os.environ.get('SMTP_SERVER')
@@ -626,6 +632,7 @@ def create_app(config_class=Config):
         arguments = rule.arguments if rule.arguments is not None else ()
         return len(defaults) >= len(arguments)
     import markdown
+
     @app.template_filter('markdown')
     def markdown_filter(text):
         return markdown.markdown(text)
@@ -650,7 +657,7 @@ def create_app(config_class=Config):
 
                 session['admin_id'] = admin.admin_id
             else:
-                return "Invalid Secrect Key",403
+                return "Invalid Secrect Key", 403
         else:
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
             session['admin_id'] = admin_id
