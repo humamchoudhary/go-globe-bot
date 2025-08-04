@@ -9,11 +9,12 @@ from pymongo import MongoClient
 import bcrypt
 import os
 from config import Config
-from routes import chat_bp, admin_bp, auth_bp, min_bp
+from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp
 from routes.chat import register_socketio_events
 from routes.admin import register_admin_socketio_events
 import routes.auth
 import routes.min
+import routes.api
 from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
@@ -29,7 +30,7 @@ from flask_mail import Mail, Message
 
 import logging
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)  # or logging.CRITICAL to silence everything
+# log.setLevel(logging.ERROR)  # or logging.CRITICAL to silence everything
 
 
 def get_font_data():
@@ -607,12 +608,15 @@ def create_app(config_class=Config):
     socketio = SocketIO(app,  async_mode="threading",
                         manage_session=False, cors_allowed_origins="*")
     app.socketio = socketio
+    
+
 
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(chat_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(min_bp)
+    app.register_blueprint(api_bp)
 
     # Register Socket.IO event handlers
     register_socketio_events(socketio)
@@ -695,4 +699,6 @@ if __name__ == '__main__':
                  debug=True,
                  # ssl_context='adhoc'
 
-                 ssl_context=('cert.pem', 'key.pem'))
+                 # ssl_context=('cert.pem', 'key.pem')
+
+                 )
