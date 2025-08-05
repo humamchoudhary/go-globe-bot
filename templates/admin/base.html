@@ -540,7 +540,16 @@ function formatLocalTime(date) {
 
 // Run on initial page load
 window.addEventListener('DOMContentLoaded', function() {
-  processMessageTimes();
+
+    const messageArea = document.getElementById('messageArea');
+    if (messageArea) {
+        messageArea.scrollTo({
+            top: messageArea.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+
+    //  processMessageTimes();
 });
 
 
@@ -548,13 +557,33 @@ window.addEventListener('DOMContentLoaded', function() {
 document.body.addEventListener('htmx:afterSwap', function(event) {
   // Only process for non-out-of-band swaps
   if (!event.detail.isOOBSwap) {
-    processMessageTimes();
+  //  processMessageTimes();
   }
+
+    const messageArea = document.getElementById('messageArea');
+    if (messageArea) {
+        messageArea.scrollTo({
+            top: messageArea.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+
+
 });
 
 // Also run after HTMX content is added to the page
 document.body.addEventListener('htmx:afterSettle', function(event) {
-  processMessageTimes();
+  //processMessageTimes();
+
+    const messageArea = document.getElementById('messageArea');
+    if (messageArea) {
+        messageArea.scrollTo({
+            top: messageArea.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+
+
 });
 
 
