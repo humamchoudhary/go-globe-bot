@@ -537,31 +537,6 @@ function formatLocalTime(date) {
 }
 
 // Function to process all time elements
-function processMessageTimes() {
-  document.querySelectorAll('.message-time').forEach(el => {
-    try {
-      let utcString = el.dataset.utc;
-
-      // Ensure it's a proper ISO string with UTC 'Z' if not already
-      if (!utcString.endsWith('Z') && !utcString.includes('+')) {
-        utcString += 'Z';
-      }
-
-      const date = new Date(utcString);
-      
-      // Only update if we got a valid date
-      if (!isNaN(date.getTime())) {
-        el.textContent = formatLocalTime(date);
-      } else {
-        console.warn('Invalid date for element:', el);
-      }
-    } catch (e) {
-      console.error('Time formatting failed', e);
-      // Optionally show a fallback value
-      el.textContent = 'Just now';
-    }
-  });
-}
 
 // Run on initial page load
 window.addEventListener('DOMContentLoaded', function() {

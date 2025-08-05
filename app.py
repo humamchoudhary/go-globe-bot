@@ -699,6 +699,6 @@ if __name__ == '__main__':
                  debug=True,
                  # ssl_context='adhoc'
 
-                 # ssl_context=('cert.pem', 'key.pem')
+                 ssl_context=('cert.pem', 'key.pem')
 
                  )
