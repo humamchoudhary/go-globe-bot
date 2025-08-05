@@ -24,7 +24,10 @@
             </p>
             {% if chat.admin_required %}
                 <div class="px-[9px] py-[3px] bg-[#56ABFF]/20 rounded-full">
-                    <p class="text-xs md:text-sm text-[#56ABFF]">Admin Required</p>
+                    <p class="text-xs md:text-sm text-[#56ABFF]">
+                        <span class="md:hidden 2xl:inline">Admin Required</span>
+                        <span class="hidden md:inline 2xl:hidden">Admin...</span>
+                    </p>
                 </div>
             {% endif %}
         </div>
