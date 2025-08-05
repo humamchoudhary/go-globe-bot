@@ -47,7 +47,7 @@
         <span class="message-time {% if chat.viewed %}opacity-60{% endif %}"
               data-utc="{{ chat.updated_at.isoformat() }}"
               title="{{ chat.updated_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}">
-            {{ chat.updated_at.strftime("%d %B %Y") }}
+            {{ chat.updated_at.strftime("%d %B %Y - %H:%M") }}
         </span>
         
         <!-- Three Dot Menu -->
