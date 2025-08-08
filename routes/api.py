@@ -3,18 +3,17 @@ from flask import request, make_response, session, jsonify, url_for, current_app
 from functools import wraps
 from . import api_bp
 from services.admin_service import AdminService
+from services.chat_service import ChatService
+from services.user_service import UserService
 
 
 def success_json_response(data=None, code=200):
-    return jsonify({"status": "success", **({"data": data} if data else {})}), code
+    print(data)
+    return jsonify({"success": True, "status": "success", **({"data": data} if data else {})}), code
 
 
 def error_json_response(message="Error! Couldnot process this request", code=500):
-    return jsonify({"status": "error", "message": message}), code
-
-
-def redirect_json_response(redirect, code=302):
-    return jsonify({"status": "redirect", "redirect": redirect}), code
+    return jsonify({"success": False, "status": "error", "message": message}), code
 
 
 def admin_required(_func=None, *, roles=None):
@@ -26,17 +25,18 @@ def admin_required(_func=None, *, roles=None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            print(dict(session))
             if session.get("role") not in roles:
-                return redirect_json_response(url_for('api.login'))
+                return error_json_response("Not Authorized", 401)
             if not session.get("admin_id"):
                 session["next"] = request.path
-                return redirect_json_response(url_for('api.login'))
+                return error_json_response("Not Authorized", 401)
 
             admin_service = AdminService(current_app.db)
             current_admin = admin_service.get_admin_by_id(session["admin_id"])
 
             if not current_admin or not current_admin.has_permission(roles):
-                return redirect_json_response(url_for('api.login'))
+                return error_json_response("UAuthorized", 401)
 
             from flask import g
 
@@ -108,7 +108,8 @@ def require_api_key():
     if request.endpoint != 'public_route':  # Exclude public routes
         print(dict(request.headers))
         api_key = request.headers.get(
-            'X-SECRET-KEY') or request.headers.get('secret_key')
+            'X-Secret-Key') or request.headers.get('secret_key')
+        print(api_key)
         if not api_key or api_key != API_KEY:
             return error_json_response('UnAuthorized', 403)
 
@@ -129,12 +130,13 @@ def complete_admin_login(admin):
     return jsonify({"status": "success", "redirect": url_for("admin.index")}), 200
 
 
-@api_bp.route('/login', methods=['POST', 'GET'])
+@api_bp.route('/auth/login', methods=['POST', 'GET'])
 def login():
     if request.method == "GET":
         abort(405)
         return
     data = request.json
+    print(data)
     username = data.get("username")
     password = data.get("password")
     ip_address = request.headers.get(
@@ -166,6 +168,39 @@ def login():
     return ip_address
 
 
-@api_bp.route('/')
-def test():
-    return success_json_response()
+@api_bp.route('/auth/me')
+@admin_required
+def me():
+    admin_service = AdminService(current_app.db)
+    admin = admin_service.get_admin_by_id(session.get("admin_id")).to_dict()
+    del admin['password_hash']
+    return success_json_response({"user": admin})
+
+
+@api_bp.route("/chats/list")
+@admin_required
+def get_chat_list():
+
+    page = request.args.get('page', 0, type=int)
+    limit = request.args.get('limit', 20, type=int)
+    filter_type = request.args.get('filter', 'all')
+
+    chat_service = ChatService(current_app.db)
+    user_service = UserService(current_app.db)
+
+    # Get chats based on filter with pagination
+    chats = chat_service.get_filtered_chats_paginated(
+        admin_id=session.get("admin_id"),
+        filter_type=filter_type,
+        limit=limit,
+        skip=page * limit
+    )
+
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data["username"] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    print(len(chats_data))
+    return success_json_response({"chats": chats_data, "has_more": len(chats_data) == limit})
