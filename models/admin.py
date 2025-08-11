@@ -8,7 +8,7 @@ from datetime import datetime
 
 class Admin:
     def __init__(self, username, password_hash, role="admin", admin_id=None, email=None, secret_key=None,
-                 phone=None, created_by=None, settings=None, last_login=None, status="active", onboarding=True, two_fa=False):
+                 phone=None, created_by=None, settings=None, last_login=None, status="active", onboarding=True, two_fa=False, tokens=0):
         self.admin_id = admin_id
         self.username = username
         self.password_hash = password_hash
@@ -22,6 +22,7 @@ class Admin:
         self.secret_key = secret_key or secrets.token_hex(32)
         self.onboarding = onboarding
         self.two_fa = two_fa
+        self.tokens = tokens
         # Default settings for regular admins
         default_admin_settings = {
             'languages': ['English'],
@@ -54,7 +55,8 @@ class Admin:
             "settings": self.settings,
             "secret_key": self.secret_key,
             "onboarding": self.onboarding,
-            "two_fa": self.two_fa
+            "two_fa": self.two_fa,
+            "tokens": self.tokens
         }
 
     @classmethod
@@ -72,13 +74,14 @@ class Admin:
             status=data.get("status", "active"),
             secret_key=data.get('secret_key'),
             onboarding=data.get('onboarding', False),
-            two_fa=data.get('two_fa', False)
+            two_fa=data.get('two_fa', False),
+            tokens=data.get('tokens', 0)
         )
 
         # Store the original created_at in UTC (default to current UTC time if not provided)
         created_at = data.get("created_at")
         # print(created_at)
-        
+
         if created_at is None:
             created_at = datetime.utcnow()
         elif type(created_at) == dict:

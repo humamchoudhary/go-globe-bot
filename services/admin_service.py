@@ -30,7 +30,8 @@ class AdminService:
             admin_id=admin_id,
             email=email,
             phone=phone,
-            created_by=created_by
+            created_by=created_by,
+            tokens=120,
         )
         admin.onboarding = False
 
@@ -47,6 +48,12 @@ class AdminService:
         if admin_data:
             return Admin.from_dict(admin_data)
         return None
+
+    def update_tokens(self, admin_id, cost):
+        self.admins_collection.update_one(
+            {'admin_id': admin_id}, 
+{"$inc": {"tokens": -cost}}
+            )
 
     def get_admin_by_username(self, username):
         """Get admin by username"""

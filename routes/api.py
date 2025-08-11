@@ -1,3 +1,6 @@
+import requests
+import os
+import json
 from config import Config
 from flask import request, make_response, session, jsonify, url_for, current_app, abort
 from functools import wraps
@@ -8,7 +11,6 @@ from services.user_service import UserService
 
 
 def success_json_response(data=None, code=200):
-    print(data)
     return jsonify({"success": True, "status": "success", **({"data": data} if data else {})}), code
 
 
@@ -204,3 +206,84 @@ def get_chat_list():
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
     print(len(chats_data))
     return success_json_response({"chats": chats_data, "has_more": len(chats_data) == limit})
+
+
+def get_country_id(file_path, target_country):
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    for entry in data:
+        print(entry.get('short_name'))
+        if entry.get('short_name', "").lower() == target_country.lower():
+            return entry.get('country_id')
+    return None
+
+
+@api_bp.route('/chat/<string:room_id>/export',methods=['POST'])
+@admin_required
+def export_chat(room_id):
+    chat_service = ChatService(current_app.db)
+    chat = chat_service.get_chat_by_room_id(room_id)
+
+    if chat:
+        user_service = UserService(current_app.db)
+        user = user_service.get_user_by_id(chat.user_id)
+        # try:
+        erp_url = os.environ.get("ERP_URL")
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "authtoken": f"{os.environ.get('ERP_TOKEN')}",
+        }
+        data = {
+            "name": user.name,
+            "company": user.company,
+            "title": user.desg,
+            "phonenumber": user.phone,
+            "email": f"{user.email}",
+            # "address": f"{user.city},{user.country}",
+            "city": str(user.city),
+            "state": str(user.city),
+            "country": int(get_country_id('tblcountries.json', user.country)),
+            "description": "\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
+        }
+
+        r = requests.post(erp_url, headers=headers, data=data)
+        print(f"DATA: {data}")
+        if r.status_code == 200:
+
+            data = r.json()
+            print(r)
+            print(r.content)
+            if not chat_service.export_chat(room_id, data.get("lead_id", None)):
+                return error_json_response("Error in exporting: Chat not found", 500)
+        else:
+            print(r.json())
+
+            return error_json_response(f"Error in exporting: {r.status_code}, {r.json().get('message', 'Internal Server error').replace('<p>', "").replace('</p>', "")}", 500)
+        return success_json_response(None, 200)
+
+    return error_json_response("Chat not found", 500)
+
+
+@api_bp.route("/chat/<room_id>/archive", methods=["POST"])
+@admin_required
+def archive_chat(room_id):
+    chat_service = ChatService(current_app.db)
+    chat = chat_service.get_chat_by_room_id(room_id)
+
+    if chat:
+        if not chat_service.archive_chat(room_id):
+            return error_json_response("Error in exporting: Chat not found", 500)
+
+        return success_json_response(None, 200)
+
+    return error_json_response("Chat not found", 500)
+
+
+
+@api_bp.route("/chat/<string:room_id>/delete", methods=["POST"])
+@admin_required
+def delete_chat(room_id):
+    chat_service = ChatService(current_app.db)
+    print(f"Deleted: {chat_service.delete([room_id])}")
+    return success_json_response(None, 200)
+

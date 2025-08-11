@@ -526,7 +526,7 @@ class Bot:
         return {
             "input": input_tokens,
             "output": output_tokens,
-            "cost": input_cost + output_cost,
+            "cost": (input_cost + output_cost)*100,
             "bot": bot_name
         }
 

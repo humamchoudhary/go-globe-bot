@@ -453,6 +453,7 @@ def send_message(chat_id):
     if (not chat.admin_required):
         msg, usage = current_app.bot.responed(
             f"Subject of chat: {chat.subject}\n {message}", chat.room_id)
+        admin_service = AdminService(current_app.db).update_tokens(admin.admin_id,usage['cost'])
 
         usage_service = UsageService(current_app.db)
         usage_service.add_cost(usage['input'], usage['output'], usage['cost'])
