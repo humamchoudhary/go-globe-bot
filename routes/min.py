@@ -444,16 +444,20 @@ def send_message(chat_id):
         "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name)
     }, room=chat.room_id)
     # print('hello')
-    if "job" not in chat.subject.lower():
+    print(len(chat.messages))
+    if "job" not in chat.subject.lower() and len(chat.messages) <= 2:
+        print("SEND MAIL")
 
         mail = Mail(current_app)
         status = send_email(admin.email, f'New Message: {
             chat.subject}', "Message", mail, render_template('/email/new_message.html', user=user, chat=chat))
+        print(status)
 
     if (not chat.admin_required):
         msg, usage = current_app.bot.responed(
             f"Subject of chat: {chat.subject}\n {message}", chat.room_id)
-        admin_service = AdminService(current_app.db).update_tokens(admin.admin_id,usage['cost'])
+        admin_service = AdminService(current_app.db).update_tokens(
+            admin.admin_id, usage['cost'])
 
         usage_service = UsageService(current_app.db)
         usage_service.add_cost(usage['input'], usage['output'], usage['cost'])

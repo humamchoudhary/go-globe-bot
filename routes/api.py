@@ -8,6 +8,7 @@ from . import api_bp
 from services.admin_service import AdminService
 from services.chat_service import ChatService
 from services.user_service import UserService
+from services.usage_service import UsageService
 
 
 def success_json_response(data=None, code=200):
@@ -129,7 +130,7 @@ def complete_admin_login(admin):
     # return jsonify({"status": "success", "redirect": next_url}), 200
     # return redirect_json_response(url_for(""))
     return success_json_response()
-    return jsonify({"status": "success", "redirect": url_for("admin.index")}), 200
+    # return jsonify({"status": "success", "redirect": url_for("admin.index")}), 200
 
 
 @api_bp.route('/auth/login', methods=['POST', 'GET'])
@@ -176,6 +177,7 @@ def me():
     admin_service = AdminService(current_app.db)
     admin = admin_service.get_admin_by_id(session.get("admin_id")).to_dict()
     del admin['password_hash']
+    print(admin)
     return success_json_response({"user": admin})
 
 
@@ -184,7 +186,7 @@ def me():
 def get_chat_list():
 
     page = request.args.get('page', 0, type=int)
-    limit = request.args.get('limit', 20, type=int)
+    limit = request.args.get('limit', 10, type=int)
     filter_type = request.args.get('filter', 'all')
 
     chat_service = ChatService(current_app.db)
@@ -208,6 +210,23 @@ def get_chat_list():
     return success_json_response({"chats": chats_data, "has_more": len(chats_data) == limit})
 
 
+@api_bp.route("/chat/<room_id>", methods=["GET"])
+@admin_required
+def chat(room_id):
+    chat_service = ChatService(current_app.db)
+    user_service = UserService(current_app.db)
+    chat = chat_service.get_chat_by_room_id(room_id)
+    print(chat)
+    if not chat:
+        return error_json_response("Chat not found"), 500
+    # Get initial chats with pagination
+    user = user_service.get_user_by_id(chat.user_id)
+    chat_service.set_chat_viewed(chat.room_id)
+    return success_json_response(
+        {"user": user.to_dict(), "chat": chat.to_dict(), "username": "Ana"}
+    )
+
+
 def get_country_id(file_path, target_country):
     with open(file_path, 'r') as f:
         data = json.load(f)
@@ -218,7 +237,7 @@ def get_country_id(file_path, target_country):
     return None
 
 
-@api_bp.route('/chat/<string:room_id>/export',methods=['POST'])
+@api_bp.route('/chat/<string:room_id>/export', methods=['POST'])
 @admin_required
 def export_chat(room_id):
     chat_service = ChatService(current_app.db)
@@ -279,7 +298,6 @@ def archive_chat(room_id):
     return error_json_response("Chat not found", 500)
 
 
-
 @api_bp.route("/chat/<string:room_id>/delete", methods=["POST"])
 @admin_required
 def delete_chat(room_id):
@@ -287,3 +305,72 @@ def delete_chat(room_id):
     print(f"Deleted: {chat_service.delete([room_id])}")
     return success_json_response(None, 200)
 
+
+@api_bp.route("/chats/latest")
+@admin_required
+def latest_chats():
+    chat_service = ChatService(current_app.db)
+
+    # chats = chat_service.get_all_chats(admin_id=session.get("admin_id"))
+
+    chats = chat_service.get_filtered_chats_paginated(
+        admin_id=session.get("admin_id"),
+        filter_type="all",
+        limit=5,
+        skip=0
+    )
+
+
+
+    user_service = UserService(current_app.db)
+    
+    chats_data = []
+    for c in chats:
+        data = c.to_dict()
+        data["username"] = user_service.get_user_by_id(c.user_id).name
+        chats_data.append(data)
+    chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
+    print(chats_data)
+
+    return success_json_response(data={"chats": chats_data})
+
+
+def get_latest_entry(period, collection):
+    """Get the latest available entry for a given period (daily, monthly, yearly)."""
+    latest = collection.find_one({"period": period}, sort=[("date", -1)])
+    return latest["date"] if latest else None
+
+
+def get_all_entry(period, collection):
+    latest = collection.find({"period": period}, sort=[("date", -1)])
+    return latest
+
+
+@api_bp.route("/chats/usage/")
+@admin_required
+def api_usage():
+    usage_service = UsageService(current_app.db)
+    period = request.args.get("period", "daily")
+    date = request.args.get("date", get_latest_entry(
+        period, usage_service.collection))
+
+    # Find the specific data point
+    data = usage_service.collection.find_one({"period": period, "date": date})
+
+    # If no data found, fall back to latest entry
+    if not data:
+        date = get_latest_entry(period, usage_service.collection)
+        data = usage_service.collection.find_one(
+            {"period": period, "date": date})
+
+        if not data:
+            return jsonify({"error": "No data found"}), 404
+
+    return jsonify(
+        {
+            "date": date,
+            "cost": data["cost"],
+            "input_tokens": data["input_tokens"],
+            "output_tokens": data["output_tokens"],
+        }
+    )
