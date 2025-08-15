@@ -212,6 +212,16 @@ def get_chat_list():
     return success_json_response({"chats": chats_data, "has_more": len(chats_data) == limit})
 
 
+@api_bp.route("/client/<user_id>", methods=["GET"])
+@admin_required
+def user(user_id):
+    user_service = UserService(current_app.db)
+    user = user_service.get_user_by_id(user_id)
+    return success_json_response(
+        user.to_dict()
+    )
+
+
 @api_bp.route("/chat/<room_id>", methods=["GET"])
 @admin_required
 def chat(room_id):
@@ -237,6 +247,42 @@ def get_country_id(file_path, target_country):
         if entry.get('short_name', "").lower() == target_country.lower():
             return entry.get('country_id')
     return None
+
+
+@api_bp.route("/chat/<room_id>/send_message", methods=["POST"])
+@admin_required
+def send_message(room_id):
+    try:
+        message = request.json.get("message")
+        if not message:
+            return success_json_response("", 302)
+        chat_service = ChatService(current_app.db)
+        user_service = UserService(current_app.db)
+
+        chat = chat_service.get_chat_by_room_id(room_id)
+        if not chat:
+            return error_json_response("Chat not found", 404)
+
+        new_message = chat_service.add_message(chat.room_id, "Ana", message)
+        user = user_service.get_user_by_id(chat.user_id)
+        if not user:
+            return error_json_response("User Not Found", 500)
+        current_app.socketio.emit(
+            "new_message",
+            {
+
+                'room_id': chat.room_id,
+                "sender": new_message.sender,
+                "content": message,
+                "timestamp": new_message.timestamp.isoformat(),
+            },
+            room=room_id,
+        )
+
+        # return render_template('admin/fragments/chat_message.html', message=new_message, username="Ana")
+        return success_json_response(None, 200)
+    except Exception as e:
+        return error_json_response(f"{e}", 500)
 
 
 @api_bp.route('/chat/<string:room_id>/export', methods=['POST'])
@@ -375,39 +421,3 @@ def api_usage():
         }
     )
 
-
-# from flask_socketio import join_room, emit
-#
-#
-# def register_admin_socketio_events(socketio):
-#     @socketio.on("admin_join")
-#     def on_admin_join(data):
-#
-#         sid = request.cookies.get("sessionId")
-#         print("Custom sessionId from cookie:", sid)
-#         print("admin joined")
-#         print(session.sid)
-#         print(session.get("admin_id"))
-#         if session.get("role") != "admin":
-#             print('ret')
-#             return
-#
-#         chat_service = ChatService(current_app.db)
-#         chats = chat_service.get_all_chats(session.get('admin_id'))
-#
-#         room = data.get("room")
-#         if not room:
-#             return
-#         print([join_room(chat.room_id) for chat in chats])
-#         print(room)
-#         join_room(room)
-#         join_room("admin")  # Join the admin room for broadcasts
-#         # # print('admin joined')
-#         emit("status", {"msg": "Admin has joined the room."}, room=room)
-#
-#     @socketio.on("admin_required")
-#     def on_admin_required(data):
-#         # if session.get('admin_id')
-#         # room_id = data.get('r')
-#         print(f"ADMIN REQUIRED: {data}")
-#
