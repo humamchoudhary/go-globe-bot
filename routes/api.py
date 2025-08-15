@@ -28,7 +28,7 @@ def admin_required(_func=None, *, roles=None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            print(dict(session))
+
             if session.get("role") not in roles:
                 return error_json_response("Not Authorized", 401)
             if not session.get("admin_id"):
@@ -109,10 +109,10 @@ def server_error(error):
 @api_bp.before_request
 def require_api_key():
     if request.endpoint != 'public_route':  # Exclude public routes
-        print(dict(request.headers))
+        # print(dict(request.headers))
         api_key = request.headers.get(
             'X-Secret-Key') or request.headers.get('secret_key')
-        print(api_key)
+        # print(api_key)
         if not api_key or api_key != API_KEY:
             return error_json_response('UnAuthorized', 403)
 
@@ -135,11 +135,12 @@ def complete_admin_login(admin):
 
 @api_bp.route('/auth/login', methods=['POST', 'GET'])
 def login():
+    # print(session.sid)
     if request.method == "GET":
         abort(405)
         return
     data = request.json
-    print(data)
+    # print(data)
     username = data.get("username")
     password = data.get("password")
     ip_address = request.headers.get(
@@ -174,6 +175,7 @@ def login():
 @api_bp.route('/auth/me')
 @admin_required
 def me():
+    print(session.sid)
     admin_service = AdminService(current_app.db)
     admin = admin_service.get_admin_by_id(session.get("admin_id")).to_dict()
     del admin['password_hash']
@@ -206,7 +208,7 @@ def get_chat_list():
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    print(len(chats_data))
+    # print(len(chats_data))
     return success_json_response({"chats": chats_data, "has_more": len(chats_data) == limit})
 
 
@@ -216,7 +218,7 @@ def chat(room_id):
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
     chat = chat_service.get_chat_by_room_id(room_id)
-    print(chat)
+    # print(chat)
     if not chat:
         return error_json_response("Chat not found"), 500
     # Get initial chats with pagination
@@ -231,7 +233,7 @@ def get_country_id(file_path, target_country):
     with open(file_path, 'r') as f:
         data = json.load(f)
     for entry in data:
-        print(entry.get('short_name'))
+        # print(entry.get('short_name'))
         if entry.get('short_name', "").lower() == target_country.lower():
             return entry.get('country_id')
     return None
@@ -266,16 +268,16 @@ def export_chat(room_id):
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
-        print(f"DATA: {data}")
+        # print(f"DATA: {data}")
         if r.status_code == 200:
 
             data = r.json()
-            print(r)
-            print(r.content)
+            # print(r)
+            # print(r.content)
             if not chat_service.export_chat(room_id, data.get("lead_id", None)):
                 return error_json_response("Error in exporting: Chat not found", 500)
         else:
-            print(r.json())
+            # print(r.json())
 
             return error_json_response(f"Error in exporting: {r.status_code}, {r.json().get('message', 'Internal Server error').replace('<p>', "").replace('</p>', "")}", 500)
         return success_json_response(None, 200)
@@ -302,7 +304,7 @@ def archive_chat(room_id):
 @admin_required
 def delete_chat(room_id):
     chat_service = ChatService(current_app.db)
-    print(f"Deleted: {chat_service.delete([room_id])}")
+    # print(f"Deleted: {chat_service.delete([room_id])}")
     return success_json_response(None, 200)
 
 
@@ -320,17 +322,15 @@ def latest_chats():
         skip=0
     )
 
-
-
     user_service = UserService(current_app.db)
-    
+
     chats_data = []
     for c in chats:
         data = c.to_dict()
         data["username"] = user_service.get_user_by_id(c.user_id).name
         chats_data.append(data)
     chats_data.sort(key=lambda x: x["updated_at"], reverse=True)
-    print(chats_data)
+    # print(chats_data)
 
     return success_json_response(data={"chats": chats_data})
 
@@ -374,3 +374,40 @@ def api_usage():
             "output_tokens": data["output_tokens"],
         }
     )
+
+
+# from flask_socketio import join_room, emit
+#
+#
+# def register_admin_socketio_events(socketio):
+#     @socketio.on("admin_join")
+#     def on_admin_join(data):
+#
+#         sid = request.cookies.get("sessionId")
+#         print("Custom sessionId from cookie:", sid)
+#         print("admin joined")
+#         print(session.sid)
+#         print(session.get("admin_id"))
+#         if session.get("role") != "admin":
+#             print('ret')
+#             return
+#
+#         chat_service = ChatService(current_app.db)
+#         chats = chat_service.get_all_chats(session.get('admin_id'))
+#
+#         room = data.get("room")
+#         if not room:
+#             return
+#         print([join_room(chat.room_id) for chat in chats])
+#         print(room)
+#         join_room(room)
+#         join_room("admin")  # Join the admin room for broadcasts
+#         # # print('admin joined')
+#         emit("status", {"msg": "Admin has joined the room."}, room=room)
+#
+#     @socketio.on("admin_required")
+#     def on_admin_required(data):
+#         # if session.get('admin_id')
+#         # room_id = data.get('r')
+#         print(f"ADMIN REQUIRED: {data}")
+#

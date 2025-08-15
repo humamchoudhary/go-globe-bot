@@ -2923,8 +2923,14 @@ def get_saved_table_data():
 def register_admin_socketio_events(socketio):
     @socketio.on("admin_join")
     def on_admin_join(data):
+        print(dict(session))
+        sid = request.cookies.get("sessionId")
+        print("Custom sessionId from cookie:", sid)
+        print("admin joined")
+        print(session.sid)
+        print(session.get("admin_id"))
         if session.get("role") != "admin":
-            # # print('ret')
+            print('ret')
             return
 
         chat_service = ChatService(current_app.db)
@@ -2933,7 +2939,8 @@ def register_admin_socketio_events(socketio):
         room = data.get("room")
         if not room:
             return
-        [join_room(chat.room_id) for chat in chats]
+        print([join_room(chat.room_id) for chat in chats])
+        print(room)
         join_room(room)
         join_room("admin")  # Join the admin room for broadcasts
         # # print('admin joined')
@@ -2944,3 +2951,8 @@ def register_admin_socketio_events(socketio):
         # if session.get('admin_id')
         # room_id = data.get('r')
         print(f"ADMIN REQUIRED: {data}")
+    @socketio.on("new_message")
+    def on_new_message(data):
+        print("New Message")
+        print(data)
+        print(dict(session))
