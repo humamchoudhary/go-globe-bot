@@ -13,6 +13,13 @@ from collections import Counter
 from services.timezone import UTCZoneManager
 import threading
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
+import logging
+
+
+
+
 # from # p# # print import p# print
 from services.usage_service import UsageService
 from urllib.parse import urlparse
@@ -50,6 +57,9 @@ import calendar
 from functools import lru_cache
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "user_data")
+
+
+logger = logging.getLogger(__name__)
 
 
 def admin_required(_func=None, *, roles=None):
@@ -968,98 +978,75 @@ def logout():
 
 
 def generate_stats(chat_list):
-    """Optimized version of generate_stats with better performance."""
+    """Simplified and optimized stats generation."""
     if not chat_list:
         return get_empty_stats()
     
     now = datetime.utcnow()
-    
-    # Pre-calculate time boundaries
     time_boundaries = calculate_time_boundaries(now)
     
-    # Initialize counters using defaultdict for cleaner code
-    counters = {
-        'today_hourly': defaultdict(int),
-        'today_admin_hourly': defaultdict(int),
-        'week_daily': defaultdict(int),
-        'week_admin_daily': defaultdict(int),
-        'month_daily': defaultdict(int),
-        'month_admin_daily': defaultdict(int),
-        'year_monthly': defaultdict(int),
-        'year_admin_monthly': defaultdict(int),
-        'all_time_yearly': defaultdict(int),
-        'all_time_admin_yearly': defaultdict(int),
+    # Define time periods and their configurations
+    periods = {
+        'today': {
+            'boundary': time_boundaries['today_start'],
+            'format': lambda dt: dt.strftime("%H:00"),
+            'labels': get_time_labels(now)['hours']
+        },
+        'this-week': {
+            'boundary': time_boundaries['week_start'], 
+            'format': lambda dt: dt.strftime("%A"),
+            'labels': get_time_labels(now)['days']
+        },
+        'this-month': {
+            'boundary': time_boundaries['month_start'],
+            'format': lambda dt: dt.day,
+            'labels': get_time_labels(now)['days_in_month']
+        },
+        'this-year': {
+            'boundary': time_boundaries['year_start'],
+            'format': lambda dt: dt.strftime("%b"), 
+            'labels': get_time_labels(now)['months']
+        },
+        'all-time': {
+            'boundary': None,  # No boundary for all-time
+            'format': lambda dt: dt.strftime("%Y"),
+            'labels': None  # Will be calculated dynamically
+        }
     }
     
-    # Single pass through chats with optimized logic
+    # Initialize counters for all periods
+    counters = {}
+    for period in periods:
+        counters[period] = {'total': defaultdict(int), 'admin': defaultdict(int)}
+    
+    # Single pass through all chats
     for chat in chat_list:
         created = chat.created_at
         is_admin_required = chat.admin_required
         
-        # TODAY (hourly)
-        if created >= time_boundaries['today_start']:
-            hour_label = created.strftime("%H:00")
-            counters['today_hourly'][hour_label] += 1
-            if is_admin_required:
-                counters['today_admin_hourly'][hour_label] += 1
-        
-        # THIS WEEK (daily)
-        if created >= time_boundaries['week_start']:
-            day_label = created.strftime("%A")
-            counters['week_daily'][day_label] += 1
-            if is_admin_required:
-                counters['week_admin_daily'][day_label] += 1
-        
-        # THIS MONTH (daily)
-        if created >= time_boundaries['month_start']:
-            day_label = created.day
-            counters['month_daily'][day_label] += 1
-            if is_admin_required:
-                counters['month_admin_daily'][day_label] += 1
-        
-        # THIS YEAR (monthly)
-        if created >= time_boundaries['year_start']:
-            month_label = created.strftime("%b")
-            counters['year_monthly'][month_label] += 1
-            if is_admin_required:
-                counters['year_admin_monthly'][month_label] += 1
-        
-        # ALL TIME (yearly)
-        year_label = created.strftime("%Y")
-        counters['all_time_yearly'][year_label] += 1
-        if is_admin_required:
-            counters['all_time_admin_yearly'][year_label] += 1
+        for period_name, config in periods.items():
+            # Check if chat falls within this period's boundary
+            if config['boundary'] is None or created >= config['boundary']:
+                label = config['format'](created)
+                counters[period_name]['total'][label] += 1
+                if is_admin_required:
+                    counters[period_name]['admin'][label] += 1
     
-    # Build response using pre-calculated labels
-    labels = get_time_labels(now)
+    # Build final response
+    result = {}
+    for period_name, config in periods.items():
+        labels = config['labels']
+        if period_name == 'all-time':
+            # For all-time, use sorted years from actual data
+            labels = sorted(counters[period_name]['total'].keys())
+        
+        result[period_name] = {
+            "labels": labels,
+            "totalChats": [counters[period_name]['total'][label] for label in labels],
+            "adminRequired": [counters[period_name]['admin'][label] for label in labels],
+        }
     
-    return {
-        "today": {
-            "labels": labels['hours'],
-            "totalChats": [counters['today_hourly'][h] for h in labels['hours']],
-            "adminRequired": [counters['today_admin_hourly'][h] for h in labels['hours']],
-        },
-        "this-week": {
-            "labels": labels['days'],
-            "totalChats": [counters['week_daily'][d] for d in labels['days']],
-            "adminRequired": [counters['week_admin_daily'][d] for d in labels['days']],
-        },
-        "this-month": {
-            "labels": labels['days_in_month'],
-            "totalChats": [counters['month_daily'][d] for d in labels['days_in_month']],
-            "adminRequired": [counters['month_admin_daily'][d] for d in labels['days_in_month']],
-        },
-        "this-year": {
-            "labels": labels['months'],
-            "totalChats": [counters['year_monthly'][m] for m in labels['months']],
-            "adminRequired": [counters['year_admin_monthly'][m] for m in labels['months']],
-        },
-        "all-time": {
-            "labels": sorted(counters['all_time_yearly'].keys()),
-            "totalChats": [counters['all_time_yearly'][y] for y in sorted(counters['all_time_yearly'].keys())],
-            "adminRequired": [counters['all_time_admin_yearly'][y] for y in sorted(counters['all_time_admin_yearly'].keys())],
-        },
-    }
+    return result
 
 def calculate_time_boundaries(now):
     """Pre-calculate all time boundaries."""
@@ -1122,44 +1109,6 @@ def get_user(chat,user_service):
     return chat
 
 
-# @admin_bp.route("/")
-# @admin_bp.route("/dashboard")
-# @admin_required
-# def index():
-#
-#     admin = AdminService(current_app.db).get_admin_by_id(
-#         session.get("admin_id"))
-#     if admin.onboarding:
-#         return redirect(url_for("admin.onboard"))
-#
-#     chat_service = ChatService(current_app.db)
-#
-#     user_service = UserService(current_app.db)
-#     # all_users = user_service.get_all_users()
-#     chats = chat_service.get_all_chats(session.get("admin_id"))
-#
-#
-#
-#     data = generate_stats(chats)
-#     chats_ary = [(lambda chat:get_user(chat,user_service))(chat) for chat in chats]
-#
-#     return render_template(
-#         "admin/index.html",
-#         chats=chats_ary,
-#         data=data,
-#         username="Ana",
-#         online_users=current_app.config["ONLINE_USERS"],
-#         # all_users=len(all_users),
-#     )
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from functools import lru_cache
-import logging
-
-logger = logging.getLogger(__name__)
-
-
-
 @lru_cache(maxsize=256)
 def get_cached_user(user_id, user_service):
     """Cache user lookups to avoid repeated database calls."""
@@ -1181,7 +1130,8 @@ def enrich_chats_with_usernames(chats, user_service):
     user_cache = {}
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_to_user_id = {
-            executor.submit(get_cached_user, user_id, user_service): user_id 
+            executor.submit(get_cached_user,
+                            user_id, user_service): user_id 
             for user_id in unique_user_ids
         }
         
@@ -1201,23 +1151,29 @@ def enrich_chats_with_usernames(chats, user_service):
     
     return chats
 
+
 def get_dashboard_data(admin_id, chat_service, user_service, limit=50):
-    """Get optimized dashboard data with minimal database calls."""
-    # Get chats without full message history for better performance
+    """Get optimized dashboard data with 500+ limit handling."""
+    # Get chats with limit+1 to detect if there are more than the limit
     chats = chat_service.get_all_chats(admin_id, limit=limit)
     
-    # Only get full messages for chats that actually need them (e.g., for stats)
-    chats_for_stats = chat_service.get_chats_with_full_messages(admin_id, limit=1000)
+    # For stats, use higher limit with 500+ handling
+    stats_limit = 501  # Get 501 to detect if there are 500+
+    chats_for_stats = chat_service.get_chats_with_full_messages(admin_id, limit=stats_limit)
     
-    # Generate stats from the full dataset
+    # Handle 500+ case
+    if len(chats_for_stats) == 501:
+        # Truncate to 500 and note that there are more
+        chats_for_stats = chats_for_stats[:500]
+        # You could add a flag here if needed: has_more_than_500 = True
+    
+    # Generate stats from the dataset (max 500 chats)
     stats_data = generate_stats(chats_for_stats)
     
-    # Enrich chats with usernames efficiently
+    # Enrich chats with usernames efficiently  
     enriched_chats = enrich_chats_with_usernames(chats, user_service)
     
     return enriched_chats, stats_data
-
-
 @admin_bp.route("/")
 @admin_bp.route("/dashboard")
 @admin_required
@@ -1879,75 +1835,7 @@ def extract_urls_from_sitemap(sitemap_content, base_url):
     return urls
 
 
-def get_latest_entry(period, collection):
-    """Get the latest available entry for a given period (daily, monthly, yearly)."""
-    latest = collection.find_one({"period": period}, sort=[("date", -1)])
-    return latest["date"] if latest else None
 
-
-def get_all_entry(period, collection):
-    latest = collection.find({"period": period}, sort=[("date", -1)])
-    return latest
-
-
-@admin_bp.route("/usage/")
-@admin_required
-def usage():
-    usage_service = UsageService(current_app.db)
-
-    # Get all unique dates for each period
-    daily_dates = list(usage_service.collection.distinct(
-        "date", {"period": "daily"}))
-    monthly_dates = list(
-        usage_service.collection.distinct("date", {"period": "monthly"})
-    )
-    yearly_dates = list(usage_service.collection.distinct(
-        "date", {"period": "yearly"}))
-
-    # Get the latest entries
-    latest_daily = get_latest_entry("daily", usage_service.collection)
-    latest_monthly = get_latest_entry("monthly", usage_service.collection)
-    latest_yearly = get_latest_entry("yearly", usage_service.collection)
-
-    return render_template(
-        "admin/usage.html",
-        latest_daily=latest_daily,
-        latest_monthly=latest_monthly,
-        latest_yearly=latest_yearly,
-        daily_dates=daily_dates,
-        monthly_dates=monthly_dates,
-        yearly_dates=yearly_dates,
-    )
-
-
-@admin_bp.route("/api/usage/")
-@admin_required
-def api_usage():
-    usage_service = UsageService(current_app.db)
-    period = request.args.get("period", "daily")
-    date = request.args.get("date", get_latest_entry(
-        period, usage_service.collection))
-
-    # Find the specific data point
-    data = usage_service.collection.find_one({"period": period, "date": date})
-
-    # If no data found, fall back to latest entry
-    if not data:
-        date = get_latest_entry(period, usage_service.collection)
-        data = usage_service.collection.find_one(
-            {"period": period, "date": date})
-
-        if not data:
-            return jsonify({"error": "No data found"}), 404
-
-    return jsonify(
-        {
-            "date": date,
-            "cost": data["cost"],
-            "input_tokens": data["input_tokens"],
-            "output_tokens": data["output_tokens"],
-        }
-    )
 
 
 @admin_bp.route('/chat-counts', methods=['GET'])

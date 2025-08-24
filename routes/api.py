@@ -295,37 +295,41 @@ def export_chat(room_id):
         user_service = UserService(current_app.db)
         user = user_service.get_user_by_id(chat.user_id)
         # try:
-        erp_url = os.environ.get("ERP_URL")
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "authtoken": f"{os.environ.get('ERP_TOKEN')}",
-        }
-        data = {
-            "name": user.name,
-            "company": user.company,
-            "title": user.desg,
-            "phonenumber": user.phone,
-            "email": f"{user.email}",
-            # "address": f"{user.city},{user.country}",
-            "city": str(user.city),
-            "state": str(user.city),
-            "country": int(get_country_id('tblcountries.json', user.country)),
-            "description": "\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
-        }
-
-        r = requests.post(erp_url, headers=headers, data=data)
-        # print(f"DATA: {data}")
-        if r.status_code == 200:
-
-            data = r.json()
-            # print(r)
-            # print(r.content)
-            if not chat_service.export_chat(room_id, data.get("lead_id", None)):
-                return error_json_response("Error in exporting: Chat not found", 500)
+        # erp_url = os.environ.get("ERP_URL")
+        # headers = {
+        #     "Content-Type": "application/x-www-form-urlencoded",
+        #     "authtoken": f"{os.environ.get('ERP_TOKEN')}",
+        # }
+        # data = {
+        #     "name": user.name,
+        #     "company": user.company,
+        #     "title": user.desg,
+        #     "phonenumber": user.phone,
+        #     "email": f"{user.email}",
+        #     # "address": f"{user.city},{user.country}",
+        #     "city": str(user.city),
+        #     "state": str(user.city),
+        #     "country": int(get_country_id('tblcountries.json', user.country)),
+        #     "description": "\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
+        # }
+        #
+        # r = requests.post(erp_url, headers=headers, data=data)
+        # # print(f"DATA: {data}")
+        # if r.status_code == 200:
+        #
+        #     data = r.json()
+        # print(r)
+        # print(r.content)
+        # TAB
+        if not chat_service.export_chat(room_id, None
+                                        # data.get("lead_id", None)
+                                        ):
+            return error_json_response("Error in exporting: Chat not found", 500)
         else:
             # print(r.json())
+            pass
 
-            return error_json_response(f"Error in exporting: {r.status_code}, {r.json().get('message', 'Internal Server error').replace('<p>', "").replace('</p>', "")}", 500)
+            # return error_json_response(f"Error in exporting: {r.status_code}, {r.json().get('message', 'Internal Server error').replace('<p>', "").replace('</p>', "")}", 500)
         return success_json_response(None, 200)
 
     return error_json_response("Chat not found", 500)
@@ -350,7 +354,7 @@ def archive_chat(room_id):
 @admin_required
 def delete_chat(room_id):
     chat_service = ChatService(current_app.db)
-    # print(f"Deleted: {chat_service.delete([room_id])}")
+    print(f"Deleted: {chat_service.delete([room_id])}")
     return success_json_response(None, 200)
 
 
@@ -394,30 +398,18 @@ def get_all_entry(period, collection):
 
 @api_bp.route("/chats/usage/")
 @admin_required
-def api_usage():
+def usage():
     usage_service = UsageService(current_app.db)
-    period = request.args.get("period", "daily")
-    date = request.args.get("date", get_latest_entry(
-        period, usage_service.collection))
 
-    # Find the specific data point
-    data = usage_service.collection.find_one({"period": period, "date": date})
+    # Get all unique dates for each period
 
-    # If no data found, fall back to latest entry
-    if not data:
-        date = get_latest_entry(period, usage_service.collection)
-        data = usage_service.collection.find_one(
-            {"period": period, "date": date})
+    # Get the latest entries
+    latest_daily = get_latest_entry("daily", usage_service.collection)
+    latest_monthly = get_latest_entry("monthly", usage_service.collection)
+    latest_yearly = get_latest_entry("yearly", usage_service.collection)
 
-        if not data:
-            return jsonify({"error": "No data found"}), 404
-
-    return jsonify(
-        {
-            "date": date,
-            "cost": data["cost"],
-            "input_tokens": data["input_tokens"],
-            "output_tokens": data["output_tokens"],
-        }
-    )
-
+    return success_json_response({
+        "latest_daily": latest_daily,
+        "latest_monthly": latest_monthly,
+        "latest_yearly": latest_yearly,
+    }, 200)
