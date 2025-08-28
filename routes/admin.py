@@ -725,7 +725,7 @@ def export_chat(room_id):
             "state":str(user.city),
             "country":int(get_country_id('tblcountries.json',user.country)),
             "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages]),
-            "status":2
+            "status":2,"hash":"null"
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
