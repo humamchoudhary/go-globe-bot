@@ -741,7 +741,7 @@ def export_chat(room_id):
             # print(r.json())
             if not chat_service.export_chat(room_id, None):
                 return "Error in exporting: Chat not found", 404
-            return f"Error from ERP: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")} {"*"*100}",202
+            return f"Error from ERP: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",202
         return "success", 200
 
     return "Chat not found", 404
