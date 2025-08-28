@@ -721,11 +721,11 @@ def export_chat(room_id):
             "title": user.desg,
             "phonenumber": user.phone,
             "email": f"{user.email}",
-            # "address": f"{user.city},{user.country}",
             "city":str(user.city),
             "state":str(user.city),
             "country":int(get_country_id('tblcountries.json',user.country)),
-            "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
+            "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages]),
+            "status":2
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
