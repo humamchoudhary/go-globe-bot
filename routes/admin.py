@@ -12,14 +12,9 @@ from datetime import datetime, timedelta
 from collections import Counter
 from services.timezone import UTCZoneManager
 import threading
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 import logging
-
-
-
-
 # from # p# # print import p# print
 from services.usage_service import UsageService
 from urllib.parse import urlparse
@@ -744,7 +739,8 @@ def export_chat(room_id):
                 return "Error in exporting: Chat not found", 404
         else:
             print(r.json())
-
+            if not chat_service.export_chat(room_id, data.get("lead_id", None)):
+                return "Error in exporting: Chat not found", 404
             return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
         return "success", 200
 
@@ -1411,7 +1407,7 @@ def add_timing():
     day = request.form.get("meetingDay")
     start_time = request.form.get("startTime")
     end_time = request.form.get("endTime")
-    timezone = request.form.get("timezone")
+    # timezone = request.form.get("timezone")
 
     admin_service = AdminService(current_app.db)
     current_admin = admin_service.get_admin_by_id(session.get("admin_id"))

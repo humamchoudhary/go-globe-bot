@@ -143,7 +143,7 @@ class ChatService:
         """Export chat with optimized existence check."""
         result = self.chats_collection.update_one(
             {"room_id": room_id},
-            {"$set": {"exported": True, "lead_id": lead_id, "archived": True}}
+            {"$set": {"exported": True, "lead_id": lead_id}}
         )
         return result.modified_count > 0
 

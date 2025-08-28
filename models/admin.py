@@ -8,7 +8,7 @@ from datetime import datetime
 
 class Admin:
     def __init__(self, username, password_hash, role="admin", admin_id=None, email=None, secret_key=None,
-                 phone=None, created_by=None, settings=None, last_login=None, status="active", onboarding=True, two_fa=False, tokens=0):
+                 phone=None, created_by=None, settings=None, last_login=None, status="active", onboarding=True, two_fa=False, tokens=0, expo_tokens=[]):
         self.admin_id = admin_id
         self.username = username
         self.password_hash = password_hash
@@ -32,6 +32,7 @@ class Admin:
             'google_token': None,  # Store serialized Google credentials
             'selected_folders': []  # Store folder IDs selected by this admin
         }
+        self.expo_tokens = expo_tokens
 
         # Superadmin settings are now stored in app.config['SETTINGS']
         # Only store admin-specific settings here
@@ -56,7 +57,8 @@ class Admin:
             "secret_key": self.secret_key,
             "onboarding": self.onboarding,
             "two_fa": self.two_fa,
-            "tokens": self.tokens
+            "tokens": self.tokens,
+            "expo_token": self.expo_tokens
         }
 
     @classmethod
@@ -75,7 +77,8 @@ class Admin:
             secret_key=data.get('secret_key'),
             onboarding=data.get('onboarding', False),
             two_fa=data.get('two_fa', False),
-            tokens=data.get('tokens', 0)
+            tokens=data.get('tokens', 0),
+            expo_tokens=data.get("expo_token", 0)
         )
 
         # Store the original created_at in UTC (default to current UTC time if not provided)
