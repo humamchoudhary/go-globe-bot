@@ -730,6 +730,7 @@ def export_chat(room_id):
 
         r = requests.post(erp_url, headers=headers, data=data)
         print(f"DATA: {data}")
+        print(r)
         if r.status_code == 200:
 
             data = r.json()
