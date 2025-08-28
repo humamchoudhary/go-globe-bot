@@ -715,7 +715,7 @@ def export_chat(room_id):
             "Content-Type": "application/x-www-form-urlencoded",
             "authtoken": f"{os.environ.get('ERP_TOKEN')}",
         }
-        data = [{
+        data = {
             "name": user.name,
             "company": user.company,
             "title": user.desg,
@@ -726,7 +726,7 @@ def export_chat(room_id):
             "country":int(get_country_id('tblcountries.json',user.country)),
             "description":"\n".join([f"{message.sender}: {message.content}" for message in chat.messages]),
             "status":2,"hash":"null"
-        }]
+        }
 
         r = requests.post(erp_url, headers=headers, data=data)
         print(f"DATA: {data}")
