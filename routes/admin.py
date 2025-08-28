@@ -733,13 +733,13 @@ def export_chat(room_id):
         if r.status_code == 200:
 
             data = r.json()
-            print(r)
-            print(r.content)
+            # print(r)
+            # print(r.content)
             if not chat_service.export_chat(room_id, data.get("lead_id", None)):
                 return "Error in exporting: Chat not found", 404
         else:
-            print(r.json())
-            if not chat_service.export_chat(room_id, data.get("lead_id", None)):
+            # print(r.json())
+            if not chat_service.export_chat(room_id, None):
                 return "Error in exporting: Chat not found", 404
             return f"Error in exporting: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
         return "success", 200
