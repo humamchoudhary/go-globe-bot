@@ -430,7 +430,7 @@ async function exportChat(roomId) {
             if (response.status == 202){
 
             const errorText = await response.text();
- customAlert(`Export failed.\n${errorText}`);            }
+ customAlert(`Export status updated but not exported: \n${errorText}`);            }
 
             //console.log('Export successful');
             // Update chat counts
