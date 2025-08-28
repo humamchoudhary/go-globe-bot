@@ -427,9 +427,15 @@ async function exportChat(roomId) {
         console.log('Export response status:', response.status);
         
         if (response.ok) {
-            console.log('Export successful');
+            if (response.status == 202){
+
+            const errorText = await response.text();
+ customAlert(`Export failed.\n${errorText}`);            }
+
+            //console.log('Export successful');
             // Update chat counts
             updateChatCounts();
+
             
             // Remove export button from the chat item
             const exportBtn = document.querySelector(`#chat-${roomId} div[onclick*="exportChat"]`);
