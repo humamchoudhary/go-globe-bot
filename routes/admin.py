@@ -738,7 +738,7 @@ def export_chat(room_id):
             # print(r.content)
             if not chat_service.export_chat(room_id, data.get("lead_id", None)):
                 return "Error in exporting: Chat not found", 404
-        if r.status_code==404:
+        elif r.status_code==404:
 
 
             if not chat_service.export_chat(room_id, None):
