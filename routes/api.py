@@ -1224,10 +1224,12 @@ def get_notifications():
     user_service = UserService(current_app.db)
     print(notis)
     for noti in notis:
+
+        print(noti)
         chat = chat_service.get_chat_by_room_id(noti.get('room_id'))
         print(chat)
-        user = user_service.get_user_by_id(chat.user_id)
         if chat:
+            user = user_service.get_user_by_id(chat.user_id)
             notificaitons.append(
                 {**noti, **chat.to_dict(), **{"username": user.name}})
     pprint(notificaitons)
