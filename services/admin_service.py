@@ -43,6 +43,24 @@ class AdminService:
         self.admins_collection.update_one(
             {'admin_id': admin_id}, {"$set": {'two_fa': not admin.two_fa}})
 
+    def add_expo_token(self, admin_id, token):
+        return self.admins_collection.update_one(
+            {"admin_id": admin_id},
+            {"$addToSet": {"expo_token": token}},  # avoids duplicates
+            upsert=True
+        )
+
+    def get_expo_tokens(self, admin_id):
+        admin = self.admins_collection.find_one(
+            {"admin_id": admin_id},
+            {"_id": 0, "expo_token": 1}  # only return expo_token field
+        )
+        print(admin_id)
+        if admin and "expo_token" in admin:
+            return admin["expo_token"]
+        return []
+
+
     def get_admin_by_key(self, key):
         admin_data = self.admins_collection.find_one({"secret_key": key})
         if admin_data:
@@ -51,9 +69,9 @@ class AdminService:
 
     def update_tokens(self, admin_id, cost):
         self.admins_collection.update_one(
-            {'admin_id': admin_id}, 
-{"$inc": {"tokens": -cost}}
-            )
+            {'admin_id': admin_id},
+            {"$inc": {"tokens": -cost}}
+        )
 
     def get_admin_by_username(self, username):
         """Get admin by username"""

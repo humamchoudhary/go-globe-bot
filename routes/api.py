@@ -1,3 +1,5 @@
+from pprint import pprint
+from services.notification_service import NotificationService
 import requests
 import os
 import json
@@ -124,15 +126,15 @@ def server_error(error):
     )
 
 
-@api_bp.before_request
-def require_api_key():
-    if request.endpoint != 'public_route':  # Exclude public routes
-        # print(dict(request.headers))
-        api_key = request.headers.get(
-            'X-Secret-Key') or request.headers.get('secret_key')
-        # print(api_key)
-        if not api_key or api_key != API_KEY:
-            return error_json_response('UnAuthorized', 403)
+# @api_bp.before_request
+# def require_api_key():
+#     if request.endpoint != 'public_route':  # Exclude public routes
+#         # print(dict(request.headers))
+#         api_key = request.headers.get(
+#             'X-Secret-Key') or request.headers.get('secret_key')
+#         # print(api_key)
+#         if not api_key or api_key != API_KEY:
+#             return error_json_response('UnAuthorized', 403)
 
 
 def complete_admin_login(admin):
@@ -194,11 +196,14 @@ def login():
 @admin_required
 def me():
     print(session.sid)
-    # print(request.get_json())
+    expo_token = request.args.get("expo-token")
+    print(expo_token)
+
     admin_service = AdminService(current_app.db)
     admin = admin_service.get_admin_by_id(session.get("admin_id")).to_dict()
+    print(admin_service.add_expo_token(session.get("admin_id"), expo_token))
     del admin['password_hash']
-    print(admin)
+    # print(admin)
     return success_json_response({"user": admin})
 
 
@@ -1147,3 +1152,117 @@ def set_prompt():
         return error_json_response("Failed to set prompt", 500)
 
 
+#####################################   SEARCH  #########################################
+
+
+@api_bp.route("/search/", methods=["GET"])
+@admin_required
+def search():
+    data = request.args
+    if not data or 'search-q' not in data:
+        return error_json_response("Search query is required", 400)
+
+    query = data.get("search-q").lower()
+    if not query:
+        return success_json_response({"results": []}, 200)
+
+    chat_service = ChatService(current_app.db)
+    user_service = UserService(current_app.db)
+    chats = chat_service.get_all_chats(session.get("admin_id"))
+
+    search_results = []
+    for chat in chats:
+        user = user_service.get_user_by_id(chat.user_id)
+        if not user:
+            continue
+
+        # Match against user fields
+        user_matched = (
+            query in user.name.lower() or
+            (user.country and query in user.country.lower()) or
+            (user.city and query in user.city.lower())
+        )
+
+        # Match against messages
+        message_matched = any(query in message.content.lower()
+                              for message in chat.messages)
+
+        if user_matched or message_matched:
+            # Prepare chat data for JSON response
+            # chat_data = {
+            #     "chat_id": chat.chat_id,
+            #     "user_id": chat.user_id,
+            #     "created_at": chat.created_at.isoformat() if chat.created_at else None,
+            #     "matched_by": "user" if user_matched else "message"
+            # }
+            chat_data = chat.to_dict()
+            chat_data.update(
+                {
+
+                    "username": user.name,
+                    "user_country": user.country,
+                    "user_city": user.city,
+                }
+            )
+
+            search_results.append(chat_data)
+    pprint(search_results)
+
+    return success_json_response({"results": search_results, "count": len(search_results)}, 200)
+
+
+@api_bp.route("/notifications")
+@admin_required
+def get_notifications():
+    noti_service = NotificationService(current_app.db)
+    notis = noti_service.get_notifications(
+        session.get("admin_id"), unread_only=True
+    )
+    chat_service = ChatService(current_app.db)
+    notificaitons = []
+
+    user_service = UserService(current_app.db)
+
+    for noti in notis:
+        chat = chat_service.get_chat_by_room_id(noti.get('room_id'))
+        user = user_service.get_user_by_id(chat.user_id)
+        if chat:
+            notificaitons.append(
+                {**noti, **chat.to_dict(), **{"username": user.name}})
+    pprint(notificaitons)
+    return success_json_response(notificaitons, 200)
+
+
+@api_bp.route("/notification/<notification_id>/", methods=['POST'])
+@admin_required
+def viewed_notifications(notification_id):
+    noti_service = NotificationService(current_app.db)
+
+    if noti_service.mark_notification_read(notification_id, session.get('admin_id')):
+
+        return success_json_response({}, 200)
+    return error_json_response("Internal Server Error", 500)
+
+
+@api_bp.route("/noti")
+def test_noti():
+    # data = request.get_json()
+    expo_token = "ExponentPushToken[64LfZeDkba80snIqdIBKWL]"
+    message = {
+        "to": expo_token,
+        "sound": "default",  # iOS/Android notification sound
+        "title": "Hello 👋",
+        "body": "This is a test notification from Python!",
+        "data": {"extraData": "Some custom data"}  # optional
+    }
+
+# Send the notification
+    response = requests.post(
+        "https://exp.host/--/api/v2/push/send",
+        headers={"Content-Type": "application/json"},
+        json=message
+    )
+
+    print(response.status_code)
+    print(response.json())
+    return ""

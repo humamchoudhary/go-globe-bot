@@ -1,3 +1,4 @@
+from services.expo_noti import send_push_noti
 import markdown
 from flask import make_response
 from services.notification_service import NotificationService
@@ -400,6 +401,15 @@ Auto Generated Message"""
     mail = Mail(current_app)
     status = send_email(current_admin.email, f'Assistance Required: {
         chat.subject}', "Ping", mail, render_template('/email/new_message.html', user=user, chat=chat))
+
+    admin_service = AdminService(current_app.db)
+    noti_res = send_push_noti(admin_service.get_expo_tokens(
+        session.get("admin_id")), "Admin Assistance Required!", f'{user.name}: {chat.subject}',chat.room_id)
+    if noti_res.status_code != 200:
+        print(f"Notificaiton Error: {noti_res.__dict__}")
+
+
+
     # print(status)
 
     if request.headers.get('HX-Request'):
@@ -451,16 +461,23 @@ def send_message(chat_id):
         mail = Mail(current_app)
         status = send_email(admin.email, f'New Message: {
             chat.subject}', "Message", mail, render_template('/email/new_message.html', user=user, chat=chat))
+
         print(status)
+    admin_service = AdminService(current_app.db)
+    noti_res = send_push_noti(admin_service.get_expo_tokens(
+        session.get("admin_id")), "New Message", f'{user.name}: {message}',chat.room_id)
+    print(f"Noti done: {noti_res}")
+    if noti_res.status_code != 200:
+        print(f"Notificaiton Error: {noti_res.__dict__}")
+
 
     if (not chat.admin_required):
         msg, usage = current_app.bot.responed(
             f"Subject of chat: {chat.subject}\n {message}", chat.room_id)
-        admin_service = AdminService(current_app.db).update_tokens(
-            admin.admin_id, usage['cost'])
+        admin_service = AdminService(current_app.db).update_tokens(admin.admin_id, usage['cost'])
 
         usage_service = UsageService(current_app.db)
-        usage_service.add_cost(usage['input'], usage['output'], usage['cost'])
+        usage_service.add_cost(session.get("admin_id"),usage['input'], usage['output'], usage['cost'])
         bot_message = chat_service.add_message(
             chat.room_id, chat.bot_name, msg)
 

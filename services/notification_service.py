@@ -38,7 +38,7 @@ class NotificationService:
             query["read"] = False
 
         notifications = self.notifications_collection.find(
-            query).sort("created_at", -1).limit(limit)
+                query,{"_id":0}).sort("created_at", -1).limit(limit)
         return list(notifications)
 
     def get_unread_count(self, admin_id: str) -> int:
