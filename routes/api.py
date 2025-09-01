@@ -1,3 +1,6 @@
+import pdfplumber
+from flask import send_from_directory
+import uuid
 from pprint import pprint
 from services.notification_service import NotificationService
 import requests
@@ -1269,3 +1272,182 @@ def test_noti():
     print(response.status_code)
     print(response.json())
     return ""
+
+
+@api_bp.route("/files/", methods=["GET"])
+@admin_required
+def files():
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}", "files")
+    os.makedirs(path, exist_ok=True)
+
+    # Get file list with metadata
+    file_list = []
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path):
+            file_list.append({
+                "filename": filename,
+                "size": os.path.getsize(file_path),
+                "modified": os.path.getmtime(file_path)
+            })
+
+    return success_json_response({"files": sorted(file_list, key=lambda x: x["filename"])})
+
+
+def is_readable_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception:
+        return None
+
+
+@api_bp.route("/files/<file_name>", methods=["GET"])
+@admin_required
+def file_page(file_name):
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}", "files")
+    file_path = os.path.join(path, file_name)
+
+    if not os.path.exists(file_path):
+        return error_json_response("File not found", 404)
+
+    file_info = {
+        "filename": file_name,
+        "size": os.path.getsize(file_path),
+        "modified": os.path.getmtime(file_path)
+    }
+
+    # Get file extension
+    file_ext = os.path.splitext(file_name)[1].lower()
+
+    # Check if file is an image
+    image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]
+    if file_ext in image_extensions:
+        file_info["type"] = "image"
+        file_info["readable"] = False
+    else:
+        # Try to read the file content for non-image files
+        content = is_readable_file(file_path)
+        if content:
+            file_info["type"] = "text"
+            file_info["content"] = content
+            file_info["readable"] = True
+        else:
+            file_info["type"] = "binary"
+            file_info["readable"] = False
+
+    return success_json_response({"file": file_info})
+
+
+@api_bp.route("/files/delete/<file_name>", methods=["DELETE"])
+@admin_required
+def delete_file(file_name):
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}", "files")
+
+    try:
+        file_path = os.path.join(path, file_name)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return success_json_response({"message": "File deleted successfully"})
+        else:
+            return error_json_response("File not found", 404)
+    except Exception as e:
+        current_app.logger.error(f"Error deleting file: {str(e)}")
+        return error_json_response(f"Error deleting file: {str(e)}", 500)
+
+
+@api_bp.route("/serve-file/<file_name>", methods=["GET"])
+@admin_required
+def serve_file(file_name):
+    admin_id = session.get("admin_id")
+    path = os.path.join(UPLOAD_FOLDER, f"{admin_id}", "files")
+
+    if not os.path.exists(os.path.join(path, file_name)):
+        return error_json_response("File not found", 404)
+
+    # Securely serve the file from the UPLOAD_FOLDER
+    return send_from_directory(path, file_name)
+
+
+@api_bp.route("/upload", methods=["POST"])
+@admin_required
+def upload_file():
+    if "files" not in request.files:
+        return error_json_response("No files provided", 400)
+
+    uploaded_files = request.files.getlist("files")
+    uploaded_file_info = []
+
+    for file in uploaded_files:
+        if file.filename == "":
+            continue
+
+        original_filename = secure_filename(file.filename)
+        base_filename = os.path.splitext(original_filename)[0]
+        file_extension = os.path.splitext(original_filename)[1].lower()
+        unique_filename = f"{uuid.uuid4().hex}{file_extension}"
+
+        admin_id = session.get("admin_id")
+        path = os.path.join(UPLOAD_FOLDER, f"{admin_id}", "files")
+        os.makedirs(path, exist_ok=True)
+        file_path = os.path.join(path, unique_filename)
+
+        file_info = {
+            "original_filename": original_filename,
+            "saved_filename": unique_filename,
+            "type": "file"
+        }
+
+        if file_extension == ".pdf":
+            try:
+                temp_path = os.path.join(path, f"temp_{unique_filename}")
+                file.save(temp_path)
+
+                text = ""
+                with pdfplumber.open(temp_path) as pdf:
+                    for page in pdf.pages:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text += page_text + "\n"
+
+                os.remove(temp_path)
+
+                if text.strip():
+                    # Save extracted text as .txt file
+                    text_filename = f"{base_filename}.txt"
+                    text_path = os.path.join(path, text_filename)
+                    with open(text_path, "w", encoding="utf-8") as f:
+                        f.write(text)
+
+                    file_info["saved_filename"] = text_filename
+                    file_info["type"] = "text"
+                    uploaded_file_info.append(file_info)
+                else:
+                    # If no text extracted, save the PDF as is
+                    file.save(file_path)
+                    uploaded_file_info.append(file_info)
+
+            except Exception as e:
+                current_app.logger.error(f"PDF text extraction error: {e}")
+                file.seek(0)
+                file.save(file_path)
+                uploaded_file_info.append(file_info)
+        else:
+            file.save(file_path)
+            uploaded_file_info.append(file_info)
+
+    return success_json_response({
+        "message": f"Successfully uploaded {len(uploaded_file_info)} files",
+        "files": uploaded_file_info
+    }, 201)
+
+
+@api_bp.route("/logout",methods=["POST"])
+@admin_required
+def logout():
+    # session.pop('user', None)
+    session.clear()
+    return success_json_response({},200)
