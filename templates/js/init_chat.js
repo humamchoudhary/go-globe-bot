@@ -283,7 +283,7 @@ function initializeChatbot() {
       right: 10px;
       bottom: 80px;
       width: 95vw;
-      height: 65vh;
+      max-height: 65vh;
     }
 
   }
