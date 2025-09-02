@@ -385,7 +385,7 @@ function initializeChatbot() {
 
 <div
   id="chat-container"
-  class="chat-container-open"
+  class="chat-container-close"
   style="background-color: #001f33;"
 >
   <div
