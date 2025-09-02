@@ -99,16 +99,22 @@ function loadHeaders() {
 // Function to initialize the chatbot
 function initializeChatbot() {
     const insertHtml = `
-<style>
+  <style>
   @keyframes pulse-glow {
-      0% {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 88, 0, 0.4);
+    0% {
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(255, 88, 0, 0.4);
     }
     50% {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 30px rgba(255, 88, 0, 0.7);
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.2),
+        0 0 30px rgba(255, 88, 0, 0.7);
     }
     100% {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 88, 0, 0.4);
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(255, 88, 0, 0.4);
     }
   }
 
@@ -122,7 +128,9 @@ function initializeChatbot() {
     background-color: #ff5800;
     color: white;
     border: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 88, 0, 0.4);
+    box-shadow:
+      0 2px 10px rgba(0, 0, 0, 0.2),
+      0 0 20px rgba(255, 88, 0, 0.4);
     cursor: pointer;
     z-index: 999;
     display: flex;
@@ -134,35 +142,43 @@ function initializeChatbot() {
   }
 
   #chat-button:hover {
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 88, 0, 0.9);
+    box-shadow:
+      0 2px 15px rgba(0, 0, 0, 0.3),
+      0 0 40px rgba(255, 88, 0, 0.9);
     transform: scale(1.05);
   }
 
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-  #chat-container {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 350px;
-    height: 450px;
-    min-width: 350px;
-    min-height: 450px;
-    max-width: 80vw;
-    max-height: 80vh;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    display: none;
-    resize: both;
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
+#chat-container {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 350px;
+  min-width: 350px;
+  max-width: 80vw;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  display: none;
+  resize: both;
+  max-height: 500px; /* Initial max-height */
+  transition: height 0.3s ease, max-height 0.3s ease; /* Add max-height transition */
+}
+
+#chat-container.resized {
+  max-height: 80vh; /* Resized state max-height */
+}
 
   #chat-container .chat-header {
     padding: 1rem;
@@ -244,7 +260,7 @@ function initializeChatbot() {
 
   .resize-indicator::before,
   .resize-indicator::after {
-    content: '';
+    content: "";
     position: absolute;
     background-color: #999;
   }
@@ -270,8 +286,8 @@ function initializeChatbot() {
   #chatbox {
     flex: 1;
     overflow-y: auto;
-    padding: 10px;
-    background-color:var(--goglobe-site-bg-color)
+    padding: 10px 16px 0;
+    background-color: var(--goglobe-site-bg-color);
   }
 
   @media (max-width: 480px) {
@@ -290,8 +306,12 @@ function initializeChatbot() {
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   @keyframes slideOutRight {
@@ -357,45 +377,135 @@ function initializeChatbot() {
 </style>
 
 <a id="chat-button">
-  <img src="data:image/svg+xml,%3Csvg%20width%3D%2230%22%20height%3D%2231%22%20viewBox%3D%220%200%2030%2031%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2.967%2022.226l-.025.008s7.698%2013.9%2026.975%205.546c0%200-1.495-1.752-4.384-3.52a14.067%2014.067%200%200%200%202.588-14.047c-2.655-7.297-10.7-11.07-17.964-8.425C2.89%204.433-.847%2012.492%201.81%2019.79c.313.863.703%201.677%201.157%202.436z%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E" alt="Chat" />
+  <img
+    src="data:image/svg+xml,%3Csvg%20width%3D%2230%22%20height%3D%2231%22%20viewBox%3D%220%200%2030%2031%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2.967%2022.226l-.025.008s7.698%2013.9%2026.975%205.546c0%200-1.495-1.752-4.384-3.52a14.067%2014.067%200%200%200%202.588-14.047c-2.655-7.297-10.7-11.07-17.964-8.425C2.89%204.433-.847%2012.492%201.81%2019.79c.313.863.703%201.677%201.157%202.436z%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E"
+    alt="Chat"
+  />
 </a>
 
-<div id="chat-container" style="background-color: #001f33;">
- <div style="padding: 10px 15px; background-color: #001f33;color: white; display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="color: white; font-size:16px;margin:0px">Welcome, How can we help you?</h3>
-      <div style="display: flex; flex-direction: row; gap: 9px; align-items: center;">
-        <div id="close-chat" style="background: none; border: none; color: #ff5800; font-size: 24px; cursor: pointer;">
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>        </div>
-      </div>
-    </div>
-  <div id="chatbox"
-       hx-get="${config.backendUrl}/min/"
-       hx-trigger="load"
-       hx-target="#chatbox"
-       hx-swap="innerHTML"
-       data-base-url="${config.backendUrl}">
-    <div style="display:flex; flex-direction:column;align-items:center; justify-content:center; height:100%">
-                    <svg class="spin " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
-style="animation: spin 1s linear infinite; color:white; width:25px; height:25px"
+<div
+  id="chat-container"
+  class="chat-container-open"
+  style="background-color: #001f33;"
+>
+  <div
+    style="
+      padding: 20px 15px 0px;
+      background-color: #001f33;
+      color: white;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    gap:5px;
+    "
+  >
+    <div
+      hx-get="${config.backendUrl}/min/onboarding"
+      hx-trigger="click"
+      hx-target="#chatbox"
+      hx-swap="innerHTML"
+    id="return-chat"
+      style="
+        background: none;
+        border: none;
+        color: #ff5800;
+        font-size: 24px;
+    cursor: pointer;
+
+    display:none
+      "
     >
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg></div>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3.33333 6.66672L2.74417 7.25589L2.155 6.66672L2.74417 6.07756L3.33333 6.66672ZM7.5 16.6667C7.27899 16.6667 7.06702 16.5789 6.91074 16.4226C6.75446 16.2664 6.66667 16.0544 6.66667 15.8334C6.66667 15.6124 6.75446 15.4004 6.91074 15.2441C7.06702 15.0879 7.27899 15.0001 7.5 15.0001V16.6667ZM6.91083 11.4226L2.74417 7.25589L3.9225 6.07756L8.08917 10.2442L6.91083 11.4226ZM2.74417 6.07756L6.91083 1.91089L8.08917 3.08922L3.9225 7.25589L2.74417 6.07756ZM3.33333 5.83339H12.0833V7.50005H3.33333V5.83339ZM12.0833 16.6667H7.5V15.0001H12.0833V16.6667ZM17.5 11.2501C17.5 12.6866 16.9293 14.0644 15.9135 15.0802C14.8977 16.096 13.5199 16.6667 12.0833 16.6667V15.0001C12.5758 15.0001 13.0634 14.9031 13.5184 14.7146C13.9734 14.5261 14.3868 14.2499 14.735 13.9017C15.0832 13.5535 15.3594 13.1401 15.5479 12.6851C15.7363 12.2301 15.8333 11.7425 15.8333 11.2501H17.5ZM12.0833 5.83339C13.5199 5.83339 14.8977 6.40407 15.9135 7.41989C16.9293 8.43572 17.5 9.81347 17.5 11.2501H15.8333C15.8333 10.7576 15.7363 10.27 15.5479 9.81499C15.3594 9.36002 15.0832 8.94662 14.735 8.5984C14.3868 8.25019 13.9734 7.97396 13.5184 7.78551C13.0634 7.59705 12.5758 7.50005 12.0833 7.50005V5.83339Z"
+          fill="#FF5800"
+        />
+      </svg>
+    </div>
+    <div
+      id="close-chat"
+      style="
+        background: none;
+        border: none;
+        color: #ff5800;
+        font-size: 24px;
+        cursor: pointer;
+      "
+    >
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z" fill="#FF5800"/>
+</svg>
+    </div>
   </div>
-  
+
+  <div
+    id="chatbox"
+    hx-get="${config.backendUrl}/min/"
+    hx-trigger="load"
+    hx-target="#chatbox"
+    hx-swap="innerHTML"
+    data-base-url="${config.backendUrl}"
+  >
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 350px;
+      "
+    >
+      <svg
+        class="spin"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        style="
+          animation: spin 1s linear infinite;
+          color: white;
+          width: 25px;
+          height: 25px;
+        "
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+    </div>
+  </div>
+
   <!-- Resize handles -->
   <div class="resize-handle resize-handle-nw" id="resize-nw"></div>
   <div class="resize-handle resize-handle-n" id="resize-n"></div>
   <div class="resize-handle resize-handle-w" id="resize-w"></div>
   <div class="resize-indicator"></div>
+
+ 
+
 </div>
+
     `;
 
     document.body.insertAdjacentHTML("beforeend", insertHtml);
 
     // Process the newly added HTML with HTMX
     const chatContainer = document.getElementById("chat-container");
-    const chatbox = document.getElementById("chatbox");
 
     if (typeof htmx !== 'undefined') {
         htmx.process(chatContainer);
@@ -413,19 +523,22 @@ style="animation: spin 1s linear infinite; color:white; width:25px; height:25px"
     let currentResizer = null;
     let startX, startY, startWidth, startHeight;
 
-    const initResize = (e, direction) => {
-        e.preventDefault();
-        isResizing = true;
-        currentResizer = direction;
-        startX = e.clientX;
-        startY = e.clientY;
-        startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
-        startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
+const initResize = (e, direction) => {
+  e.preventDefault();
+  isResizing = true;
+  currentResizer = direction;
+  startX = e.clientX;
+  startY = e.clientY;
+  startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
+  startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
 
-        document.addEventListener("mousemove", handleResize);
-        document.addEventListener("mouseup", stopResize);
-        document.body.style.userSelect = "none";
-    };
+  // Add resized class when user starts resizing
+  chatContainer.classList.add('resized');
+
+  document.addEventListener("mousemove", handleResize);
+  document.addEventListener("mouseup", stopResize);
+  document.body.style.userSelect = "none";
+};
 
     const handleResize = (e) => {
         if (!isResizing) return;
@@ -565,6 +678,9 @@ style="animation: spin 1s linear infinite; color:white; width:25px; height:25px"
             }, 150);
         }
     }, 10000);
+
+
+
 
     console.log('Chatbot initialized successfully');
 }

@@ -797,10 +797,14 @@ def save_google_tokens():
         })
 
     except FileNotFoundError:
+
+        print("File Error")
         return error_json_response("Credentials file not found")
     except json.JSONDecodeError:
+        print("Json error")
         return error_json_response("Invalid credentials file format")
     except Exception as e:
+        print(e)
         current_app.logger.error(f"Save tokens error: {str(e)}")
         return error_json_response(f"Failed to save Google tokens: {str(e)}")
 

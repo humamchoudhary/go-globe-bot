@@ -6,17 +6,19 @@
     border-color: #ef4444;
   }
   input::placeholder{
-
-color:gray;
+    color:gray;
   }
   
   /* Error message styling */
   .error-text {
     color: #ef4444;
     font-size: 0.875rem;
-    margin-top: 0.25rem;
-    display: none;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    position: relative;
   }
+  
   
   .input-error {
     border: 1px solid #ef4444 !important;
@@ -39,6 +41,36 @@ color:gray;
   }
 </style>
 
+<div style="display:flex; flex-direction:row;gap:15px; margin-bottom:20px;">
+<svg width="60" height="63" viewBox="0 0 60 63" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M34.9837 2.98219C20.5215 0.285021 6.57007 9.60674 3.90138 23.9148C1.2329 38.2232 10.8863 51.9479 25.3487 54.6451L52.7215 59.7501L51.3281 55.6944L48.652 47.8958C52.6893 44.1138 55.4226 39.1538 56.4308 33.7085C59.0971 19.4014 49.4448 5.67934 34.9837 2.98219Z" fill="white" stroke="#FF5800" stroke-width="5"/>
+  <path d="M16.9164 28.0168V41.5406H43.5975L43.474 28.0168L42.2 21.4509L19.1704 22.7249L16.9164 28.0168Z" fill="#F7D5B1"/>
+  <path d="M11.2325 17.1385L16.9164 28.0164L19.1703 22.7244L42.1999 21.4505L43.4739 28.0164L46.3159 18.2165L40.142 16.9425L42.1019 13.8066L38.721 14.2476L42.1509 9.54366L35.0951 12.7776L38.525 5.91772L28.1372 12.4836L27.1572 9.73966L11.2325 17.1385Z" fill="#52504D"/>
+  <path d="M16.9413 41.3388V47.0213H43.2018V41.3125L16.9413 41.3388Z" fill="white"/>
+  <path d="M19.6604 41.4421L30.2442 52.026L40.7301 41.4421H19.6604Z" fill="#E8EAEB"/>
+  <path d="M20.3463 41.4421L24.1683 45.9501L30.1462 41.5401L36.2221 45.9501L40.044 41.4421H20.3463Z" fill="white"/>
+  <path d="M30.1462 41.5403L28.0882 43.0103V43.5003H32.4002V43.0103L30.1462 41.5403Z" fill="#C95C1C"/>
+  <path d="M30.0715 51.5885H33.4968L32.4001 43.5002H28.0882L27.2171 51.5885H30.0715Z" fill="#FF5E00"/>
+  <path d="M30.3975 37.0812C32.3947 37.0812 34.2857 35.0523 34.0847 34.1945C33.8838 33.3367 32.3947 34.1945 30.3975 34.1945C28.4002 34.1945 26.9525 33.1927 26.852 34.1945C26.7516 35.1964 28.3588 36.9372 30.3975 37.0812Z" fill="#3B3731"/>
+  <path d="M22.6335 29.1925C23.283 29.1925 23.8095 28.666 23.8095 28.0166C23.8095 27.3671 23.283 26.8406 22.6335 26.8406C21.9841 26.8406 21.4576 27.3671 21.4576 28.0166C21.4576 28.666 21.9841 29.1925 22.6335 29.1925Z" fill="#3B3731"/>
+  <path d="M37.6275 29.1925C38.277 29.1925 38.8035 28.666 38.8035 28.0166C38.8035 27.3671 38.277 26.8406 37.6275 26.8406C36.978 26.8406 36.4515 27.3671 36.4515 28.0166C36.4515 28.666 36.978 29.1925 37.6275 29.1925Z" fill="#3B3731"/>
+  <path d="M16.9164 28.0168V41.5406H43.5975L43.474 28.0168L42.2 21.4509L19.1704 22.7249L16.9164 28.0168Z" fill="#F7D5B1"/>
+  <path d="M11.2325 17.1385L16.9164 28.0164L19.1703 22.7244L42.1999 21.4505L43.4739 28.0164L46.3159 18.2165L40.142 16.9425L42.1019 13.8066L38.721 14.2476L42.1509 9.54366L35.0951 12.7776L38.525 5.91772L28.1372 12.4836L27.1572 9.73966L11.2325 17.1385Z" fill="#52504D"/>
+  <path d="M16.9413 41.3388V47.0213H43.2018V41.3125L16.9413 41.3388Z" fill="white"/>
+  <path d="M19.6604 41.4421L30.2442 52.026L40.7301 41.4421H19.6604Z" fill="#E8EAEB"/>
+  <path d="M20.3463 41.4421L24.1683 45.9501L30.1462 41.5401L36.2221 45.9501L40.044 41.4421H20.3463Z" fill="white"/>
+  <path d="M30.1462 41.5403L28.0882 43.0103V43.5003H32.4002V43.0103L30.1462 41.5403Z" fill="#C95C1C"/>
+  <path d="M30.0715 51.5885H33.4968L32.4001 43.5002H28.0882L27.2171 51.5885H30.0715Z" fill="#FF5E00"/>
+  <path d="M30.3975 37.0812C32.3947 37.0812 34.2857 35.0523 34.0847 34.1945C33.8838 33.3367 32.3947 34.1945 30.3975 34.1945C28.4002 34.1945 26.9525 33.1927 26.852 34.1945C26.7516 35.1964 28.3588 36.9372 30.3975 37.0812Z" fill="#3B3731"/>
+  <path d="M22.6335 29.1925C23.283 29.1925 23.8095 28.666 23.8095 28.0166C23.8095 27.3671 23.283 26.8406 22.6335 26.8406C21.9841 26.8406 21.4576 27.3671 21.4576 28.0166C21.4576 28.666 21.9841 29.1925 22.6335 29.1925Z" fill="#3B3731"/>
+  <path d="M37.6275 29.1925C38.277 29.1925 38.8035 28.666 38.8035 28.0166C38.8035 27.3671 38.277 26.8406 37.6275 26.8406C36.978 26.8406 36.4515 27.3671 36.4515 28.0166C36.4515 28.666 36.978 29.1925 37.6275 29.1925Z" fill="#3B3731"/>
+</svg>
+
+    <p style="color: #FFF; font-size: 16px; font-style: normal; font-weight: 400; line-height: 20px; letter-spacing: -0.32px;">
+        Let us know about you!
+    </p>
+</div>
+
 <div style="overflow-y:hidden; background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family); width: 100%;">
     <!-- Desktop logo would go here -->
     <div style="border-radius: 0.5rem; padding: 0.5rem; margin: 0 auto;">
@@ -46,41 +78,38 @@ color:gray;
             <form id="login-form" novalidate>
                 <div style="margin-bottom: 1rem; width: 100%;">
                     <input type="text"
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
                         id="name" name="name" placeholder="Your Name*" autocapitalize="off"
                         autocomplete="name" required minlength="2"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
                         onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
-                    <p id="name-error" class="error-text"></p>
                 </div>
 
                 {% if default_subject.lower() != "job" %}
                 <div style="margin-bottom: 1rem; width: 100%;">
                     <input type="text"
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
                         id="desg" name="desg" placeholder="Designation*" autocapitalize="off"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
                         onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
-                    <p id="desg-error" class="error-text"></p>
                 </div>
                 {% endif %}
 
                 <div style="margin-bottom: 1rem; width: 100%;">
                     <input type="email"
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
                         id="email" name="email" placeholder="Email Address*" autocapitalize="off"
                         autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
                         onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
-                    <p id="email-error" class="error-text"></p>
                 </div>
 
                 <div style="margin-bottom: 1rem; width: 100%;" class="hidden">
                     <select
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 1rem; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
                         id="subject" name="subject" autocapitalize="off" autocomplete="off" required
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
@@ -90,28 +119,24 @@ color:gray;
                             {{subject}}</option>
                         {% endfor %}
                     </select>
-                    <p id="subject-error" class="error-text"></p>
                 </div>
 
                 <!-- Enhanced Phone Input -->
                 <div style="margin-bottom: 1.5rem; width: 100%;">
                     <div class="phone-input-container" id="phone-container" style="width: 100%;">
-                        <select class="country-selector" id="country-selector" name="country-code" style="font-family: var(--goglobe-body-font-family); padding: 1rem; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; outline: none; width: 30%;">
+                        <select class="country-selector" id="country-selector" name="country-code" style="font-family: var(--goglobe-body-font-family); padding: 12px; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; outline: none; width: 30%;">
                             <!-- Countries will be populated by JavaScript -->
                         </select>
                         <input type="tel" 
                             class="phone-number-input placeholder-[var(--goglobe-body-color)] placeholder-bold"
-                            style="font-family: var(--goglobe-body-font-family); flex: 1; border: none; outline: none; background: transparent; color: white; font-weight: bold; padding: 1rem; width: 70%;"
+                            style="font-family: var(--goglobe-body-font-family); flex: 1; border: none; outline: none; background: transparent; color: white; font-weight: bold; padding: 12px; width: 70%;"
                             id="phone" 
                             name="phone" 
                             placeholder="Phone Number*" 
                             autocomplete="tel" 
                             required>
                     </div>
-                    <p id="phone-error" class="error-text"></p>
                 </div>
-
-                <p id="error-message" style="color: #ef4444; margin-bottom: 1rem; display:none;"></p>
 
                 <button type="submit" id="login-btn"
                     style=" box-sizing: border-box;font-family: var(--goglobe-body-font-family); font-weight:bold; color:white; width: 100%; padding: 0.75rem 1rem; background-color: var(--goglobe-main-color); border: 1px solid var(--goglobe-border-color); border-radius: 6px; transition: all 0.3s;"
@@ -121,17 +146,21 @@ color:gray;
                     onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'">
                     Start Chat
                 </button>
+
+                <!-- Single Error Message Display -->
+                <div id="error-message" class="error-text" style="display:none;"></div>
             </form>
         </div>
     </div>
 </div>
 <!-- !Sign In -->
 {% endblock %}
-{% block scripts %}
 
+{% block scripts %}
 <script>
 // Country data with flags, codes, and names
-const countries = [
+function initPhoneInput() {
+let countries = [
   // North America (NANP - +1)
   { code: '+1', country: 'United States', flag: '🇺🇸', dialCode: '1' },
   { code: '+1', country: 'Canada', flag: '🇨🇦', dialCode: '1' },
@@ -354,19 +383,18 @@ const countries = [
   { code: '+508', country: 'Saint Pierre and Miquelon', flag: '🇵🇲', dialCode: '508' }
 ];
 
-function initPhoneInput() {
-    const countrySelector = document.getElementById('country-selector');
-    const phoneInput = document.getElementById('phone');
+    let countrySelector = document.getElementById('country-selector');
+    let phoneInput = document.getElementById('phone');
     
     // Set default country based on Flask variable
-    const userCountryCode = '{{ user_country if user_country else "United State" }}';
+    let userCountryCode = '{{ user_country if user_country else "United State" }}';
     let defaultCountry = countries.find(c => c.country === userCountryCode) || countries.find(c => c.dialCode === '1');
     
     // Populate dropdown options
     function populateDropdown() {
         countrySelector.innerHTML = '';
         countries.forEach(country => {
-            const option = document.createElement('option');
+            let option = document.createElement('option');
             option.value = country.code;
             option.textContent = `${country.flag} ${country.code}`;
             option.dataset.dialCode = country.dialCode;
@@ -379,40 +407,10 @@ function initPhoneInput() {
         });
     }
     
-    // Auto-detect country from phone input
-    function detectCountryFromInput() {
-        const inputValue = phoneInput.value.replace(/\D/g, '');
-        if (inputValue.length >= 1) {
-            // Try to match country codes (sort by length desc to match longest first)
-            const possibleCountries = countries.filter(c => 
-                inputValue.startsWith(c.dialCode)
-            ).sort((a, b) => b.dialCode.length - a.dialCode.length);
-            
-            if (possibleCountries.length > 0) {
-                const detectedCountry = possibleCountries[0];
-                const currentSelected = countrySelector.options[countrySelector.selectedIndex];
-                
-                if (currentSelected.dataset.dialCode !== detectedCountry.dialCode) {
-                    // Find and select the detected country
-                    for (let i = 0; i < countrySelector.options.length; i++) {
-                        if (countrySelector.options[i].dataset.dialCode === detectedCountry.dialCode) {
-                            countrySelector.selectedIndex = i;
-                            break;
-                        }
-                    }
-                    // Remove the country code from input
-                    const remainingNumber = inputValue.substring(detectedCountry.dialCode.length);
-                    phoneInput.value = remainingNumber;
-                }
-            }
-        }
-    }
-    
     // Handle phone input changes
     phoneInput.addEventListener('input', function() {
         // Only allow digits, spaces, hyphens, and parentheses
         this.value = this.value.replace(/[^\d\s\-()]/g, '');
-        //detectCountryFromInput();
     });
     
     // Initialize
@@ -420,47 +418,37 @@ function initPhoneInput() {
     
     return defaultCountry;
 }
+
 function initForm() {
-    const loginForm = document.getElementById("login-form");
-    const loginBtn = document.getElementById("login-btn");
-    const nameInput = document.getElementById("name");
-    const emailInput = document.getElementById("email");
-    const subjectInput = document.getElementById("subject");
-    const desgInput = document.getElementById("desg");
-    const phoneInput = document.getElementById("phone");
-    const phoneContainer = document.getElementById("phone-container");
-    const errorMessage = document.getElementById("error-message");
+    let loginForm = document.getElementById("login-form");
+    let nameInput = document.getElementById("name");
+    let emailInput = document.getElementById("email");
+    let subjectInput = document.getElementById("subject");
+    let desgInput = document.getElementById("desg");
+    let phoneInput = document.getElementById("phone");
+    let phoneContainer = document.getElementById("phone-container");
+    let errorMessage = document.getElementById("error-message");
 
     // Initialize phone input
     let currentCountry = initPhoneInput();
 
-    // Error message elements
-    const nameError = document.getElementById("name-error");
-    const emailError = document.getElementById("email-error");
-    const subjectError = document.getElementById("subject-error");
-    const desgError = document.getElementById("desg-error");
-    const phoneError = document.getElementById("phone-error");
+    // Validation regex patterns
+    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    let phoneRegex = /^[\d\s\-()]{7,15}$/;
 
-    // Email validation regex
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    // Unified error display function
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+    }
 
-    // Phone validation regex - allows digits, spaces, hyphens, parentheses (without country code)
-    const phoneRegex = /^[\d\s\-()]{7,15}$/;
+    function hideError() {
+        errorMessage.textContent = "";
+        errorMessage.style.display = "none";
+    }
 
-    // Form validation
-    function validateForm() {
-        let isValid = true;
-
-        // Reset all errors
-        hideError(errorMessage);
-        hideError(nameError);
-        hideError(emailError);
-        hideError(phoneError);
-        hideError(subjectError);
-        if (desgError) {
-            hideError(desgError);
-        }
-
+    // Remove error styling from all inputs
+    function clearErrorStyling() {
         nameInput.classList.remove("input-error");
         emailInput.classList.remove("input-error");
         phoneContainer.classList.remove("input-error");
@@ -468,94 +456,83 @@ function initForm() {
         if (desgInput) {
             desgInput.classList.remove("input-error");
         }
+    }
+
+    // Form validation function
+    function validateForm() {
+        hideError();
+        clearErrorStyling();
 
         // Validate name
         if (!nameInput.value.trim()) {
-            showInputError(nameInput, nameError, "Name is required");
-            isValid = false;
-        } else if (nameInput.value.trim().length < 2) {
-            showInputError(nameInput, nameError, "Name must be at least 2 characters");
-            isValid = false;
+            nameInput.classList.add("input-error");
+            showError("Name is required");
+            return false;
         }
+        if (nameInput.value.trim().length < 2) {
+            nameInput.classList.add("input-error");
+            showError("Name must be at least 2 characters");
+            return false;
+        }
+
         // Validate email
-        else if (!emailInput.value.trim()) {
-            showInputError(emailInput, emailError, "Email is required");
-            isValid = false;
-        } else if (!emailRegex.test(emailInput.value.trim())) {
-            showInputError(emailInput, emailError, "Please enter a valid email address");
-            isValid = false;
+        if (!emailInput.value.trim()) {
+            emailInput.classList.add("input-error");
+            showError("Email is required");
+            return false;
         }
+        if (!emailRegex.test(emailInput.value.trim())) {
+            emailInput.classList.add("input-error");
+            showError("Please enter a valid email address");
+            return false;
+        }
+
         // Validate subject
-        else if (!subjectInput.value.trim()) {
-            showInputError(subjectInput, subjectError, "Subject is required");
-            isValid = false;
+        if (!subjectInput.value.trim()) {
+            subjectInput.classList.add("input-error");
+            showError("Subject is required");
+            return false;
         }
-        else if (desgInput && !desgInput.value.trim()) {
-            showInputError(desgInput, desgError, "Designation is required");
-            isValid = false;
+
+        // Validate designation (if exists)
+        if (desgInput && !desgInput.value.trim()) {
+            desgInput.classList.add("input-error");
+            showError("Designation is required");
+            return false;
         }
+
         // Validate phone
-        else if (!phoneInput.value.trim()) {
-            showPhoneInputError("Phone number is required");
-            isValid = false;
-        } else if (!phoneRegex.test(phoneInput.value.trim())) {
-            showPhoneInputError("Please enter a valid phone number (7-15 digits)");
-            isValid = false;
+        if (!phoneInput.value.trim()) {
+            phoneContainer.classList.add("input-error");
+            showError("Phone number is required");
+            return false;
+        }
+        if (!phoneRegex.test(phoneInput.value.trim())) {
+            phoneContainer.classList.add("input-error");
+            showError("Please enter a valid phone number (7-15 digits)");
+            return false;
         }
 
-        return isValid;
-    }
-
-    function showInputError(inputElement, errorElement, message) {
-        inputElement.classList.add("input-error");
-        errorElement.textContent = message;
-        errorElement.style.display = "block";
-        
-        // Also display in main error message area for accessibility
-        errorMessage.textContent = message;
-        errorMessage.style.display = "block";
-    }
-
-    function showPhoneInputError(message) {
-        phoneContainer.classList.add("input-error");
-        phoneError.textContent = message;
-        phoneError.style.display = "block";
-        
-        // Also display in main error message area for accessibility
-        errorMessage.textContent = message;
-        errorMessage.style.display = "block";
-    }
-
-    function hideError(errorElement) {
-        errorElement.textContent = "";
-        errorElement.style.display = "none";
-    }
-
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = "block";
+        return true;
     }
 
     // Form submission
     loginForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        // Update current country before validation
-        currentCountry = document.getElementById('country-selector').value;
-
         if (!validateForm()) {
             return;
         }
 
-        const name = nameInput.value.trim();
-        const email = emailInput.value.trim();
-        const phone = currentCountry + phoneInput.value.trim().replace(/\D/g, ''); // Add country code and clean number
-        const subject = subjectInput.value.trim();
-        let desg;
-        if (desgInput) {
-            desg = desgInput.value.trim();
-        }
-        const isHtmxRequest = document.getElementById("chatbox") !== null;
+        // Update current country before submission
+        currentCountry = document.getElementById('country-selector').value;
+
+        let name = nameInput.value.trim();
+        let email = emailInput.value.trim();
+        let phone = currentCountry + phoneInput.value.trim().replace(/\D/g, ''); 
+        let subject = subjectInput.value.trim();
+        let desg = desgInput ? desgInput.value.trim() : "None";
+        let isHtmxRequest = document.getElementById("chatbox") !== null;
         
         fetch("{{settings['backend_url']}}/min/auth", {
             method: "POST",
@@ -567,26 +544,26 @@ function initForm() {
             body: JSON.stringify({
                 name: name,
                 email: email,
-                phone: phone, // This will now include the country code
+                phone: phone,
                 subject: subject,
-                desg: desg ? desg : "None"
+                desg: desg
             }),
         })
         .then(async (response) => {
             if (!response.ok) {
-                const data = await response.json();
+                let data = await response.json();
                 showError(data.error || "Login failed");
                 return;
             }
 
             if (isHtmxRequest) {
-                const text = await response.text();
+                let text = await response.text();
                 htmx.swap('#chatbox', text, {swapStyle: 'innerHTML'});
             } else {
                 if (response.redirected) {
                     window.location.href = response.url;
                 } else {
-                    const text = await response.text();
+                    let text = await response.text();
                 }
             }
         })
@@ -596,41 +573,37 @@ function initForm() {
         });
     });
 
-    // Real-time validation on input fields
-    nameInput.addEventListener("input", function () {
-        nameInput.classList.remove("input-error");
-        hideError(nameError);
-        hideError(errorMessage);
-    });
-
-    emailInput.addEventListener("input", function () {
-        emailInput.classList.remove("input-error");
-        hideError(emailError);
-        hideError(errorMessage);
-
-        if (emailInput.value.trim() && !emailRegex.test(emailInput.value.trim())) {
-            showInputError(emailInput, emailError, "Please enter a valid email address");
-        }
-    });
-
-    phoneInput.addEventListener("input", function () {
-        phoneContainer.classList.remove("input-error");
-        hideError(phoneError);
-        hideError(errorMessage);
-
-        if (phoneInput.value.trim() && !phoneRegex.test(phoneInput.value.trim())) {
-            showPhoneInputError("Please enter a valid phone number (7-15 digits)");
+    // Real-time validation clearing
+    [nameInput, emailInput, phoneInput, subjectInput, desgInput].forEach(input => {
+        if (input) {
+            input.addEventListener("input", function () {
+                hideError();
+                clearErrorStyling();
+            });
         }
     });
 }
 
+function showReturnChatButton() {
+    let returnButton = document.getElementById('return-chat');
+    if (returnButton) {
+        returnButton.style.display = 'block';
+        
+        // Make sure HTMX processes the button
+        if (typeof htmx !== 'undefined') {
+            htmx.process(returnButton);
+        }
+    }
+}
+
 // Initialize the form when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    showReturnChatButton();
     initForm();
 });
 
 // Also call it immediately in case the script loads after DOM is ready
+showReturnChatButton();
 initForm();
 </script>
-
 {% endblock %}
