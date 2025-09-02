@@ -4,7 +4,7 @@
   <div style="min-height: 100%; padding-left: 0.5rem; padding-right: 0.5rem; width: 100%; display: flex; flex-direction: column; position: relative; z-index: 3;">
     <!-- Chat Messages -->
     {% if chat %}
-        <div id="messageArea" style="display: flex; position: relative; height:100%; flex-direction:column; gap:20px; overflow-y: auto; ">
+        <div id="messageArea" style="display: flex; position: relative;min-height:300px ; height:100%; flex-direction:column; gap:20px; overflow-y: auto; ">
           {% for message in chat.messages %} 
           {% include 'user/fragments/chat_message.html' %}
           {% endfor %}
