@@ -174,6 +174,7 @@ function initializeChatbot() {
   resize: both;
   max-height: 500px; /* Initial max-height */
   transition: height 0.3s ease, max-height 0.3s ease; /* Add max-height transition */
+        padding-bottom:10px;
 }
 
 #chat-container.resized {
