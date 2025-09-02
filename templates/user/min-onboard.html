@@ -98,8 +98,12 @@ How can I help you today?
           color:white;
           text-decoration:none;
           display: block;
-
+transition:all 0.1s ease-in-out 0.1s;
         "
+ onMouseOver="this.style.opacity=0.7"
+   onMouseOut="this.style.opacity=1" 
+
+        
         href="/min/login/{{subject}}"
       >
         {{subject}}

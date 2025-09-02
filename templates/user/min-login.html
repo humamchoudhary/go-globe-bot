@@ -124,7 +124,11 @@
                 <!-- Enhanced Phone Input -->
                 <div style="margin-bottom: 1.5rem; width: 100%;">
                     <div class="phone-input-container" id="phone-container" style="width: 100%;">
-                        <select class="country-selector" id="country-selector" name="country-code" style="font-family: var(--goglobe-body-font-family); padding: 12px; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; outline: none; width: 30%;">
+                        <select class="country-selector" id="country-selector" name="country-code" style="font-family: var(--goglobe-body-font-family); padding: 12px; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; outline: none; width: 30%; 
+
+
+    height: 50px;       /* 🔑 sets height */
+    line-height: 50px;  /* helps align text vertically */                            ">
                             <!-- Countries will be populated by JavaScript -->
                         </select>
                         <input type="tel" 
@@ -139,11 +143,12 @@
                 </div>
 
                 <button type="submit" id="login-btn"
-                    style=" box-sizing: border-box;font-family: var(--goglobe-body-font-family); font-weight:bold; color:white; padding: 0.75rem 1rem; background-color: var(--goglobe-main-color); border: 1px solid var(--goglobe-border-color); border-radius: 6px; transition: all 0.3s;"
-                    onmouseover="this.style.backgroundColor='var(--goglobe-site-bg)'; this.style.cursor='pointer'"
-                    onmouseout="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.cursor='auto'"
+                    style=" box-sizing: border-box;font-family: var(--goglobe-body-font-family); font-weight:bold; color:white; padding: 0.75rem 1rem; background-color: var(--goglobe-main-color); border: 1px solid var(--goglobe-border-color); border-radius: 6px; transition: all 0.2s;"
+                    onmouseover="this.style.opacity=0.7; this.style.cursor='pointer'"
+                    onmouseout="this.style.opacity=1; this.style.cursor='auto'"
                     onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
-                    onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'">
+                    onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'"
+                    >
                     Start Chat
                 </button>
 
@@ -383,6 +388,7 @@ let countries = [
   { code: '+508', country: 'Saint Pierre and Miquelon', flag: '🇵🇲', dialCode: '508' }
 ];
 
+countries.sort((a, b) => Number(a.dialCode) - Number(b.dialCode));
     let countrySelector = document.getElementById('country-selector');
     let phoneInput = document.getElementById('phone');
     
