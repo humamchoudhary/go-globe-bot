@@ -598,7 +598,8 @@ const initResize = (e, direction) => {
                 isChatOpen = true;
                 const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
                 audio.play().catch(() => { }); // Ignore audio errors
-            }, 150);
+            
+scrollToBottom();            }, 150);
         }
     };
 
