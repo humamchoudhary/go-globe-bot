@@ -303,7 +303,7 @@
             class="message-item {{ 'user' if message.sender == 'user' else 'bot' }}"
           >
             <div class="message-sender">
-              {{ 'User' if message.sender == 'user' else 'Chatbot' }}
+              {{ 'Chatbot' if message.sender == 'bot' else 'User' }}
             </div>
             <div class="message-content">{{ message.content }}</div>
             <div class="message-time">
