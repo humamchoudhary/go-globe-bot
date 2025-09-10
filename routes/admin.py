@@ -773,10 +773,16 @@ def archive_chat(room_id):
 @admin_required
 def chat_couts():
     chat_service = ChatService(current_app.db)
-  
     return jsonify(
-        
-            chat_service.get_chat_counts_by_filter(session.get('admin_id'))             )
+            chat_service.get_chat_counts_by_filter(session.get('admin_id')))
+
+@admin_bp.route("/chat/<room_id>/intervene",methods=["POST"])
+@admin_required
+def intervene(room_id):
+    admin_service = AdminService(current_app.db)
+    chat_service = ChatService(current_app.db)
+    chat_service.set_admin_required(room_id,True)
+    return "",200
 
 @admin_bp.route("/chat/<room_id>/send_message", methods=["POST"])
 @admin_required
@@ -2192,8 +2198,6 @@ def create_admin():
 
             # SEND_USER = os.environ.get('SMTP_TO')
             mail = Mail(current_app)
-            # status = send_email(current_admin.email, f'Assistance Required: {
-            #     chat.subject}', "Ping", mail, render_template('/email/new_message.html', user=user, chat=chat))
             status = send_email(
                 form_data["email"],
                 f"Go Bot account created: {admin.username}",

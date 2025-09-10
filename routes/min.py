@@ -400,7 +400,7 @@ Auto Generated Message"""
 
     mail = Mail(current_app)
     status = send_email(current_admin.email, f'Assistance Required: {
-        chat.subject}', "Ping", mail, render_template('/email/new_message.html', user=user, chat=chat))
+        chat.subject}', "Ping", mail, render_template('/email/admin_required.html', user=user, chat=chat))
 
     admin_service = AdminService(current_app.db)
     noti_res = send_push_noti(admin_service.get_expo_tokens(

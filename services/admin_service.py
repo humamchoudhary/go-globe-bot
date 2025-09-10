@@ -60,7 +60,6 @@ class AdminService:
             return admin["expo_token"]
         return []
 
-
     def get_admin_by_key(self, key):
         admin_data = self.admins_collection.find_one({"secret_key": key})
         if admin_data:
@@ -117,6 +116,7 @@ class AdminService:
             {"$set": {"settings": settings}}
         )
         return result.modified_count > 0
+
 
     def update_admin_password(self, admin_id, new_password):
         """Update admin password"""

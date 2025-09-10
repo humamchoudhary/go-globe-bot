@@ -373,7 +373,7 @@ class ChatService:
         # Apply filter logic
         if filter_type in ["archived"]:
             base_filter["archived"] = True
-        elif filter_type in ["all","active"]:
+        elif filter_type in ["all", "active"]:
             # For 'all', 'active', and 'exported', include only unarchived or missing archived field
             base_filter["$or"] = [{"archived": False},
                                   {"archived": {"$exists": False}}]

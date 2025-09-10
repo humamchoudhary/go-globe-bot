@@ -50,6 +50,15 @@
       <i data-lucide="corner-down-left" class="text-[var(--white)]"></i>
     </button>
   </form>
+    {% else %}
+
+    <div 
+    class="relative w-full h-[40px] px-[20px] md:px-[40px] mb-[20px]">
+        <div class="flex h-full bg-[var(--main-color)] rounded-md hover:opacity-90 duration-300 transition-all items-center justify-center" hx-post="/admin/chat/{{chat.room_id}}/intervene" hx-on::after-request="location.reload()" hx-swap="none" hx-triger="click" >
+            <p class="font-bold">Intervene</p>
+        </div>
+    </div>
+
   {% endif %}
 </div>
 {% if 'mobile' in request.user_agent.string.lower() %}
