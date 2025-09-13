@@ -340,42 +340,42 @@ def ping_admin(chat_id):
     noti_service.create_admin_required_notification(
         chat.admin_id, chat.room_id, user.name)
 
-    if not available:
+    # if not available:
+    #
+    #     formatted_timings = "\n".join(
+    #         f"• {t['day'].capitalize()}: {t['startTime']} - {t['endTime']} {timezone}\n" for t in timings
+    #     )
+    #
+    #     message_content = (
+    #         "Ana has been notified, but she is currently unavailable.\n\n"
+    #         "You can reach her during the following times: \n\n"
+    #         f"{formatted_timings}"
+    #     )
+    #
+    #     new_message = chat_service.add_message(
+    #         chat.room_id, 'SYSTEM', message_content
+    #     )
+    #
+    #     current_app.socketio.emit('new_message', {
+    #         'sender': 'SYSTEM',
+    #         'content': new_message.content,
+    #         'timestamp': new_message.timestamp.isoformat(),
+    #
+    #         'room_id': room_id,
+    #         "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
+    #     }, room=room_id)
+    # else:
+    new_message = chat_service.add_message(
+        chat.room_id, 'SYSTEM', 'Ana has been notified! She will join soon'
+    )
+    current_app.socketio.emit('new_message', {
+        'sender': 'SYSTEM',
+        'content': new_message.content,
 
-        formatted_timings = "\n".join(
-            f"• {t['day'].capitalize()}: {t['startTime']} - {t['endTime']} {timezone}\n" for t in timings
-        )
-
-        message_content = (
-            "Ana has been notified, but she is currently unavailable.\n\n"
-            "You can reach her during the following times: \n\n"
-            f"{formatted_timings}"
-        )
-
-        new_message = chat_service.add_message(
-            chat.room_id, 'SYSTEM', message_content
-        )
-
-        current_app.socketio.emit('new_message', {
-            'sender': 'SYSTEM',
-            'content': new_message.content,
-            'timestamp': new_message.timestamp.isoformat(),
-
-            'room_id': room_id,
-            "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
-        }, room=room_id)
-    else:
-        new_message = chat_service.add_message(
-            chat.room_id, 'SYSTEM', 'Ana has been notified! She will join soon'
-        )
-        current_app.socketio.emit('new_message', {
-            'sender': 'SYSTEM',
-            'content': new_message.content,
-
-            "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
-            'timestamp': new_message.timestamp.isoformat(),
-            'room_id': room_id
-        }, room=room_id)
+        "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
+        'timestamp': new_message.timestamp.isoformat(),
+        'room_id': room_id
+    }, room=room_id)
 
     # print("ANNA PINGED")
     msg = f"""Hi Ana,
@@ -404,11 +404,9 @@ Auto Generated Message"""
 
     admin_service = AdminService(current_app.db)
     noti_res = send_push_noti(admin_service.get_expo_tokens(
-        session.get("admin_id")), "Admin Assistance Required!", f'{user.name}: {chat.subject}',chat.room_id)
+        session.get("admin_id")), "Admin Assistance Required!", f'{user.name}: {chat.subject}', chat.room_id)
     if noti_res.status_code != 200:
         print(f"Notificaiton Error: {noti_res.__dict__}")
-
-
 
     # print(status)
 
@@ -465,19 +463,20 @@ def send_message(chat_id):
         print(status)
     admin_service = AdminService(current_app.db)
     noti_res = send_push_noti(admin_service.get_expo_tokens(
-        session.get("admin_id")), "New Message", f'{user.name}: {message}',chat.room_id)
+        session.get("admin_id")), "New Message", f'{user.name}: {message}', chat.room_id)
     print(f"Noti done: {noti_res}")
     if noti_res.status_code != 200:
         print(f"Notificaiton Error: {noti_res.__dict__}")
 
-
     if (not chat.admin_required):
         msg, usage = current_app.bot.responed(
             f"Subject of chat: {chat.subject}\n {message}", chat.room_id)
-        admin_service = AdminService(current_app.db).update_tokens(admin.admin_id, usage['cost'])
+        admin_service = AdminService(current_app.db).update_tokens(
+            admin.admin_id, usage['cost'])
 
         usage_service = UsageService(current_app.db)
-        usage_service.add_cost(session.get("admin_id"),usage['input'], usage['output'], usage['cost'])
+        usage_service.add_cost(session.get("admin_id"),
+                               usage['input'], usage['output'], usage['cost'])
         bot_message = chat_service.add_message(
             chat.room_id, chat.bot_name, msg)
 
