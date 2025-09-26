@@ -1218,6 +1218,15 @@ def search():
     return success_json_response({"results": search_results, "count": len(search_results)}, 200)
 
 
+@api_bp.route("/chat/<room_id>/intervene",methods=["POST"])
+@admin_required
+def intervene(room_id):
+    admin_service = AdminService(current_app.db)
+    chat_service = ChatService(current_app.db)
+    chat_service.set_admin_required(room_id,True)
+    return success_json_response(None, 200)
+
+
 @api_bp.route("/notifications")
 @admin_required
 def get_notifications():

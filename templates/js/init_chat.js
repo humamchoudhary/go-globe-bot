@@ -2,103 +2,102 @@
     // Configuration - Update these values as needed
     const config = {
         backendUrl: '{{backend_url}}', // Replace with your actual backend URL
-        fontFiles: {{ font_files | safe
-}}, // Replace with your font files array
-fontFolder: '{{settings["backend_url"]}}{{ url_for("static", filename="font/NeueHaas") }}' // Replace with your font folder path
-  };
+        fontFiles: {{ font_files | safe }}, // Replace with your font files array
+        fontFolder: '{{settings["backend_url"]}}{{ url_for("static", filename="font/NeueHaas") }}' // Replace with your font folder path
+    };
 
-// Function to load headers and dependencies
-function loadHeaders() {
-    return new Promise((resolve, reject) => {
-        // Set meta charset
-        const charsetMeta = document.createElement('meta');
-        charsetMeta.httpEquiv = 'Content-Type';
-        charsetMeta.content = 'text/html; charset=utf-8';
-        document.head.appendChild(charsetMeta);
+    // Function to load headers and dependencies
+    function loadHeaders() {
+        return new Promise((resolve, reject) => {
+            // Set meta charset
+            const charsetMeta = document.createElement('meta');
+            charsetMeta.httpEquiv = 'Content-Type';
+            charsetMeta.content = 'text/html; charset=utf-8';
+            document.head.appendChild(charsetMeta);
 
-        // Set HTMX config meta
-        const htmxConfigMeta = document.createElement('meta');
-        htmxConfigMeta.name = 'htmx-config';
-        htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
-        document.head.appendChild(htmxConfigMeta);
+            // Set HTMX config meta
+            const htmxConfigMeta = document.createElement('meta');
+            htmxConfigMeta.name = 'htmx-config';
+            htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
+            document.head.appendChild(htmxConfigMeta);
 
-        const cssLink = document.createElement('link');
-        cssLink.rel = 'stylesheet';
-        cssLink.href = `${config.backendUrl}/static/css/output.css`; // Replace with your actual CSS file path
-        document.head.appendChild(cssLink);      // Load HTMX script
-        const htmxScript = document.createElement('script');
-        htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
-        htmxScript.crossOrigin = 'anonymous';
-        htmxScript.onload = () => {
-            console.log('HTMX loaded successfully');
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = `${config.backendUrl}/static/css/output.css`; // Replace with your actual CSS file path
+            document.head.appendChild(cssLink);      // Load HTMX script
+            const htmxScript = document.createElement('script');
+            htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
+            htmxScript.crossOrigin = 'anonymous';
+            htmxScript.onload = () => {
+                console.log('HTMX loaded successfully');
 
-            // Wait for HTMX to be fully available
-            if (typeof htmx !== 'undefined') {
-                // Configure HTMX
-                htmx.config.selfRequestsOnly = false;
-                htmx.config.withCredentials = true;
+                // Wait for HTMX to be fully available
+                if (typeof htmx !== 'undefined') {
+                    // Configure HTMX
+                    htmx.config.selfRequestsOnly = false;
+                    htmx.config.withCredentials = true;
 
-                // Initialize HTMX on the document
-                htmx.process(document.body);
+                    // Initialize HTMX on the document
+                    htmx.process(document.body);
 
-                console.log('HTMX initialized with config:', htmx.config);
-            }
+                    console.log('HTMX initialized with config:', htmx.config);
+                }
 
-            // Load Socket.IO script
-            const socketScript = document.createElement('script');
-            socketScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js';
-            socketScript.onload = () => {
-                console.log('Socket.IO loaded successfully');
+                // Load Socket.IO script
+                const socketScript = document.createElement('script');
+                socketScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js';
+                socketScript.onload = () => {
+                    console.log('Socket.IO loaded successfully');
 
-                // Add font configuration to window
-                window.fontFiles = config.fontFiles;
-                window.fontFolder = config.fontFolder;
+                    // Add font configuration to window
+                    window.fontFiles = config.fontFiles;
+                    window.fontFolder = config.fontFolder;
 
-                // Load font loader script
-                const fontLoaderScript = document.createElement('script');
-                fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
-                fontLoaderScript.onload = () => {
-                    console.log('Font loader loaded successfully');
-                    // Give all libraries a moment to fully initialize before resolving
-                    setTimeout(resolve, 100);
+                    // Load font loader script
+                    const fontLoaderScript = document.createElement('script');
+                    fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
+                    fontLoaderScript.onload = () => {
+                        console.log('Font loader loaded successfully');
+                        // Give all libraries a moment to fully initialize before resolving
+                        setTimeout(resolve, 100);
+                    };
+                    fontLoaderScript.onerror = () => {
+                        console.warn('Font loader failed to load, continuing anyway');
+                        // Give all libraries a moment to fully initialize before resolving
+                        setTimeout(resolve, 100);
+                    };
+                    document.head.appendChild(fontLoaderScript);
                 };
-                fontLoaderScript.onerror = () => {
-                    console.warn('Font loader failed to load, continuing anyway');
-                    // Give all libraries a moment to fully initialize before resolving
-                    setTimeout(resolve, 100);
+                socketScript.onerror = () => {
+                    console.warn('Socket.IO failed to load, continuing anyway');
+                    // Continue without Socket.IO if it fails
+                    window.fontFiles = config.fontFiles;
+                    window.fontFolder = config.fontFolder;
+
+                    const fontLoaderScript = document.createElement('script');
+                    fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
+                    fontLoaderScript.onload = () => {
+                        console.log('Font loader loaded successfully');
+                        setTimeout(resolve, 100);
+                    };
+                    fontLoaderScript.onerror = () => {
+                        console.warn('Font loader failed to load, continuing anyway');
+                        setTimeout(resolve, 100);
+                    };
+                    document.head.appendChild(fontLoaderScript);
                 };
-                document.head.appendChild(fontLoaderScript);
+                document.head.appendChild(socketScript);
             };
-            socketScript.onerror = () => {
-                console.warn('Socket.IO failed to load, continuing anyway');
-                // Continue without Socket.IO if it fails
-                window.fontFiles = config.fontFiles;
-                window.fontFolder = config.fontFolder;
-
-                const fontLoaderScript = document.createElement('script');
-                fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
-                fontLoaderScript.onload = () => {
-                    console.log('Font loader loaded successfully');
-                    setTimeout(resolve, 100);
-                };
-                fontLoaderScript.onerror = () => {
-                    console.warn('Font loader failed to load, continuing anyway');
-                    setTimeout(resolve, 100);
-                };
-                document.head.appendChild(fontLoaderScript);
+            htmxScript.onerror = () => {
+                reject(new Error('Failed to load HTMX'));
             };
-            document.head.appendChild(socketScript);
-        };
-        htmxScript.onerror = () => {
-            reject(new Error('Failed to load HTMX'));
-        };
-        document.head.appendChild(htmxScript);
-    });
-}
+            document.head.appendChild(htmxScript);
+        });
+    }
 
-// Function to initialize the chatbot
-function initializeChatbot() {
-    const insertHtml = `
+    // Function to initialize the chatbot
+    function initializeChatbot() {
+        const insertHtml = `
   <style>
   @keyframes pulse-glow {
     0% {
@@ -164,6 +163,11 @@ function initializeChatbot() {
         padding-bottom:10px;
 }
 
+#chat-container.dragging {
+  transition: none !important;
+  cursor: grabbing !important;
+}
+
 #chat-container.resized {
   max-height: 80vh; /* Resized state max-height */
 }
@@ -175,6 +179,36 @@ function initializeChatbot() {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    cursor: grab;
+    user-select: none;
+  }
+
+  #chat-container .chat-header:hover {
+    cursor: grab;
+  }
+
+  #chat-container .chat-header:active {
+    cursor: grabbing;
+  }
+
+  .drag-handle {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+    cursor: grab;
+  }
+
+  .drag-handle:hover::after {
+    content: "⠿";
+    color: #ff5800;
+    font-size: 16px;
+    margin-left: 8px;
+    opacity: 0.7;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
   }
 
   /* Resize handle styles */
@@ -389,16 +423,18 @@ function initializeChatbot() {
   style="background-color: #001f33;"
 >
   <div
+    class="chat-header"
     style="
       padding: 20px 15px 0px;
       background-color: #001f33;
       color: white;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
-    gap:5px;
+      gap: 5px;
     "
   >
+    <div class="drag-handle"></div>
     <div
       hx-get="${config.backendUrl}/min/onboarding"
       hx-trigger="click"
@@ -410,14 +446,13 @@ function initializeChatbot() {
         border: none;
         color: #ff5800;
         font-size: 24px;
-    cursor: pointer;
-    display:none
-transition:all 0.1s ease-in-out 0.1s;
+        cursor: pointer;
+        display: none;
+        transition: all 0.1s ease-in-out 0.1s;
+        z-index: 1001;
       "
-
- onMouseOver="this.style.opacity=0.7"
-   onMouseOut="this.style.opacity=1" 
-
+      onMouseOver="this.style.opacity=0.7"
+      onMouseOut="this.style.opacity=1" 
     >
       <svg
         width="20"
@@ -440,11 +475,11 @@ transition:all 0.1s ease-in-out 0.1s;
         color: #ff5800;
         font-size: 24px;
         cursor: pointer;
-transition:all 0.1s ease-in-out 0.1s;
+        transition: all 0.1s ease-in-out 0.1s;
+        z-index: 1001;
       "
-
- onMouseOver="this.style.opacity=0.7"
-   onMouseOut="this.style.opacity=1" 
+      onMouseOver="this.style.opacity=0.7"
+      onMouseOut="this.style.opacity=1" 
     >
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z" fill="#FF5800"/>
@@ -503,9 +538,6 @@ transition:all 0.1s ease-in-out 0.1s;
   <div class="resize-handle resize-handle-n" id="resize-n"></div>
   <div class="resize-handle resize-handle-w" id="resize-w"></div>
   <div class="resize-indicator"></div>
-
- 
-
 </div>
 
     `;
@@ -520,33 +552,209 @@ transition:all 0.1s ease-in-out 0.1s;
         console.log('HTMX processed chatbot elements');
     }
 
+    // Cookie functions
+    const setCookie = (name, value, days = 365) => {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    };
+
+    const getCookie = (name) => {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    };
+
     // Initialize chatbot functionality
     const baseURL = config.backendUrl;
     const chatBtn = document.getElementById("chat-button");
     const closeBtn = document.getElementById("close-chat");
+    const chatHeader = document.querySelector('.chat-header');
+    const dragHandle = document.querySelector('.drag-handle');
     let isChatOpen = false;
+    let isDragging = false;
+    let dragOffset = { x: 0, y: 0 };
+    let originalPosition = { bottom: '20px', right: '20px' };
+    let autoOpenTriggered = false;
+    const CHAT_CLOSED_COOKIE = 'chatbot_closed';
+
+    // Drag functionality
+    const startDrag = (e) => {
+        // Prevent dragging if clicking on buttons
+        if (e.target.closest('#return-chat') || e.target.closest('#close-chat')) {
+            return;
+        }
+
+        isDragging = true;
+        chatContainer.classList.add('dragging');
+        
+        // Store original position for reset
+        originalPosition = {
+            bottom: chatContainer.style.bottom || '20px',
+            right: chatContainer.style.right || '20px'
+        };
+
+        // Calculate offset from mouse to container position
+        const rect = chatContainer.getBoundingClientRect();
+        dragOffset.x = e.clientX - rect.left;
+        dragOffset.y = e.clientY - rect.top;
+
+        // Switch to absolute positioning for dragging
+        chatContainer.style.position = 'fixed';
+        chatContainer.style.bottom = 'auto';
+        chatContainer.style.right = 'auto';
+        chatContainer.style.left = rect.left + 'px';
+        chatContainer.style.top = rect.top + 'px';
+
+        document.addEventListener('mousemove', handleDrag);
+        document.addEventListener('mouseup', stopDrag);
+        document.body.style.userSelect = 'none';
+    };
+
+    const handleDrag = (e) => {
+        if (!isDragging) return;
+
+        // Calculate new position
+        const newX = e.clientX - dragOffset.x;
+        const newY = e.clientY - dragOffset.y;
+
+        // Constrain to viewport
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const containerWidth = chatContainer.offsetWidth;
+        const containerHeight = chatContainer.offsetHeight;
+
+        const constrainedX = Math.max(0, Math.min(newX, viewportWidth - containerWidth));
+        const constrainedY = Math.max(0, Math.min(newY, viewportHeight - containerHeight));
+
+        chatContainer.style.left = constrainedX + 'px';
+        chatContainer.style.top = constrainedY + 'px';
+    };
+
+    const stopDrag = () => {
+        isDragging = false;
+        chatContainer.classList.remove('dragging');
+        document.removeEventListener('mousemove', handleDrag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.body.style.userSelect = '';
+    };
+
+    // Reset to original position
+    const resetPosition = () => {
+        chatContainer.style.position = 'fixed';
+        chatContainer.style.bottom = originalPosition.bottom;
+        chatContainer.style.right = originalPosition.right;
+    };
+
+    // Check if chat was previously closed by user
+    const wasChatClosedByUser = () => {
+        return getCookie(CHAT_CLOSED_COOKIE) === 'true';
+    };
+
+    // Unified auto-open function
+    const autoOpenChat = (triggerType) => {
+        // Don't open if already open, already triggered, or user previously closed it
+        if (isChatOpen || autoOpenTriggered || wasChatClosedByUser()) {
+            return;
+        }
+        
+        autoOpenTriggered = true;
+        console.log(`Auto-opening chat via ${triggerType} trigger`);
+        
+        chatBtn.classList.add("chat-button-hidden");
+        setTimeout(() => {
+            chatContainer.classList.add("chat-container-open");
+            isChatOpen = true;
+            const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
+            audio.play().catch(() => { });
+            scrollToBottom();
+        }, 150);
+    };
+
+    // Scroll trigger (60% down the page)
+    const initScrollTrigger = () => {
+        let scrollTriggerFired = false;
+        
+        const checkScroll = () => {
+            if (scrollTriggerFired || autoOpenTriggered) return;
+            
+            const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            
+            if (scrollPercentage >= 60) {
+                scrollTriggerFired = true;
+                autoOpenChat('scroll');
+                // Remove scroll listener after triggering
+                window.removeEventListener('scroll', checkScroll);
+            }
+        };
+        
+        // Throttled scroll event
+        let scrollTimeout;
+        const throttledScroll = () => {
+            if (!scrollTimeout) {
+                scrollTimeout = setTimeout(() => {
+                    checkScroll();
+                    scrollTimeout = null;
+                }, 100);
+            }
+        };
+        
+        window.addEventListener('scroll', throttledScroll);
+        
+        // Also check on load in case page is already scrolled
+        setTimeout(checkScroll, 1000);
+    };
+
+    // Time trigger (45 seconds)
+    const initTimeTrigger = () => {
+        setTimeout(() => {
+            autoOpenChat('timer');
+        }, 45000); // 45 seconds
+    };
+
+    // Initialize all triggers
+    const initAutoOpenTriggers = () => {
+        // Only initialize if chat wasn't previously closed by user
+        if (!wasChatClosedByUser()) {
+            initScrollTrigger();
+            initTimeTrigger();
+        } else {
+            console.log('Chat auto-open disabled - user previously closed the chat');
+        }
+    };
+
+    // Add drag event listeners
+    chatHeader.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('mousedown', startDrag);
 
     // Resize functionality
     let isResizing = false;
     let currentResizer = null;
     let startX, startY, startWidth, startHeight;
 
-const initResize = (e, direction) => {
-  e.preventDefault();
-  isResizing = true;
-  currentResizer = direction;
-  startX = e.clientX;
-  startY = e.clientY;
-  startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
-  startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
+    const initResize = (e, direction) => {
+        e.preventDefault();
+        e.stopPropagation(); // Prevent drag when resizing
+        isResizing = true;
+        currentResizer = direction;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
+        startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
 
-  // Add resized class when user starts resizing
-  chatContainer.classList.add('resized');
+        // Add resized class when user starts resizing
+        chatContainer.classList.add('resized');
 
-  document.addEventListener("mousemove", handleResize);
-  document.addEventListener("mouseup", stopResize);
-  document.body.style.userSelect = "none";
-};
+        document.addEventListener("mousemove", handleResize);
+        document.addEventListener("mouseup", stopResize);
+        document.body.style.userSelect = "none";
+    };
 
     const handleResize = (e) => {
         if (!isResizing) return;
@@ -589,21 +797,29 @@ const initResize = (e, direction) => {
     document.getElementById("resize-w").addEventListener("mousedown", (e) => initResize(e, "w"));
     document.querySelector(".resize-indicator").addEventListener("mousedown", (e) => initResize(e, "nw"));
 
+    // Manual click trigger
     chatBtn.onclick = () => {
         if (!isChatOpen) {
+            // Don't set cookie for manual opens
             chatBtn.classList.add("chat-button-hidden");
             setTimeout(() => {
                 chatContainer.classList.add("chat-container-open");
                 isChatOpen = true;
                 const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
-                audio.play().catch(() => { }); // Ignore audio errors
-            
-scrollToBottom();            }, 150);
+                audio.play().catch(() => { });
+                scrollToBottom();
+            }, 150);
         }
     };
 
+    // Close button with cookie setting
     closeBtn.onclick = () => {
         if (isChatOpen) {
+            // Set cookie when user manually closes the chat
+            setCookie(CHAT_CLOSED_COOKIE, 'true', 30); // Store for 30 days
+            // Reset position when closing
+            resetPosition();
+            
             chatContainer.classList.add("chat-container-closing");
             setTimeout(() => {
                 chatBtn.classList.remove("chat-button-hidden");
@@ -674,22 +890,8 @@ scrollToBottom();            }, 150);
 
     processChatContentElements();
 
-    // Auto-open chat after 10 seconds
-    setTimeout(() => {
-        const chatContainer = document.getElementById("chat-container");
-        if (chatContainer && !isChatOpen) {
-            chatBtn.classList.add("chat-button-hidden");
-            setTimeout(() => {
-                chatContainer.classList.add("chat-container-open");
-                isChatOpen = true;
-                const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
-                audio.play().catch(() => { }); // Ignore audio errors
-            }, 150);
-        }
-    }, 10000);
-
-
-
+    // Initialize auto-open triggers
+    initAutoOpenTriggers();
 
     console.log('Chatbot initialized successfully');
 }
@@ -707,4 +909,4 @@ function init() {
 
 // Start the initialization
 init();
-}) ();
+})();
