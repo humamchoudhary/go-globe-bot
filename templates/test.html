@@ -14,6 +14,7 @@
         margin: 0 auto;
         color: #333;
       }
+
       header {
         background-color: #f4f4f4;
         padding: 20px;
@@ -21,16 +22,19 @@
         margin-bottom: 30px;
         border-radius: 5px;
       }
+
       h1 {
         color: #2c3e50;
         margin: 0;
       }
+
       .content {
         padding: 20px;
         background-color: #fff;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
+
       footer {
         text-align: center;
         margin-top: 30px;
@@ -44,6 +48,7 @@
         0% {
           transform: rotate(0deg);
         }
+
         100% {
           transform: rotate(360deg);
         }
@@ -54,15 +59,61 @@
       content='{"selfRequestsOnly":false, "withCredentials": true}'
     />
     <script src="{{backend_url}}/render-bot/6dc1066b8a2880024e6e2e1a4c3941a2597b0467132849c6d62d232eb00d9958"></script>
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({
+          "gtm.start": new Date().getTime(),
+          event: "gtm.js",
+        });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KS5M85M4");
+    </script>
+    <!-- End Google Tag Manager -->
   </head>
+
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KS5M85M4"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <div style="display: flex; flex-direction: column; gap: 6px">
-      {% for i in range(500) %}
-      <div
-        class="w-full"
-        style="height: 500px; background-color: #6{{ i|string|first }}{{ i|string|first }}6{{ i|string|first }}{{ i|string|first }}"
-      ></div>
-      {% endfor %}
+      <button id="testBtn">Click Me!</button>
+
+      <script>
+        // Helper function for tracking
+        function trackEvent(eventName, params = {}) {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: eventName,
+            ...params,
+          });
+          console.log("Event pushed:", eventName, params);
+        }
+
+        // Attach click listener
+        document
+          .getElementById("testBtn")
+          .addEventListener("click", function () {
+            trackEvent("button_click", {
+              test_var: "test_var_resp",
+            });
+          });
+      </script>
     </div>
   </body>
 </html>
