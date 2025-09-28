@@ -2,102 +2,103 @@
     // Configuration - Update these values as needed
     const config = {
         backendUrl: '{{backend_url}}', // Replace with your actual backend URL
-        fontFiles: {{ font_files | safe }}, // Replace with your font files array
-        fontFolder: '{{settings["backend_url"]}}{{ url_for("static", filename="font/NeueHaas") }}' // Replace with your font folder path
+        fontFiles: {{ font_files | safe
+}}, // Replace with your font files array
+fontFolder: '{{settings["backend_url"]}}{{ url_for("static", filename="font/NeueHaas") }}' // Replace with your font folder path
     };
 
-    // Function to load headers and dependencies
-    function loadHeaders() {
-        return new Promise((resolve, reject) => {
-            // Set meta charset
-            const charsetMeta = document.createElement('meta');
-            charsetMeta.httpEquiv = 'Content-Type';
-            charsetMeta.content = 'text/html; charset=utf-8';
-            document.head.appendChild(charsetMeta);
+// Function to load headers and dependencies
+function loadHeaders() {
+    return new Promise((resolve, reject) => {
+        // Set meta charset
+        const charsetMeta = document.createElement('meta');
+        charsetMeta.httpEquiv = 'Content-Type';
+        charsetMeta.content = 'text/html; charset=utf-8';
+        document.head.appendChild(charsetMeta);
 
-            // Set HTMX config meta
-            const htmxConfigMeta = document.createElement('meta');
-            htmxConfigMeta.name = 'htmx-config';
-            htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
-            document.head.appendChild(htmxConfigMeta);
+        // Set HTMX config meta
+        const htmxConfigMeta = document.createElement('meta');
+        htmxConfigMeta.name = 'htmx-config';
+        htmxConfigMeta.content = '{"selfRequestsOnly":false, "withCredentials": true}';
+        document.head.appendChild(htmxConfigMeta);
 
-            const cssLink = document.createElement('link');
-            cssLink.rel = 'stylesheet';
-            cssLink.href = `${config.backendUrl}/static/css/output.css`; // Replace with your actual CSS file path
-            document.head.appendChild(cssLink);      // Load HTMX script
-            const htmxScript = document.createElement('script');
-            htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
-            htmxScript.crossOrigin = 'anonymous';
-            htmxScript.onload = () => {
-                console.log('HTMX loaded successfully');
+        const cssLink = document.createElement('link');
+        cssLink.rel = 'stylesheet';
+        cssLink.href = `${config.backendUrl}/static/css/output.css`; // Replace with your actual CSS file path
+        document.head.appendChild(cssLink);      // Load HTMX script
+        const htmxScript = document.createElement('script');
+        htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
+        htmxScript.crossOrigin = 'anonymous';
+        htmxScript.onload = () => {
+            console.log('HTMX loaded successfully');
 
-                // Wait for HTMX to be fully available
-                if (typeof htmx !== 'undefined') {
-                    // Configure HTMX
-                    htmx.config.selfRequestsOnly = false;
-                    htmx.config.withCredentials = true;
+            // Wait for HTMX to be fully available
+            if (typeof htmx !== 'undefined') {
+                // Configure HTMX
+                htmx.config.selfRequestsOnly = false;
+                htmx.config.withCredentials = true;
 
-                    // Initialize HTMX on the document
-                    htmx.process(document.body);
+                // Initialize HTMX on the document
+                htmx.process(document.body);
 
-                    console.log('HTMX initialized with config:', htmx.config);
-                }
+                console.log('HTMX initialized with config:', htmx.config);
+            }
 
-                // Load Socket.IO script
-                const socketScript = document.createElement('script');
-                socketScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js';
-                socketScript.onload = () => {
-                    console.log('Socket.IO loaded successfully');
+            // Load Socket.IO script
+            const socketScript = document.createElement('script');
+            socketScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js';
+            socketScript.onload = () => {
+                console.log('Socket.IO loaded successfully');
 
-                    // Add font configuration to window
-                    window.fontFiles = config.fontFiles;
-                    window.fontFolder = config.fontFolder;
+                // Add font configuration to window
+                window.fontFiles = config.fontFiles;
+                window.fontFolder = config.fontFolder;
 
-                    // Load font loader script
-                    const fontLoaderScript = document.createElement('script');
-                    fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
-                    fontLoaderScript.onload = () => {
-                        console.log('Font loader loaded successfully');
-                        // Give all libraries a moment to fully initialize before resolving
-                        setTimeout(resolve, 100);
-                    };
-                    fontLoaderScript.onerror = () => {
-                        console.warn('Font loader failed to load, continuing anyway');
-                        // Give all libraries a moment to fully initialize before resolving
-                        setTimeout(resolve, 100);
-                    };
-                    document.head.appendChild(fontLoaderScript);
+                // Load font loader script
+                const fontLoaderScript = document.createElement('script');
+                fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
+                fontLoaderScript.onload = () => {
+                    console.log('Font loader loaded successfully');
+                    // Give all libraries a moment to fully initialize before resolving
+                    setTimeout(resolve, 100);
                 };
-                socketScript.onerror = () => {
-                    console.warn('Socket.IO failed to load, continuing anyway');
-                    // Continue without Socket.IO if it fails
-                    window.fontFiles = config.fontFiles;
-                    window.fontFolder = config.fontFolder;
-
-                    const fontLoaderScript = document.createElement('script');
-                    fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
-                    fontLoaderScript.onload = () => {
-                        console.log('Font loader loaded successfully');
-                        setTimeout(resolve, 100);
-                    };
-                    fontLoaderScript.onerror = () => {
-                        console.warn('Font loader failed to load, continuing anyway');
-                        setTimeout(resolve, 100);
-                    };
-                    document.head.appendChild(fontLoaderScript);
+                fontLoaderScript.onerror = () => {
+                    console.warn('Font loader failed to load, continuing anyway');
+                    // Give all libraries a moment to fully initialize before resolving
+                    setTimeout(resolve, 100);
                 };
-                document.head.appendChild(socketScript);
+                document.head.appendChild(fontLoaderScript);
             };
-            htmxScript.onerror = () => {
-                reject(new Error('Failed to load HTMX'));
-            };
-            document.head.appendChild(htmxScript);
-        });
-    }
+            socketScript.onerror = () => {
+                console.warn('Socket.IO failed to load, continuing anyway');
+                // Continue without Socket.IO if it fails
+                window.fontFiles = config.fontFiles;
+                window.fontFolder = config.fontFolder;
 
-    // Function to initialize the chatbot
-    function initializeChatbot() {
-        const insertHtml = `
+                const fontLoaderScript = document.createElement('script');
+                fontLoaderScript.src = config.backendUrl + '/static/js/fontLoader.js';
+                fontLoaderScript.onload = () => {
+                    console.log('Font loader loaded successfully');
+                    setTimeout(resolve, 100);
+                };
+                fontLoaderScript.onerror = () => {
+                    console.warn('Font loader failed to load, continuing anyway');
+                    setTimeout(resolve, 100);
+                };
+                document.head.appendChild(fontLoaderScript);
+            };
+            document.head.appendChild(socketScript);
+        };
+        htmxScript.onerror = () => {
+            reject(new Error('Failed to load HTMX'));
+        };
+        document.head.appendChild(htmxScript);
+    });
+}
+
+// Function to initialize the chatbot
+function initializeChatbot() {
+    const insertHtml = `
   <style>
   @keyframes pulse-glow {
     0% {
@@ -584,6 +585,18 @@
     let autoOpenTriggered = false;
     const CHAT_CLOSED_COOKIE = 'chatbot_closed';
 
+    function trackEvent(eventName, params = {}) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            event: eventName,
+            page_path: window.location.pathname,
+            ...params,
+        });
+        console.log("Event pushed:", eventName, params);
+    }
+
+
+
     // Drag functionality
     const startDrag = (e) => {
         // Prevent dragging if clicking on buttons
@@ -593,7 +606,7 @@
 
         isDragging = true;
         chatContainer.classList.add('dragging');
-        
+
         // Store original position for reset
         originalPosition = {
             bottom: chatContainer.style.bottom || '20px',
@@ -663,29 +676,33 @@
         if (isChatOpen || autoOpenTriggered || wasChatClosedByUser()) {
             return;
         }
-        
+
         autoOpenTriggered = true;
         console.log(`Auto-opening chat via ${triggerType} trigger`);
-        
+
+        trackEvent(`gobot_${triggerType}`, {})
+
         chatBtn.classList.add("chat-button-hidden");
         setTimeout(() => {
             chatContainer.classList.add("chat-container-open");
             isChatOpen = true;
             const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
             audio.play().catch(() => { });
-            scrollToBottom();
+            if (scrollToBottom) {
+                scrollToBottom();
+            }
         }, 150);
     };
 
     // Scroll trigger (60% down the page)
     const initScrollTrigger = () => {
         let scrollTriggerFired = false;
-        
+
         const checkScroll = () => {
             if (scrollTriggerFired || autoOpenTriggered) return;
-            
+
             const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            
+
             if (scrollPercentage >= 60) {
                 scrollTriggerFired = true;
                 autoOpenChat('scroll');
@@ -693,7 +710,7 @@
                 window.removeEventListener('scroll', checkScroll);
             }
         };
-        
+
         // Throttled scroll event
         let scrollTimeout;
         const throttledScroll = () => {
@@ -704,9 +721,9 @@
                 }, 100);
             }
         };
-        
+
         window.addEventListener('scroll', throttledScroll);
-        
+
         // Also check on load in case page is already scrolled
         setTimeout(checkScroll, 1000);
     };
@@ -802,6 +819,8 @@
         if (!isChatOpen) {
             // Don't set cookie for manual opens
             chatBtn.classList.add("chat-button-hidden");
+
+            trackEvent("gobot_click")
             setTimeout(() => {
                 chatContainer.classList.add("chat-container-open");
                 isChatOpen = true;
@@ -819,7 +838,7 @@
             setCookie(CHAT_CLOSED_COOKIE, 'true', 30); // Store for 30 days
             // Reset position when closing
             resetPosition();
-            
+
             chatContainer.classList.add("chat-container-closing");
             setTimeout(() => {
                 chatBtn.classList.remove("chat-button-hidden");
@@ -909,4 +928,4 @@ function init() {
 
 // Start the initialization
 init();
-})();
+}) ();

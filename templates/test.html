@@ -91,30 +91,15 @@
       ></iframe
     ></noscript>
     <!-- End Google Tag Manager (noscript) -->
+    {% for i in range(100) %}
+    <div
+      class="w-full"
+      style="height: 500px; background-color: #6{{ i|string|first }}{{ i|string|first }}6{{ i|string|first }}{{ i|string|first }}"
+    ></div>
+    {% endfor %}
 
     <div style="display: flex; flex-direction: column; gap: 6px">
       <button id="testBtn">Click Me!</button>
-
-      <script>
-        // Helper function for tracking
-        function trackEvent(eventName, params = {}) {
-          window.dataLayer = window.dataLayer || [];
-          window.dataLayer.push({
-            event: eventName,
-            ...params,
-          });
-          console.log("Event pushed:", eventName, params);
-        }
-
-        // Attach click listener
-        document
-          .getElementById("testBtn")
-          .addEventListener("click", function () {
-            trackEvent("button_click", {
-              test_var: "test_var_resp",
-            });
-          });
-      </script>
     </div>
   </body>
 </html>
