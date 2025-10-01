@@ -14,9 +14,9 @@
   </div>
 
   <!-- Questions list -->
-  <div class="qa-answer hidden flex flex-col gap-4 text-[var(--white)] mt-3">
+  <div class="qa-answer hidden flex flex-col gap-6 text-[var(--white)] mt-3">
     {% for qa in group['questions'] %}
-    <div class="border-l-2 border-[var(--main-color)] pl-4">
+    <div class="">
       <p class="font-semibold">{{ qa['question'] }}</p>
       <p class="text-sm opacity-90">{{ qa['answer'] }}</p>
     </div>
