@@ -728,7 +728,7 @@ def export_chat(room_id):
             "country":int(get_country_id('tblcountries.json',user.country)),
             "description":"\n".join(
                 [
-                    f"{message.sender.lower()}: {message.content[:10] + ('...' if len(message.content) > 10 else '')}"
+                    f"{message.sender.lower()}: {message.content[:15] + ('...' if len(message.content) > 15 else '')}"
                     if message.sender.lower() == "bot"
                     else f"{message.sender}: {message.content}"
                     for message in chat.messages
