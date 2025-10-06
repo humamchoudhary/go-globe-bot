@@ -715,6 +715,8 @@ def export_chat(room_id):
             "Content-Type": "application/x-www-form-urlencoded",
             "authtoken": f"{os.environ.get('ERP_TOKEN')}",
         }
+        print(user.country)
+        print(get_country_id('tblcountries.json',user.country))
         data = {
             "name": user.name,
             "company": user.company,
