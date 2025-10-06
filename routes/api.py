@@ -322,41 +322,49 @@ def export_chat(room_id):
         user_service = UserService(current_app.db)
         user = user_service.get_user_by_id(chat.user_id)
         # try:
-        # erp_url = os.environ.get("ERP_URL")
-        # headers = {
-        #     "Content-Type": "application/x-www-form-urlencoded",
-        #     "authtoken": f"{os.environ.get('ERP_TOKEN')}",
-        # }
-        # data = {
-        #     "name": user.name,
-        #     "company": user.company,
-        #     "title": user.desg,
-        #     "phonenumber": user.phone,
-        #     "email": f"{user.email}",
-        #     # "address": f"{user.city},{user.country}",
-        #     "city": str(user.city),
-        #     "state": str(user.city),
-        #     "country": int(get_country_id('tblcountries.json', user.country)),
-        #     "description": "\n".join([f"{message.sender}: {message.content}" for message in chat.messages])
-        # }
-        #
-        # r = requests.post(erp_url, headers=headers, data=data)
-        # # print(f"DATA: {data}")
-        # if r.status_code == 200:
-        #
-        #     data = r.json()
-        # print(r)
-        # print(r.content)
-        # TAB
-        if not chat_service.export_chat(room_id, None
-                                        # data.get("lead_id", None)
-                                        ):
-            return error_json_response("Error in exporting: Chat not found", 500)
-        else:
-            # print(r.json())
-            pass
+        erp_url = os.environ.get("ERP_URL")
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "authtoken": f"{os.environ.get('ERP_TOKEN')}",
+        }
+        data = {
+            "name": user.name,
+            "company": user.company,
+            "title": user.desg,
+            "phonenumber": user.phone,
+            "email": f"{user.email}",
+            # "address": f"{user.city},{user.country}",
+            "city": str(user.city),
+            "state": str(user.city),
+            "country": int(get_country_id('tblcountries.json', user.country)),
+            "description":"\n".join(
+                [
+                    f"{message.sender.lower()}: {message.content[:10] + ('...' if len(message.content) > 10 else '')}"
+                    if message.sender.lower() == "bot"
+                    else f"{message.sender}: {message.content}"
+                    for message in chat.messages
+                ]
+                ),
+        }
 
-            # return error_json_response(f"Error in exporting: {r.status_code}, {r.json().get('message', 'Internal Server error').replace('<p>', "").replace('</p>', "")}", 500)
+        r = requests.post(erp_url, headers=headers, data=data)
+        # print(f"DATA: {data}")
+        if r.status_code == 200:
+
+            data = r.json()
+            if not chat_service.export_chat(room_id, None
+                                            # data.get("lead_id", None)
+                                            ):
+                return error_json_response("Error in exporting: Chat not found", 500)
+
+        elif r.status_code==404:
+            if not chat_service.export_chat(room_id, None):
+                return error_json_response("Error in exporting: Chat not found", 500)
+
+
+            return error_json_response(f"Error from ERP: {r.status_code}, {r.json().get('message', 'Internal Server error').replace('<p>', "").replace('</p>', "")}", 202)
+        else:
+            return error_json_response(f"Error in exporting: {r.status_code}, {r.json().get('message', 'Internal Server error').replace('<p>', "").replace('</p>', "")}", 500)
         return success_json_response(None, 200)
 
     return error_json_response("Chat not found", 500)
