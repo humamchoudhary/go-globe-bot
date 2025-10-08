@@ -1,4 +1,4 @@
-<div style="position: relative; width: fit-content;   
+<div style="position: relative; width: fit-content; max-width: 85%;
     align-self:{% if message.sender == username %}flex-end{% else %}flex-start{% endif %};  
     display:flex; flex-direction:row; gap:10px; align-items:flex-start;">
 
@@ -35,7 +35,12 @@
              font-family: var(--goglobe-heading-font-family); 
              background-color: {% if message.sender == username %}#001523{% else %}var(--goglobe-some-r-bg-color){% endif %};
              color: var(--goglobe-heading-color); 
-             border: 0.5px solid var(--goglobe-border-color);">
+             border: 0.5px solid var(--goglobe-border-color);
+width:85%;
+word-wrap: break-word;
+
+overflow-wrap: break-word
+">
       {{ message.content|markdown|safe }}
     </div>
 </div>
