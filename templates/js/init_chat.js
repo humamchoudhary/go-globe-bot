@@ -455,7 +455,18 @@ function initializeChatbot() {
       onMouseOver="this.style.opacity=0.7"
       onMouseOut="this.style.opacity=1" 
     >
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2-icon lucide-undo-2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3.33333 6.66672L2.74417 7.25589L2.155 6.66672L2.74417 6.07756L3.33333 6.66672ZM7.5 16.6667C7.27899 16.6667 7.06702 16.5789 6.91074 16.4226C6.75446 16.2664 6.66667 16.0544 6.66667 15.8334C6.66667 15.6124 6.75446 15.4004 6.91074 15.2441C7.06702 15.0879 7.27899 15.0001 7.5 15.0001V16.6667ZM6.91083 11.4226L2.74417 7.25589L3.9225 6.07756L8.08917 10.2442L6.91083 11.4226ZM2.74417 6.07756L6.91083 1.91089L8.08917 3.08922L3.9225 7.25589L2.74417 6.07756ZM3.33333 5.83339H12.0833V7.50005H3.33333V5.83339ZM12.0833 16.6667H7.5V15.0001H12.0833V16.6667ZM17.5 11.2501C17.5 12.6866 16.9293 14.0644 15.9135 15.0802C14.8977 16.096 13.5199 16.6667 12.0833 16.6667V15.0001C12.5758 15.0001 13.0634 14.9031 13.5184 14.7146C13.9734 14.5261 14.3868 14.2499 14.735 13.9017C15.0832 13.5535 15.3594 13.1401 15.5479 12.6851C15.7363 12.2301 15.8333 11.7425 15.8333 11.2501H17.5ZM12.0833 5.83339C13.5199 5.83339 14.8977 6.40407 15.9135 7.41989C16.9293 8.43572 17.5 9.81347 17.5 11.2501H15.8333C15.8333 10.7576 15.7363 10.27 15.5479 9.81499C15.3594 9.36002 15.0832 8.94662 14.735 8.5984C14.3868 8.25019 13.9734 7.97396 13.5184 7.78551C13.0634 7.59705 12.5758 7.50005 12.0833 7.50005V5.83339Z"
+          fill="#FF5800"
+        />
+      </svg>
     </div>
     <div
       id="close-chat"
@@ -471,7 +482,7 @@ function initializeChatbot() {
       onMouseOver="this.style.opacity=0.7"
       onMouseOut="this.style.opacity=1" 
     >
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z" fill="#FF5800"/>
 </svg>
     </div>
@@ -494,7 +505,32 @@ function initializeChatbot() {
         height: 350px;
       "
     >
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      <svg
+        class="spin"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        style="
+          animation: spin 1s linear infinite;
+          color: white;
+          width: 25px;
+          height: 25px;
+        "
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
     </div>
   </div>
 
