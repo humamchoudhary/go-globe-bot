@@ -423,70 +423,52 @@ function initializeChatbot() {
   class="chat-container-close"
   style="background-color: #001f33;"
 >
+<div
+  class="chat-header"
+  style="
+    padding: 20px 15px 0px;
+    background-color: #001f33;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  "
+>
+  <div class="drag-handle"></div>
+
+  <!-- Return Button -->
   <div
-    class="chat-header"
-    style="
-      padding: 20px 15px 0px;
-      background-color: #001f33;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 5px;
-    "
-  >
-    <div class="drag-handle"></div>
-    <div
-      hx-get="${config.backendUrl}/min/onboarding"
-      hx-trigger="click"
-      hx-target="#chatbox"
-      hx-swap="innerHTML"
+    hx-get="${config.backendUrl}/min/onboarding"
+    hx-trigger="click"
+    hx-target="#chatbox"
+    hx-swap="innerHTML"
     id="return-chat"
-      style="
-        background: none;
-        border: none;
-        color: #ff5800;
-        font-size: 24px;
-        cursor: pointer;
-        display: none;
-        transition: all 0.1s ease-in-out 0.1s;
-        z-index: 1001;
-      "
-      onMouseOver="this.style.opacity=0.7"
-      onMouseOut="this.style.opacity=1" 
-    >
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M3.33333 6.66672L2.74417 7.25589L2.155 6.66672L2.74417 6.07756L3.33333 6.66672ZM7.5 16.6667C7.27899 16.6667 7.06702 16.5789 6.91074 16.4226C6.75446 16.2664 6.66667 16.0544 6.66667 15.8334C6.66667 15.6124 6.75446 15.4004 6.91074 15.2441C7.06702 15.0879 7.27899 15.0001 7.5 15.0001V16.6667ZM6.91083 11.4226L2.74417 7.25589L3.9225 6.07756L8.08917 10.2442L6.91083 11.4226ZM2.74417 6.07756L6.91083 1.91089L8.08917 3.08922L3.9225 7.25589L2.74417 6.07756ZM3.33333 5.83339H12.0833V7.50005H3.33333V5.83339ZM12.0833 16.6667H7.5V15.0001H12.0833V16.6667ZM17.5 11.2501C17.5 12.6866 16.9293 14.0644 15.9135 15.0802C14.8977 16.096 13.5199 16.6667 12.0833 16.6667V15.0001C12.5758 15.0001 13.0634 14.9031 13.5184 14.7146C13.9734 14.5261 14.3868 14.2499 14.735 13.9017C15.0832 13.5535 15.3594 13.1401 15.5479 12.6851C15.7363 12.2301 15.8333 11.7425 15.8333 11.2501H17.5ZM12.0833 5.83339C13.5199 5.83339 14.8977 6.40407 15.9135 7.41989C16.9293 8.43572 17.5 9.81347 17.5 11.2501H15.8333C15.8333 10.7576 15.7363 10.27 15.5479 9.81499C15.3594 9.36002 15.0832 8.94662 14.735 8.5984C14.3868 8.25019 13.9734 7.97396 13.5184 7.78551C13.0634 7.59705 12.5758 7.50005 12.0833 7.50005V5.83339Z"
-          fill="#FF5800"
-        />
-      </svg>
-    </div>
-    <div
-      id="close-chat"
-      style="
-        background: none;
-        border: none;
-        color: #ff5800;
-        font-size: 24px;
-        cursor: pointer;
-        transition: all 0.1s ease-in-out 0.1s;
-        z-index: 1001;
-      "
-      onMouseOver="this.style.opacity=0.7"
-      onMouseOut="this.style.opacity=1" 
-    >
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z" fill="#FF5800"/>
+    style="
+      color: #ff5800;
+    "
+    onMouseOver="this.style.opacity=0.7"
+    onMouseOut="this.style.opacity=1"
+  >
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.33333 5.66672L0.744165 6.25589L0.154999 5.66672L0.744165 5.07756L1.33333 5.66672ZM5.5 15.6667C5.27899 15.6667 5.06702 15.5789 4.91074 15.4226C4.75446 15.2664 4.66667 15.0544 4.66667 14.8334C4.66667 14.6124 4.75446 14.4004 4.91074 14.2441C5.06702 14.0879 5.27899 14.0001 5.5 14.0001V15.6667ZM4.91083 10.4226L0.744165 6.25589L1.9225 5.07756L6.08917 9.24422L4.91083 10.4226ZM0.744165 5.07756L4.91083 0.910889L6.08917 2.08922L1.9225 6.25589L0.744165 5.07756ZM1.33333 4.83339H10.0833V6.50005H1.33333V4.83339ZM10.0833 15.6667H5.5V14.0001H10.0833V15.6667ZM15.5 10.2501C15.5 11.6866 14.9293 13.0644 13.9135 14.0802C12.8977 15.096 11.5199 15.6667 10.0833 15.6667V14.0001C10.5758 14.0001 11.0634 13.9031 11.5184 13.7146C11.9734 13.5261 12.3868 13.2499 12.735 12.9017C13.0832 12.5535 13.3594 12.1401 13.5479 11.6851C13.7363 11.2301 13.8333 10.7425 13.8333 10.2501H15.5ZM10.0833 4.83339C11.5199 4.83339 12.8977 5.40407 13.9135 6.41989C14.9293 7.43572 15.5 8.81347 15.5 10.2501H13.8333C13.8333 9.7576 13.7363 9.26996 13.5479 8.81499C13.3594 8.36002 13.0832 7.94662 12.735 7.5984C12.3868 7.25019 11.9734 6.97396 11.5184 6.78551C11.0634 6.59705 10.5758 6.50005 10.0833 6.50005V4.83339Z" fill="#FF5800"/>
 </svg>
-    </div>
   </div>
+
+  <!-- Close Button -->
+  <div
+    id="close-chat"
+    style="
+color: #ff5800;
+    "
+    onMouseOver="this.style.opacity=0.7"
+    onMouseOut="this.style.opacity=1"
+  >
+<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.66666 14.7916L0.208328 13.3333L6.04166 7.49992L0.208328 1.66659L1.66666 0.208252L7.49999 6.04159L13.3333 0.208252L14.7917 1.66659L8.95833 7.49992L14.7917 13.3333L13.3333 14.7916L7.49999 8.95825L1.66666 14.7916Z" fill="#FF5800"/>
+</svg>
+  </div>
+</div>
 
   <div
     id="chatbox"
