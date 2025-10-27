@@ -100,6 +100,8 @@ def login(subject):
 
             print(f"ip: {ip}")
             geo = requests.get(f"http://ipleak.net/json/{ip}")
+
+            print(f"geo: {geo}")
             geo = geo.json()
 
             print(f"geo: {geo}")
