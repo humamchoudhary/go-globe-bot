@@ -99,7 +99,7 @@ def login(subject):
             ip = ip.split(",")[0]
 
             print(f"ip: {ip}")
-            geo = requests.get(f"https://ipleak.net/json/{ip}")
+            geo = requests.get(f"http://ipleak.net/json/{ip}", verify=False, timeout=5)
 
             print(f"geo: {geo}")
             geo = geo.json()
