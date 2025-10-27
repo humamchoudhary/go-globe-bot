@@ -94,8 +94,8 @@ def login(subject):
     # if request.method == "GET":
         try:
             print("start login")
+            __import__('pprint').pprint(dict(request.headers))
             ip = request.headers.get("X_REAL-IP")
-            __import__('pprint').pprint(dict(request))
             ip = ip.split(",")[0]
 
             print(f"ip: {ip}")
