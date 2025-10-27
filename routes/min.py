@@ -21,6 +21,7 @@ from services.email_service import send_email
 import os
 import pytz
 
+import pycurl, io, json
 
 @min_bp.before_request
 def before_req():
@@ -99,10 +100,15 @@ def login(subject):
             ip = ip.split(",")[0]
 
             print(f"ip: {ip}")
-            geo = requests.get(f"http://ipleak.net/json/{ip}", verify=False, timeout=5)
+            buf = io.BytesIO()
+            c = pycurl.Curl()
+            c.setopt(c.URL, f"https://ipleak.net/json/{ip}")
+            c.setopt(c.WRITEDATA, buf)
+            c.perform()
+            c.close()
 
-            print(f"geo: {geo}")
-            geo = geo.json()
+
+            geo = json.loads(buf.getvalue())
 
             print(f"geo: {geo}")
             country = geo.get("country_name", None)
