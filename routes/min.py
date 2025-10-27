@@ -91,7 +91,7 @@ def index():
 @min_bp.route('login', defaults={'subject': None}, methods=['GET'])
 @min_bp.route('login/<string:subject>', methods=['GET'])
 def login(subject):
-    if request.method == "GET":
+    # if request.method == "GET":
         try:
             ip = request.headers.get("X_REAL-IP")
             ip = ip.split(",")[0]
