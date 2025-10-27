@@ -93,11 +93,15 @@ def index():
 def login(subject):
     # if request.method == "GET":
         try:
+            print("start login")
             ip = request.headers.get("X_REAL-IP")
             ip = ip.split(",")[0]
 
+            print(f"ip: {ip}")
             geo = requests.get(f"http://ipleak.net/json/{ip}")
             geo = geo.json()
+
+            print(f"geo: {geo}")
             country = geo.get("country_name", None)
         except:
             country = None
