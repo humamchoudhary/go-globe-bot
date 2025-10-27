@@ -95,6 +95,7 @@ def login(subject):
         try:
             print("start login")
             ip = request.headers.get("X_REAL-IP")
+            __import__('pprint').pprint(dict(request))
             ip = ip.split(",")[0]
 
             print(f"ip: {ip}")
