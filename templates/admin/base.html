@@ -390,6 +390,39 @@ socket.on("new_message", function (data) {
             });
         }, 100);
     }
+
+    // only user message notification
+    if (data['sender'] && data['sender'].toString().toLowerCase().includes('bot')) {
+        console.log('Bot message - skipping notification');
+        return;
+    }
+
+    const notificationTitle = `New Message from ${data['sender']}`;
+    const notificationMessage = data['content'];
+    console.log(data)
+    
+    // Add to notification list
+    addNotification(notificationTitle, notificationMessage);
+    
+    // Show popup notification
+    showPopupNotification(notificationTitle, notificationMessage);
+    
+    // Browser notification (optional)
+    if (Notification.permission === "granted") {
+        new Notification(notificationTitle, {
+            body: `Message: ${notificationMessage}`,
+            icon: "/static/img/logo-desktop-mini.svg",
+        });
+    } else {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                new Notification(notificationTitle, {
+            body: `Message: ${notificationMessage}`,
+            icon: "/static/img/logo-desktop-mini.svg",
+                });
+            }
+        });
+    }
 });
 
 
