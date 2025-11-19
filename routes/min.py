@@ -64,7 +64,7 @@ def login_required(f):
 # @min_bp.route('/test')
 # def test_model():
 #     return render_template('user/test.html')
-
+ 
 
 @min_bp.route('/get-headers')
 def headers():
@@ -296,7 +296,7 @@ def ping_admin(chat_id):
         settings = current_app.config.get('SETTINGS', {})
         timings = settings.get('timings', [])
         timezone = settings.get('timezone', "UTC")
-
+    print("=============admin info", current_admin.to_dict(), session.get('admin_id'))
     now = UTCZoneManager().get_current_date(timezone)
     current_day = now.strftime('%A').lower()
     current_time = now.strftime('%H:%M')
@@ -317,7 +317,7 @@ def ping_admin(chat_id):
     user = user_service.get_user_by_id(session['user_id'])
     room_id = f"{user.user_id}-{chat_id[:8]}"
     chat = chat_service.get_chat_by_room_id(room_id)
-
+    print("=============chat info", chat.to_dict())
     if not chat:
         if request.headers.get('HX-Request'):
             return "Chat not found", 404
@@ -479,7 +479,7 @@ def send_message(chat_id):
                                usage['input'], usage['output'], usage['cost'])
         bot_message = chat_service.add_message(
             chat.room_id, chat.bot_name, msg)
-
+        # send push and popup notification
         current_app.socketio.emit('new_message', {
 
             "html": render_template("/user/fragments/chat_message.html", message=bot_message, username=user.name),
@@ -488,16 +488,20 @@ def send_message(chat_id):
             'content': msg,
             'timestamp': bot_message.timestamp.isoformat()
         }, room=chat.room_id)
+        # send mongodb notification
+        noti_service = NotificationService(current_app.db)
+        noti_service.create_notification(chat.admin_id, f'{
+                                         user.name} sent a message', message, 'Test B New message Received', chat.room_id)
     else:
-
+        # send push and popup notification
         current_app.socketio.emit('new_message_admin', {
-
             "html": render_template("/user/fragments/chat_message.html", message=new_message, username=user.name),
             'room_id': chat.room_id,
             'sender': user.name,
             'content': message,
             'timestamp': new_message.timestamp.isoformat(),
         }, room=chat.room_id)
+        # send mongodb notification
         noti_service = NotificationService(current_app.db)
         noti_service.create_notification(chat.admin_id, f'{
                                          user.name} sent a message', message, 'admin_required', chat.room_id)
