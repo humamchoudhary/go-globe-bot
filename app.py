@@ -356,8 +356,7 @@ def create_app(config_class=Config):
                 try:
                     request_data['json_data'] = request.get_json()
                 except Exception as e:
-                    request_data['json_data_error'] = f'Invalid JSON payload: {
-                        str(e)}'
+                    request_data['json_data_error'] = f'Invalid JSON payload: {str(e)}'
 
             # Create the log entry
             log_entry = logs_service.create_log(
@@ -380,8 +379,8 @@ def create_app(config_class=Config):
             g.log_id = log_entry.log_id
 
         except Exception as e:
-            app.logger.error(f"Failed to log request: {
-                             str(e)}\n{traceback.format_exc()}")
+            app.logger.error(f"Failed to log request: \
+                {str(e)}\n{traceback.format_exc()}")
 
     @app.after_request
     def log_response(response):
@@ -404,8 +403,7 @@ def create_app(config_class=Config):
                     }}
                 )
         except Exception as e:
-            app.logger.error(f"Failed to log response: {
-                             str(e)}\n{traceback.format_exc()}")
+            app.logger.error(f"Failed to log response: {str(e)}\n{traceback.format_exc()}")
         return response
 
     @app.errorhandler(Exception)
@@ -428,8 +426,7 @@ def create_app(config_class=Config):
                     }
                 )
         except Exception as e:
-            app.logger.error(f"Failed to log exception: {
-                             str(e)}\n{traceback.format_exc()}")
+            app.logger.error(f"Failed to log exception: {str(e)}\n{traceback.format_exc()}")
         return error
 
     SKIP_PATHS = {
@@ -499,8 +496,7 @@ def create_app(config_class=Config):
             status_color = f"\033[91m{status_code}\033[0m"  # Red
 
         # Basic log format
-        log_msg = f"[{timestamp}] {client_ip} | {method:6} | {
-            status_color} | {response_time:6.2f}ms | {path}"
+        log_msg = f"[{timestamp}] {client_ip} | {method:6} | {status_color} | {response_time:6.2f}ms | {path}"
 
         # Add query parameters if present
         if request.query_string:
@@ -537,8 +533,7 @@ def create_app(config_class=Config):
         if client_ip and ',' in client_ip:
             client_ip = client_ip.split(',')[0].strip()
 
-        print(f"[{timestamp}] \033[91mEXCEPTION\033[0m: {
-              client_ip} | {request.method} | {request.path}")
+        print(f"[{timestamp}] \033[91mEXCEPTION\033[0m: {client_ip} | {request.method} | {request.path}")
         print(f"    └─ Error: {str(error)}")
         print(f"    └─ Type: {type(error).__name__}")
         print(f"    └─ Trace: {traceback.format_exc()}")
