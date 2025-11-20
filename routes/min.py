@@ -235,6 +235,7 @@ def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
+    print("========create new chat")
     # print(f"CREATE CHAT ADMIN ID: {session.get('admin_id')} ")
     chat = chat_service.create_chat(
         user.user_id, subject=subject, admin_id=session.get('admin_id'))
@@ -244,6 +245,16 @@ def new_chat(subject):
         session.get('admin_id'))
 
     current_app.bot.create_chat(chat.room_id, admin)
+    print("========create new chat")
+    if chat:
+        print("========create new chat")
+        # notify via email
+        mail = Mail(current_app)
+        status = send_email(admin.email, f'New Chat Created: {
+            chat.subject}', "Message", mail, render_template('/email/new_chat_created.html', user=user, chat=chat))
+
+        print(status)
+
 
     # If HTMX request, return the chat URL instead of redirecting
     if request.headers.get('HX-Request') == 'true':
