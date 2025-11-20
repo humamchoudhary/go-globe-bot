@@ -453,13 +453,21 @@ def send_message(chat_id):
     }, room=chat.room_id)
     # print('hello')
     print(len(chat.messages))
+    # when bot replies and it is user's first message
     if "job" not in chat.subject.lower() and len(chat.messages) <= 2:
         print("SEND MAIL")
 
         mail = Mail(current_app)
         status = send_email(admin.email, f'New Message: {
-            chat.subject}', "Message", mail, render_template('/email/new_message.html', user=user, chat=chat))
+            chat.subject}', "Message", mail, render_template('/email/first_new_message.html', user=user, chat=chat))
 
+        print(status)
+    # send email notification that you have received a new message
+    if "job" not in chat.subject.lower() and len(chat.messages) > 2:
+        
+        mail = Mail(current_app)
+        status = send_email(admin.email, f'New Message: {
+            chat.subject}', "Message", mail, render_template('/email/new_message_received.html', user=user, chat=chat))
         print(status)
     admin_service = AdminService(current_app.db)
     noti_res = send_push_noti(admin_service.get_expo_tokens(
@@ -491,7 +499,7 @@ def send_message(chat_id):
         # send mongodb notification
         noti_service = NotificationService(current_app.db)
         noti_service.create_notification(chat.admin_id, f'{
-                                         user.name} sent a message', message, 'Test B New message Received', chat.room_id)
+                                         user.name} sent a message', message, 'new_user_message', chat.room_id)
     else:
         # send push and popup notification
         current_app.socketio.emit('new_message_admin', {
