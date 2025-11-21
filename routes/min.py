@@ -257,6 +257,10 @@ def new_chat(subject):
         # send mongodb notification
         noti_service = NotificationService(current_app.db)
         noti_service.create_notification(chat.admin_id, "New chat Started", f'{user.name} Started a new chat', "new_chat", chat.room_id)
+        # push notify
+        current_app.socketio.emit('new_chat', {
+            'username': user.name
+        })
 
 
     # If HTMX request, return the chat URL instead of redirecting

@@ -341,6 +341,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
       });
 
+socket.on("new_chat", function (data) {
+        const notificationTitle = "New Chat  Created";
+        const notificationMessage = `New Chat has been started by ${data.username || ''}`;
+        
+        // Add to notification list
+        addNotification(notificationTitle, notificationMessage);
+        
+        // Show popup notification
+        showPopupNotification(notificationTitle, notificationMessage);
+        
+        // Browser notification (optional)
+        if (Notification.permission === "granted") {
+            new Notification(notificationTitle, {
+                body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+            });
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    new Notification(notificationTitle, {
+                        body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+                    });
+                }
+            });
+        }
+    });
+
 
 
     socket.on("new_message_admin", function (data) {
@@ -374,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 socket.on("new_message", function (data) {
+    console.log("socket new_message")
     htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
     const currentPath = window.location.pathname;
     const lastPathSegment = currentPath.substring(currentPath.lastIndexOf('/') + 1);
