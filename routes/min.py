@@ -252,8 +252,11 @@ def new_chat(subject):
         mail = Mail(current_app)
         status = send_email(admin.email, f'New Chat Created: {
             chat.subject}', "Message", mail, render_template('/email/new_chat_created.html', user=user, chat=chat))
-
         print(status)
+        # notify db dropdown
+        # send mongodb notification
+        noti_service = NotificationService(current_app.db)
+        noti_service.create_notification(chat.admin_id, "New chat Started", f'{user.name} Started a new chat', "new_chat", chat.room_id)
 
 
     # If HTMX request, return the chat URL instead of redirecting
