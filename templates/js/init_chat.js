@@ -423,59 +423,52 @@ function initializeChatbot() {
   class="chat-container-close"
   style="background-color: #001f33;"
 >
+<div
+  class="chat-header"
+  style="
+    padding: 20px 15px 0px;
+    background-color: #001f33;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  "
+>
+  <div class="drag-handle"></div>
+
+  <!-- Return Button -->
   <div
-    class="chat-header"
-    style="
-      padding: 20px 15px 0px;
-      background-color: #001f33;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 5px;
-    "
-  >
-    <div class="drag-handle"></div>
-    <div
-      hx-get="${config.backendUrl}/min/onboarding"
-      hx-trigger="click"
-      hx-target="#chatbox"
-      hx-swap="innerHTML"
+    hx-get="${config.backendUrl}/min/onboarding"
+    hx-trigger="click"
+    hx-target="#chatbox"
+    hx-swap="innerHTML"
     id="return-chat"
-      style="
-        background: none;
-        border: none;
-        color: #ff5800;
-        font-size: 24px;
-        cursor: pointer;
-        display: none;
-        transition: all 0.1s ease-in-out 0.1s;
-        z-index: 1001;
-      "
-      onMouseOver="this.style.opacity=0.7"
-      onMouseOut="this.style.opacity=1" 
-    >
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2-icon lucide-undo-2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
-    </div>
-    <div
-      id="close-chat"
-      style="
-        background: none;
-        border: none;
-        color: #ff5800;
-        font-size: 24px;
-        cursor: pointer;
-        transition: all 0.1s ease-in-out 0.1s;
-        z-index: 1001;
-      "
-      onMouseOver="this.style.opacity=0.7"
-      onMouseOut="this.style.opacity=1" 
-    >
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z" fill="#FF5800"/>
+    style="
+      color: #ff5800;
+    "
+    onMouseOver="this.style.opacity=0.7"
+    onMouseOut="this.style.opacity=1"
+  >
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.33333 5.66672L0.744165 6.25589L0.154999 5.66672L0.744165 5.07756L1.33333 5.66672ZM5.5 15.6667C5.27899 15.6667 5.06702 15.5789 4.91074 15.4226C4.75446 15.2664 4.66667 15.0544 4.66667 14.8334C4.66667 14.6124 4.75446 14.4004 4.91074 14.2441C5.06702 14.0879 5.27899 14.0001 5.5 14.0001V15.6667ZM4.91083 10.4226L0.744165 6.25589L1.9225 5.07756L6.08917 9.24422L4.91083 10.4226ZM0.744165 5.07756L4.91083 0.910889L6.08917 2.08922L1.9225 6.25589L0.744165 5.07756ZM1.33333 4.83339H10.0833V6.50005H1.33333V4.83339ZM10.0833 15.6667H5.5V14.0001H10.0833V15.6667ZM15.5 10.2501C15.5 11.6866 14.9293 13.0644 13.9135 14.0802C12.8977 15.096 11.5199 15.6667 10.0833 15.6667V14.0001C10.5758 14.0001 11.0634 13.9031 11.5184 13.7146C11.9734 13.5261 12.3868 13.2499 12.735 12.9017C13.0832 12.5535 13.3594 12.1401 13.5479 11.6851C13.7363 11.2301 13.8333 10.7425 13.8333 10.2501H15.5ZM10.0833 4.83339C11.5199 4.83339 12.8977 5.40407 13.9135 6.41989C14.9293 7.43572 15.5 8.81347 15.5 10.2501H13.8333C13.8333 9.7576 13.7363 9.26996 13.5479 8.81499C13.3594 8.36002 13.0832 7.94662 12.735 7.5984C12.3868 7.25019 11.9734 6.97396 11.5184 6.78551C11.0634 6.59705 10.5758 6.50005 10.0833 6.50005V4.83339Z" fill="#FF5800"/>
 </svg>
-    </div>
   </div>
+
+  <!-- Close Button -->
+  <div
+    id="close-chat"
+    style="
+color: #ff5800;
+    "
+    onMouseOver="this.style.opacity=0.7"
+    onMouseOut="this.style.opacity=1"
+  >
+<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.66666 14.7916L0.208328 13.3333L6.04166 7.49992L0.208328 1.66659L1.66666 0.208252L7.49999 6.04159L13.3333 0.208252L14.7917 1.66659L8.95833 7.49992L14.7917 13.3333L13.3333 14.7916L7.49999 8.95825L1.66666 14.7916Z" fill="#FF5800"/>
+</svg>
+  </div>
+</div>
 
   <div
     id="chatbox"
@@ -494,7 +487,32 @@ function initializeChatbot() {
         height: 350px;
       "
     >
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      <svg
+        class="spin"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        style="
+          animation: spin 1s linear infinite;
+          color: white;
+          width: 25px;
+          height: 25px;
+        "
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
     </div>
   </div>
 

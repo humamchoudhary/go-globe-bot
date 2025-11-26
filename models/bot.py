@@ -2,7 +2,6 @@ import os
 import pickle
 import base64
 from io import BytesIO
-# from p# # print import p# print
 from dotenv import load_dotenv
 from PIL import Image
 import anthropic
@@ -11,7 +10,7 @@ import requests
 from google import genai
 from google.genai import types
 import json
-import pdfplumber
+
 load_dotenv()
 
 
@@ -43,11 +42,7 @@ class Bot:
         self.dp_key = app.config['SETTINGS']['apiKeys']['deepseek']
 
         self.active_bot = None
-        # self.active_bot_name = ""
-
-        self.active_bot_name = app.config['SETTINGS'].get(
-            'model', 'gemini_2.0_flash')
-
+        self.active_bot_name = app.config['SETTINGS'].get('model', 'gemini_2.0_flash')
         self.base_prompt = app.config["SETTINGS"]["prompt"]
 
         # Enhanced Google model configurations
@@ -111,7 +106,6 @@ class Bot:
 
     @classmethod
     def get_bots(cls):
-        # Static method to get available bots - you may want to make this dynamic too
         google_models = [
             ('Gemini 2.0 Flash', "gemini_2.0_flash"),
             ('Gemini 1.5 Pro', "gemini_1.5_pro"),
@@ -132,8 +126,6 @@ class Bot:
 
     def responed(self, input, id):
         chat_state = self._load_chat(id)
-        # p# print(self.bot_maps)
-        # # print(self.active_bot_name)
         if self.active_bot_name not in self.bot_maps:
             raise ValueError(f"Unsupported bot: {self.active_bot_name}")
         return self.bot_maps[self.active_bot_name](input, id)
@@ -144,65 +136,38 @@ class Bot:
 
     def _is_google_model(self, model_name):
         """Check if the model is a Google model"""
-
-        # # # print(f"Bot Name: {model_name}")
         actual_model = self._get_google_model_name(model_name)
-
-        # # # print(f"Bot Name: {actual_model}")
-        # # # print(self.google_models)
         return actual_model in self.google_models
 
-    def _set_bot(self, name):
-        # # print(f"Bot Name: {name}")
-        if self._is_google_model(name):
-            self.active_bot = genai.Client(api_key=self.gm_key)
-            self.active_bot_name = name
-        elif name == "claude-3":
-            self.active_bot = anthropic.Client(api_key=self.cld_key)
-            self.active_bot_name = name
-        elif name == "gpt-4":
+    def _get_client(self, model_name):
+        """Get or create client for the specified model"""
+        if self._is_google_model(model_name):
+            return genai.Client(api_key=self.gm_key)
+        elif model_name == "claude-3":
+            return anthropic.Client(api_key=self.cld_key)
+        elif model_name == "gpt-4":
             openai.api_key = self.gpt_key
-            self.active_bot_name = name
-        elif name == "dp-chat":
-            self.active_bot = DeepseekClient(api_key=self.dp_key)
-            self.active_bot_name = name
+            return openai.ChatCompletion
+        elif model_name == "dp-chat":
+            return DeepseekClient(api_key=self.dp_key)
         else:
-            raise NotImplementedError(f'Bot not implemented: {name}')
+            raise NotImplementedError(f'Bot not implemented: {model_name}')
 
-    # def create_chat(self, id, admin):
-    #     text_content, images = self._process_files()
-    #
-    #     if not os.path.exists('./bin/chat/'):
-    #         os.makedirs('./bin/chat/')
-    #
-    #     if self._is_google_model(self.active_bot_name):
-    #         chat_state = self._init_google_chat(text_content, images)
-    #     else:
-    #         init_method = getattr(
-    #             self, f'_init_{self.active_bot_name.replace("-", "_")}_chat')
-    #         chat_state = init_method(text_content, images)
-    #
-    #     # Store the model name in the chat state
-    #     chat_state["model_name"] = self.active_bot_name
-    #     chat_state["model_config"] = self._get_model_config()
-    #
-    #     with open(f'bin/chat/{id}.chatpl', 'wb') as file:
-    #         pickle.dump(chat_state, file)
+    def _set_bot(self, name):
+        self.active_bot = self._get_client(name)
+        self.active_bot_name = name
 
     def create_chat(self, id, admin=None):
         """Create a new chat session with optional admin-specific settings"""
-        admin_settings = admin.settings
-        text_content, images = self._process_files(admin.admin_id)
+        admin_settings = admin.settings if admin else {}
+        text_content, images = self._process_files(admin.admin_id if admin else 0)
 
         # Use admin-specific prompt if available, otherwise use base prompt
-        prompt = admin_settings.get(
-            'prompt', self.base_prompt) if admin_settings else self.base_prompt
+        prompt = admin_settings.get('prompt', self.base_prompt)
 
         # Initialize system prompt with language restrictions if specified
-        languages = admin_settings.get(
-            'languages', ['English']) if admin_settings else ['English']
-        self.sys_prompt = f"{prompt}\n\nOnly respond in these languages: {
-            ', '.join(languages)}"
+        languages = admin_settings.get('languages', ['English'])
+        self.sys_prompt = f"{prompt}\n\nOnly respond in these languages: {', '.join(languages)}"
 
         if self._is_google_model(self.active_bot_name):
             chat_state = self._init_google_chat(text_content, images)
@@ -216,8 +181,7 @@ class Bot:
 
         # Save chat state
         os.makedirs('./bin/chat/', exist_ok=True)
-        with open(f'bin/chat/{id}.chatpl', 'wb') as file:
-            pickle.dump(chat_state, file)
+        self._save_chat(chat_state, id)
 
     def _get_model_config(self):
         if self._is_google_model(self.active_bot_name):
@@ -275,11 +239,9 @@ class Bot:
                         text_content.append(string_re)
                 except Exception as e:
                     print(f"Error processing DB file {file_name}: {str(e)}")
-        print(text_content)
 
         return "\n".join(text_content), images
 
-    # Universal Google model initializer
     def _init_google_chat(self, text_content, images):
         actual_model = self._get_google_model_name(self.active_bot_name)
         model_config = self.google_models[actual_model]
@@ -291,25 +253,23 @@ class Bot:
             for img in images:
                 buffered = BytesIO()
                 img.save(buffered, format="JPEG")
-                history.append(types.UserContent(
-                    types.Part.from_bytes(
-                        data=buffered.getvalue(), mime_type='image/jpeg')
-                ))
+                # Store as base64 string instead of Part object
+                history.append({
+                    "type": "image",
+                    "data": base64.b64encode(buffered.getvalue()).decode('utf-8'),
+                    "mime_type": "image/jpeg"
+                })
 
         return {
-            "client": self.active_bot,
             "config": {
                 "model": actual_model,
-                "config": types.GenerateContentConfig(
-                    system_instruction=f"{self.sys_prompt}\n{text_content}",
-                    max_output_tokens=model_config["max_tokens"],
-                    temperature=model_config["temperature"]
-                ),
+                "system_instruction": f"{self.sys_prompt}\n{text_content}",
+                "max_output_tokens": model_config["max_tokens"],
+                "temperature": model_config["temperature"],
                 "history": history
             }
         }
 
-    # Keep existing initializers for other models
     def _init_claude_3_chat(self, text_content, images):
         messages = [{
             "role": "system",
@@ -334,12 +294,11 @@ class Bot:
             })
 
         return {
-            "client": self.active_bot,
             "config": {
                 "model": "claude-3-opus-20240229",
                 "max_tokens": 1000,
                 "temperature": 0.7,
-                "history": messages
+                "messages": messages
             }
         }
 
@@ -366,16 +325,14 @@ class Bot:
             })
 
         return {
-            "client": openai.ChatCompletion,
             "config": {
                 "model": "gpt-4-vision-preview",
-                "history": messages
+                "messages": messages
             }
         }
 
     def _init_dp_chat_chat(self, text_content, images):
         return {
-            "client": self.active_bot,
             "config": {
                 "model": "deepseek-chat",
                 "messages": [{
@@ -386,26 +343,66 @@ class Bot:
             }
         }
 
-    # Universal Google model response handler
     def _google_model(self, input, id):
         chat_state = self._load_chat(id)
-        response = chat_state["client"].chats.create(
-            **chat_state["config"]
+        client = self._get_client(self.active_bot_name)
+        
+        # Reconstruct history with Part objects
+        history = []
+        for item in chat_state["config"]["history"]:
+            if item.get("type") == "image":
+                history.append(types.UserContent(
+                    types.Part.from_bytes(
+                        data=base64.b64decode(item["data"]),
+                        mime_type=item["mime_type"]
+                    )
+                ))
+            elif item.get("type") == "text":
+                history.append(types.Content(
+                    role=item["role"],
+                    parts=[types.Part(text=item["text"])]
+                ))
+        
+        config = types.GenerateContentConfig(
+            system_instruction=chat_state["config"]["system_instruction"],
+            max_output_tokens=chat_state["config"]["max_output_tokens"],
+            temperature=chat_state["config"]["temperature"]
+        )
+        
+        response = client.chats.create(
+            model=chat_state["config"]["model"],
+            config=config,
+            history=history
         ).send_message(input)
 
+        # Save conversation history
+        chat_state["config"]["history"].append({
+            "type": "text",
+            "role": "user",
+            "text": input
+        })
+        chat_state["config"]["history"].append({
+            "type": "text",
+            "role": "model",
+            "text": response.text
+        })
+
         tokens = self._count_tokens(response)
-        # print(tokens)
         self._save_chat(chat_state, id)
         return response.text, tokens
 
-    # Keep existing response handlers for other models
     def _claude(self, input, id):
         chat_state = self._load_chat(id)
+        client = self._get_client(self.active_bot_name)
+        
         chat_state["config"]["messages"].append(
             {"role": "user", "content": input})
 
-        response = chat_state["client"].messages.create(
-            **chat_state["config"]
+        response = client.messages.create(
+            model=chat_state["config"]["model"],
+            max_tokens=chat_state["config"]["max_tokens"],
+            temperature=chat_state["config"]["temperature"],
+            messages=chat_state["config"]["messages"]
         )
 
         tokens = self._count_tokens(response)
@@ -418,11 +415,14 @@ class Bot:
 
     def _gpt(self, input, id):
         chat_state = self._load_chat(id)
+        client = self._get_client(self.active_bot_name)
+        
         chat_state["config"]["messages"].append(
             {"role": "user", "content": input})
 
-        response = chat_state["client"].create(
-            **chat_state["config"]
+        response = client.create(
+            model=chat_state["config"]["model"],
+            messages=chat_state["config"]["messages"]
         )
 
         tokens = self._count_tokens(response)
@@ -435,6 +435,7 @@ class Bot:
 
     def _deepseek(self, input, id):
         chat_state = self._load_chat(id)
+        client = self._get_client(self.active_bot_name)
 
         if "messages" not in chat_state["config"]:
             chat_state["config"]["messages"] = []
@@ -445,7 +446,7 @@ class Bot:
         })
 
         try:
-            response = chat_state["client"].chat(
+            response = client.chat(
                 messages=chat_state["config"]["messages"],
                 temperature=chat_state["config"].get("temperature", 0.7)
             )
@@ -465,7 +466,6 @@ class Bot:
             return assistant_message, tokens
 
         except Exception as e:
-            # # print(f"Deepseek API error: {str(e)}")
             chat_state["config"]["messages"].pop()
             raise
 
@@ -477,7 +477,7 @@ class Bot:
                 if "model_name" in chat_state:
                     self._set_bot(chat_state["model_name"])
                 else:
-                    self._set_bot('gemini_2_0_flash')  # Updated default
+                    self._set_bot('gemini_2.0_flash')
                 return chat_state
         except FileNotFoundError:
             raise ValueError(f"No chat session found for id {id}")
@@ -486,11 +486,15 @@ class Bot:
         # Ensure current model info is saved
         chat_state["model_name"] = self.active_bot_name
         chat_state["model_config"] = self._get_model_config()
+        
+        # Remove client from chat_state before pickling (it's recreated on load)
+        if "client" in chat_state:
+            del chat_state["client"]
+        
         with open(f"bin/chat/{id}.chatpl", 'wb') as file:
             pickle.dump(chat_state, file)
 
     def _count_tokens(self, response):
-        # Enhanced pricing with Google models
         pricing = {
             "claude-3": {"input": 15, "output": 75},
             "gpt-4": {"input": 0.03, "output": 0.06},
@@ -499,7 +503,6 @@ class Bot:
 
         bot_name = self.active_bot_name
 
-        # Handle Google models
         if self._is_google_model(bot_name):
             actual_model = self._get_google_model_name(bot_name)
             costs = self.google_models[actual_model]["pricing"]
@@ -526,33 +529,6 @@ class Bot:
         return {
             "input": input_tokens,
             "output": output_tokens,
-            "cost": (input_cost + output_cost)*100,
+            "cost": (input_cost + output_cost) * 100,
             "bot": bot_name
         }
-
-
-if __name__ == "__main__":
-    from flask import Flask
-    app = Flask(__name__)
-    app.config['SETTINGS'] = {
-        'apiKeys': {
-            'gemini': os.getenv('GEMINI_API_KEY'),
-            'openAi': os.getenv('OPENAI_API_KEY'),
-            'claude': os.getenv('CLAUDE_API_KEY'),
-            'deepseek': os.getenv('DEEPSEEK_API_KEY')
-        },
-        'prompt': "You are a helpful AI assistant.",
-        'model': 'gm_2_0_f'
-    }
-
-    bot = Bot('test', app)
-
-    # Test each bot
-    for bot_name, bot_code in bot.get_bots():
-        # # print(f"\nTesting {bot_name}...")
-        bot._set_bot(bot_code)
-        chat_id = f"test_{bot_code}"
-        bot.create_chat(chat_id)
-        response, tokens = bot.responed("Hello! What can you do?", chat_id)
-        # # print(f"Response: {response[:100]}...")
-        # # print(f"Tokens used: {tokens}")
