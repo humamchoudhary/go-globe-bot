@@ -390,6 +390,34 @@ socket.on("new_message", function (data) {
             });
         }, 100);
     }
+
+        const notificationTitle = "New Message";
+        const notificationMessage = `New message`;
+        
+        // Add to notification list
+        addNotification(notificationTitle, notificationMessage);
+        
+        // Show popup notification
+        showPopupNotification(notificationTitle, notificationMessage);
+        
+        // Browser notification (optional)
+        if (Notification.permission === "granted") {
+            new Notification(notificationTitle, {
+                body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+            });
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    new Notification(notificationTitle, {
+                        body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+                    });
+                }
+            });
+        }
+
+
 });
 
 

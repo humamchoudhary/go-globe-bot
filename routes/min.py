@@ -258,6 +258,9 @@ def new_chat(subject):
 
     current_app.bot.create_chat(chat.room_id, admin)
 
+
+
+
     # If HTMX request, return the chat URL instead of redirecting
     if request.headers.get('HX-Request') == 'true':
 
@@ -510,7 +513,7 @@ def send_message(chat_id):
             'sender': user.name,
             'content': message,
             'timestamp': new_message.timestamp.isoformat(),
-        }, room=chat.room_id)
+        }, room="admin")
         noti_service = NotificationService(current_app.db)
         noti_service.create_notification(chat.admin_id, f'{
                                          user.name} sent a message', message, 'admin_required', chat.room_id)
