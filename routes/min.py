@@ -260,7 +260,7 @@ def new_chat(subject):
         # push notify
         current_app.socketio.emit('new_chat', {
             'username': user.name
-        })
+        },room="admin")
 
 
     # If HTMX request, return the chat URL instead of redirecting
