@@ -86,7 +86,6 @@ protobuf==5.29.4
 py-vapid==1.9.2
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
-PyAudio==0.2.14
 pycparser==2.22
 pycurl==7.45.7
 pydantic==2.10.6
