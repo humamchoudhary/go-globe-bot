@@ -600,7 +600,7 @@ def create_app(config_class=Config):
     Session(app)
 
     # Setup SocketIO
-    socketio = SocketIO(app,  async_mode="gevent",
+    socketio = SocketIO(app,  async_mode="threading",
                         manage_session=False, cors_allowed_origins="*")
     app.socketio = socketio
     
