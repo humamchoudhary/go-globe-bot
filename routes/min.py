@@ -25,46 +25,50 @@ from flask import copy_current_request_context
 
 
 def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_delay=1):
-    """Handle bot response with retry logic"""
-    
-    def _bot_response_task():
-        with current_app.app_context():
-            chat_service = ChatService(current_app.db)
-            admin_service = AdminService(current_app.db)
-            
-            for attempt in range(max_retries):
-                try:
-                    msg, usage = current_app.bot.respond(
-                        f"Subject of chat: {chat.subject}\n{message}", chat.room_id)
-                    
-                    admin_service.update_tokens(admin.admin_id, usage['cost'])
-                    bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
+    """Handle bot response with retry logic - can be called from multiple endpoints"""
+    @copy_current_request_context
+    def _bot_response_worker():
+        chat_service = ChatService(current_app.db)
+        admin_service = AdminService(current_app.db)
+        
+        for attempt in range(max_retries):
+            try:
+                msg, usage = current_app.bot.respond(
+                    f"Subject of chat: {chat.subject}\n{message}", chat.room_id)
+                
+                admin_service.update_tokens(admin.admin_id, usage['cost'])
 
-                    # Use socketio's emit in background task
+                bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
+
+                current_app.socketio.emit('new_message', {
+                    'room_id': chat.room_id,
+                    'sender': chat.bot_name,
+                    'content': msg,
+                    'timestamp': bot_message.timestamp.isoformat()
+                }, room=chat.room_id)
+                return  # Success, exit retry loop
+                
+            except Exception as e:
+                print(f"Bot response error (attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                else:
+                    # All retries failed, send error message
+                    error_message = chat_service.add_message(chat.room_id, "SYSTEM", 
+                                                            "We Apologize, there was an unexpected error, please try again after some time")
+                    
                     current_app.socketio.emit('new_message', {
                         'room_id': chat.room_id,
-                        'sender': chat.bot_name,
-                        'content': msg,
-                        'timestamp': bot_message.timestamp.isoformat()
+                        'sender': "SYSTEM",
+                        'content': "We Apologize, there was an unexpected error, please try again after some time",
+                        'timestamp': error_message.timestamp.isoformat()
                     }, room=chat.room_id)
-                    return
-                    
-                except Exception as e:
-                    print(f"Bot response error (attempt {attempt + 1}/{max_retries}): {e}")
-                    if attempt < max_retries - 1:
-                        time.sleep(retry_delay)
-                    else:
-                        error_message = chat_service.add_message(chat.room_id, "SYSTEM", 
-                                                                "We Apologize, there was an unexpected error, please try again after some time")
-                        current_app.socketio.emit('new_message', {
-                            'room_id': chat.room_id,
-                            'sender': "SYSTEM",
-                            'content': "We Apologize, there was an unexpected error, please try again after some time",
-                            'timestamp': error_message.timestamp.isoformat()
-                        }, room=chat.room_id)
     
-    # Start as background task
-    current_app.socketio.start_background_task(_bot_response_task)
+    # Start the bot response in a separate thread
+    thread = threading.Thread(target=_bot_response_worker)
+    thread.daemon = True
+    thread.start()
+
 
 @min_bp.before_request
 def before_req():
