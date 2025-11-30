@@ -124,7 +124,7 @@ class Bot:
 
         return google_models + other_models
 
-    def responed(self, input, id):
+    def respond(self, input, id):
         chat_state = self._load_chat(id)
         if self.active_bot_name not in self.bot_maps:
             raise ValueError(f"Unsupported bot: {self.active_bot_name}")

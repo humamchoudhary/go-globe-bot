@@ -1,5 +1,5 @@
 import time
-from datetime import timedelta
+from datetime import timedelta, timezone
 from flask import Flask, session, url_for, jsonify, Response, g
 import uuid
 from flask import render_template,  request, redirect, current_app
@@ -398,8 +398,8 @@ def create_app(config_class=Config):
                             'content_type': response.content_type,
                             'headers': dict(response.headers)
                         },
-                        'completed_at': datetime.utcnow(),
-                        'duration': (datetime.utcnow() - g.get('request_start_time', datetime.utcnow())).total_seconds()
+                        'completed_at':  datetime.now(timezone.utc),
+                        'duration': ( datetime.now(timezone.utc) - g.get('request_start_time',  datetime.now(timezone.utc))).total_seconds()
                     }}
                 )
         except Exception as e:
