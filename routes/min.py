@@ -193,54 +193,25 @@ def auth_user():
     return redirect(url_for('min.new_chat', subject=subject))
 
 
+@min_bp.route('/newchat', defaults={'subject': "Other"}, methods=['GET'])
 @min_bp.route('/newchat/<string:subject>', methods=['GET'])
 @login_required
 def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
-    initial_msg = session.get("initial_msg", "Hello")  # Add default
-    
+    initial_msg = session["initial_msg"]
     chat = chat_service.create_chat(
-        user.user_id, subject=subject, admin_id=session.get('admin_id'),
-        initial_msg=initial_msg, username=user.name
-    )
+        user.user_id, subject=subject, admin_id=session.get('admin_id'),initial_msg=initial_msg,username=user.name)
 
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
 
     admin = AdminService(current_app.db).get_admin_by_id(session.get('admin_id'))
     current_app.bot.create_chat(chat.room_id, admin)
 
-    # Use SocketIO's background task instead of custom threading
-    def send_initial_bot_response():
-        print("INIT message")
-        with current_app.app_context():
-            try:
-                chat_service = ChatService(current_app.db)
-                admin_service = AdminService(current_app.db)
-                
-                msg, usage = current_app.bot.respond(
-                    f"Subject of chat: {chat.subject}\n{initial_msg}", chat.room_id
-                )
-                
-                admin_service.update_tokens(admin.admin_id, usage['cost'])
-                bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
-
-                print(bot_message)
-                current_app.socketio.emit('new_message', {
-                    'room_id': chat.room_id,
-                    'sender': chat.bot_name,
-                    'content': msg,
-                    'timestamp': bot_message.timestamp.isoformat()
-                }, room=chat.room_id)
-                
-            except Exception as e:
-                print(f"Initial bot response error: {e}")
-                # Add error handling
-
-    # Start as background task - survives redirect
-    current_app.socketio.start_background_task(send_initial_bot_response)
-
+    #### SEND THE INITAIL MESSAGE TO GEMINI
+    handle_bot_response(room_id=chat.room_id,message=initial_msg,chat=chat,admin=admin)
+    # Redirect to chat using room_id (consistent with App 2)
     return redirect(url_for('min.chat', room_id=chat.room_id))
 
 
