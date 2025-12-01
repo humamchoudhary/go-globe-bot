@@ -427,7 +427,7 @@ def send_message(room_id):
         'content': message,
         'timestamp': new_message.timestamp.isoformat(),
         'room_id': chat.room_id,
-    }, room="admin")
+    }, room=chat.room_id)
 
     current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
     mail = Mail(current_app)
