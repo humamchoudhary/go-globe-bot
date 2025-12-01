@@ -59,7 +59,7 @@
                     required
                 ></textarea>
                 <button 
-                    hx-post="/min/login/"
+                    hx-post="{{settings['backend_url']}}/min/login/"
                     hx-target="#chatbox"
                     hx-trigger="click"
                     hx-swap="innerHTML"
