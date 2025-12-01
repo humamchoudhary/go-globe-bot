@@ -30,6 +30,8 @@ def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_dela
     def _bot_response_worker():
         chat_service = ChatService(current_app.db)
         admin_service = AdminService(current_app.db)
+
+
         
         for attempt in range(max_retries):
             try:
@@ -200,6 +202,7 @@ def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
+
     message = session["initial_msg"]
     chat = chat_service.create_chat(
         user.user_id, subject=subject, admin_id=session.get('admin_id'),initial_msg=message,username=user.name)
@@ -211,12 +214,32 @@ def new_chat(subject):
     admin_service = AdminService(current_app.db)
     current_app.bot.create_chat(chat.room_id, admin)
 
+    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+
+    current_app.socketio.emit('new_chat', {
+        'room_id': chat.room_id,
+        'sender': user.name,
+    }, room="admin")
+
+    noti_service = NotificationService(current_app.db)
+    noti_service.create_notification(
+        chat.admin_id, 
+        f'{user.name} started a new chat', 
+        message, 
+        'new_chat', 
+        chat.room_id
+    )
+
+
     #### SEND THE INITAIL MESSAGE TO GEMINI
     # handle_bot_response(room_id=chat.room_id,message=initial_msg,chat=chat,admin=admin)
     max_retries=3
     retry_delay=1
     
 
+    mail = Mail(current_app)
+    send_email(current_admin.email, f'New chat started by {user.name}: {chat.subject}', 
+               "Ping", mail, render_template('/email/new_chat_created.html', user=user, chat=chat))
 
     for attempt in range(max_retries):
         try:
@@ -332,21 +355,6 @@ def ping_admin(room_id):
         'room_id': room_id
     }, room=room_id)
 
-    msg = f"""Hi Ana,
-
-{user.name} has just requested to have a live chat.
-
-{current_app.config['SETTINGS']['backend_url']}/admin/chat/{chat.room_id}
-
-User Information:
-    Name: {user.name}
-    Email: {user.email}
-    Phone #: {user.phone}
-    Designation: {user.desg}
-    IP: {user.ip}
-    Country: {user.country}
-    City: {user.city}"""
-
     mail = Mail(current_app)
     send_email(current_admin.email, f'Assistance Required: {chat.subject}', 
                "Ping", mail, render_template('/email/admin_required.html', user=user, chat=chat))
@@ -421,6 +429,11 @@ def send_message(room_id):
         'room_id': chat.room_id,
     }, room=chat.room_id)
 
+    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    mail = Mail(current_app)
+    send_email(current_admin.email, f'New Message from {user.name}: {chat.subject}', 
+               "Ping", mail, render_template('/email/new_message_received.html', user=user, chat=chat))
+
     # Handle bot response or admin notification
     if not chat.admin_required:
         # try:
@@ -439,6 +452,16 @@ def send_message(room_id):
         #     }, room=chat.room_id)
         # except Exception as e:
         #     print(f"Bot response error: {e}")
+
+
+        noti_service = NotificationService(current_app.db)
+        noti_service.create_notification(
+            chat.admin_id, 
+            f'{user.name} sent a message', 
+            message, 
+            'new_message', 
+            chat.room_id
+        )
         
         handle_bot_response(room_id, message, chat, admin)
     else:

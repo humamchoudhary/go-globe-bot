@@ -264,7 +264,6 @@ openNotifications?.addEventListener('click', () => {
         notificationMenu.style.display = 'flex';
         // Refresh notifications when opening
 htmx.ajax('GET', '/admin/notifications/', '#notification-list') 
-        markNotificationsAsRead();
     }
 });
 
@@ -288,6 +287,59 @@ function updateBadge() {
         notificationBadge.classList.add('hidden');
     }
 }
+
+function countNotificationsInList() {
+    if (!notificationList) return 0;
+    
+    // Count all child elements except the first one if it's a loading message
+    const children = notificationList.children[0].children;
+    console.log(children)
+    let count = 0;
+    
+    for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const text = child.textContent || '';
+        console.log(child)
+        
+        // Skip loading/empty messages
+        if (text.includes('Loading notifications') || 
+            text.includes('No notifications')) {
+            continue;
+        }
+        
+        // Count this as a notification
+        count++;
+    }
+    
+    return count-1;
+}
+
+// NEW: Update notification count when list changes
+function updateNotificationCount() {
+    const count = countNotificationsInList();
+    unreadNotifications = count;
+    updateBadge();
+}
+
+
+
+// NEW: Add HTMX event listener to update count after notifications load
+document.body.addEventListener('htmx:afterSwap', function(event) {
+    // Check if the notification list was updated
+    if (event.detail.target.id === 'notification-list') {
+        // Wait a moment for the content to render
+        setTimeout(updateNotificationCount, 50);
+    }
+});
+
+// NEW: Update count when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial count update
+    setTimeout(updateNotificationCount, 100);
+});
+
+
+
 
 function addNotification(title, message) {
     unreadNotifications++;
@@ -342,8 +394,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
 socket.on("new_chat", function (data) {
+    console.log("New Chat: ",data)
         const notificationTitle = "New Chat  Created";
-        const notificationMessage = `New Chat has been started by ${data.username || ''}`;
+        const notificationMessage = `New Chat has been started by ${data.sender || ''}`;
         
         // Add to notification list
         addNotification(notificationTitle, notificationMessage);
@@ -367,8 +420,30 @@ socket.on("new_chat", function (data) {
                 }
             });
         }
-    location.reload();
-    });
+    // location.reload();
+
+    console.log("socket new_chat")
+    htmx.ajax('GET', '/admin/chats_list/', '#chat_list_container') 
+    const currentPath = window.location.pathname;
+    const lastPathSegment = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+    if (lastPathSegment === data['room_id']) {
+        console.log('req')
+        // Use setTimeout to ensure HTMX is ready
+        setTimeout(() => {
+            htmx.ajax('GET', `/admin/chat/${data['room_id']}`, {
+                target:'#chatarea',
+                swap:"innerHTML"
+            });
+        }, 100);
+    }
+
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+
+
+
+    },room="admin");
 
 
 
@@ -896,5 +971,7 @@ document.body.addEventListener('htmx:confirm', function(evt) {
         }
     }
 });
+
+updateNotificationCount();
 </script>
  {% endblock %}
