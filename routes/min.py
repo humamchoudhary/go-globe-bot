@@ -200,17 +200,57 @@ def new_chat(subject):
     user_service = UserService(current_app.db)
     user = user_service.get_user_by_id(session['user_id'])
     chat_service = ChatService(current_app.db)
-    initial_msg = session["initial_msg"]
+    message = session["initial_msg"]
     chat = chat_service.create_chat(
-        user.user_id, subject=subject, admin_id=session.get('admin_id'),initial_msg=initial_msg,username=user.name)
+        user.user_id, subject=subject, admin_id=session.get('admin_id'),initial_msg=message,username=user.name)
 
     user_service.add_chat_to_user(user.user_id, chat.chat_id)
 
     admin = AdminService(current_app.db).get_admin_by_id(session.get('admin_id'))
+
+    admin_service = AdminService(current_app.db)
     current_app.bot.create_chat(chat.room_id, admin)
 
     #### SEND THE INITAIL MESSAGE TO GEMINI
-    handle_bot_response(room_id=chat.room_id,message=initial_msg,chat=chat,admin=admin)
+    # handle_bot_response(room_id=chat.room_id,message=initial_msg,chat=chat,admin=admin)
+    max_retries=3
+    retry_delay=1
+    
+
+
+    for attempt in range(max_retries):
+        try:
+            msg, usage = current_app.bot.respond(
+                f"Subject of chat: {chat.subject}\n{message}", chat.room_id)
+            
+            admin_service.update_tokens(admin.admin_id, usage['cost'])
+
+            bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
+
+            current_app.socketio.emit('new_message', {
+                'room_id': chat.room_id,
+                'sender': chat.bot_name,
+                'content': msg,
+                'timestamp': bot_message.timestamp.isoformat()
+            }, room=chat.room_id)
+            break
+            # return  # Success, exit retry loop
+            
+        except Exception as e:
+            print(f"Bot response error (attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+            else:
+                # All retries failed, send error message
+                error_message = chat_service.add_message(chat.room_id, "SYSTEM", 
+                                                        "We Apologize, there was an unexpected error, please try again after some time")
+                
+                current_app.socketio.emit('new_message', {
+                    'room_id': chat.room_id,
+                    'sender': "SYSTEM",
+                    'content': "We Apologize, there was an unexpected error, please try again after some time",
+                    'timestamp': error_message.timestamp.isoformat()
+                }, room=chat.room_id)
     # Redirect to chat using room_id (consistent with App 2)
     return redirect(url_for('min.chat', room_id=chat.room_id))
 
