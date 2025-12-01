@@ -9,12 +9,13 @@ from pymongo import MongoClient
 import bcrypt
 import os
 from config import Config
-from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp
+from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp,wa_bp
 from routes.chat import register_socketio_events
 from routes.admin import register_admin_socketio_events
 import routes.auth
 import routes.min
 import routes.api
+import routes.whatsapp 
 from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
@@ -613,6 +614,9 @@ def create_app(config_class=Config):
     app.register_blueprint(min_bp)
     app.register_blueprint(api_bp)
 
+    app.register_blueprint(wa_bp)
+
+
     # Register Socket.IO event handlers
     register_socketio_events(socketio)
     register_min_socketio_events(socketio)
@@ -694,6 +698,6 @@ if __name__ == '__main__':
                  debug=True,
                  # ssl_context='adhoc'
 
-                 ssl_context=('cert.pem', 'key.pem')
-
+                 # ssl_context=('cert.pem', 'key.pem')
+                 #
                  )

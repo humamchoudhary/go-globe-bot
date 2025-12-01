@@ -456,6 +456,36 @@ socket.on("new_message", function (data) {
 });
 
 
+socket.on("wa_message", function (data) {
+    // Show notification immediately
+    showPopupNotification("New Whatsapp Message", `${data.sender} sent a message`);
+
+    addNotification("New Whatsapp Message",  `${data.sender} sent a message`);
+
+
+        if (Notification.permission === "granted") {
+            new Notification("New Whatsapp Message", {
+                body: `${data.sender}: ${data.message}`,
+              icon: "/static/img/logo-desktop-mini.svg",
+            });
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+            new Notification("New Whatsapp Message", {
+                body: `${data.sender}: ${data.message}`,
+              icon: "/static/img/logo-desktop-mini.svg",
+            });
+                }
+            });
+        }
+
+    console.log(`wa:`, data);
+    
+    // Reload after 2 seconds
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+});
 
 
       socket.on("admin_required", function (data) {
@@ -540,6 +570,9 @@ document.addEventListener('DOMContentLoaded', () => {
 "Home", "link": "/admin/", "icon": "house" },
 { "name":
 "Chats", "link": "/admin/chats/", "icon": "message-square","role":"admin" },
+
+{ "name":
+"WA Messages", "link": "/admin/whatsapp/", "icon": "message-circle","role":"admin" },
 { "name":
 "Logs", "link": "/admin/logs/", "icon": "logs" },
 { "name":
