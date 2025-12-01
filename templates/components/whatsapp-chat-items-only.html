@@ -1,0 +1,58 @@
+{% for chat in chats %}
+<div
+  class="flex flex-col gap-0 border-b border-[var(--border-color)] hover:bg-[var(--sec-bg-color)] cursor-pointer whatsapp-chat-row"
+  id="whatsapp-chat-{{ chat.phone_no }}"
+  hx-get="/admin/whatsapp/chat/{{ chat.phone_no }}"
+  hx-target="#whatsapp_chatarea"
+  hx-swap="innerHTML"
+  hx-push-url="true"
+  hx-indicator="#loading-indicator"
+>
+  <div class="flex flex-row justify-between items-center mx-4 my-3">
+    <div class="flex flex-row gap-[12px] items-center w-full">
+      <div
+        class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center"
+      >
+        <i data-lucide="message-circle" class="w-5 h-5 text-white"></i>
+      </div>
+
+      <div class="flex flex-col gap-2 w-full">
+        <div class="flex flex-row justify-between">
+          <div class="flex flex-col gap-[4px]">
+            <div class="flex flex-row gap-[8px] items-center">
+              <p class="text-[16px] font-bold">{{ chat.phone_no }}</p>
+              {% if chat.unread_count and chat.unread_count > 0 %}
+              <span
+                class="bg-[var(--main-color)] text-white text-[12px] px-2 py-1 rounded-full"
+              >
+                {{ chat.unread_count }}
+              </span>
+              {% endif %} {% if chat.exported %}
+              <span
+                class="bg-green-100 text-green-800 text-[10px] px-2 py-1 rounded-full"
+              >
+                Exported
+              </span>
+              {% endif %}
+            </div>
+            {% if chat.last_message %}
+            <p class="text-[14px] text-gray-500 truncate max-w-[200px]">
+              {{ chat.last_message.message[:50] }}{% if
+              chat.last_message.message|length > 50 %}...{% endif %}
+            </p>
+            {% endif %}
+          </div>
+
+          <div class="flex flex-col items-end gap-[4px]">
+            {% if chat.updated_at %}
+            <p class="text-[12px] text-gray-400">
+              {{ chat.updated_at|relative_time if chat.updated_at else '' }}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}

@@ -75,8 +75,8 @@
     <!-- Desktop logo would go here -->
     <div style="border-radius: 0.5rem; padding: 0.5rem; margin: 0 auto;">
         <div style="margin-bottom: 2rem;">
-            <form id="login-form" novalidate>
-                <div style="margin-bottom: 1rem; width: 100%;">
+            <form id="login-form" style="display:flex; flex-direction:column; gap:10px" novalidate>
+                <div style=" width: 100%;">
                     <input type="text"
                         style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
@@ -87,7 +87,7 @@
                 </div>
 
                 {% if default_subject.lower() != "job" %}
-                <div style="margin-bottom: 1rem; width: 100%;">
+                <div style=" width: 100%;">
                     <input type="text"
                         style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
@@ -97,7 +97,7 @@
                 </div>
                 {% endif %}
 
-                <div style="margin-bottom: 1rem; width: 100%;">
+                <div style=" width: 100%;">
                     <input type="email"
                         style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
@@ -107,22 +107,9 @@
                         onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
                 </div>
 
-                <div style="margin-bottom: 1rem; width: 100%;" class="hidden">
-                    <select
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
-                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
-                        id="subject" name="subject" autocapitalize="off" autocomplete="off" required
-                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
-                        {% for subject in settings['subjects'] %}
-                        <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
-                            {{subject}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
 
                 <!-- Enhanced Phone Input -->
-                <div style="margin-bottom: 1.5rem; width: 100%;">
+                <div style=" width: 100%;">
                     <div class="phone-input-container" id="phone-container" style="width: 100%;">
                         <select class="country-selector" id="country-selector" name="country-code" style="font-family: var(--goglobe-body-font-family); padding: 12px; background: transparent; border: none; color: white;background-color:var(--goglobe-input-color); font-weight: bold; cursor: pointer; outline: none; width: 30%; 
                           ">
@@ -139,14 +126,28 @@
                     </div>
                 </div>
 
+                <div style="margin-bottom: 1rem; width: 100%;" class="">
+                    <select
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
+                        id="subject" name="subject" autocapitalize="off" autocomplete="off" required
+                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
+                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
+                        {% for subject in settings['subjects'] %}
+                        <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
+                            {{subject}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <button type="submit" id="login-btn"
-                    style=" box-sizing: border-box;font-family: var(--goglobe-body-font-family); font-weight:bold; color:white; padding: 0.75rem 1rem; background-color: var(--goglobe-main-color); border: 1px solid var(--goglobe-border-color); border-radius: 6px; transition: all 0.2s;"
+                    style=" box-sizing: border-box;font-family: var(--goglobe-body-font-family); font-weight:bold; color:white; padding: 0.75rem 1rem; background-color: var(--goglobe-main-color); border: 1px solid var(--goglobe-border-color); border-radius: 6px; transition: all 0.2s;align-self:flex-end"
                     onmouseover="this.style.opacity=0.7; this.style.cursor='pointer'"
                     onmouseout="this.style.opacity=1; this.style.cursor='auto'"
                     onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
                     onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'"
                     >
-                    Start Chat
+                    Lets GO
                 </button>
 
                 <!-- Single Error Message Display -->

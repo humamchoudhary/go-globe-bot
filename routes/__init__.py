@@ -6,3 +6,5 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 auth_bp = Blueprint('auth', __name__)
 min_bp = Blueprint('min', __name__, url_prefix='/min')
 api_bp = Blueprint('api', __name__, url_prefix='/api')
+wa_bp = Blueprint("wa",__name__,url_prefix="/wa")
+

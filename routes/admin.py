@@ -20,6 +20,8 @@ from services.usage_service import UsageService
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 import requests
+
+from services.whatsapp_service import WhatsappService
 from .scrape import scrape_web
 import re
 from flask import send_from_directory
@@ -2817,6 +2819,238 @@ def get_saved_table_data():
     except Exception as e:
         return jsonify({'error': f'Failed to load table data: {str(e)}'}), 500
 
+
+
+
+
+WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
+PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
+VERSION = "v24.0"
+
+print(WHATSAPP_TOKEN)
+
+
+@admin_bp.route("/whatsapp/")
+@admin_required
+def dashboard():
+    wa_service = WhatsappService(current_app.db)
+    chats = wa_service.get_all_chats()
+    return render_template("admin/whatsapp.html",chats=chats)
+
+@admin_bp.route("/whatsapp/<phone_no>")
+@admin_required
+def get_wa_chat(phone_no):
+     
+    wa_service = WhatsappService(current_app.db)
+    chat = wa_service.get_by_phone_no(phone_no)
+    if request.headers.get("HX-Request"):
+        return render_template("components/whatsapp-chat-area.html",chat=chat)
+
+    chats = wa_service.get_all_chats()
+    return render_template("admin/whatsapp.html",chat=chat,chats=chats)
+
+
+@admin_bp.route("/whatsapp/get-all-chats")
+def whatsapp_chats():
+    wa_service = WhatsappService(current_app.db)
+    chats = wa_service.get_all_chats()
+    pass 
+
+@admin_bp.route("/whatsapp/<phone_no>/toggle_admin_enable")
+@admin_required
+def toggle_admin(phone_no):
+    wa_service = WhatsappService(current_app.db)
+    if wa_service.toggle_enabled_admin(phone_no):
+        return "",200
+    return "",500
+
+
+@admin_bp.route("/whatsapp/<phone_no>/audio_file/<message_id>/")
+@admin_required
+def wa_audio_file(phone_no, message_id):
+    base_dir = os.path.join('files', phone_no) 
+    file_path = os.path.join(base_dir, f"{message_id}.ogg")
+    print(file_path)
+    if not os.path.exists(file_path):
+        abort(404, description="Audio file not found")
+    return send_from_directory(base_dir, f"{message_id}.ogg", mimetype="audio/ogg")
+
+@admin_bp.route("/whatsapp/<phone_no>/intervene",methods=["POST"])
+def wa_intervene(phone_no):
+    whatsapp_service = WhatsappService(current_app.db)
+    print("INTERVENE")
+    if whatsapp_service.toggle_enabled_admin(phone_no):
+        return "",200
+    return "",500
+
+
+
+@admin_bp.route("/whatsapp/<phone_no>/send_message", methods=["POST"])
+@admin_required
+def wa_send_message(phone_no):
+    """
+    Send a WhatsApp text message manually from the admin dashboard.
+    """
+    try:
+        # Get message text
+        message = request.form.get("message")
+        if not message:
+            if request.headers.get("HX-Request"):
+                return "Message cannot be empty", 400
+            return jsonify({"error": "Message cannot be empty"}), 400
+        
+        # WhatsApp Graph API endpoint
+        url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
+        headers = {
+            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": phone_no,  # Remove the '+' prefix
+            "type": "text",
+            "text": {
+                "preview_url": False,
+                "body": message
+            }
+        }
+        print(f"Sending message payload: {payload}")
+        
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        print(f"WhatsApp API response: {data}")
+        
+        # Save to DB using WhatsApp service
+        try:
+            from services.whatsapp_service import WhatsappService
+            wa_service = WhatsappService(current_app.db)
+            wa_service.add_message(message, phone_no, "admin", type="text")
+            print(f"Message logged to DB for {phone_no}")
+        except Exception as e:
+            print(f"[WARN] Could not log message to DB: {e}")
+        
+        # Handle HTMX vs JSON
+        if request.headers.get("HX-Request"):
+            return f"<p class='text-green-600'>Message sent to {phone_no}</p>", 200
+        
+        return jsonify({
+            "status": "success",
+            "to": phone_no,
+            "message": message,
+            "whatsapp_response": data
+        }), 200
+        
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] WhatsApp API failed: {e}")
+        if hasattr(e.response, 'text'):
+            print(f"[ERROR] Response body: {e.response.text}")
+        if request.headers.get("HX-Request"):
+            return f"<p class='text-red-600'>Failed to send message: {str(e)}</p>", 500
+        return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route("/whatsapp/<phone_no>/send_audio", methods=["POST"])
+@admin_required
+def wa_send_audio(phone_no):
+    """
+    Send an audio file via WhatsApp from admin dashboard.
+    """
+    if 'audio' not in request.files:
+        if request.headers.get('HX-Request'):
+            return "No audio file provided", 400
+        return jsonify({'error': 'No audio file provided'}), 400
+    
+    audio_file = request.files['audio']
+    audio_bytes = audio_file.read()
+    
+    try:
+        # Upload to WhatsApp
+        upload_url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/media"
+        headers = {"Authorization": f"Bearer {WHATSAPP_TOKEN}"}
+        files = {'file': ('audio.ogg', BytesIO(audio_bytes), 'audio/ogg; codecs=opus')}
+        data = {'messaging_product': 'whatsapp'}
+        
+        print(f"Uploading audio to WhatsApp ({len(audio_bytes)} bytes)...")
+        upload_response = requests.post(upload_url, headers=headers, files=files, data=data)
+        upload_response.raise_for_status()
+        media_id = upload_response.json().get("id")
+        
+        if not media_id:
+            print("[ERROR] Upload failed - no media ID returned")
+            return jsonify({"error": "Upload failed - no media ID"}), 400
+        
+        print(f"Audio uploaded successfully, media_id: {media_id}")
+        
+        # Send the uploaded audio
+        send_url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": phone_no,
+            "type": "audio",
+            "audio": {"id": media_id}
+        }
+        
+        send_response = requests.post(
+            send_url, 
+            headers={**headers, "Content-Type": "application/json"}, 
+            json=payload
+        )
+        send_response.raise_for_status()
+        response_data = send_response.json()
+        print(f"Audio sent successfully to {phone_no}: {response_data}")
+        
+        # Save to DB using WhatsApp service
+        try:
+            from services.whatsapp_service import WhatsappService
+            wa_service = WhatsappService(current_app.db)
+            
+            # Save audio message with reference
+            msg_id = wa_service.add_message("[Audio Message]", phone_no, "admin", type="audio")
+            
+            # Optionally save the audio file
+            save_path = os.path.join('files', f"{phone_no}", f"{msg_id}.ogg")
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            with open(save_path, 'wb') as f:
+                f.write(audio_bytes)
+            print(f"Audio logged to DB and saved to: {save_path}")
+            
+        except Exception as e:
+            print(f"[WARN] Could not log audio to DB: {e}")
+        
+        # Handle HTMX vs JSON
+        if request.headers.get('HX-Request'):
+            return f"<p class='text-green-600'>Audio sent to {phone_no}</p>", 200
+        
+        return jsonify({
+            "status": "success", 
+            "to": phone_no,
+            "media_id": media_id,
+            "whatsapp_response": response_data
+        }), 200
+        
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Failed to send audio: {e}")
+        if hasattr(e.response, 'text'):
+            print(f"[ERROR] Response body: {e.response.text}")
+        if request.headers.get('HX-Request'):
+            return f"<p class='text-red-600'>Failed to send audio: {str(e)}</p>", 500
+        return jsonify({"error": str(e)}), 500
+
+@admin_bp.route("/whatsapp/<string:room_id>/delete", methods=["POST"])
+def wa_delete_chat(room_id):
+    wa_service = WhatsappService(current_app.db)
+    print(f"Deleted: {wa_service.delete_chat(room_id)}")
+    return "", 200
+
+
+@admin_bp.route("/whatsapp/<string:phone_no>/admin_leave", methods=["POST"])
+def wa_admin_leave_chat(phone_no):
+    wa_service = WhatsappService(current_app.db)
+    wa_service.toggle_enabled_admin(phone_no)
+    return "", 200
 
 
 def register_admin_socketio_events(socketio):

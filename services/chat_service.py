@@ -54,12 +54,12 @@ class ChatService:
         except Exception as e:
             logger.warning(f"Index creation failed: {e}")
 
-    def create_chat(self, user_id: str, subject: str, admin_id: str) -> Chat:
+    def create_chat(self, user_id: str, subject: str, admin_id: str,initial_msg: str,username) -> Chat:
         """Create a new chat with optimized initial message."""
         chat_id = str(uuid.uuid4())
-
+        
         # Create initial messages using the Message model
-        initial_messages = [Message("bot", "How may I help you")]
+        initial_messages = [Message(username,initial_msg) if initial_msg else Message("bot", "How may I help you")]
 
         # Create the chat object using the Chat model
         chat = Chat(
