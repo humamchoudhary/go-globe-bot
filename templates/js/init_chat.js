@@ -582,9 +582,13 @@ color: #ff5800;
     // Drag functionality
     const startDrag = (e) => {
         // Prevent dragging if clicking on buttons
-        if (e.target.closest('#return-chat') || e.target.closest('#close-chat')) {
-            return;
-        }
+    if (e.target.closest('#return-chat') || 
+        e.target.closest('#close-chat') || 
+        e.target.closest('.resize-handle') ||
+        e.target.closest('.resize-indicator') ||
+        isResizing) {  // Don't drag if already resizing
+        return;
+    }
 
         isDragging = true;
         chatContainer.classList.add('dragging');
@@ -733,68 +737,207 @@ color: #ff5800;
     dragHandle.addEventListener('mousedown', startDrag);
 
     // Resize functionality
-    let isResizing = false;
-    let currentResizer = null;
-    let startX, startY, startWidth, startHeight;
 
-    const initResize = (e, direction) => {
-        e.preventDefault();
-        e.stopPropagation(); // Prevent drag when resizing
-        isResizing = true;
-        currentResizer = direction;
-        startX = e.clientX;
-        startY = e.clientY;
-        startWidth = parseInt(window.getComputedStyle(chatContainer).width, 10);
-        startHeight = parseInt(window.getComputedStyle(chatContainer).height, 10);
+// FIXED RESIZE FUNCTIONALITY WITH PROPER ABSOLUTE POSITIONING SUPPORT
+let isResizing = false;
+let currentResizer = null;
+let startX, startY, startWidth, startHeight, startLeft, startTop, startRight, startBottom;
 
-        // Add resized class when user starts resizing
-        chatContainer.classList.add('resized');
+const initResize = (e, direction) => {
+    e.preventDefault();
+    e.stopPropagation(); // Stop event from bubbling to drag handlers
+    
+    // Prevent dragging while resizing
+    if (isDragging) {
+        stopDrag();
+    }
+    
+    isResizing = true;
+    currentResizer = direction;
+    
+    // Get starting mouse position
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    // Get starting dimensions
+    startWidth = chatContainer.offsetWidth;
+    startHeight = chatContainer.offsetHeight;
+    
+    // Get current position and style
+    const rect = chatContainer.getBoundingClientRect();
+    const computedStyle = window.getComputedStyle(chatContainer);
+    
+    // Store all position values to handle both fixed and absolute positioning
+    startLeft = rect.left;
+    startTop = rect.top;
+    startRight = window.innerWidth - rect.right;
+    startBottom = window.innerHeight - rect.bottom;
+    
+    // Convert styles to ensure we're working with fixed positioning
+    chatContainer.style.position = 'fixed';
+    
+    // If container was positioned with bottom/right, convert to left/top
+    if (computedStyle.left === 'auto' || computedStyle.left === '') {
+        chatContainer.style.left = rect.left + 'px';
+    }
+    if (computedStyle.top === 'auto' || computedStyle.top === '') {
+        chatContainer.style.top = rect.top + 'px';
+    }
+    
+    // Clear bottom/right properties
+    chatContainer.style.bottom = 'auto';
+    chatContainer.style.right = 'auto';
 
-        document.addEventListener("mousemove", handleResize);
-        document.addEventListener("mouseup", stopResize);
-        document.body.style.userSelect = "none";
-    };
+    // Remove max-height constraint during resize
+    chatContainer.style.maxHeight = 'none';
+    chatContainer.classList.add('resized');
 
-    const handleResize = (e) => {
-        if (!isResizing) return;
+    document.addEventListener("mousemove", handleResize);
+    document.addEventListener("mouseup", stopResize);
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+};
 
-        const rect = chatContainer.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+const handleResize = (e) => {
+    if (!isResizing) return;
 
-        if (currentResizer === "nw") {
-            let newWidth = startWidth - (e.clientX - startX);
-            let newHeight = startHeight - (e.clientY - startY);
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate mouse movement delta
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+    
+    // Get current container position
+    const currentLeft = parseFloat(chatContainer.style.left) || startLeft;
+    const currentTop = parseFloat(chatContainer.style.top) || startTop;
 
-            newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
-            newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
+    if (currentResizer === "nw") {
+        // Northwest: resize from top-left corner
+        let newWidth = startWidth - deltaX;
+        let newHeight = startHeight - deltaY;
+        let newLeft = startLeft + deltaX;
+        let newTop = startTop + deltaY;
 
-            chatContainer.style.width = newWidth + "px";
-            chatContainer.style.height = newHeight + "px";
-        } else if (currentResizer === "n") {
-            let newHeight = startHeight - (e.clientY - startY);
-            newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
-            chatContainer.style.height = newHeight + "px";
-        } else if (currentResizer === "w") {
-            let newWidth = startWidth - (e.clientX - startX);
-            newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
-            chatContainer.style.width = newWidth + "px";
+        // Apply constraints
+        newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
+        newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
+        
+        // Adjust position based on constrained dimensions
+        newLeft = Math.min(startLeft + (startWidth - newWidth), startLeft);
+        newTop = Math.min(startTop + (startHeight - newHeight), startTop);
+        
+        // Ensure container doesn't go out of viewport bounds
+        if (newLeft < 0) {
+            newWidth += newLeft; // Adjust width to compensate
+            newLeft = 0;
         }
-    };
+        if (newTop < 0) {
+            newHeight += newTop; // Adjust height to compensate
+            newTop = 0;
+        }
+        
+        // Ensure container stays within viewport on right/bottom sides
+        if (newLeft + newWidth > viewportWidth) {
+            newWidth = viewportWidth - newLeft;
+        }
+        if (newTop + newHeight > viewportHeight) {
+            newHeight = viewportHeight - newTop;
+        }
 
-    const stopResize = () => {
-        isResizing = false;
-        currentResizer = null;
-        document.removeEventListener("mousemove", handleResize);
-        document.removeEventListener("mouseup", stopResize);
-        document.body.style.userSelect = "";
-    };
+        chatContainer.style.width = newWidth + "px";
+        chatContainer.style.height = newHeight + "px";
+        chatContainer.style.left = newLeft + "px";
+        chatContainer.style.top = newTop + "px";
+        
+    } else if (currentResizer === "n") {
+        // North: resize from top edge
+        let newHeight = startHeight - deltaY;
+        let newTop = startTop + deltaY;
+        
+        // Apply constraints
+        newHeight = Math.max(300, Math.min(newHeight, viewportHeight * 0.8));
+        
+        // Adjust position based on constrained height
+        newTop = Math.min(startTop + (startHeight - newHeight), startTop);
+        
+        // Ensure container doesn't go above viewport
+        if (newTop < 0) {
+            newHeight += newTop; // Adjust height to compensate
+            newTop = 0;
+        }
+        
+        // Ensure container doesn't go below viewport
+        if (newTop + newHeight > viewportHeight) {
+            newHeight = viewportHeight - newTop;
+        }
+        
+        chatContainer.style.height = newHeight + "px";
+        chatContainer.style.top = newTop + "px";
+        
+    } else if (currentResizer === "w") {
+        // West: resize from left edge
+        let newWidth = startWidth - deltaX;
+        let newLeft = startLeft + deltaX;
+        
+        // Apply constraints
+        newWidth = Math.max(300, Math.min(newWidth, viewportWidth * 0.8));
+        
+        // Adjust position based on constrained width
+        newLeft = Math.min(startLeft + (startWidth - newWidth), startLeft);
+        
+        // Ensure container doesn't go left of viewport
+        if (newLeft < 0) {
+            newWidth += newLeft; // Adjust width to compensate
+            newLeft = 0;
+        }
+        
+        // Ensure container doesn't go right of viewport
+        if (newLeft + newWidth > viewportWidth) {
+            newWidth = viewportWidth - newLeft;
+        }
+        
+        chatContainer.style.width = newWidth + "px";
+        chatContainer.style.left = newLeft + "px";
+    }
+};
+
+const stopResize = () => {
+    isResizing = false;
+    currentResizer = null;
+    document.removeEventListener("mousemove", handleResize);
+    document.removeEventListener("mouseup", stopResize);
+    document.body.style.userSelect = "";
+    
+    // Ensure container stays within bounds after resize
+    const rect = chatContainer.getBoundingClientRect();
+    if (rect.left < 0) {
+        chatContainer.style.left = "0px";
+    }
+    if (rect.top < 0) {
+        chatContainer.style.top = "0px";
+    }
+    if (rect.right > window.innerWidth) {
+        chatContainer.style.left = (window.innerWidth - rect.width) + "px";
+    }
+    if (rect.bottom > window.innerHeight) {
+        chatContainer.style.top = (window.innerHeight - rect.height) + "px";
+    }
+};
 
     // Add event listeners for resize handles
-    document.getElementById("resize-nw").addEventListener("mousedown", (e) => initResize(e, "nw"));
-    document.getElementById("resize-n").addEventListener("mousedown", (e) => initResize(e, "n"));
-    document.getElementById("resize-w").addEventListener("mousedown", (e) => initResize(e, "w"));
-    document.querySelector(".resize-indicator").addEventListener("mousedown", (e) => initResize(e, "nw"));
+document.getElementById("resize-nw").addEventListener("mousedown", (e) => {
+    initResize(e, "nw");
+});
+document.getElementById("resize-n").addEventListener("mousedown", (e) => {
+    initResize(e, "n");
+});
+document.getElementById("resize-w").addEventListener("mousedown", (e) => {
+    initResize(e, "w");
+});
+document.querySelector(".resize-indicator").addEventListener("mousedown", (e) => {
+    initResize(e, "nw");
+});
 
     // Manual click trigger
     chatBtn.onclick = () => {
