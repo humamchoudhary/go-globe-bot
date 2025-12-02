@@ -232,7 +232,7 @@ def new_chat(subject):
 
 
     #### SEND THE INITAIL MESSAGE TO GEMINI
-    handle_bot_response(room_id=chat.room_id,message=initial_msg,chat=chat,admin=admin)
+    handle_bot_response(room_id=chat.room_id,message=message,chat=chat,admin=admin)
     # max_retries=3
     # retry_delay=1
     # 
