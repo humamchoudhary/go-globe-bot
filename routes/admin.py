@@ -742,7 +742,7 @@ def export_chat(room_id):
         r = requests.post(erp_url, headers=headers, data=data)
         print(f"DATA: {data}")
         print(r.__dict__)
-        if r.status_code == 200:
+        if r.status_code == 200 or r.status_code == 201:
 
             data = r.json()
             if not chat_service.export_chat(room_id, data.get("lead_id", None)):
