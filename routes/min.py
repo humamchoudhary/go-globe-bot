@@ -24,13 +24,14 @@ import time
 from flask import copy_current_request_context
 
 
-def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_delay=1):
+def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_delay=1,init_delay=False):
     """Handle bot response with retry logic - can be called from multiple endpoints"""
     @copy_current_request_context
     def _bot_response_worker():
         chat_service = ChatService(current_app.db)
         admin_service = AdminService(current_app.db)
-        time.sleep(5)
+        if init_delay:
+            time.sleep(5)
 
         
         for attempt in range(max_retries):
@@ -238,7 +239,7 @@ def new_chat(subject):
 
 
     #### SEND THE INITAIL MESSAGE TO GEMINI
-    handle_bot_response(room_id=chat.room_id,message=message,chat=chat,admin=admin)
+    handle_bot_response(room_id=chat.room_id,message=message,chat=chat,admin=admin,init_delay=True)
     # max_retries=3
     # retry_delay=1
     # 
