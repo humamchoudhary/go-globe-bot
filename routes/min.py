@@ -30,7 +30,7 @@ def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_dela
     def _bot_response_worker():
         chat_service = ChatService(current_app.db)
         admin_service = AdminService(current_app.db)
-
+        time.sleep(2)
 
         
         for attempt in range(max_retries):
@@ -41,6 +41,12 @@ def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_dela
                 admin_service.update_tokens(admin.admin_id, usage['cost'])
 
                 bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
+                print({
+                    'room_id': chat.room_id,
+                    'sender': chat.bot_name,
+                    'content': msg,
+                    'timestamp': bot_message.timestamp.isoformat()
+                })
 
                 current_app.socketio.emit('new_message', {
                     'room_id': chat.room_id,
@@ -232,48 +238,48 @@ def new_chat(subject):
 
 
     #### SEND THE INITAIL MESSAGE TO GEMINI
-    # handle_bot_response(room_id=chat.room_id,message=initial_msg,chat=chat,admin=admin)
-    max_retries=3
-    retry_delay=1
-    
-
-    mail = Mail(current_app)
-    send_email(current_admin.email, f'New chat started by {user.name}: {chat.subject}', 
-               "Ping", mail, render_template('/email/new_chat_created.html', user=user, chat=chat))
-
-    for attempt in range(max_retries):
-        try:
-            msg, usage = current_app.bot.respond(
-                f"Subject of chat: {chat.subject}\n{message}", chat.room_id)
-            
-            admin_service.update_tokens(admin.admin_id, usage['cost'])
-
-            bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
-
-            current_app.socketio.emit('new_message', {
-                'room_id': chat.room_id,
-                'sender': chat.bot_name,
-                'content': msg,
-                'timestamp': bot_message.timestamp.isoformat()
-            }, room=chat.room_id)
-            break
-            # return  # Success, exit retry loop
-            
-        except Exception as e:
-            print(f"Bot response error (attempt {attempt + 1}/{max_retries}): {e}")
-            if attempt < max_retries - 1:
-                time.sleep(retry_delay)
-            else:
-                # All retries failed, send error message
-                error_message = chat_service.add_message(chat.room_id, "SYSTEM", 
-                                                        "We Apologize, there was an unexpected error, please try again after some time")
-                
-                current_app.socketio.emit('new_message', {
-                    'room_id': chat.room_id,
-                    'sender': "SYSTEM",
-                    'content': "We Apologize, there was an unexpected error, please try again after some time",
-                    'timestamp': error_message.timestamp.isoformat()
-                }, room=chat.room_id)
+    handle_bot_response(room_id=chat.room_id,message=message,chat=chat,admin=admin)
+    # max_retries=3
+    # retry_delay=1
+    # 
+    #
+    # mail = Mail(current_app)
+    # send_email(current_admin.email, f'New chat started by {user.name}: {chat.subject}', 
+    #            "Ping", mail, render_template('/email/new_chat_created.html', user=user, chat=chat))
+    #
+    # for attempt in range(max_retries):
+    #     try:
+    #         msg, usage = current_app.bot.respond(
+    #             f"Subject of chat: {chat.subject}\n{message}", chat.room_id)
+    #         
+    #         admin_service.update_tokens(admin.admin_id, usage['cost'])
+    #
+    #         bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
+    #
+    #         current_app.socketio.emit('new_message', {
+    #             'room_id': chat.room_id,
+    #             'sender': chat.bot_name,
+    #             'content': msg,
+    #             'timestamp': bot_message.timestamp.isoformat()
+    #         }, room=chat.room_id)
+    #         break
+    #         # return  # Success, exit retry loop
+    #         
+    #     except Exception as e:
+    #         print(f"Bot response error (attempt {attempt + 1}/{max_retries}): {e}")
+    #         if attempt < max_retries - 1:
+    #             time.sleep(retry_delay)
+    #         else:
+    #             # All retries failed, send error message
+    #             error_message = chat_service.add_message(chat.room_id, "SYSTEM", 
+    #                                                     "We Apologize, there was an unexpected error, please try again after some time")
+    #             
+    #             current_app.socketio.emit('new_message', {
+    #                 'room_id': chat.room_id,
+    #                 'sender': "SYSTEM",
+    #                 'content': "We Apologize, there was an unexpected error, please try again after some time",
+    #                 'timestamp': error_message.timestamp.isoformat()
+    #             }, room=chat.room_id)
     # Redirect to chat using room_id (consistent with App 2)
     return redirect(url_for('min.chat', room_id=chat.room_id))
 
