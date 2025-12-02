@@ -30,7 +30,7 @@ def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_dela
     def _bot_response_worker():
         chat_service = ChatService(current_app.db)
         admin_service = AdminService(current_app.db)
-        time.sleep(2)
+        time.sleep(5)
 
         
         for attempt in range(max_retries):
