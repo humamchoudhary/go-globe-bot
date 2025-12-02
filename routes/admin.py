@@ -715,7 +715,7 @@ def export_chat(room_id):
         erp_url = os.environ.get("ERP_URL")
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "authtoken": f"{os.environ.get('ERP_TOKEN')}",
+            # "authtoken": f"{os.environ.get('ERP_TOKEN')}",
         }
         print(user.country)
         print(get_country_id('tblcountries.json',user.country))
@@ -736,7 +736,7 @@ def export_chat(room_id):
                     for message in chat.messages
                 ]
                 ),
-            "status":1,"hash":"null"
+            "status":1,"hash":"a185efa4eb174d38748ed28abd2c4034934f78dced410ccd0d86249974908733"
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
