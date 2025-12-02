@@ -736,7 +736,7 @@ def export_chat(room_id):
                     for message in chat.messages
                 ]
                 ),
-            "status":2,"hash":"null"
+            "status":1,"hash":"null"
         }
 
         r = requests.post(erp_url, headers=headers, data=data)
