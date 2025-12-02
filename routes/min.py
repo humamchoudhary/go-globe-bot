@@ -41,6 +41,12 @@ def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_dela
                 admin_service.update_tokens(admin.admin_id, usage['cost'])
 
                 bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
+                print({
+                    'room_id': chat.room_id,
+                    'sender': chat.bot_name,
+                    'content': msg,
+                    'timestamp': bot_message.timestamp.isoformat()
+                })
 
                 current_app.socketio.emit('new_message', {
                     'room_id': chat.room_id,
