@@ -237,6 +237,13 @@ def new_chat(subject):
         'new_chat', 
         chat.room_id
     )
+    noti_res = send_push_noti(
+        admin_service.get_expo_tokens(session.get("admin_id")), 
+        "New Chat!", 
+        f'{user.name}: {chat.subject}', 
+        chat.room_id
+    )
+
 
 
     #### SEND THE INITAIL MESSAGE TO GEMINI
@@ -444,7 +451,7 @@ def send_message(room_id):
     noti_res = send_push_noti(
         admin_service.get_expo_tokens(session.get("admin_id")), 
         "New message!", 
-        f'{user.name}: {chat.subject}', 
+        f'{user.name}: {message}', 
         chat.room_id
     )
 
