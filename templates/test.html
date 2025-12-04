@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Al Dar - Demo Page</title>
     <style>
-      body {
+            body {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 20px;
@@ -58,8 +58,13 @@
       name="htmx-config"
       content='{"selfRequestsOnly":false, "withCredentials": true}'
     />
+    <!-- to show country flags -->
+    <script type="module" defer>
+      import { polyfillCountryFlagEmojis } from "https://cdn.skypack.dev/country-flag-emoji-polyfill";
+      polyfillCountryFlagEmojis();
+    </script>
     <script src="{{backend_url}}/render-bot/6dc1066b8a2880024e6e2e1a4c3941a2597b0467132849c6d62d232eb00d9958"></script>
-
+    
 
   <body>
     <!-- Google Tag Manager (noscript) -->
