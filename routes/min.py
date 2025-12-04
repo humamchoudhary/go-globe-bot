@@ -55,6 +55,7 @@ def handle_bot_response(room_id, message, chat, admin, max_retries=3, retry_dela
                     'content': msg,
                     'timestamp': bot_message.timestamp.isoformat()
                 }, room=chat.room_id)
+
                 return  # Success, exit retry loop
                 
             except Exception as e:
@@ -440,6 +441,13 @@ def send_message(room_id):
     mail = Mail(current_app)
     send_email(current_admin.email, f'New Message from {user.name}: {chat.subject}', 
                "Ping", mail, render_template('/email/new_message_received.html', user=user, chat=chat))
+    noti_res = send_push_noti(
+        admin_service.get_expo_tokens(session.get("admin_id")), 
+        "New message!", 
+        f'{user.name}: {chat.subject}', 
+        chat.room_id
+    )
+
 
     # Handle bot response or admin notification
     if not chat.admin_required:
