@@ -26,6 +26,26 @@ function loadHeaders() {
         cssLink.rel = 'stylesheet';
         cssLink.href = `${config.backendUrl}/static/css/output.css`; // Replace with your actual CSS file path
         document.head.appendChild(cssLink);      // Load HTMX script
+
+// Create the module script element
+const polyfillScript = document.createElement('script');
+polyfillScript.type = 'module';
+polyfillScript.defer = true;
+
+// Set the script content to include the module import and execution
+polyfillScript.textContent = `
+  import { polyfillCountryFlagEmojis } from "https://cdn.skypack.dev/country-flag-emoji-polyfill";
+  polyfillCountryFlagEmojis();
+  
+  // Optional: add a callback if you need to know when it's loaded
+  console.log('Country flag emoji polyfill loaded successfully');
+`;
+
+// Append to head or body
+document.head.appendChild(polyfillScript);
+
+
+
         const htmxScript = document.createElement('script');
         htmxScript.src = 'https://unpkg.com/htmx.org@2.0.4';
         htmxScript.crossOrigin = 'anonymous';
