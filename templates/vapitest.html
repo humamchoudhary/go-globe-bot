@@ -42,11 +42,10 @@
     </style>
   </head>
   <body>
-    
-
+    <div id="target" style="position: absolute; left: 0; bottom:0">afda</div>
     <script>
       const assistant = ""; // Replace with your assistant ID
-      const apiKey = "6e062b80-ad6b-469f-9ada-"; // Replace with your API key
+      const apiKey = ""; // Replace with your API key
 
       var vapiInstance = null;
 
@@ -100,7 +99,6 @@
             vapiInstance = vapi;
 
             vapiInstance.on("speech-start", () => {
-              alert("Speech has started");
               console.log("Speech has started");
             });
 
@@ -147,6 +145,32 @@
           console.log(window.vapiSDK, vapiInstance);
         }
       }
+
+      // Move the full Vapi support button element (including its children) into #target
+      (function moveVapiSupportBtnIntoTargetWhenReady() {
+        const TARGET_ID = "target";
+        const BTN_ID = "vapi-support-btn";
+
+        const tryMove = () => {
+          const target = document.getElementById(TARGET_ID);
+          const btn = document.getElementById(BTN_ID);
+          if (!target || !btn) return false;
+          if (btn.parentElement === target) return true;
+          target.appendChild(btn); // appendChild moves the existing node (keeps all content)
+          return true;
+        };
+
+        if (tryMove()) return;
+
+        const obs = new MutationObserver(() => {
+          if (tryMove()) obs.disconnect();
+        });
+
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+
+        // Safety timeout to avoid observing forever
+        setTimeout(() => obs.disconnect(), 15000);
+      })();
     </script>
   </body>
 </html>
