@@ -58,6 +58,7 @@
                     "
                     required
                 ></textarea>
+                <div id="call-btn-target"></div>
                 <button 
                     hx-post="{{settings['backend_url']}}/min/login/"
                     hx-target="#chatbox"
@@ -80,7 +81,7 @@
                     onMouseOver="this.style.opacity=0.7"
                     onMouseOut="this.style.opacity=1"
                 >
-                    Send
+                    Start Your Project
                 </button>
             </div>
         </form>
@@ -114,4 +115,134 @@ document.getElementById('subjectForm').addEventListener('submit', function(e) {
 hideReturnChatButton();
 </script>
 
+<!-- vapi script -->
+<script>
+  const assistant = ""; // Replace with your assistant ID
+  const apiKey = ""; // Replace with your API key
+
+  var vapiInstance = null;
+
+  const buttonConfig = {
+    position: "top-left", // "bottom" | "top" | "left" | "right" | "top-right" | "top-left" | "bottom-left" | "bottom-right"
+    offset: "10px", // decide how far the button should be from the edge
+    width: "20px", // min-width of the button
+    height: "30px", // height of the button
+    idle: {
+      // button state when the call is not active.
+      type: "pill", // or "round"
+      title: 'Or talk to AI Operator ', // only required in case of Pill
+      subtitle: " ", // only required in case of pill
+      icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
+    },
+    loading: {
+      // button state when the call is connecting
+      type: "pill", // or "round"
+      title: "Connecting...", // only required in case of Pill
+      subtitle: " ", // only required in case of pill
+      icon: `https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg`,
+    },
+    active: {
+      // button state when the call is in progress or active.
+      type: "pill", // or "round"
+      title: "Call is in progress...Click to cancel", // only required in case of Pill
+      subtitle: " ", // only required in case of pill
+      icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
+    },
+  };
+
+  (function (d, t) {
+    var g = document.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    g.src =
+      "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+    g.defer = true;
+    g.async = true;
+    s.parentNode.insertBefore(g, s);
+
+    g.onload = function () {
+      const vapi = window.vapiSDK.run({
+        apiKey: apiKey, // required
+        assistant: assistant, // required
+        config: buttonConfig, // optional
+      });
+
+      if (vapi) {
+        // Extend more using vapi
+        window.vapiSDK.vapi = vapi;
+        vapiInstance = vapi;
+
+        vapiInstance.on("speech-start", () => {
+          console.log("Speech has started");
+        });
+
+        vapiInstance.on("speech-end", () => {
+          console.log("Speech has ended");
+        });
+
+        vapiInstance.on("call-start", () => {
+          console.log("Call has started");
+        });
+
+        vapiInstance.on("call-end", () => {
+          console.log("Call has stopped");
+        });
+
+        vapiInstance.on("volume-level", (volume) => {
+          console.log(`Assistant volume level: ${volume}`);
+        });
+
+        // Function calls and transcripts will be sent via messages
+        vapiInstance.on("message", (message) => {
+          console.log(message);
+        });
+
+        vapiInstance.on("error", (e) => {
+          console.error(e);
+        });
+      }
+    };
+  })(document, "script");
+
+  function logUserAction() {
+    // Function to log the user action
+
+    if (window.vapiSDK.vapi)
+      window.vapiSDK.vapi.send({
+        type: "add-message",
+        message: {
+          role: "system",
+          content: "The user has pressed the button, say peanuts",
+        },
+      });
+    else {
+      console.log(window.vapiSDK, vapiInstance);
+    }
+  }
+
+  // Move the full Vapi support button element (including its children) into #target
+  (function moveVapiSupportBtnIntoTargetWhenReady() {
+    const TARGET_ID = "call-btn-target";
+    const BTN_ID = "vapi-support-btn";
+
+    const tryMove = () => {
+      const target = document.getElementById(TARGET_ID);
+      const btn = document.getElementById(BTN_ID);
+      if (!target || !btn) return false;
+      if (btn.parentElement === target) return true;
+      target.appendChild(btn); // appendChild moves the existing node (keeps all content)
+      return true;
+    };
+
+    if (tryMove()) return;
+
+    const obs = new MutationObserver(() => {
+      if (tryMove()) obs.disconnect();
+    });
+
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+
+    // Safety timeout to avoid observing forever
+    setTimeout(() => obs.disconnect(), 15000);
+  })();
+</script>
 {% endblock %}
