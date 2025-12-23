@@ -159,7 +159,9 @@ def onboard():
     session["admin_id"] = admin_id
     session["last_visit"] = "/min/onboarding"
     print("clearing session")
-    return render_template('user/min-onboard.html')
+    assistant_id = os.environ.get("VAPI_ASSISTANT", "")
+    api_key = os.environ.get("VAPI_KEY", "")
+    return render_template("user/min-onboard.html", assistant=assistant_id, api_key=api_key)
 
 
 def generate_random_username():

@@ -117,8 +117,8 @@ hideReturnChatButton();
 
 <!-- vapi script -->
 <script>
-  const assistant = ""; // Replace with your assistant ID
-  const apiKey = ""; // Replace with your API key
+  const assistant = "{{ assistant }}"; // Read from environment variable VAPI_ASSISTANT
+  const apiKey = "{{ api_key }}"; // Read from environment variable VAPI_KEY
 
   var vapiInstance = null;
 
