@@ -227,6 +227,11 @@ hideReturnChatButton();
     const tryMove = () => {
       const target = document.getElementById(TARGET_ID);
       const btn = document.getElementById(BTN_ID);
+      // Don't make it a submit button to avoid submitting the form
+      if (btn && btn.tagName.toLowerCase() === "button") {
+          btn.setAttribute("type", "button");
+      }
+
       if (!target || !btn) return false;
       if (btn.parentElement === target) return true;
       target.appendChild(btn); // appendChild moves the existing node (keeps all content)
