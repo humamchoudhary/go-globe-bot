@@ -119,7 +119,7 @@ def create_app(config_class=Config):
         SESSION_KEY_PREFIX='session:',
     )
 
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=3)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
     IGNORE_PATHS = {'static',
                     'socket.io',
                     'favicon.ico',
