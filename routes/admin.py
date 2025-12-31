@@ -697,7 +697,6 @@ def get_country_id(file_path, target_country):
     with open(file_path, 'r') as f:
         data = json.load(f)
     for entry in data:
-        print(entry.get('short_name'))
         if entry.get('short_name',"").lower() == target_country.lower():
             return entry.get('country_id')
     return None 
@@ -718,7 +717,6 @@ def export_chat(room_id):
             # "authtoken": f"{os.environ.get('ERP_TOKEN')}",
         }
         print(user.country)
-        print(get_country_id('tblcountries.json',user.country))
         data = {
             "name": user.name,
             "company": user.company,
@@ -727,7 +725,7 @@ def export_chat(room_id):
             "email": f"{user.email}",
             "city":str(user.city),
             "state":str(user.city),
-            "country":int(get_country_id('tblcountries.json',user.country)),
+            "country":int(get_country_id('tblcountries.json',user.country)) if get_country_id('tblcountries.json',user.country) else None,
             "description":"\n".join(
                 [
                     f"{message.sender.lower()}: {message.content[:15] + ('...' if len(message.content) > 15 else '')}"
