@@ -412,47 +412,6 @@ function initializeChatbot() {
   .chat-container-closing {
     animation: slideDownToBottom 0.3s ease-out forwards;
   }
-  .vapi-btn {
-    position: relative;
-  }
-  .vapi-btn-pill {
-  background: #001f33 !important;
-  color: #ff5800 !important;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 0;
-  letter-spacing: -0.32px;
-  cursor: pointer;
-  box-shadow: none !important;
-  padding: 0 !important;
-  transform: none !important;
-}
-
-#vapi-icon-container {
-  display: none;
-}
-
-#vapi-title::after {
-  content: '';
-  display: inline-block;
-  vertical-align: middle;
-  width: 1em;
-  height: 1em;
-  margin-left: 0.1em;
-  background: url('static/svg/speak.svg') no-repeat center center;
-  background-size: contain;
-}
-
-.vapi-btn {
-  position: "relative";
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: fit-content;
-
-}
 </style>
 
 <svg id="chat-button" width="60" height="63" viewBox="0 0 60 63" fill="none" xmlns="http://www.w3.org/2000/svg">
