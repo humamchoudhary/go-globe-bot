@@ -25,6 +25,8 @@ from services.email_service import send_email
 def user_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        if session.get("role", "user") == "admin":
+            return redirect(url_for("admin.dashboard"))
         if "user_id" not in session:
             return redirect(url_for("auth.create_anonymous_user"))
         return f(*args, **kwargs)
