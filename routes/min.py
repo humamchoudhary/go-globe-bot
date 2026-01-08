@@ -313,7 +313,10 @@ def chat(room_id):
     #     print(f"Unauthorized access attempt to chat: {room_id}")
     #     return redirect(url_for("min.onboard"))
 
-    return render_template('user/min-index.html', chat=chat, username=user.name)
+    assistant_id = os.environ.get("VAPI_ASSISTANT", "")
+    api_key = os.environ.get("VAPI_KEY", "")
+
+    return render_template('user/min-index.html', chat=chat, username=user.name, assistant=assistant_id, api_key=api_key)
 
 
 @min_bp.route('/chat/<room_id>/ping_admin', methods=['POST'])
