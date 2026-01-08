@@ -162,7 +162,8 @@
             </span>
             Chat with me for quick<br>answers
         </button>
-
+        <!-- Hidden Vapi Button Target -->
+        
         <!-- Voice Option -->
         <button onclick="chooseVoice()" style="
             width: 100%;
@@ -187,12 +188,11 @@
                     </path>
                 </svg>
             </span>
-            Talk with Ana by voice for<br>detailed help
+            <div id="call-btn-target"></div>
         </button>
     </div>
 
-    <!-- Hidden Vapi Button Target -->
-    <div id="call-btn-target" style="display:none;"></div>
+    
 </div>
 
 <script>
@@ -207,75 +207,6 @@
         document.getElementById('choice-overlay').style.display = 'none';
     }
 
-    function chooseVoice() {
-        const overlay = document.getElementById('choice-overlay');
-
-        // Check if Vapi is ready
-        if (!window.vapiSDK || !window.vapiSDK.vapi) {
-            alert("Voice assistant is initializing, please wait a moment...");
-            return;
-        }
-
-        try {
-            // Show Connecting State
-            overlay.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:20px;">
-                    <div style="animation: spin 1s linear infinite; width: 50px; height: 50px; border: 4px solid #FF5E00; border-top: 4px solid transparent; border-radius: 50%;"></div>
-                    <p style="color: white; font-size: 18px; font-weight: 500;">Connecting to Ana...</p>
-                    <style>
-                        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-                    </style>
-                </div>
-            `;
-
-            // Start Call
-            window.vapiSDK.vapi.start();
-
-            // Setup Listeners for this call session
-            const vapi = window.vapiSDK.vapi;
-
-            vapi.on('call-start', () => {
-                overlay.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:20px;">
-                        <div style="animation: pulse 2s infinite; width: 80px; height: 80px; background-color: #FF5E00; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                        </div>
-                        <p style="color: white; font-size: 18px; font-weight: 500;">Voice Call Active</p>
-                        <button onclick="window.vapiSDK.vapi.stop()" style="
-                            padding: 10px 20px;
-                            border-radius: 20px;
-                            border: 1px solid white;
-                            background: transparent;
-                            color: white;
-                            cursor: pointer;
-                        ">End Call</button>
-                        <style>
-                            @keyframes pulse {
-                                0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 94, 0, 0.7); }
-                                70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 94, 0, 0); }
-                                100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 94, 0, 0); }
-                            }
-                        </style>
-                    </div>
-                `;
-            });
-
-            vapi.on('call-end', () => {
-                switchToChat();
-            });
-
-            vapi.on('error', (e) => {
-                console.error("Vapi Error:", e);
-                alert("Unable to connect to Voice Assistant. Please use chat.");
-                switchToChat();
-            });
-
-        } catch (e) {
-            console.error("Error starting Vapi:", e);
-            alert("Error starting voice call.");
-            switchToChat();
-        }
-    }
 
     function switchToChat() {
         const roomId = getRoomId();
@@ -286,65 +217,139 @@
     }
 </script>
 
-<!-- vapi script ported from onboard -->
+<!-- vapi script -->
 <script>
-    const assistant = "{{ assistant }}";
-    const apiKey = "{{ api_key }}";
+  const assistant = "{{ assistant }}"; // Read from environment variable VAPI_ASSISTANT
+  const apiKey = "{{ api_key }}"; // Read from environment variable VAPI_KEY
 
-    var vapiInstance = null;
+  var vapiInstance = null;
 
-    const buttonConfig = {
-        position: "bottom-left",
-        offset: "10px",
-        width: "50px",
-        height: "50px",
-        idle: {
-            type: "pill",
-            title: 'Call',
-            subtitle: " ",
-            icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
-        },
-        loading: {
-            type: "pill",
-            title: "Connecting...",
-            subtitle: " ",
-            icon: ``,
-        },
-        active: {
-            type: "pill",
-            title: "Active",
-            subtitle: " ",
-            icon: ``,
-        },
-    };
+  const buttonConfig = {
+    position: "top-left", // "bottom" | "top" | "left" | "right" | "top-right" | "top-left" | "bottom-left" | "bottom-right"
+    offset: "10px", // decide how far the button should be from the edge
+    width: "20px", // min-width of the button
+    height: "30px", // height of the button
+    idle: {
+      // button state when the call is not active.
+      type: "pill", // or "round"
+      title: `Talk with Ana by voice for`, // only required in case of Pill
+      subtitle: "detailed help", // only required in case of pill
+      icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
+    },
+    loading: {
+      // button state when the call is connecting
+      type: "pill", // or "round"
+      title: "Connecting...", // only required in case of Pill
+      subtitle: " ", // only required in case of pill
+      icon: `https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg`,
+    },
+    active: {
+      // button state when the call is in progress or active.
+      type: "pill", // or "round"
+      title: "Call is in progress...Click to cancel", // only required in case of Pill
+      subtitle: " ", // only required in case of pill
+      icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
+    },
+  };
 
-    (function (d, t) {
-        var g = document.createElement(t),
-            s = d.getElementsByTagName(t)[0];
-        g.src =
-            "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
-        g.defer = true;
-        g.async = true;
-        s.parentNode.insertBefore(g, s);
+  (function (d, t) {
+    var g = document.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    g.src =
+      "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+    g.defer = true;
+    g.async = true;
+    s.parentNode.insertBefore(g, s);
 
-        g.onload = function () {
-            const vapi = window.vapiSDK.run({
+    g.onload = function () {
+      const vapi = window.vapiSDK.run({
                 apiKey: apiKey,
                 assistant: assistant,
                 config: buttonConfig,
-            });
+      });
 
-            if (vapi) {
-                window.vapiSDK.vapi = vapi;
-                vapiInstance = vapi;
+      if (vapi) {
+        window.vapiSDK.vapi = vapi;
+        vapiInstance = vapi;
 
-                // Hide the default button if it renders
-                const style = document.createElement('style');
-                style.innerHTML = '#vapi-support-btn { display: none !important; }';
-                document.head.appendChild(style);
-            }
-        };
-    })(document, "script");
+        vapiInstance.on("speech-start", () => {
+          console.log("Speech has started");
+        });
+
+        vapiInstance.on("speech-end", () => {
+          console.log("Speech has ended");
+        });
+
+        vapiInstance.on("call-start", () => {
+          console.log("Call has started");
+        });
+
+        vapiInstance.on("call-end", () => {
+          console.log("Call has stopped");
+        });
+
+        vapiInstance.on("volume-level", (volume) => {
+          console.log(`Assistant volume level: ${volume}`);
+        });
+
+        // Function calls and transcripts will be sent via messages
+        vapiInstance.on("message", (message) => {
+          console.log(message);
+        });
+
+        vapiInstance.on("error", (e) => {
+          console.error(e);
+        });
+      }
+    };
+  })(document, "script");
+
+  function logUserAction() {
+    // Function to log the user action
+
+    if (window.vapiSDK.vapi)
+      window.vapiSDK.vapi.send({
+        type: "add-message",
+        message: {
+          role: "system",
+          content: "The user has pressed the button, say peanuts",
+        },
+      });
+    else {
+      console.log(window.vapiSDK, vapiInstance);
+    }
+  }
+
+  // Move the full Vapi support button element (including its children) into #target
+  (function moveVapiSupportBtnIntoTargetWhenReady() {
+    const TARGET_ID = "call-btn-target";
+    const BTN_ID = "vapi-support-btn";
+
+    const tryMove = () => {
+      const target = document.getElementById(TARGET_ID);
+      const btn = document.getElementById(BTN_ID);
+      // Don't make it a submit button to avoid submitting the form
+      if (btn && btn.tagName.toLowerCase() === "button") {
+          btn.setAttribute("type", "button");
+      }
+
+      if (!target || !btn) return false;
+      if (btn.parentElement === target) return true;
+      target.appendChild(btn); // appendChild moves the existing node (keeps all content)
+      return true;
+    };
+
+    if (tryMove()) return;
+
+    const obs = new MutationObserver(() => {
+      if (tryMove()) obs.disconnect();
+    });
+
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+
+    // Safety timeout to avoid observing forever
+    setTimeout(() => obs.disconnect(), 15000);
+  })();
 </script>
 
 {% endblock %}
