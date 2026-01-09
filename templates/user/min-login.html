@@ -2,11 +2,13 @@
 <!-- Sign In -->
 <style>
     /* Simple styling for form validation */
-  input:invalid, select:invalid {
+    input:invalid,
+    select:invalid {
         border-color: #ef4444;
     }
-  input::placeholder{
-    color:gray;
+
+    input::placeholder {
+        color: gray;
     }
 
     /* Error message styling */
@@ -43,27 +45,49 @@
 
 <div style="display:flex; flex-direction:row;gap:15px; margin-bottom:20px;">
     <svg width="57" height="56" viewBox="0 0 57 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M51.9725 32.2535C54.3799 19.3447 45.6728 6.89178 32.525 4.43975C19.3772 1.98772 6.7666 10.465 4.35916 23.3737C1.95171 36.2824 10.6589 48.7354 23.8067 51.1874L46.9641 55.5062L43.7422 46.1233C48.0544 42.5965 50.9659 37.6899 51.9725 32.2535Z" fill="white"/>
-  <path d="M14.9164 27.0168V40.5406H41.5974L41.474 27.0168L40.2 20.4509L17.1704 21.7249L14.9164 27.0168Z" fill="#F7D5B1"/>
-  <path d="M9.23244 16.1385L14.9164 27.0164L17.1703 21.7244L40.1999 20.4505L41.4739 27.0164L44.3159 17.2165L38.142 15.9425L40.1019 12.8066L36.721 13.2476L40.1509 8.54366L33.0951 11.7776L36.525 4.91772L26.1372 11.4836L25.1572 8.73966L9.23244 16.1385Z" fill="#52504D"/>
-  <path d="M14.9412 40.3388V46.0213H41.2018V40.3125L14.9412 40.3388Z" fill="white"/>
-  <path d="M17.6604 40.4421L28.2442 51.026L38.7301 40.4421H17.6604Z" fill="#E8EAEB"/>
-  <path d="M18.3463 40.4421L22.1683 44.9501L28.1462 40.5401L34.2221 44.9501L38.044 40.4421H18.3463Z" fill="white"/>
-  <path d="M28.1462 40.5403L26.0882 42.0103V42.5003H30.4001V42.0103L28.1462 40.5403Z" fill="#C95C1C"/>
-  <path d="M28.0715 50.5885H31.4968L30.4001 42.5002H26.0882L25.2171 50.5885H28.0715Z" fill="#FF5E00"/>
-  <path d="M28.3975 36.0812C30.3947 36.0812 32.2856 34.0523 32.0847 33.1945C31.8838 32.3367 30.3947 33.1945 28.3975 33.1945C26.4002 33.1945 24.9525 32.1927 24.852 33.1945C24.7516 34.1964 26.3588 35.9372 28.3975 36.0812Z" fill="#3B3731"/>
-  <path d="M20.6335 28.1925C21.283 28.1925 21.8095 27.666 21.8095 27.0166C21.8095 26.3671 21.283 25.8406 20.6335 25.8406C19.9841 25.8406 19.4576 26.3671 19.4576 27.0166C19.4576 27.666 19.9841 28.1925 20.6335 28.1925Z" fill="#3B3731"/>
-  <path d="M35.6275 28.1925C36.277 28.1925 36.8035 27.666 36.8035 27.0166C36.8035 26.3671 36.277 25.8406 35.6275 25.8406C34.978 25.8406 34.4515 26.3671 34.4515 27.0166C34.4515 27.666 34.978 28.1925 35.6275 28.1925Z" fill="#3B3731"/>
-  <path d="M14.9164 27.0168V40.5406H41.5974L41.474 27.0168L40.2 20.4509L17.1704 21.7249L14.9164 27.0168Z" fill="#F7D5B1"/>
-  <path d="M9.23244 16.1385L14.9164 27.0164L17.1703 21.7244L40.1999 20.4505L41.4739 27.0164L44.3159 17.2165L38.142 15.9425L40.1019 12.8066L36.721 13.2476L40.1509 8.54366L33.0951 11.7776L36.525 4.91772L26.1372 11.4836L25.1572 8.73966L9.23244 16.1385Z" fill="#52504D"/>
-  <path d="M14.9412 40.3388V46.0213H41.2018V40.3125L14.9412 40.3388Z" fill="white"/>
-  <path d="M17.6604 40.4421L28.2442 51.026L38.7301 40.4421H17.6604Z" fill="#E8EAEB"/>
-  <path d="M18.3463 40.4421L22.1683 44.9501L28.1462 40.5401L34.2221 44.9501L38.044 40.4421H18.3463Z" fill="white"/>
-  <path d="M28.1462 40.5403L26.0882 42.0103V42.5003H30.4001V42.0103L28.1462 40.5403Z" fill="#C95C1C"/>
-  <path d="M28.0715 50.5885H31.4968L30.4001 42.5002H26.0882L25.2171 50.5885H28.0715Z" fill="#FF5E00"/>
-  <path d="M28.3975 36.0812C30.3947 36.0812 32.2856 34.0523 32.0847 33.1945C31.8838 32.3367 30.3947 33.1945 28.3975 33.1945C26.4002 33.1945 24.9525 32.1927 24.852 33.1945C24.7516 34.1964 26.3588 35.9372 28.3975 36.0812Z" fill="#3B3731"/>
-  <path d="M20.6335 28.1925C21.283 28.1925 21.8095 27.666 21.8095 27.0166C21.8095 26.3671 21.283 25.8406 20.6335 25.8406C19.9841 25.8406 19.4576 26.3671 19.4576 27.0166C19.4576 27.666 19.9841 28.1925 20.6335 28.1925Z" fill="#3B3731"/>
-  <path d="M35.6275 28.1925C36.277 28.1925 36.8035 27.666 36.8035 27.0166C36.8035 26.3671 36.277 25.8406 35.6275 25.8406C34.978 25.8406 34.4515 26.3671 34.4515 27.0166C34.4515 27.666 34.978 28.1925 35.6275 28.1925Z" fill="#3B3731"/>
+        <path
+            d="M51.9725 32.2535C54.3799 19.3447 45.6728 6.89178 32.525 4.43975C19.3772 1.98772 6.7666 10.465 4.35916 23.3737C1.95171 36.2824 10.6589 48.7354 23.8067 51.1874L46.9641 55.5062L43.7422 46.1233C48.0544 42.5965 50.9659 37.6899 51.9725 32.2535Z"
+            fill="white" />
+        <path d="M14.9164 27.0168V40.5406H41.5974L41.474 27.0168L40.2 20.4509L17.1704 21.7249L14.9164 27.0168Z"
+            fill="#F7D5B1" />
+        <path
+            d="M9.23244 16.1385L14.9164 27.0164L17.1703 21.7244L40.1999 20.4505L41.4739 27.0164L44.3159 17.2165L38.142 15.9425L40.1019 12.8066L36.721 13.2476L40.1509 8.54366L33.0951 11.7776L36.525 4.91772L26.1372 11.4836L25.1572 8.73966L9.23244 16.1385Z"
+            fill="#52504D" />
+        <path d="M14.9412 40.3388V46.0213H41.2018V40.3125L14.9412 40.3388Z" fill="white" />
+        <path d="M17.6604 40.4421L28.2442 51.026L38.7301 40.4421H17.6604Z" fill="#E8EAEB" />
+        <path d="M18.3463 40.4421L22.1683 44.9501L28.1462 40.5401L34.2221 44.9501L38.044 40.4421H18.3463Z"
+            fill="white" />
+        <path d="M28.1462 40.5403L26.0882 42.0103V42.5003H30.4001V42.0103L28.1462 40.5403Z" fill="#C95C1C" />
+        <path d="M28.0715 50.5885H31.4968L30.4001 42.5002H26.0882L25.2171 50.5885H28.0715Z" fill="#FF5E00" />
+        <path
+            d="M28.3975 36.0812C30.3947 36.0812 32.2856 34.0523 32.0847 33.1945C31.8838 32.3367 30.3947 33.1945 28.3975 33.1945C26.4002 33.1945 24.9525 32.1927 24.852 33.1945C24.7516 34.1964 26.3588 35.9372 28.3975 36.0812Z"
+            fill="#3B3731" />
+        <path
+            d="M20.6335 28.1925C21.283 28.1925 21.8095 27.666 21.8095 27.0166C21.8095 26.3671 21.283 25.8406 20.6335 25.8406C19.9841 25.8406 19.4576 26.3671 19.4576 27.0166C19.4576 27.666 19.9841 28.1925 20.6335 28.1925Z"
+            fill="#3B3731" />
+        <path
+            d="M35.6275 28.1925C36.277 28.1925 36.8035 27.666 36.8035 27.0166C36.8035 26.3671 36.277 25.8406 35.6275 25.8406C34.978 25.8406 34.4515 26.3671 34.4515 27.0166C34.4515 27.666 34.978 28.1925 35.6275 28.1925Z"
+            fill="#3B3731" />
+        <path d="M14.9164 27.0168V40.5406H41.5974L41.474 27.0168L40.2 20.4509L17.1704 21.7249L14.9164 27.0168Z"
+            fill="#F7D5B1" />
+        <path
+            d="M9.23244 16.1385L14.9164 27.0164L17.1703 21.7244L40.1999 20.4505L41.4739 27.0164L44.3159 17.2165L38.142 15.9425L40.1019 12.8066L36.721 13.2476L40.1509 8.54366L33.0951 11.7776L36.525 4.91772L26.1372 11.4836L25.1572 8.73966L9.23244 16.1385Z"
+            fill="#52504D" />
+        <path d="M14.9412 40.3388V46.0213H41.2018V40.3125L14.9412 40.3388Z" fill="white" />
+        <path d="M17.6604 40.4421L28.2442 51.026L38.7301 40.4421H17.6604Z" fill="#E8EAEB" />
+        <path d="M18.3463 40.4421L22.1683 44.9501L28.1462 40.5401L34.2221 44.9501L38.044 40.4421H18.3463Z"
+            fill="white" />
+        <path d="M28.1462 40.5403L26.0882 42.0103V42.5003H30.4001V42.0103L28.1462 40.5403Z" fill="#C95C1C" />
+        <path d="M28.0715 50.5885H31.4968L30.4001 42.5002H26.0882L25.2171 50.5885H28.0715Z" fill="#FF5E00" />
+        <path
+            d="M28.3975 36.0812C30.3947 36.0812 32.2856 34.0523 32.0847 33.1945C31.8838 32.3367 30.3947 33.1945 28.3975 33.1945C26.4002 33.1945 24.9525 32.1927 24.852 33.1945C24.7516 34.1964 26.3588 35.9372 28.3975 36.0812Z"
+            fill="#3B3731" />
+        <path
+            d="M20.6335 28.1925C21.283 28.1925 21.8095 27.666 21.8095 27.0166C21.8095 26.3671 21.283 25.8406 20.6335 25.8406C19.9841 25.8406 19.4576 26.3671 19.4576 27.0166C19.4576 27.666 19.9841 28.1925 20.6335 28.1925Z"
+            fill="#3B3731" />
+        <path
+            d="M35.6275 28.1925C36.277 28.1925 36.8035 27.666 36.8035 27.0166C36.8035 26.3671 36.277 25.8406 35.6275 25.8406C34.978 25.8406 34.4515 26.3671 34.4515 27.0166C34.4515 27.666 34.978 28.1925 35.6275 28.1925Z"
+            fill="#3B3731" />
     </svg>
 
     <p id="header-instruction-text"
@@ -72,7 +96,8 @@
     </p>
 </div>
 
-<div style="overflow-y:hidden; background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family); width: 100%;">
+<div
+    style="overflow-y:hidden; background-color: var(--goglobe-site-bg-color); color: var(--goglobe-body-color); font-family: var(--goglobe-body-font-family); width: 100%;">
     <!-- Desktop logo would go here -->
     <div style="border-radius: 0.5rem; padding: 0.5rem; margin: 0 auto;">
         <div style="margin-bottom: 2rem;">
@@ -80,9 +105,8 @@
                 <div style=" width: 100%;">
                     <input type="text"
                         style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
-                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
-                        id="name" name="name" placeholder="Your Name*" autocapitalize="off"
-                        autocomplete="name" required minlength="2"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold' id="name" name="name"
+                        placeholder="Your Name*" autocapitalize="off" autocomplete="name" required minlength="2"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
                         onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
                 </div>
@@ -91,8 +115,8 @@
                 <div style=" width: 100%;">
                     <input type="text"
                         style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
-                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
-                        id="desg" name="desg" placeholder="Designation*" autocapitalize="off"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold' id="desg" name="desg"
+                        placeholder="Designation*" autocapitalize="off"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
                         onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
                 </div>
@@ -101,9 +125,9 @@
                 <div style=" width: 100%;">
                     <input type="email"
                         style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
-                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
-                        id="email" name="email" placeholder="Email Address*" autocapitalize="off"
-                        autocomplete="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold' id="email" name="email"
+                        placeholder="Email Address*" autocapitalize="off" autocomplete="email" required
+                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
                         onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
                 </div>
@@ -119,35 +143,18 @@
                         <input type="tel"
                             class="phone-number-input placeholder-[var(--goglobe-body-color)] placeholder-bold"
                             style="font-family: var(--goglobe-body-font-family); flex: 1; border: none; outline: none; background: transparent; color: white; font-weight: bold; padding: 12px; width: 70%;"
-                            id="phone" 
-                            name="phone" 
-                            placeholder="Phone Number*" 
-                            autocomplete="tel" 
-                            required>
+                            id="phone" name="phone" placeholder="Phone Number*" autocomplete="tel" required>
                     </div>
                 </div>
 
-                <div style="margin-bottom: 1rem; width: 100%;" class="">
-                    <select
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
-                        class='placeholder-[var(--goglobe-body-color)] placeholder-bold'
-                        id="subject" name="subject" autocapitalize="off" autocomplete="off" required
-                        onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
-                        onblur="this.style.border = '1px solid var(--goglobe-site-bg-color)';">
-                        {% for subject in settings['subjects'] %}
-                        <option {% if default_subject and default_subject==subject %} selected='true' {% endif %}>
-                            {{subject}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+
 
                 <button type="submit" id="login-btn"
                     style=" box-sizing: border-box;font-family: var(--goglobe-body-font-family); font-weight:bold; color:white; padding: 0.75rem 1rem; background-color: var(--goglobe-main-color); border: 1px solid var(--goglobe-border-color); border-radius: 6px; transition: all 0.2s;align-self:flex-end"
                     onmouseover="this.style.opacity=0.7; this.style.cursor='pointer'"
                     onmouseout="this.style.opacity=1; this.style.cursor='auto'"
                     onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
-                    onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'"
-                    >
+                    onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'">
                     Lets GO
                 </button>
 
@@ -428,7 +435,6 @@
         let loginForm = document.getElementById("login-form");
         let nameInput = document.getElementById("name");
         let emailInput = document.getElementById("email");
-        let subjectInput = document.getElementById("subject");
         let desgInput = document.getElementById("desg");
         let phoneInput = document.getElementById("phone");
         let phoneContainer = document.getElementById("phone-container");
@@ -440,7 +446,7 @@
 
         // Validation regex patterns
         let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    let phoneRegex = /^[\d\s\-()]{7,15}$/;
+        let phoneRegex = /^[\d\s\-()]{7,15}$/;
 
         // Unified error display function
         function showError(message) {
@@ -470,7 +476,6 @@
             nameInput.classList.remove("input-error");
             emailInput.classList.remove("input-error");
             phoneContainer.classList.remove("input-error");
-            subjectInput.classList.remove("input-error");
             if (desgInput) {
                 desgInput.classList.remove("input-error");
             }
@@ -505,12 +510,7 @@
                 return false;
             }
 
-            // Validate subject
-            if (!subjectInput.value.trim()) {
-                subjectInput.classList.add("input-error");
-                showError("Subject is required");
-                return false;
-            }
+
 
             // Validate designation (if exists)
             if (desgInput && !desgInput.value.trim()) {
@@ -557,7 +557,6 @@
             let name = nameInput.value.trim();
             let email = emailInput.value.trim();
             let phone = currentCountry + phoneInput.value.trim().replace(/\D/g, '');
-            let subject = subjectInput.value.trim();
             let desg = desgInput ? desgInput.value.trim() : "None";
             let isHtmxRequest = document.getElementById("chatbox") !== null;
 
@@ -572,7 +571,6 @@
                     name: name,
                     email: email,
                     phone: phone,
-                    subject: subject,
                     desg: desg
                 }),
             })
@@ -585,7 +583,7 @@
 
                     if (isHtmxRequest) {
                         let text = await response.text();
-                htmx.swap('#chatbox', text, {swapStyle: 'innerHTML'});
+                        htmx.swap('#chatbox', text, { swapStyle: 'innerHTML' });
                     } else {
                         if (response.redirected) {
                             window.location.href = response.url;
@@ -601,7 +599,7 @@
         });
 
         // Real-time validation clearing
-        [nameInput, emailInput, phoneInput, subjectInput, desgInput].forEach(input => {
+        [nameInput, emailInput, phoneInput, desgInput].forEach(input => {
             if (input) {
                 input.addEventListener("input", function () {
                     hideError();
@@ -624,7 +622,7 @@
     }
 
     // Initialize the form when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         showReturnChatButton();
         initForm();
     });

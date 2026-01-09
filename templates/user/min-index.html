@@ -103,6 +103,27 @@
     padding: 20px;
     box-sizing: border-box;
 ">
+    <!-- Back and Close Buttons -->
+    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-bottom: 10px;">
+        <!-- Back Button -->
+        <div id="choice-back-btn" style="cursor: pointer; color: #FF5E00;" onmouseover="this.style.opacity=0.7"
+            onmouseout="this.style.opacity=1" onclick="goBackFromChoice()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M1.33333 5.66672L0.744165 6.25589L0.154999 5.66672L0.744165 5.07756L1.33333 5.66672ZM5.5 15.6667C5.27899 15.6667 5.06702 15.5789 4.91074 15.4226C4.75446 15.2664 4.66667 15.0544 4.66667 14.8334C4.66667 14.6124 4.75446 14.4004 4.91074 14.2441C5.06702 14.0879 5.27899 14.0001 5.5 14.0001V15.6667ZM4.91083 10.4226L0.744165 6.25589L1.9225 5.07756L6.08917 9.24422L4.91083 10.4226ZM0.744165 5.07756L4.91083 0.910889L6.08917 2.08922L1.9225 6.25589L0.744165 5.07756ZM1.33333 4.83339H10.0833V6.50005H1.33333V4.83339ZM10.0833 15.6667H5.5V14.0001H10.0833V15.6667ZM15.5 10.2501C15.5 11.6866 14.9293 13.0644 13.9135 14.0802C12.8977 15.096 11.5199 15.6667 10.0833 15.6667V14.0001C10.5758 14.0001 11.0634 13.9031 11.5184 13.7146C11.9734 13.5261 12.3868 13.2499 12.735 12.9017C13.0832 12.5535 13.3594 12.1401 13.5479 11.6851C13.7363 11.2301 13.8333 10.7425 13.8333 10.2501H15.5ZM10.0833 4.83339C11.5199 4.83339 12.8977 5.40407 13.9135 6.41989C14.9293 7.43572 15.5 8.81347 15.5 10.2501H13.8333C13.8333 9.7576 13.7363 9.26996 13.5479 8.81499C13.3594 8.36002 13.0832 7.94662 12.735 7.5984C12.3868 7.25019 11.9734 6.97396 11.5184 6.78551C11.0634 6.59705 10.5758 6.50005 10.0833 6.50005V4.83339Z"
+                    fill="#FF5800" />
+            </svg>
+        </div>
+        <!-- Close Button -->
+        <div id="choice-close-btn" style="cursor: pointer; color: #FF5E00;" onmouseover="this.style.opacity=0.7"
+            onmouseout="this.style.opacity=1" onclick="closeFromChoice()">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M1.66666 14.7916L0.208328 13.3333L6.04166 7.49992L0.208328 1.66659L1.66666 0.208252L7.49999 6.04159L13.3333 0.208252L14.7917 1.66659L8.95833 7.49992L14.7917 13.3333L13.3333 14.7916L7.49999 8.95825L1.66666 14.7916Z"
+                    fill="#FF5800" />
+            </svg>
+        </div>
+    </div>
     <div style="display:flex; flex-direction:row;gap:15px; margin-bottom:20px;">
         <svg width="57" height="56" viewBox="0 0 57 56" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -163,7 +184,7 @@
             Chat with me for quick<br>answers
         </button>
         <!-- Hidden Vapi Button Target -->
-        
+
         <!-- Voice Option -->
         <button onclick="chooseVoice()" style="
             width: 100%;
@@ -192,7 +213,7 @@
         </button>
     </div>
 
-    
+
 </div>
 
 <script>
@@ -215,141 +236,168 @@
         // Remove listeners to prevent duplicates if possible, or just hide overlay
         document.getElementById('choice-overlay').style.display = 'none';
     }
+
+    // Go back to onboarding from choice overlay
+    function goBackFromChoice() {
+        const messageArea = document.getElementById('messageArea');
+        const backendUrl = messageArea ? messageArea.dataset.backendUrl : '';
+        const chatbox = document.getElementById('chatbox');
+        const overlay = document.getElementById('choice-overlay');
+
+        // Hide the overlay first to prevent visual artifacts
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+
+        if (chatbox && backendUrl) {
+            // Use HTMX to load the onboarding page (same as the header's return button)
+            htmx.ajax('GET', backendUrl + '/min/onboarding', { target: '#chatbox', swap: 'innerHTML' });
+        }
+    }
+
+    // Close the chat widget from choice overlay
+    function closeFromChoice() {
+        // Trigger the main close button's click handler
+        const closeBtn = document.getElementById('close-chat');
+        if (closeBtn) {
+            closeBtn.click();
+        }
+    }
 </script>
 
 <!-- vapi script -->
 <script>
-  const assistant = "{{ assistant }}"; // Read from environment variable VAPI_ASSISTANT
-  const apiKey = "{{ api_key }}"; // Read from environment variable VAPI_KEY
+    const assistant = "{{ assistant }}"; // Read from environment variable VAPI_ASSISTANT
+    const apiKey = "{{ api_key }}"; // Read from environment variable VAPI_KEY
 
-  var vapiInstance = null;
+    var vapiInstance = null;
 
-  const buttonConfig = {
-    position: "top-left", // "bottom" | "top" | "left" | "right" | "top-right" | "top-left" | "bottom-left" | "bottom-right"
-    offset: "10px", // decide how far the button should be from the edge
-    width: "20px", // min-width of the button
-    height: "30px", // height of the button
-    idle: {
-      // button state when the call is not active.
-      type: "pill", // or "round"
-      title: `Talk with Ana by voice for`, // only required in case of Pill
-      subtitle: "detailed help", // only required in case of pill
-      icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
-    },
-    loading: {
-      // button state when the call is connecting
-      type: "pill", // or "round"
-      title: "Connecting...", // only required in case of Pill
-      subtitle: " ", // only required in case of pill
-      icon: `https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg`,
-    },
-    active: {
-      // button state when the call is in progress or active.
-      type: "pill", // or "round"
-      title: "Call is in progress...Click to cancel", // only required in case of Pill
-      subtitle: " ", // only required in case of pill
-      icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
-    },
-  };
+    const buttonConfig = {
+        position: "top-left", // "bottom" | "top" | "left" | "right" | "top-right" | "top-left" | "bottom-left" | "bottom-right"
+        offset: "10px", // decide how far the button should be from the edge
+        width: "20px", // min-width of the button
+        height: "30px", // height of the button
+        idle: {
+            // button state when the call is not active.
+            type: "pill", // or "round"
+            title: `Talk with Ana by voice for`, // only required in case of Pill
+            subtitle: "detailed help", // only required in case of pill
+            icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
+        },
+        loading: {
+            // button state when the call is connecting
+            type: "pill", // or "round"
+            title: "Connecting...", // only required in case of Pill
+            subtitle: " ", // only required in case of pill
+            icon: `https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg`,
+        },
+        active: {
+            // button state when the call is in progress or active.
+            type: "pill", // or "round"
+            title: "Call is in progress...Click to cancel", // only required in case of Pill
+            subtitle: " ", // only required in case of pill
+            icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
+        },
+    };
 
-  (function (d, t) {
-    var g = document.createElement(t),
-      s = d.getElementsByTagName(t)[0];
-    g.src =
-      "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
-    g.defer = true;
-    g.async = true;
-    s.parentNode.insertBefore(g, s);
+    (function (d, t) {
+        var g = document.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        g.src =
+            "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+        g.defer = true;
+        g.async = true;
+        s.parentNode.insertBefore(g, s);
 
-    g.onload = function () {
-      const vapi = window.vapiSDK.run({
+        g.onload = function () {
+            const vapi = window.vapiSDK.run({
                 apiKey: apiKey,
                 assistant: assistant,
                 config: buttonConfig,
-      });
+            });
 
-      if (vapi) {
-        window.vapiSDK.vapi = vapi;
-        vapiInstance = vapi;
+            if (vapi) {
+                window.vapiSDK.vapi = vapi;
+                vapiInstance = vapi;
 
-        vapiInstance.on("speech-start", () => {
-          console.log("Speech has started");
-        });
+                vapiInstance.on("speech-start", () => {
+                    console.log("Speech has started");
+                });
 
-        vapiInstance.on("speech-end", () => {
-          console.log("Speech has ended");
-        });
+                vapiInstance.on("speech-end", () => {
+                    console.log("Speech has ended");
+                });
 
-        vapiInstance.on("call-start", () => {
-          console.log("Call has started");
-        });
+                vapiInstance.on("call-start", () => {
+                    console.log("Call has started");
+                });
 
-        vapiInstance.on("call-end", () => {
-          console.log("Call has stopped");
-        });
+                vapiInstance.on("call-end", () => {
+                    console.log("Call has stopped");
+                });
 
-        vapiInstance.on("volume-level", (volume) => {
-          console.log(`Assistant volume level: ${volume}`);
-        });
+                vapiInstance.on("volume-level", (volume) => {
+                    console.log(`Assistant volume level: ${volume}`);
+                });
 
-        // Function calls and transcripts will be sent via messages
-        vapiInstance.on("message", (message) => {
-          console.log(message);
-        });
+                // Function calls and transcripts will be sent via messages
+                vapiInstance.on("message", (message) => {
+                    console.log(message);
+                });
 
-        vapiInstance.on("error", (e) => {
-          console.error(e);
-        });
-      }
-    };
-  })(document, "script");
+                vapiInstance.on("error", (e) => {
+                    console.error(e);
+                });
+            }
+        };
+    })(document, "script");
 
-  function logUserAction() {
-    // Function to log the user action
+    function logUserAction() {
+        // Function to log the user action
 
-    if (window.vapiSDK.vapi)
-      window.vapiSDK.vapi.send({
-        type: "add-message",
-        message: {
-          role: "system",
-          content: "The user has pressed the button, say peanuts",
-        },
-      });
-    else {
-      console.log(window.vapiSDK, vapiInstance);
+        if (window.vapiSDK.vapi)
+            window.vapiSDK.vapi.send({
+                type: "add-message",
+                message: {
+                    role: "system",
+                    content: "The user has pressed the button, say peanuts",
+                },
+            });
+        else {
+            console.log(window.vapiSDK, vapiInstance);
+        }
     }
-  }
 
-  // Move the full Vapi support button element (including its children) into #target
-  (function moveVapiSupportBtnIntoTargetWhenReady() {
-    const TARGET_ID = "call-btn-target";
-    const BTN_ID = "vapi-support-btn";
+    // Move the full Vapi support button element (including its children) into #target
+    (function moveVapiSupportBtnIntoTargetWhenReady() {
+        const TARGET_ID = "call-btn-target";
+        const BTN_ID = "vapi-support-btn";
 
-    const tryMove = () => {
-      const target = document.getElementById(TARGET_ID);
-      const btn = document.getElementById(BTN_ID);
-      // Don't make it a submit button to avoid submitting the form
-      if (btn && btn.tagName.toLowerCase() === "button") {
-          btn.setAttribute("type", "button");
-      }
+        const tryMove = () => {
+            const target = document.getElementById(TARGET_ID);
+            const btn = document.getElementById(BTN_ID);
+            // Don't make it a submit button to avoid submitting the form
+            if (btn && btn.tagName.toLowerCase() === "button") {
+                btn.setAttribute("type", "button");
+            }
 
-      if (!target || !btn) return false;
-      if (btn.parentElement === target) return true;
-      target.appendChild(btn); // appendChild moves the existing node (keeps all content)
-      return true;
-    };
+            if (!target || !btn) return false;
+            if (btn.parentElement === target) return true;
+            target.appendChild(btn); // appendChild moves the existing node (keeps all content)
+            return true;
+        };
 
-    if (tryMove()) return;
+        if (tryMove()) return;
 
-    const obs = new MutationObserver(() => {
-      if (tryMove()) obs.disconnect();
-    });
+        const obs = new MutationObserver(() => {
+            if (tryMove()) obs.disconnect();
+        });
 
-    obs.observe(document.documentElement, { childList: true, subtree: true });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
 
-    // Safety timeout to avoid observing forever
-    setTimeout(() => obs.disconnect(), 15000);
-  })();
+        // Safety timeout to avoid observing forever
+        setTimeout(() => obs.disconnect(), 15000);
+    })();
 </script>
 
 {% endblock %}
@@ -444,23 +492,23 @@
         const username = messageArea.dataset.username;
         console.log("init")
         // Use the backendUrl from data attribute
-    const socket = io(backendUrl, {withCredentials: true});
+        const socket = io(backendUrl, { withCredentials: true });
 
-    socket.on('connect', function() {
+        socket.on('connect', function () {
             console.log('Socket connected to room:', roomId);
-        socket.emit('join_min', {room: roomId});
+            socket.emit('join_min', { room: roomId });
         });
 
-    socket.on('new_message', function(data) {
+        socket.on('new_message', function (data) {
             console.log("new_message received:", data);
             appendMessage(data);
-    }, {room: roomId});
+        }, { room: roomId });
 
-    socket.on('disconnect', function() {
+        socket.on('disconnect', function () {
             console.log('Socket disconnected');
         });
 
-    socket.on('error', function(error) {
+        socket.on('error', function (error) {
             console.error('Socket error:', error);
         });
     }
@@ -560,7 +608,7 @@ overflow-wrap: break-word
     scrollToBottom();
 
     // Initialize everything when the page loads
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         showReturnChatButton();
         initChat();
         scrollToBottom();

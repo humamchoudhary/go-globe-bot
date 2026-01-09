@@ -180,9 +180,22 @@ def auth_user():
     name = data.get('name')
     email = data.get('email', "")
     phone = data.get('phone', " ")
-    subject = data.get('subject')
     desg = data.get('desg', " ")
     is_anon = data.get('anonymous')
+    
+    # Map the login path to ERP subject
+    subject_map = {
+        'Project': 'I need services',
+        'Partnership': 'Partnerships', 
+        'Job': 'Job'
+    }
+    
+    # Get subject from the button click path (stored in last_visit)
+    last_visit = session.get('last_visit', '')
+    # Extract the subject key from path like '/min/login/Project'
+    path_parts = last_visit.split('/')
+    subject_key = path_parts[-1] if path_parts else 'Project'
+    subject = subject_map.get(subject_key, 'I need services')
     
     user_ip = request.headers.get("X-Real-IP", request.remote_addr).split(",")[0]
     user_service = UserService(current_app.db)
