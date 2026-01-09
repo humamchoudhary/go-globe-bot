@@ -138,7 +138,9 @@ def login(subject):
 
     elif request.method == "POST":
         session["initial_msg"] = request.form.get("initial_msg")
-        subject="I need services"
+        # Get subject from POST data (sent by button)
+        subject = request.form.get("subject", "I need services")
+        session["subject"] = subject
         try:
             ip = request.headers.get("X-Real-IP", request.remote_addr)
             ip = ip.split(",")[0]
@@ -183,19 +185,8 @@ def auth_user():
     desg = data.get('desg', " ")
     is_anon = data.get('anonymous')
     
-    # Map the login path to ERP subject
-    subject_map = {
-        'Project': 'I need services',
-        'Partnership': 'Partnerships', 
-        'Job': 'Job'
-    }
-    
-    # Get subject from the button click path (stored in last_visit)
-    last_visit = session.get('last_visit', '')
-    # Extract the subject key from path like '/min/login/Project'
-    path_parts = last_visit.split('/')
-    subject_key = path_parts[-1] if path_parts else 'Project'
-    subject = subject_map.get(subject_key, 'I need services')
+    # Get subject from session (stored when button was clicked in login route)
+    subject = session.get('subject', 'I need services')
     
     user_ip = request.headers.get("X-Real-IP", request.remote_addr).split(",")[0]
     user_service = UserService(current_app.db)
