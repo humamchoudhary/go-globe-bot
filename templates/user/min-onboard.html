@@ -60,7 +60,14 @@
   <!-- Buttons Container -->
   <div
     style="padding-left: 3px; height: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 1rem; width: 100%;">
+    {# Display label mapping - shows friendly labels, sends original values to backend #}
+    {% set display_labels = {
+    'I need services': 'Start a Project',
+    'Partnerships': 'Explore Partnership',
+    'Job': 'View Open Jobs'
+    } %}
     {% for subject in settings['subjects'] %}
+    {% set display_label = display_labels.get(subject, subject) %}
     <button hx-post="{{settings['backend_url']}}/min/login"
       hx-vals='{"initial_msg": "I am interested in {{ subject }}", "subject": "{{ subject }}"}' hx-target="#chatbox"
       hx-trigger="click" hx-swap="innerHTML" style="
@@ -77,7 +84,7 @@
                 transition: all 0.1s ease-in-out;
                 text-align: left;
             " onMouseOver="this.style.opacity=0.9" onMouseOut="this.style.opacity=1">
-      {{ subject }}
+      {{ display_label }}
     </button>
     {% endfor %}
   </div>
