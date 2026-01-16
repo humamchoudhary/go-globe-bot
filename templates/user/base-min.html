@@ -42,6 +42,10 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   /* vapi button styles */
@@ -61,6 +65,28 @@
     padding: 0 !important;
     transform: none !important;
   }
+
+  * {
+    font-family: var(--goglobe-body-font-family);
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    /*-webkit-box-shadow: 0 0 0 1000px var(--goglobe-main-color) inset !important;*/
+    box-shadow: 0 0 0 1000px var(--goglobe-input-color) inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+    background-color: var(--goglobe-input-color) !important;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
 
   #vapi-title {
     font-size: 15px !important;

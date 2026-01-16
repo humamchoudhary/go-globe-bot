@@ -446,14 +446,8 @@
 
         // Unified error display function
         function showError(message) {
-            // Special case for phone error to match Figma
-            if (message.includes("numbers only")) {
-                headerText.innerHTML = "Please enter numbers<br>only (no spaces or symbols)";
-                headerText.style.color = "#FF0000"; // Red color
-            } else {
-                errorMessage.textContent = message;
-                errorMessage.style.display = "block";
-            }
+            headerText.innerHTML = message;
+            headerText.style.color = "#FE0000"; // Red color
         }
 
         function hideError() {
