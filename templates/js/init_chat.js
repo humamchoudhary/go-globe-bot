@@ -293,13 +293,10 @@ function initializeChatbot() {
     width: 8px;
     height: 8px;
     cursor: nw-resize;
-    opacity: 0.4;
-    transition: opacity 0.2s ease;
+    opacity: 1;
   }
 
-  .resize-indicator:hover {
-    opacity: 0.8;
-  }
+  
 
   .resize-indicator::before,
   .resize-indicator::after {
@@ -311,7 +308,7 @@ function initializeChatbot() {
   .resize-indicator::before {
     top: 1px;
     left: 0;
-    width: 6px;
+    width: 10px;
     height: 1px;
   }
 
@@ -319,7 +316,7 @@ function initializeChatbot() {
     top: 0;
     left: 1px;
     width: 1px;
-    height: 6px;
+    height: 10px;
   }
 
   .resize-indicator:hover {
@@ -536,9 +533,9 @@ function initializeChatbot() {
   </div>
 
   <!-- Resize handles -->
-  <div class="resize-handle resize-handle-nw" id="resize-nw"></div>
-  <div class="resize-handle resize-handle-n" id="resize-n"></div>
-  <div class="resize-handle resize-handle-w" id="resize-w"></div>
+  <div class="resize-handle resize-handle-nw" title="resize window" id="resize-nw"></div>
+  <div class="resize-handle resize-handle-n" title="resize window" id="resize-n"></div>
+  <div class="resize-handle resize-handle-w" title="resize window" id="resize-w"></div>
   <div class="resize-indicator"></div>
 </div>
 
