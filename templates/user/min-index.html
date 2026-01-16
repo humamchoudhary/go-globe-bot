@@ -52,13 +52,14 @@
                     <img src="https://gobot.go-globe.dev/static/svg/enter.svg" alt=""
                         style="color: #fff; width: 21px; height: 21px; filter: invert(1);">
                 </button>
-                <div id="ping-admin-btn"
-                    style="display: flex;align-items: center;justify-content: center;border-radius: 5px;background-color: var(--goglobe-main-color);transition: 200ms;width: 44px;height: 45px;cursor: pointer;opacity: 1;"
-                    title="Request Assistance" onclick="pingAdmin()" onmouseover="this.style.opacity='0.9';"
+                <!-- <div id="ping-admin-btn"
+                    style="display: flex;align-items: center;justify-content: center;border-radius: 5px;background-color: var(--goglobe-main-color);width: 44px;height: 45px;cursor: pointer;opacity: 1;"
+                    title="Request Assistance" onmouseover="this.style.opacity='0.9';"
                     onmouseout="this.style.opacity='1';">
-                    <div id="second-call-btn-target"></div>
-                    <!-- <img src="https://gobot.go-globe.dev/static/svg/call-white.svg" alt="" > -->
-                </div>
+                    
+                    
+                </div> -->
+                <div id="second-call-btn-target"></div>
             </div>
         </div>
         {% endif %}
@@ -179,6 +180,18 @@
     }
 
     function chooseChat() {
+        // Click the Vapi primary button before anything else
+        const vapiBtn = document.getElementById('vapi-support-btn-primary');
+        if (
+            vapiBtn &&
+            vapiBtn.title &&
+            vapiBtn.title.toLowerCase().includes('click to cancel')
+        ) {
+            vapiBtn.click();
+        }
+        else {
+            console.log("Vapi button not found or not in active call state.");
+        }
         const roomId = getRoomId();
         if (roomId) localStorage.setItem('choice_made_' + roomId, 'true');
         document.getElementById('choice-overlay').style.display = 'none';
@@ -233,7 +246,6 @@
         }
     }
 </script>
-
 <!-- vapi script -->
 <script>
     (function () {
@@ -277,22 +289,25 @@
             width: "44px",
             height: "45px",
             idle: {
-                type: "button",
+                type: "round",
                 title: "Call support",
                 subtitle: "",
-                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-call.svg",
+                color: "#FFFFFF",
+                icon: "https://gobot.go-globe.dev/static/svg/call-white.svg",
             },
             loading: {
-                type: "button",
+                type: "round",
                 title: "Connecting...",
                 subtitle: "",
-                icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg",
+                color: "#FFFFFF",
+                icon: "https://gobot.go-globe.dev/static/svg/loader-white.svg",
             },
             active: {
-                type: "button",
+                type: "round",
                 title: "End call",
                 subtitle: "",
-                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg",
+                color: "#FFFFFF",
+                icon: "https://gobot.go-globe.dev/static/svg/cut-call-white.svg",
             },
         };
 
