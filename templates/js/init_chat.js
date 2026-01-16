@@ -167,8 +167,8 @@ function initializeChatbot() {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 350px;
-  min-width: 350px;
+  width: 317px;
+  min-width: 317px;
   max-width: 80vw;
   background-color: white;
   border-radius: 10px;
@@ -293,13 +293,10 @@ function initializeChatbot() {
     width: 8px;
     height: 8px;
     cursor: nw-resize;
-    opacity: 0.4;
-    transition: opacity 0.2s ease;
+    opacity: 1;
   }
 
-  .resize-indicator:hover {
-    opacity: 0.8;
-  }
+  
 
   .resize-indicator::before,
   .resize-indicator::after {
@@ -311,7 +308,7 @@ function initializeChatbot() {
   .resize-indicator::before {
     top: 1px;
     left: 0;
-    width: 6px;
+    width: 10px;
     height: 1px;
   }
 
@@ -319,7 +316,7 @@ function initializeChatbot() {
     top: 0;
     left: 1px;
     width: 1px;
-    height: 6px;
+    height: 10px;
   }
 
   .resize-indicator:hover {
@@ -453,6 +450,7 @@ function initializeChatbot() {
     justify-content: space-between;
     align-items: center;
     gap: 10px;
+    margin-top: 
   "
 >
   <div class="drag-handle"></div>
@@ -465,7 +463,7 @@ function initializeChatbot() {
     hx-swap="innerHTML"
     id="return-chat"
     style="
-      color: #ff5800;
+      color: var(--goglobe-main-color);
     "
     onMouseOver="this.style.opacity=0.7"
     onMouseOut="this.style.opacity=1"
@@ -478,13 +476,11 @@ function initializeChatbot() {
   <!-- Close Button -->
   <div
     id="close-chat"
-    style="
-color: #ff5800;
-    "
+    style="color: var(--goglobe-main-color);"
     onMouseOver="this.style.opacity=0.7"
     onMouseOut="this.style.opacity=1"
   >
-<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.66666 14.7916L0.208328 13.3333L6.04166 7.49992L0.208328 1.66659L1.66666 0.208252L7.49999 6.04159L13.3333 0.208252L14.7917 1.66659L8.95833 7.49992L14.7917 13.3333L13.3333 14.7916L7.49999 8.95825L1.66666 14.7916Z" fill="#FF5800"/>
 </svg>
   </div>
@@ -537,9 +533,9 @@ color: #ff5800;
   </div>
 
   <!-- Resize handles -->
-  <div class="resize-handle resize-handle-nw" id="resize-nw"></div>
-  <div class="resize-handle resize-handle-n" id="resize-n"></div>
-  <div class="resize-handle resize-handle-w" id="resize-w"></div>
+  <div class="resize-handle resize-handle-nw" title="resize window" id="resize-nw"></div>
+  <div class="resize-handle resize-handle-n" title="resize window" id="resize-n"></div>
+  <div class="resize-handle resize-handle-w" title="resize window" id="resize-w"></div>
   <div class="resize-indicator"></div>
 </div>
 

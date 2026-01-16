@@ -92,7 +92,8 @@
 
     <p id="header-instruction-text"
         style="color: #FFF; font-size: 16px; font-style: normal; font-weight: 400; line-height: 20px; letter-spacing: -0.32px;">
-        Let us know about you!
+        Thank you!<br>
+        Let us know a bit about you!
     </p>
 </div>
 
@@ -104,7 +105,7 @@
             <form id="login-form" style="display:flex; flex-direction:column; gap:10px" novalidate>
                 <div style=" width: 100%;">
                     <input type="text"
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: 700; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold' id="name" name="name"
                         placeholder="Your Name*" autocapitalize="off" autocomplete="name" required minlength="2"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
@@ -114,7 +115,7 @@
                 {% if default_subject.lower() != "job" %}
                 <div style=" width: 100%;">
                     <input type="text"
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: 700; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold' id="desg" name="desg"
                         placeholder="Designation*" autocapitalize="off"
                         onfocus="this.style.border = '1px solid var(--goglobe-main-color)';"
@@ -124,7 +125,7 @@
 
                 <div style=" width: 100%;">
                     <input type="email"
-                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: bold; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
+                        style="font-family: var(--goglobe-body-font-family); width: 100%; border-radius: 6px; outline: none; border: 1px solid var(--goglobe-site-bg-color); padding: 12px; color: white; font-weight: 700; transition: all 0.2s; background-color: var(--goglobe-input-color); box-sizing: border-box;"
                         class='placeholder-[var(--goglobe-body-color)] placeholder-bold' id="email" name="email"
                         placeholder="Email Address*" autocapitalize="off" autocomplete="email" required
                         pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
@@ -136,7 +137,7 @@
                 <!-- Enhanced Phone Input -->
                 <div style=" width: 100%;">
                     <div class="phone-input-container" id="phone-container" style="width: 100%;">
-                        <select class="country-selector" id="country-selector" name="country-code" style="font-family: 'Twemoji Country Flags', sans-serif; padding: 12px; background: transparent; border: none; color: white;background-color:var(--goglobe-input-color); font-weight: bold; cursor: pointer; outline: none; width: 30%; 
+                        <select class="country-selector" id="country-selector" name="country-code" style="font-family: 'Twemoji Country Flags', sans-serif; padding: 12px 9px; background: transparent; border: none; color: var(--goglobe-main-color);background-color:var(--goglobe-input-color); font-weight: bold; cursor: pointer; outline: none; width: 32%; 
                           ">
                             <!-- Countries will be populated by JavaScript -->
                         </select>
@@ -150,13 +151,8 @@
 
 
                 <button type="submit" id="login-btn"
-                    style=" box-sizing: border-box;font-family: var(--goglobe-body-font-family); font-weight:bold; color:white; padding: 0.75rem 1rem; background-color: var(--goglobe-main-color); border: 1px solid var(--goglobe-border-color); border-radius: 6px; transition: all 0.2s;align-self:flex-end"
                     onmouseover="this.style.opacity=0.7; this.style.cursor='pointer'"
-                    onmouseout="this.style.opacity=1; this.style.cursor='auto'"
-                    onmousedown="this.style.backgroundColor='var(--goglobe-site-bg)'"
-                    onmouseup="this.style.backgroundColor='var(--goglobe-site-bg)'">
-                    Lets GO
-                </button>
+                    onmouseout="this.style.opacity=1; this.style.cursor='auto'">Continue</button>
 
                 <!-- Single Error Message Display -->
                 <div id="error-message" class="error-text" style="display:none;"></div>
@@ -450,14 +446,8 @@
 
         // Unified error display function
         function showError(message) {
-            // Special case for phone error to match Figma
-            if (message.includes("numbers only")) {
-                headerText.innerHTML = "Please enter numbers<br>only (no spaces or symbols)";
-                headerText.style.color = "#FF0000"; // Red color
-            } else {
-                errorMessage.textContent = message;
-                errorMessage.style.display = "block";
-            }
+            headerText.innerHTML = message;
+            headerText.style.color = "#FE0000"; // Red color
         }
 
         function hideError() {
@@ -466,7 +456,7 @@
 
             // Reset Header Text
             if (headerText) {
-                headerText.innerHTML = "Let us know about you!";
+                headerText.innerHTML = "Thank you! <br> Let us know a bit about you!";
                 headerText.style.color = "#FFF";
             }
         }

@@ -26,64 +26,40 @@
 
         {% if chat %}
         <div
-            style="margin-top: auto; position: sticky; bottom: -10px; padding: 10px 0px 0px 0px; background-color: var(--goglobe-site-bg-color);">
-            <div style="display: flex; flex-direction: row; width: 100%; gap: 10px">
-                <div style="width: 100%; height: fit-content; position: relative">
-                    <textarea rows="1" name="message" placeholder="Send a message..." id="fn__chat_textarea" style="
-    min-height: 0px;
-    margin-bottom: 0px;
-    border-radius: 6px;
-    box-sizing: border-box;
-    background-color: transparent;
-    outline: none;
-    display: block;
-    width: 100%;
-    padding: 14px 20px 12px;
-    padding-right: 72px;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 22px;
-    max-height: 170px;
-    font-family: var(--goglobe-heading-font-family);
-    resize: none;
-    overflow-y: hidden;
-    color: var(--goglobe-heading-color);
-    transition: border-color 0.2s ease;" onkeyup="handleKeyPress(event); checkInputValue();"></textarea>
-
-                    <style>
-                        #fn__chat_textarea {
-                            border: 2px solid var(--goglobe-border-color);
-                        }
-
-                        #fn__chat_textarea:focus {
-                            border-color: var(--goglobe-main-color);
-                        }
-                    </style>
-                    <button id="send-btn"
-                        style="position: absolute; width: 50px; height: 35px; bottom: 8px; right: 8px; padding: 0; margin: 0; border-radius: 5px; outline: none; cursor: pointer; border: none; background-color: var(--goglobe-main-color); display: flex; align-items: center; justify-content: center; color: white; transition: all 0.3s ease;"
-                        onclick="sendMessage()">
-                        <img src="{{ settings['backend_url'] }}{{ url_for('static', filename='svg/enter.svg') }}" alt=""
-                            style="color: #fff; width: 21px; height: 21px; filter: invert(1);" />
-                    </button>
-                </div>
-                <div id="ping-admin-btn" style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.25rem;
-            border-radius: 9999px;
-            border: 0.5px solid var(--goglobe-border-color);
-            transition: all 200ms;
-            position: relative;
-            width: 40px;
-            height:40px;
-            cursor: pointer;
-          " title="Request Assistance" onclick="pingAdmin()"
-                    onmouseover="this.style.backgroundColor='var(--goglobe-main-color)'; this.style.borderColor='var(--goglobe-hover-color)';"
-                    onmouseout="this.style.backgroundColor=''; this.style.borderColor='var(--goglobe-border-color)';">
-                    <img style="border-radius: 9999px; min-width: 40px"
-                        src="{{ settings['backend_url'] }}{{ url_for('static', filename='img/ana.jpg') }}" />
-                </div>
+            style="margin-top: auto;position: sticky;bottom: 0;padding: 10px 0px 0px 0px;background-color: var(--goglobe-site-bg-color);">
+            <div style="display: flex; flex-direction: row; width: 100%; gap: 10px; align-items: center">
+                <textarea rows="1" name="message" placeholder="Send a message..." id="fn__chat_textarea" style="
+                                    border-radius: 6px;
+                                    box-sizing: border-box;
+                                    background-color: transparent;
+                                    outline: none;
+                                    display: block;
+                                    width: 70%;
+                                    padding: 12px 12px 12px;
+                                    font-size: 14px;
+                                    font-weight: 400;
+                                    line-height: 22px;
+                                    max-height: 170px;
+                                    font-family: var(--goglobe-heading-font-family);
+                                    resize: none;
+                                    overflow-y: hidden;
+                                    color: var(--goglobe-heading-color);
+                                    transition: border-color 0.2s ease;
+                                    " onkeyup="handleKeyPress(event); checkInputValue();"></textarea>
+                <button id="send-btn"
+                    style="width: 50px;height: 45px;padding: 0;margin: 0;border-radius: 5px;outline: none;cursor: pointer;border: none;background-color: var(--goglobe-main-color);color: white;transition: all 0.3s ease;"
+                    onclick="sendMessage()">
+                    <img src="https://gobot.go-globe.dev/static/svg/enter.svg" alt=""
+                        style="color: #fff; width: 21px; height: 21px; filter: invert(1);">
+                </button>
+                <!-- <div id="ping-admin-btn"
+                    style="display: flex;align-items: center;justify-content: center;border-radius: 5px;background-color: var(--goglobe-main-color);width: 44px;height: 45px;cursor: pointer;opacity: 1;"
+                    title="Request Assistance" onmouseover="this.style.opacity='0.9';"
+                    onmouseout="this.style.opacity='1';">
+                    
+                    
+                </div> -->
+                <div id="second-call-btn-target"></div>
             </div>
         </div>
         {% endif %}
@@ -151,37 +127,46 @@
                 fill="#3B3731" />
         </svg>
         <p
-            style="color: #FFF; font-size: 16px; font-style: normal; font-weight: 400; line-height: 20px; letter-spacing: -0.32px;">
+            style="color: #FFF; font-size: 16px; font-style: normal; font-weight: 400; line-height: 20px; letter-spacing: -0.32px; margin-top: 9px;">
             Thanks {{ username }}!
-            <br />
-            Choose how you want to continue:
-        </p>
+            <br />Choose how you want to continue:</p>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
         <!-- Chat Option -->
-        <button onclick="chooseChat()" class="chatbot-options-button" onMouseOver="this.style.opacity=0.8" onMouseOut="this.style.opacity=1">
-            <span style="color: #FF5E00;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-            </span>
+        <button onclick="chooseChat()" class="chatbot-options-button" onMouseOver="this.style.opacity=0.8"
+            onMouseOut="this.style.opacity=1">
+            <svg width="16" height="16" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M10.2916 13.4583C13.277 13.4583 14.7701 13.4583 15.6971 12.5305C16.625 11.6035 16.625 10.1104 16.625 7.12501C16.625 4.13963 16.625 2.64655 15.6971 1.71951C14.7701 0.791672 13.277 0.791672 10.2916 0.791672H7.12496C4.13958 0.791672 2.6465 0.791672 1.71946 1.71951C0.791626 2.64655 0.791626 4.13963 0.791626 7.12501C0.791626 10.1104 0.791626 11.6035 1.71946 12.5305C2.23642 13.0483 2.92913 13.277 3.95829 13.3776"
+                    stroke="#FF5805" stroke-width="1.58333" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M8.70825 7.125V7.13292" stroke="#FF5805" stroke-width="1.58333" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path d="M5.54163 7.125V7.13292" stroke="#FF5805" stroke-width="1.58333" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path d="M11.8749 7.125V7.13292" stroke="#FF5805" stroke-width="1.58333" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path
+                    d="M10.2915 13.4583C9.31303 13.4583 8.23478 13.8542 7.25074 14.3648C5.66899 15.1858 4.87812 15.5966 4.48862 15.3346C4.09912 15.0733 4.17274 14.2619 4.32078 12.6398L4.35403 12.2708"
+                    stroke="#FF5805" stroke-width="1.58333" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+
             Chat with me for quick<br>answers
         </button>
-        <!-- Hidden Vapi Button Target -->
+        
 
         <!-- Voice Option -->
-        <button  class="chatbot-options-button" onMouseOver="this.style.opacity=0.8" onMouseOut="this.style.opacity=1">
+        <button class="chatbot-options-button" onMouseOver="this.style.opacity=0.8" onMouseOut="this.style.opacity=1">
             <span style="color: #FF5E00;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
-                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                    </path>
+                        d="M7.76059 4.30935L5.0542 1.18554C4.7422 0.825559 4.1702 0.827159 3.80781 1.19034L1.58222 3.4198C0.919822 4.08296 0.730223 5.0677 1.11342 5.85726C3.4027 10.5969 7.22542 14.4248 11.9622 16.7206C12.751 17.1038 13.735 16.9142 14.3973 16.251L16.6437 14.0008C17.0077 13.6368 17.0085 13.0616 16.6453 12.7496L13.5094 10.0578C13.1814 9.77622 12.6718 9.81302 12.343 10.1426L11.2518 11.2353C11.1959 11.2939 11.1224 11.3325 11.0424 11.3452C10.9625 11.3579 10.8806 11.344 10.8094 11.3057C9.02573 10.2787 7.54618 8.79726 6.52139 7.01239C6.48301 6.94099 6.46912 6.85898 6.48183 6.77893C6.49455 6.69887 6.53318 6.6252 6.59179 6.56921L7.67979 5.48048C8.00938 5.1493 8.04538 4.63813 7.76059 4.30935Z"
+                        stroke="#FF5805" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </span>
+            <!-- Hidden Vapi Button Target -->
             <div id="call-btn-target"></div>
+            
         </button>
     </div>
 
@@ -195,6 +180,18 @@
     }
 
     function chooseChat() {
+        // Click the Vapi primary button before anything else
+        const vapiBtn = document.getElementById('vapi-support-btn-primary');
+        if (
+            vapiBtn &&
+            vapiBtn.title &&
+            vapiBtn.title.toLowerCase().includes('click to cancel')
+        ) {
+            vapiBtn.click();
+        }
+        else {
+            console.log("Vapi button not found or not in active call state.");
+        }
         const roomId = getRoomId();
         if (roomId) localStorage.setItem('choice_made_' + roomId, 'true');
         document.getElementById('choice-overlay').style.display = 'none';
@@ -211,6 +208,19 @@
 
     // Go back to onboarding from choice overlay
     function goBackFromChoice() {
+        // Click the Vapi primary button before anything else
+        const vapiBtn = document.getElementById('vapi-support-btn-primary');
+        if (
+            vapiBtn &&
+            vapiBtn.title &&
+            vapiBtn.title.toLowerCase().includes('click to cancel')
+        ) {
+            vapiBtn.click();
+        }
+        else {
+            console.log("Vapi button not found or not in active call state.");
+        }
+
         const messageArea = document.getElementById('messageArea');
         const backendUrl = messageArea ? messageArea.dataset.backendUrl : '';
         const chatbox = document.getElementById('chatbox');
@@ -236,75 +246,74 @@
         }
     }
 </script>
-
 <!-- vapi script -->
 <script>
-    // Idempotent Vapi init
     (function () {
         console.log("Loading Vapi script...");
 
-        // Avoid global const collisions across HTMX swaps
         if (typeof window.VAPI_ASSISTANT === "undefined") window.VAPI_ASSISTANT = "{{ assistant}}";
         if (typeof window.VAPI_KEY === "undefined") window.VAPI_KEY = "{{ api_key}}";
-        console.log("Assistant:", window.VAPI_ASSISTANT, window.VAPI_KEY);
 
-        window.vapiInstance = window.vapiInstance || null;
+        const vapiSrc = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+        const DEFAULT_VAPI_BUTTON_ID = "vapi-support-btn";
 
-        const buttonConfig = {
-        position: "top-left", // "bottom" | "top" | "left" | "right" | "top-right" | "top-left" | "bottom-left" | "bottom-right"
-        offset: "10px", // decide how far the button should be from the edge
-        width: "20px", // min-width of the button
-        height: "30px", // height of the button
+        // Two different configs (edit as you like)
+        const primaryButtonConfig = {
+            position: "top-left",
+            offset: "10px",
+            width: "20px",
+            height: "30px",
             idle: {
-            // button state when the call is not active.
-            type: "pill", // or "round"
-            title: `Talk with Ana by voice for`, // only required in case of Pill
-            subtitle: "detailed help", // only required in case of pill
-                icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
+                type: "pill",
+                title: "Talk with Ana by voice",
+                subtitle: "detailed help",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone.svg",
             },
             loading: {
-            // button state when the call is connecting
-            type: "pill", // or "round"
-            title: "Connecting...", // only required in case of Pill
-            subtitle: " ", // only required in case of pill
-                icon: `https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg`,
+                type: "pill",
+                title: "Connecting...",
+                subtitle: " ",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg",
             },
             active: {
-            // button state when the call is in progress or active.
-            type: "pill", // or "round"
-            title: "Call is in progress...Click to cancel", // only required in case of Pill
-            subtitle: " ", // only required in case of pill
-                icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
+                type: "pill",
+                title: "Call in progress (click to cancel)",
+                subtitle: " ",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg",
             },
         };
 
-        function initVapi() {
-            const vapi = window.vapiSDK?.run?.({
-                apiKey: window.VAPI_KEY,
-                assistant: window.VAPI_ASSISTANT,
-                config: buttonConfig,
-            });
+        const secondaryButtonConfig = {
+            position: "top-left",
+            offset: "0px",
+            width: "44px",
+            height: "45px",
+            idle: {
+                type: "round",
+                title: "Call support",
+                subtitle: "",
+                color: "#FFFFFF",
+                icon: "https://gobot.go-globe.dev/static/svg/call-white.svg",
+            },
+            loading: {
+                type: "round",
+                title: "Connecting...",
+                subtitle: "",
+                color: "#FFFFFF",
+                icon: "https://gobot.go-globe.dev/static/svg/loader-white.svg",
+            },
+            active: {
+                type: "round",
+                title: "End call",
+                subtitle: "",
+                color: "#FFFFFF",
+                icon: "https://gobot.go-globe.dev/static/svg/cut-call-white.svg",
+            },
+        };
 
-            if (!vapi) return;
+        function ensureScriptLoaded(cb) {
+            if (window.vapiSDK && typeof window.vapiSDK.run === "function") return cb();
 
-            window.vapiSDK.vapi = vapi;
-            window.vapiInstance = vapi;
-            window.__VAPI_INITIALIZED__ = true;
-
-            vapi.on("speech-start", () => console.log("Speech has started"));
-            vapi.on("speech-end", () => console.log("Speech has ended"));
-            vapi.on("call-start", () => console.log("Call has started"));
-            vapi.on("call-end", () => console.log("Call has stopped"));
-            vapi.on("volume-level", (volume) => console.log(`Assistant volume level: ${volume}`));
-            vapi.on("message", (message) => console.log(message));
-            vapi.on("error", (e) => console.error(e));
-        }
-
-        const vapiSrc = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
-
-        if (window.vapiSDK && typeof window.vapiSDK.run === "function") {
-            initVapi();
-        } else {
             let script = document.querySelector(`script[src="${vapiSrc}"]`);
             if (!script) {
                 script = document.createElement("script");
@@ -313,51 +322,97 @@
                 script.async = true;
                 document.head.appendChild(script);
             }
-            script.addEventListener("load", initVapi, { once: true });
+            script.addEventListener("load", cb, { once: true });
         }
 
-        // Optional helper
-        window.logUserAction = function logUserAction() {
-            if (window.vapiSDK?.vapi) {
-                window.vapiSDK.vapi.send({
-                    type: "add-message",
-                    message: { role: "system", content: "The user has pressed the button, say peanuts" },
+        function waitForButtonById(id, timeoutMs = 15000) {
+            return new Promise((resolve, reject) => {
+                const existing = document.getElementById(id);
+                if (existing) return resolve(existing);
+
+                const obs = new MutationObserver(() => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        obs.disconnect();
+                        resolve(el);
+                    }
                 });
-            } else {
-                console.log(window.vapiSDK, window.vapiInstance);
-            }
-        };
 
-        // Move the full Vapi support button element (including its children) into #target
-        (function moveVapiSupportBtnIntoTargetWhenReady() {
-            const TARGET_ID = "call-btn-target";
-            const BTN_ID = "vapi-support-btn";
+                obs.observe(document.documentElement, { childList: true, subtree: true });
 
-            const tryMove = () => {
-                const target = document.getElementById(TARGET_ID);
-                const btn = document.getElementById(BTN_ID);
-            // Don't make it a submit button to avoid submitting the form
-                if (btn && btn.tagName.toLowerCase() === "button") {
-                btn.setAttribute("type", "button");
-                }
+                setTimeout(() => {
+                    obs.disconnect();
+                    reject(new Error(`Timed out waiting for #${id}`));
+                }, timeoutMs);
+            });
+        }
 
-                if (!target || !btn) return false;
-                if (btn.parentElement === target) return true;
-            target.appendChild(btn); // appendChild moves the existing node (keeps all content)
-                return true;
-            };
+        function mountButtonIntoTarget(buttonEl, targetId) {
+            const target = document.getElementById(targetId);
+            if (!target) return;
 
-            if (tryMove()) return;
-
-            const obs = new MutationObserver(() => {
-                if (tryMove()) obs.disconnect();
+            // Prevent wrapper clicks (e.g., pingAdmin) when clicking the Vapi button
+            buttonEl.addEventListener("click", (e) => {
+                e.stopPropagation();
             });
 
-            obs.observe(document.documentElement, { childList: true, subtree: true });
+            // Avoid form submit behavior
+            if (buttonEl.tagName && buttonEl.tagName.toLowerCase() === "button") {
+                buttonEl.setAttribute("type", "button");
+            }
 
-        // Safety timeout to avoid observing forever
-            setTimeout(() => obs.disconnect(), 15000);
-        })();
+            if (buttonEl.parentElement !== target) target.appendChild(buttonEl);
+        }
+
+        async function initOneVapiButton({ instanceKey, assistant, config, targetId, finalButtonId }) {
+            // If instance already created (HTMX swaps), just re-mount existing button
+            const existingFinalBtn = document.getElementById(finalButtonId);
+            if (window[instanceKey] && existingFinalBtn) {
+                mountButtonIntoTarget(existingFinalBtn, targetId);
+                return;
+            }
+
+            const vapi = window.vapiSDK?.run?.({
+                apiKey: window.VAPI_KEY,
+                assistant,
+                config,
+            });
+
+            if (!vapi) return;
+
+            window[instanceKey] = vapi;
+
+            // Wait for Vapi to inject its default button, then rename + mount it
+            const btn = await waitForButtonById(DEFAULT_VAPI_BUTTON_ID);
+            btn.id = finalButtonId;
+
+            mountButtonIntoTarget(btn, targetId);
+
+            // Optional logging (keep minimal)
+            vapi.on("error", (e) => console.error(e));
+        }
+
+        function initBoth() {
+            // IMPORTANT: init primary first, rename its button away from `#vapi-support-btn`,
+            // then init secondary so it can create a new `#vapi-support-btn`.
+            initOneVapiButton({
+                instanceKey: "vapiInstancePrimary",
+                assistant: window.VAPI_ASSISTANT,
+                config: primaryButtonConfig,
+                targetId: "call-btn-target",
+                finalButtonId: "vapi-support-btn-primary",
+            }).then(() => {
+                return initOneVapiButton({
+                    instanceKey: "vapiInstanceSecondary",
+                    assistant: window.VAPI_ASSISTANT, // or set a different assistant for the second button
+                    config: secondaryButtonConfig,
+                    targetId: "second-call-btn-target",
+                    finalButtonId: "vapi-support-btn-secondary",
+                });
+            }).catch((e) => console.error(e));
+        }
+
+        ensureScriptLoaded(initBoth);
     })();
 </script>
 
