@@ -53,10 +53,11 @@
                         style="color: #fff; width: 21px; height: 21px; filter: invert(1);">
                 </button>
                 <div id="ping-admin-btn"
-                    style="display: flex;align-items: center;justify-content: center;border-radius: 5px;background-color: var(--goglobe-main-color);transition: 200ms;width: 44px;height: 45px;pointer;opacity: 1;"
+                    style="display: flex;align-items: center;justify-content: center;border-radius: 5px;background-color: var(--goglobe-main-color);transition: 200ms;width: 44px;height: 45px;cursor: pointer;opacity: 1;"
                     title="Request Assistance" onclick="pingAdmin()" onmouseover="this.style.opacity='0.9';"
                     onmouseout="this.style.opacity='1';">
-                    <img src="https://gobot.go-globe.dev/static/svg/call-white.svg" alt="" >
+                    <div id="second-call-btn-target"></div>
+                    <!-- <img src="https://gobot.go-globe.dev/static/svg/call-white.svg" alt="" > -->
                 </div>
             </div>
         </div>
@@ -151,7 +152,7 @@
 
             Chat with me for quick<br>answers
         </button>
-        <!-- Hidden Vapi Button Target -->
+        
 
         <!-- Voice Option -->
         <button class="chatbot-options-button" onMouseOver="this.style.opacity=0.8" onMouseOut="this.style.opacity=1">
@@ -162,7 +163,9 @@
                         stroke="#FF5805" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </span>
+            <!-- Hidden Vapi Button Target -->
             <div id="call-btn-target"></div>
+            
         </button>
     </div>
 
@@ -192,6 +195,19 @@
 
     // Go back to onboarding from choice overlay
     function goBackFromChoice() {
+        // Click the Vapi primary button before anything else
+        const vapiBtn = document.getElementById('vapi-support-btn-primary');
+        if (
+            vapiBtn &&
+            vapiBtn.title &&
+            vapiBtn.title.toLowerCase().includes('click to cancel')
+        ) {
+            vapiBtn.click();
+        }
+        else {
+            console.log("Vapi button not found or not in active call state.");
+        }
+
         const messageArea = document.getElementById('messageArea');
         const backendUrl = messageArea ? messageArea.dataset.backendUrl : '';
         const chatbox = document.getElementById('chatbox');
@@ -220,72 +236,69 @@
 
 <!-- vapi script -->
 <script>
-    // Idempotent Vapi init
     (function () {
         console.log("Loading Vapi script...");
 
-        // Avoid global const collisions across HTMX swaps
         if (typeof window.VAPI_ASSISTANT === "undefined") window.VAPI_ASSISTANT = "{{ assistant}}";
         if (typeof window.VAPI_KEY === "undefined") window.VAPI_KEY = "{{ api_key}}";
-        console.log("Assistant:", window.VAPI_ASSISTANT, window.VAPI_KEY);
 
-        window.vapiInstance = window.vapiInstance || null;
+        const vapiSrc = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+        const DEFAULT_VAPI_BUTTON_ID = "vapi-support-btn";
 
-        const buttonConfig = {
-            position: "top-left", // "bottom" | "top" | "left" | "right" | "top-right" | "top-left" | "bottom-left" | "bottom-right"
-            offset: "10px", // decide how far the button should be from the edge
-            width: "20px", // min-width of the button
-            height: "30px", // height of the button
+        // Two different configs (edit as you like)
+        const primaryButtonConfig = {
+            position: "top-left",
+            offset: "10px",
+            width: "20px",
+            height: "30px",
             idle: {
-                // button state when the call is not active.
-                type: "pill", // or "round"
-                title: `Talk with Ana by voice for`, // only required in case of Pill
-                subtitle: "detailed help", // only required in case of pill
-                icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
+                type: "pill",
+                title: "Talk with Ana by voice",
+                subtitle: "detailed help",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone.svg",
             },
             loading: {
-                // button state when the call is connecting
-                type: "pill", // or "round"
-                title: "Connecting...", // only required in case of Pill
-                subtitle: " ", // only required in case of pill
-                icon: `https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg`,
+                type: "pill",
+                title: "Connecting...",
+                subtitle: " ",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg",
             },
             active: {
-                // button state when the call is in progress or active.
-                type: "pill", // or "round"
-                title: "Call is in progress...Click to cancel", // only required in case of Pill
-                subtitle: " ", // only required in case of pill
-                icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
+                type: "pill",
+                title: "Call in progress (click to cancel)",
+                subtitle: " ",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg",
             },
         };
 
-        function initVapi() {
-            const vapi = window.vapiSDK?.run?.({
-                apiKey: window.VAPI_KEY,
-                assistant: window.VAPI_ASSISTANT,
-                config: buttonConfig,
-            });
+        const secondaryButtonConfig = {
+            position: "top-left",
+            offset: "0px",
+            width: "44px",
+            height: "45px",
+            idle: {
+                type: "button",
+                title: "Call support",
+                subtitle: "",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-call.svg",
+            },
+            loading: {
+                type: "button",
+                title: "Connecting...",
+                subtitle: "",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg",
+            },
+            active: {
+                type: "button",
+                title: "End call",
+                subtitle: "",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg",
+            },
+        };
 
-            if (!vapi) return;
+        function ensureScriptLoaded(cb) {
+            if (window.vapiSDK && typeof window.vapiSDK.run === "function") return cb();
 
-            window.vapiSDK.vapi = vapi;
-            window.vapiInstance = vapi;
-            window.__VAPI_INITIALIZED__ = true;
-
-            vapi.on("speech-start", () => console.log("Speech has started"));
-            vapi.on("speech-end", () => console.log("Speech has ended"));
-            vapi.on("call-start", () => console.log("Call has started"));
-            vapi.on("call-end", () => console.log("Call has stopped"));
-            vapi.on("volume-level", (volume) => console.log(`Assistant volume level: ${volume}`));
-            vapi.on("message", (message) => console.log(message));
-            vapi.on("error", (e) => console.error(e));
-        }
-
-        const vapiSrc = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
-
-        if (window.vapiSDK && typeof window.vapiSDK.run === "function") {
-            initVapi();
-        } else {
             let script = document.querySelector(`script[src="${vapiSrc}"]`);
             if (!script) {
                 script = document.createElement("script");
@@ -294,51 +307,97 @@
                 script.async = true;
                 document.head.appendChild(script);
             }
-            script.addEventListener("load", initVapi, { once: true });
+            script.addEventListener("load", cb, { once: true });
         }
 
-        // Optional helper
-        window.logUserAction = function logUserAction() {
-            if (window.vapiSDK?.vapi) {
-                window.vapiSDK.vapi.send({
-                    type: "add-message",
-                    message: { role: "system", content: "The user has pressed the button, say peanuts" },
+        function waitForButtonById(id, timeoutMs = 15000) {
+            return new Promise((resolve, reject) => {
+                const existing = document.getElementById(id);
+                if (existing) return resolve(existing);
+
+                const obs = new MutationObserver(() => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        obs.disconnect();
+                        resolve(el);
+                    }
                 });
-            } else {
-                console.log(window.vapiSDK, window.vapiInstance);
-            }
-        };
 
-        // Move the full Vapi support button element (including its children) into #target
-        (function moveVapiSupportBtnIntoTargetWhenReady() {
-            const TARGET_ID = "call-btn-target";
-            const BTN_ID = "vapi-support-btn";
+                obs.observe(document.documentElement, { childList: true, subtree: true });
 
-            const tryMove = () => {
-                const target = document.getElementById(TARGET_ID);
-                const btn = document.getElementById(BTN_ID);
-                // Don't make it a submit button to avoid submitting the form
-                if (btn && btn.tagName.toLowerCase() === "button") {
-                    btn.setAttribute("type", "button");
-                }
+                setTimeout(() => {
+                    obs.disconnect();
+                    reject(new Error(`Timed out waiting for #${id}`));
+                }, timeoutMs);
+            });
+        }
 
-                if (!target || !btn) return false;
-                if (btn.parentElement === target) return true;
-                target.appendChild(btn); // appendChild moves the existing node (keeps all content)
-                return true;
-            };
+        function mountButtonIntoTarget(buttonEl, targetId) {
+            const target = document.getElementById(targetId);
+            if (!target) return;
 
-            if (tryMove()) return;
-
-            const obs = new MutationObserver(() => {
-                if (tryMove()) obs.disconnect();
+            // Prevent wrapper clicks (e.g., pingAdmin) when clicking the Vapi button
+            buttonEl.addEventListener("click", (e) => {
+                e.stopPropagation();
             });
 
-            obs.observe(document.documentElement, { childList: true, subtree: true });
+            // Avoid form submit behavior
+            if (buttonEl.tagName && buttonEl.tagName.toLowerCase() === "button") {
+                buttonEl.setAttribute("type", "button");
+            }
 
-            // Safety timeout to avoid observing forever
-            setTimeout(() => obs.disconnect(), 15000);
-        })();
+            if (buttonEl.parentElement !== target) target.appendChild(buttonEl);
+        }
+
+        async function initOneVapiButton({ instanceKey, assistant, config, targetId, finalButtonId }) {
+            // If instance already created (HTMX swaps), just re-mount existing button
+            const existingFinalBtn = document.getElementById(finalButtonId);
+            if (window[instanceKey] && existingFinalBtn) {
+                mountButtonIntoTarget(existingFinalBtn, targetId);
+                return;
+            }
+
+            const vapi = window.vapiSDK?.run?.({
+                apiKey: window.VAPI_KEY,
+                assistant,
+                config,
+            });
+
+            if (!vapi) return;
+
+            window[instanceKey] = vapi;
+
+            // Wait for Vapi to inject its default button, then rename + mount it
+            const btn = await waitForButtonById(DEFAULT_VAPI_BUTTON_ID);
+            btn.id = finalButtonId;
+
+            mountButtonIntoTarget(btn, targetId);
+
+            // Optional logging (keep minimal)
+            vapi.on("error", (e) => console.error(e));
+        }
+
+        function initBoth() {
+            // IMPORTANT: init primary first, rename its button away from `#vapi-support-btn`,
+            // then init secondary so it can create a new `#vapi-support-btn`.
+            initOneVapiButton({
+                instanceKey: "vapiInstancePrimary",
+                assistant: window.VAPI_ASSISTANT,
+                config: primaryButtonConfig,
+                targetId: "call-btn-target",
+                finalButtonId: "vapi-support-btn-primary",
+            }).then(() => {
+                return initOneVapiButton({
+                    instanceKey: "vapiInstanceSecondary",
+                    assistant: window.VAPI_ASSISTANT, // or set a different assistant for the second button
+                    config: secondaryButtonConfig,
+                    targetId: "second-call-btn-target",
+                    finalButtonId: "vapi-support-btn-secondary",
+                });
+            }).catch((e) => console.error(e));
+        }
+
+        ensureScriptLoaded(initBoth);
     })();
 </script>
 

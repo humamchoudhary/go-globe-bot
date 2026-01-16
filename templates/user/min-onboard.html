@@ -68,7 +68,7 @@
     } %}
     {% for subject in settings['subjects'] %}
     {% set display_label = display_labels.get(subject, subject) %}
-    <button hx-post="{{settings['backend_url']}}/min/login"
+    <button hx-post="{{settings['backend_url']}}/min/login/"
       hx-vals='{"initial_msg": "I am interested in {{ subject }}", "subject": "{{ subject }}"}' hx-target="#chatbox"
       hx-trigger="click" hx-swap="innerHTML" style="
                 width: fit-content;
