@@ -10,7 +10,10 @@ class WhatsappUser(TypedDict):
     messages: list
     updated_at: datetime
     created_at: datetime
-    admin_enable:bool
+    admin_enable: bool
+    onboarding_complete: bool
+    onboarding_step: int
+    onboarding_responses: list
 
 class WhatsappService:
     def __init__(self, db):
@@ -23,7 +26,10 @@ class WhatsappService:
             "messages": [],
             "created_at": datetime.now(timezone.utc),
             "updated_at": datetime.now(timezone.utc),
-            "admin_enabled":False
+            "admin_enable": False,  # Fixed typo from admin_enabled
+            "onboarding_complete": False,
+            "onboarding_step": 0,
+            "onboarding_responses": [],
         }
         self.whatsapp_collection.insert_one(wa_doc)
 
@@ -140,3 +146,25 @@ class WhatsappService:
 
         return deleted_count
 
+    # Onboarding methods
+    def update_onboarding_step(self, phone_no, step):
+        """Update the current onboarding step for a user"""
+        self.whatsapp_collection.update_one(
+            {"phone_no": phone_no},
+            {"$set": {"onboarding_step": step, "updated_at": datetime.now(timezone.utc)}}
+        )
+
+    def save_onboarding_response(self, phone_no, question, answer):
+        """Save an onboarding response (skipped answers are not saved)"""
+        if answer is not None:
+            self.whatsapp_collection.update_one(
+                {"phone_no": phone_no},
+                {"$push": {"onboarding_responses": {"question": question, "answer": answer}}}
+            )
+
+    def complete_onboarding(self, phone_no):
+        """Mark onboarding as complete for a user"""
+        self.whatsapp_collection.update_one(
+            {"phone_no": phone_no},
+            {"$set": {"onboarding_complete": True, "updated_at": datetime.now(timezone.utc)}}
+        )

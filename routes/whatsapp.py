@@ -46,6 +46,41 @@ def is_duplicate_message(message_id):
     return False
 
 
+def handle_onboarding(chat, user_message, wa_service, settings):
+    """
+    Handle onboarding flow. Returns question string if continuing, None if complete.
+    """
+    questions = settings.get("whatsapp_onboarding_questions", [])[:5]  # Max 5
+    
+    # Skip if feature disabled or no questions
+    if not settings.get("whatsapp_onboarding_enabled") or not questions:
+        wa_service.complete_onboarding(chat["phone_no"])
+        return None
+    
+    step = chat.get("onboarding_step", 0)
+    phone = chat["phone_no"]
+    
+    # Save previous answer (with bounds check for shrinking questions)
+    if step > 0 and step - 1 < len(questions):
+        prev_question = questions[step - 1]
+        answer = None if user_message.strip().lower() == "skip" else user_message
+        wa_service.save_onboarding_response(phone, prev_question, answer)
+    
+    # Check if all questions answered (or questions shrunk)
+    if step >= len(questions):
+        wa_service.complete_onboarding(phone)
+        return None
+    
+    # Advance step and return next question
+    wa_service.update_onboarding_step(phone, step + 1)
+    return f"{questions[step]} (type 'skip' to continue)"
+
+
+def is_admin_enabled(chat):
+    """Check admin_enable with fallback to admin_enabled for backwards compatibility"""
+    return chat.get("admin_enable") or chat.get("admin_enabled", False)
+
+
 @wa_bp.route('/webhook', methods=['GET'])
 def verify_webhook():
     """Verify webhook for WhatsApp Business API"""
@@ -202,76 +237,30 @@ def webhook():
                             # Handle text messages
                             if message_type == 'text':
                                 user_message = message.get('text', {}).get('body', '')
-                                # print(f"Received text message from {from_number}: {user_message}")
+                                
+                                # ONBOARDING CHECK - before add_message and socket emit
+                                if not chat.get("onboarding_complete", True):  # Default True = legacy skip
+                                    settings = current_app.config['SETTINGS']
+                                    response = handle_onboarding(chat, user_message, wa_service, settings)
+                                    if response:
+                                        send_whatsapp_message(from_number, response)
+                                        return jsonify({"status": "ok"}), 200
+                                    # Onboarding complete, refresh chat data
+                                    chat = wa_service.get_by_phone_no(from_number)
+                                
+                                # Normal flow continues
                                 wa_service.add_message(user_message, from_number, from_number, type="text")
-
-                                current_app.socketio.emit("wa_message",{"sender":from_number,"message":user_message})
-                                if not chat.get("admin_enable"):
+                                current_app.socketio.emit("wa_message", {"sender": from_number, "message": user_message})
+                                
+                                if not is_admin_enabled(chat):  # Use helper with fallback
                                     msg, usage = current_app.bot.respond(f"Message from whatsapp: {user_message}", from_number)
                                     print(f"Bot response: {msg}")
                                     wa_service.add_message(msg, from_number, "bot", type="text")
                                     send_whatsapp_message(from_number, msg)
                             
-                            # Handle audio messages
+                            # Handle audio messages - audio not supported yet
                             elif message_type == 'audio':
-                                audio_data = message.get('audio', {})
-                                audio_id = audio_data.get('id')
-                                audio_mime_type = audio_data.get('mime_type', 'audio/ogg')
-                                # print(f"Received audio message from {from_number}, audio_id: {audio_id}")
-                                
-                                # Download audio from WhatsApp
-                                audio_bytes = download_whatsapp_media(audio_id)
-                                
-                                if audio_bytes:
-                                    # print(f"Downloaded audio: {len(audio_bytes)} bytes")
-                                    
-                                    # Transcribe audio to text
-                                    transcribed_text = current_app.bot.transcribe(audio_bytes)
-                                    # print(f"Transcribed text: {transcribed_text}")
-                                    
-                                    # Save user audio message
-                                    msg_id = wa_service.add_message(transcribed_text, from_number, from_number, type="audio")
-                                    
-                                    # Save audio file
-                                    save_path = os.path.join('files', f"{from_number}", f"{msg_id}.ogg")
-                                    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                                    
-                                    with open(save_path, 'wb') as f:
-                                        f.write(audio_bytes)
-                                    # print(f"Saved audio to: {save_path}")
-                                    
-                                    # Get bot response
-
-                                    if not chat.get("admin_enable"):
-                                        msg, usage = current_app.bot.respond(f"Message from whatsapp: {transcribed_text}", from_number)
-                                        # print(f"Bot response: {msg}")
-                                        
-                                        # Generate audio response (raw format from Google API)
-                                        audio_response = current_app.bot.generate_audio(msg)
-                                        # print(f"Generated audio response: {len(audio_response)} bytes")
-                                        
-                                        # Convert to OGG Opus format for WhatsApp
-                                        ogg_audio = convert_to_ogg_opus(audio_response)
-                                        
-                                        if ogg_audio:
-                                            # Save bot audio message
-                                            bot_message_id = wa_service.add_message(msg, from_number, "bot", type="audio")
-                                            bot_audio_path = os.path.join('files', f"{from_number}", f"{bot_message_id}.ogg")
-                                            
-                                            # Save bot audio file
-                                            with open(bot_audio_path, 'wb') as f:
-                                                f.write(ogg_audio)
-                                            # print(f"Saved bot audio to: {bot_audio_path}")
-                                            
-                                            # Send audio response to user
-                                            resp = send_whatsapp_audio(from_number, ogg_audio)
-                                            # print(resp)
-                                        else:
-                                            # print("Failed to convert audio to OGG Opus")
-                                            send_whatsapp_message(from_number, msg)  # Fall back to text
-                                else:
-                                    # print(f"Failed to download audio from {from_number}")
-                                    send_whatsapp_message(from_number, "Sorry, I couldn't process your audio message.")
+                                send_whatsapp_message(from_number, "Please text instead, audio is not supported at the moment.")
                             
                             # Mark message as read
                             mark_message_read(message_id)
@@ -403,10 +392,11 @@ def send_whatsapp_message(phone_number, message):
     
     try:
         response = requests.post(url, headers=headers, json=payload)
+        print(f"WhatsApp API Response: {response.status_code} {response.text}")
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        # print(f"Error sending message: {e}")
+        print(f"Error sending message: {e}")
         return None
 
 
