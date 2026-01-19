@@ -284,43 +284,12 @@ function initializeChatbot() {
   .resize-handle-w:hover {
     border-left-color: rgba(255, 88, 0, 0.6);
   }
-
-  /* Visual resize indicator in top-left corner */
-  .resize-indicator {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 8px;
-    height: 8px;
-    cursor: nw-resize;
-    opacity: 1;
+  .resize-handle svg {
+  color: #ffffff;
+  opacity: 0.4;
   }
-
-  
-
-  .resize-indicator::before,
-  .resize-indicator::after {
-    content: "";
-    position: absolute;
-    background-color: #999;
-  }
-
-  .resize-indicator::before {
-    top: 1px;
-    left: 0;
-    width: 10px;
-    height: 1px;
-  }
-
-  .resize-indicator::after {
-    top: 0;
-    left: 1px;
-    width: 1px;
-    height: 10px;
-  }
-
-  .resize-indicator:hover {
-    opacity: 1;
+  .resize-handle svg:hover {
+    opacity: 0.8;
   }
 
   #chatbox {
@@ -533,12 +502,17 @@ function initializeChatbot() {
   </div>
 
   <!-- Resize handles -->
-  <div class="resize-handle resize-handle-nw" title="resize window" id="resize-nw"></div>
+  <div class="resize-handle resize-handle-nw" title="resize window" id="resize-nw">
+    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+      <polygon points="0,6 2,6 8,0 6,0" />
+      <polygon points="0,10 2,10 12,0 10,0" />
+      <polygon points="0,14 2,14 16,0 14,0" />
+    </svg>
+  </div>
   <div class="resize-handle resize-handle-n" title="resize window" id="resize-n"></div>
   <div class="resize-handle resize-handle-w" title="resize window" id="resize-w"></div>
   <div class="resize-indicator"></div>
 </div>
-
     `;
 
     document.body.insertAdjacentHTML("beforeend", insertHtml);
