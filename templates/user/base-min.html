@@ -19,54 +19,154 @@
     --goglobe-header-height: 80px;
     --goglobe-input-color: #475864;
   }
+
+  #fn__chat_textarea {
+    border: 2px solid var(--goglobe-main-color);
+  }
+
+  #fn__chat_textarea:focus {
+    border-color: var(--goglobe-main-color);
+  }
+
+  .chatbot-options-button {
+    width: 100%;
+    font-family: var(--goglobe-body-font-family) !important;
+    font-size: 15px !important;
+    padding: 12px 0px;
+    background: transparent;
+    color: var(--goglobe-main-color);
+    border: none;
+    cursor: pointer;
+    font-weight: 400;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
   /* vapi button styles */
   .vapi-btn {
     position: relative;
   }
+
   .vapi-btn-pill {
-  background: #001f33 !important;
-  color: #ff5800 !important;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 0;
-  letter-spacing: -0.32px;
-  cursor: pointer;
-  box-shadow: none !important;
-  padding: 0 !important;
-  transform: none !important;
-}
+    background: var(--goglobe-site-bg-color) !important;
+    color: var(--goglobe-main-color) !important;
+    font-size: 15px;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: -0.32px;
+    cursor: pointer;
+    box-shadow: none !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  .vapi-btn-round {
+    animation: none !important;
+    background-color: var(--goglobe-main-color) !important;
+    box-shadow: none !important;
+    border-radius: 5px !important;
+    transform: none !important;
+    color: white !important;
+  }
+  .vapi-btn-round:hover {
+    transform: none !important;
+  }
 
-#vapi-icon-container {
-  display: none;
-}
+  * {
+    font-family: var(--goglobe-body-font-family);
+  }
 
-#vapi-title::after {
-  content: '';
-  display: inline-block;
-  vertical-align: middle;
-  width: 1em;
-  height: 1em;
-  margin-left: 0.1em;
-  background: url('static/svg/speak.svg') no-repeat center center;
-  background-size: contain;
-}
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    /*-webkit-box-shadow: 0 0 0 1000px var(--goglobe-main-color) inset !important;*/
+    box-shadow: 0 0 0 1000px var(--goglobe-input-color) inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+    background-color: var(--goglobe-input-color) !important;
+    transition: background-color 9999s ease-in-out 0s;
+  }
 
-.vapi-btn {
-  position: "relative";
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: fit-content;
 
-}
+  #vapi-title {
+    font-size: 15px !important;
+  }
+
+  #vapi-subtitle {
+    font-size: 15px !important;
+  }
+
+  #desg::placeholder,
+  #name::placeholder,
+  #email::placeholder,
+  #phone::placeholder {
+    color: white;
+    opacity: 1;
+  }
+
+  .country-selector {
+    font-family: 'Twemoji Country Flags', sans-serif;
+    padding: 12px 9px;
+    background: transparent;
+    border: none;
+    color: var(--goglobe-main-color);
+    background-color: var(--goglobe-input-color);
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    width: 32%;
+  }
+
+  #login-btn {
+    box-sizing: border-box;
+    font-family: var(--goglobe-body-font-family);
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    padding: 0.75rem 1rem;
+    background-color: var(--goglobe-main-color);
+    border: 1px solid var(--goglobe-border-color);
+    border-radius: 6px;
+    transition: all 0.2s;
+    align-self: flex-start
+  }
+
+
+  #call-btn-target #vapi-icon-container {
+    display: none;
+  }
+
+  #vapi-title-container {
+    padding: 0;
+  }
+
+  .vapi-btn {
+    position: "relative";
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: fit-content;
+
+  }
+
+  input:-internal-autofill-selected {
+    background-color: var(--goglobe-input-color) !important;
+    color: var(--goglobe-body-color) !important;
+  }
 </style>
-<div
-  id="chatbot-body"
-  class="flex chatbot-body"
-  style="all: unset; min-height: 100%"
->
+<div id="chatbot-body" class="flex chatbot-body" style="all: unset; min-height: 100%">
   {% block content %}{% endblock %}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>

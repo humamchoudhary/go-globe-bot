@@ -138,7 +138,9 @@ def login(subject):
 
     elif request.method == "POST":
         session["initial_msg"] = request.form.get("initial_msg")
-        subject="I need services"
+        # Get subject from POST data (sent by button)
+        subject = request.form.get("subject", "I need services")
+        session["subject"] = subject
         try:
             ip = request.headers.get("X-Real-IP", request.remote_addr)
             ip = ip.split(",")[0]
@@ -180,9 +182,11 @@ def auth_user():
     name = data.get('name')
     email = data.get('email', "")
     phone = data.get('phone', " ")
-    subject = data.get('subject')
     desg = data.get('desg', " ")
     is_anon = data.get('anonymous')
+    
+    # Get subject from session (stored when button was clicked in login route)
+    subject = session.get('subject', 'I need services')
     
     user_ip = request.headers.get("X-Real-IP", request.remote_addr).split(",")[0]
     user_service = UserService(current_app.db)
@@ -313,7 +317,10 @@ def chat(room_id):
     #     print(f"Unauthorized access attempt to chat: {room_id}")
     #     return redirect(url_for("min.onboard"))
 
-    return render_template('user/min-index.html', chat=chat, username=user.name)
+    assistant_id = os.environ.get("VAPI_ASSISTANT", "")
+    api_key = os.environ.get("VAPI_KEY", "")
+
+    return render_template('user/min-index.html', chat=chat, username=user.name, assistant=assistant_id, api_key=api_key)
 
 
 @min_bp.route('/chat/<room_id>/ping_admin', methods=['POST'])
