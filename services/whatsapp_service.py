@@ -13,7 +13,10 @@ class WhatsappUser(TypedDict):
     admin_enable: bool
     onboarding_complete: bool
     onboarding_step: int
+    onboarding_attempt_count: int  # V2: retry counter for validation
+    onboarding_questions_snapshot: list  # V2: frozen questions at start
     onboarding_responses: list
+    context_injected: bool  # V2: track if context was sent to bot
 
 class WhatsappService:
     def __init__(self, db):
@@ -26,10 +29,13 @@ class WhatsappService:
             "messages": [],
             "created_at": datetime.now(timezone.utc),
             "updated_at": datetime.now(timezone.utc),
-            "admin_enable": False,  # Fixed typo from admin_enabled
+            "admin_enable": False,
             "onboarding_complete": False,
             "onboarding_step": 0,
+            "onboarding_attempt_count": 0,  # V2: retry counter
+            "onboarding_questions_snapshot": None,  # V2: set on first message
             "onboarding_responses": [],
+            "context_injected": False,
         }
         self.whatsapp_collection.insert_one(wa_doc)
 
@@ -167,4 +173,52 @@ class WhatsappService:
         self.whatsapp_collection.update_one(
             {"phone_no": phone_no},
             {"$set": {"onboarding_complete": True, "updated_at": datetime.now(timezone.utc)}}
+        )
+
+    # V2 methods
+    def set_snapshot(self, phone_no, questions):
+        """Set the questions snapshot at onboarding start"""
+        self.whatsapp_collection.update_one(
+            {"phone_no": phone_no},
+            {"$set": {
+                "onboarding_questions_snapshot": questions,
+                "context_injected": False,  # Reset context flag when onboarding resets
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+
+    def increment_attempt(self, phone_no):
+        """Increment validation attempt counter"""
+        self.whatsapp_collection.update_one(
+            {"phone_no": phone_no},
+            {"$inc": {"onboarding_attempt_count": 1}}
+        )
+
+    def reset_attempt_and_advance(self, phone_no, step):
+        """Reset attempt counter and advance to next step"""
+        self.whatsapp_collection.update_one(
+            {"phone_no": phone_no},
+            {"$set": {
+                "onboarding_attempt_count": 0,
+                "onboarding_step": step,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+
+    def save_onboarding_response_v2(self, phone_no, question_obj, answer):
+        """Save an onboarding response with question type (V2 format)"""
+        response = {
+            "question": question_obj.get("text", question_obj) if isinstance(question_obj, dict) else question_obj,
+            "type": question_obj.get("type", "text") if isinstance(question_obj, dict) else "text",
+            "answer": answer
+        }
+        self.whatsapp_collection.update_one(
+            {"phone_no": phone_no},
+            {"$push": {"onboarding_responses": response}}
+        )
+    def set_context_injected(self, phone_no, value=True):
+        """Set the context_injected flag"""
+        self.whatsapp_collection.update_one(
+            {"phone_no": phone_no},
+            {"$set": {"context_injected": value}}
         )

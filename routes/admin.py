@@ -1252,6 +1252,11 @@ def settings():
             **current_app.config["SETTINGS"], **current_admin.settings}
     else:
         settings_data = current_admin.settings
+        # Merge global WhatsApp settings for display, fetching from DB to ensure it is fresh
+        db_settings = current_app.db.config.find_one({"id": "settings"}) or {}
+        settings_data["whatsapp_onboarding_enabled"] = db_settings.get("whatsapp_onboarding_enabled", False)
+        settings_data["whatsapp_onboarding_questions"] = db_settings.get("whatsapp_onboarding_questions", [])
+        settings_data["whatsapp_onboarding_use_context"] = db_settings.get("whatsapp_onboarding_use_context", False)
 
     # Validate logo paths for superadmin
     if current_admin.role == "superadmin":
@@ -1498,6 +1503,91 @@ def set_2fa():
     admin_service = AdminService(current_app.db)
     admin_service.toggle_two_fa(session.get('admin_id'))
     return '', 200
+
+
+@admin_bp.route('/settings/whatsapp-onboarding-toggle', methods=['POST'])
+@admin_required
+def toggle_whatsapp_onboarding():
+    """Toggle WhatsApp onboarding feature on/off"""
+    # Fetch fresh settings from DB to ensure worker sync
+    settings_doc = current_app.db.config.find_one({"id": "settings"}) or {}
+    
+    # Toggle based on DB value, defaulting to False
+    current_value = settings_doc.get("whatsapp_onboarding_enabled", False)
+    new_value = not current_value
+    
+    # Update DB
+    current_app.db.config.update_one(
+        {"id": "settings"},
+        {"$set": {"whatsapp_onboarding_enabled": new_value}},
+        upsert=True
+    )
+    
+    # Update local config just in case, though DB is source of truth
+    if "SETTINGS" in current_app.config:
+        current_app.config["SETTINGS"]["whatsapp_onboarding_enabled"] = new_value
+        
+    return '', 200
+    return '', 200
+
+
+@admin_bp.route('/settings/whatsapp-onboarding-context-toggle', methods=['POST'])
+@admin_required
+def toggle_whatsapp_context():
+    """Toggle WhatsApp onboarding context injection on/off"""
+    # Fetch fresh settings from DB to ensure worker sync
+    settings_doc = current_app.db.config.find_one({"id": "settings"}) or {}
+    
+    # Toggle based on DB value, defaulting to False
+    current_value = settings_doc.get("whatsapp_onboarding_use_context", False)
+    new_value = not current_value
+    
+    # Update DB
+    current_app.db.config.update_one(
+        {"id": "settings"},
+        {"$set": {"whatsapp_onboarding_use_context": new_value}},
+        upsert=True
+    )
+    
+    # Update local config just in case
+    if "SETTINGS" in current_app.config:
+        current_app.config["SETTINGS"]["whatsapp_onboarding_use_context"] = new_value
+        
+    return '', 200
+
+@admin_bp.route('/settings/whatsapp-onboarding-questions', methods=['POST'])
+@admin_required
+def save_whatsapp_onboarding_questions():
+    """Save WhatsApp onboarding questions (max 5)"""
+    try:
+        data = request.get_json()
+        questions = data.get("questions", [])
+        
+        # Enforce 5 question limit
+        questions = questions[:5]
+        
+        # Validate structure
+        validated_questions = []
+        for q in questions:
+            if isinstance(q, dict) and q.get("text"):
+                validated_questions.append({
+                    "text": q.get("text", "").strip(),
+                    "type": q.get("type", "text"),
+                    "mandatory": bool(q.get("mandatory", False))
+                })
+        
+        # Update in-memory config
+        current_app.config["SETTINGS"]["whatsapp_onboarding_questions"] = validated_questions
+        
+        # Persist to database
+        current_app.db.config.update_one(
+            {"id": "settings"},
+            {"$set": {"whatsapp_onboarding_questions": validated_questions}}
+        )
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @admin_bp.route("/settings/timing/<int:id>", methods=["DELETE"])

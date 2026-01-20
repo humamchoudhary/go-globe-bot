@@ -45,35 +45,157 @@ def is_duplicate_message(message_id):
     processed_messages[message_id] = datetime.now()
     return False
 
+import re
+from google import genai
 
-def handle_onboarding(chat, user_message, wa_service, settings):
-    """
-    Handle onboarding flow. Returns question string if continuing, None if complete.
-    """
+
+def get_questions(settings):
+    """Get questions with V1/V2 format compatibility"""
     questions = settings.get("whatsapp_onboarding_questions", [])[:5]  # Max 5
+    if not questions:
+        return []
+    # V1 format: list of strings -> convert to V2 format
+    if isinstance(questions[0], str):
+        return [{"text": q, "type": "text", "mandatory": False} for q in questions]
+    # V2 format: list of dicts
+    return questions
+
+
+def validate_with_fallback(question_type, answer, bot):
+    """
+    Validate answer against question type.
+    Uses AI validation for all types except 'text' (free-form).
+    Accepts answer on any AI failure.
+    """
+    answer = answer.strip()
+    q_type = question_type.lower().strip()
     
-    # Skip if feature disabled or no questions
-    if not settings.get("whatsapp_onboarding_enabled") or not questions:
-        wa_service.complete_onboarding(chat["phone_no"])
-        return None
+    # Free-form text always valid
+    if q_type == "text" or q_type == "":
+        return True
     
-    step = chat.get("onboarding_step", 0)
+    # Use AI validation for all other types (name, email, phone, custom types)
+    try:
+        return validate_answer_ai(question_type, answer, bot)
+    except Exception as e:
+        print(f"AI validation failed, accepting answer: {e}")
+        return True  # Accept on AI failure
+
+
+def validate_answer_ai(question_type, answer, bot):
+    """Isolated AI validation - does NOT affect chat history"""
+    try:
+        client = genai.Client(api_key=bot.gm_key)
+        prompt = f'''Is "{answer}" a valid {question_type}?
+Respond with ONLY the word "VALID" or "INVALID", nothing else.'''
+        
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
+        result = response.text.strip().upper()
+        return result == "VALID"
+    except Exception:
+        return True  # Accept on any exception
+
+
+def handle_onboarding(chat, user_message, wa_service, settings, bot=None):
+    """
+    Handle onboarding flow V2.
+    Returns tuple: (response_message, should_return_early)
+    - (message, True) = send message and return
+    - (None, False) = onboarding complete, continue to AI
+    """
     phone = chat["phone_no"]
     
-    # Save previous answer (with bounds check for shrinking questions)
-    if step > 0 and step - 1 < len(questions):
-        prev_question = questions[step - 1]
-        answer = None if user_message.strip().lower() == "skip" else user_message
-        wa_service.save_onboarding_response(phone, prev_question, answer)
+    # Skip if feature disabled
+    if not settings.get("whatsapp_onboarding_enabled"):
+        wa_service.complete_onboarding(phone)
+        return None, False
     
-    # Check if all questions answered (or questions shrunk)
+    # Snapshot questions on first interaction
+    if chat.get("onboarding_questions_snapshot") is None:
+        questions = get_questions(settings)
+        if not questions:
+            wa_service.complete_onboarding(phone)
+            return None, False
+        wa_service.set_snapshot(phone, questions)
+        chat["onboarding_questions_snapshot"] = questions
+    
+    questions = chat["onboarding_questions_snapshot"]
+    step = chat.get("onboarding_step", 0)
+    attempts = chat.get("onboarding_attempt_count", 0)
+    
+    # If step == 0, this is the first message - ask first question
+    if step == 0:
+        wa_service.reset_attempt_and_advance(phone, 1)
+        q = questions[0]
+        q_text = q.get("text", q) if isinstance(q, dict) else q
+        mandatory = q.get("mandatory", False) if isinstance(q, dict) else False
+        suffix = "" if mandatory else " (type 'skip' to continue)"
+        return f"{q_text}{suffix}", True
+    
+    # Get previous question (step-1 because step is 1-indexed after first question)
+    prev_idx = step - 1
+    if prev_idx >= len(questions):
+        # All questions answered
+        wa_service.complete_onboarding(phone)
+        return None, False
+    
+    prev_q = questions[prev_idx]
+    q_text = prev_q.get("text", prev_q) if isinstance(prev_q, dict) else prev_q
+    q_type = prev_q.get("type", "text") if isinstance(prev_q, dict) else "text"
+    mandatory = prev_q.get("mandatory", False) if isinstance(prev_q, dict) else False
+    
+    user_input = user_message.strip()
+    is_skip = user_input.lower() == "skip" or user_input == ""  # Empty = skip
+    
+    # Handle skip attempt (including empty input)
+    if is_skip:
+        if mandatory:
+            return "This question is required. Please provide an answer.", True
+        else:
+            # Save as skipped, advance
+            wa_service.save_onboarding_response_v2(phone, prev_q, "skipped")
+            wa_service.reset_attempt_and_advance(phone, step + 1)
+            # Check if more questions
+            if step >= len(questions):
+                wa_service.complete_onboarding(phone)
+                return None, False
+            # Ask next question
+            next_q = questions[step]
+            next_text = next_q.get("text", next_q) if isinstance(next_q, dict) else next_q
+            next_mandatory = next_q.get("mandatory", False) if isinstance(next_q, dict) else False
+            suffix = "" if next_mandatory else " (type 'skip' to continue)"
+            return f"{next_text}{suffix}", True
+    
+    # Validate answer
+    is_valid = validate_with_fallback(q_type, user_input, bot) if bot else True
+    
+    if not is_valid:
+        if attempts >= 2:  # 3rd attempt (0, 1, 2)
+            # Accept anyway after 3 attempts
+            is_valid = True
+        else:
+            # Increment attempts and ask again
+            wa_service.increment_attempt(phone)
+            return f"Please provide a valid {q_type}. Try again:", True
+    
+    # Save valid answer and advance
+    wa_service.save_onboarding_response_v2(phone, prev_q, user_input)
+    wa_service.reset_attempt_and_advance(phone, step + 1)
+    
+    # Check if more questions
     if step >= len(questions):
         wa_service.complete_onboarding(phone)
-        return None
+        return None, False
     
-    # Advance step and return next question
-    wa_service.update_onboarding_step(phone, step + 1)
-    return f"{questions[step]} (type 'skip' to continue)"
+    # Ask next question
+    next_q = questions[step]
+    next_text = next_q.get("text", next_q) if isinstance(next_q, dict) else next_q
+    next_mandatory = next_q.get("mandatory", False) if isinstance(next_q, dict) else False
+    suffix = "" if next_mandatory else " (type 'skip' to continue)"
+    return f"{next_text}{suffix}", True
 
 
 def is_admin_enabled(chat):
@@ -240,9 +362,15 @@ def webhook():
                                 
                                 # ONBOARDING CHECK - before add_message and socket emit
                                 if not chat.get("onboarding_complete", True):  # Default True = legacy skip
-                                    settings = current_app.config['SETTINGS']
-                                    response = handle_onboarding(chat, user_message, wa_service, settings)
-                                    if response:
+                                    # Fetch fresh settings from DB to ensure multi-worker consistency
+                                    settings_doc = current_app.db.config.find_one({"id": "settings"}) or {}
+                                    # Fallback to config if DB read fails (rare), or empty dict
+                                    settings = settings_doc if settings_doc else current_app.config.get('SETTINGS', {})
+                                    
+                                    response, should_return = handle_onboarding(
+                                        chat, user_message, wa_service, settings, current_app.bot
+                                    )
+                                    if should_return:
                                         send_whatsapp_message(from_number, response)
                                         return jsonify({"status": "ok"}), 200
                                     # Onboarding complete, refresh chat data
@@ -253,6 +381,35 @@ def webhook():
                                 current_app.socketio.emit("wa_message", {"sender": from_number, "message": user_message})
                                 
                                 if not is_admin_enabled(chat):  # Use helper with fallback
+                                    # Use locally fetched settings from above (or fetch if missing for edge cases)
+                                    if 'settings' not in locals():
+                                        settings_doc = current_app.db.config.find_one({"id": "settings"}) or {}
+                                        settings = settings_doc if settings_doc else current_app.config.get('SETTINGS', {})
+                                    
+                                    # Context Injection Logic
+                                    if (settings.get("whatsapp_onboarding_use_context") 
+                                        and not chat.get("context_injected", False)):
+                                        
+                                        # Get validated answers
+                                        responses = chat.get("onboarding_responses", [])
+                                        valid_context_parts = []
+                                        
+                                        for resp in responses:
+                                            # Skip skipped/empty
+                                            answer = resp.get("answer", "")
+                                            if answer and answer.lower() != "skipped":
+                                                # Truncate to 200 chars for safety
+                                                safe_answer = answer[:200] + "..." if len(answer) > 200 else answer
+                                                q_text = resp.get("question", "Question")
+                                                valid_context_parts.append(f"{q_text}: {safe_answer}")
+                                        
+                                        if valid_context_parts:
+                                            context_str = "\n".join(valid_context_parts)
+                                            # Prepend context to user message
+                                            user_message = f"User provided context:\n{context_str}\n\nUser Message:\n{user_message}"
+                                            # Mark injected so we don't do it again
+                                            wa_service.set_context_injected(from_number, True)
+
                                     msg, usage = current_app.bot.respond(f"Message from whatsapp: {user_message}", from_number)
                                     print(f"Bot response: {msg}")
                                     wa_service.add_message(msg, from_number, "bot", type="text")
