@@ -570,6 +570,13 @@ def create_app(config_class=Config):
         app.config['SETTINGS']['2fa'] = {
             "duration": 1, "unit": 'days'}
 
+    # WhatsApp onboarding defaults
+    if "whatsapp_onboarding_questions" not in app.config['SETTINGS']:
+        app.config['SETTINGS']['whatsapp_onboarding_questions'] = []
+    if "whatsapp_onboarding_enabled" not in app.config['SETTINGS']:
+        app.config['SETTINGS']['whatsapp_onboarding_enabled'] = False
+        db.config.update_one({"id": "settings"}, {"$set": app.config['SETTINGS']})
+
     @app.context_processor
     def inject_settings():
         """Inject settings into templates, combining superadmin settings with admin-specific settings"""

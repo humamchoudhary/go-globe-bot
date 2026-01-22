@@ -22,15 +22,19 @@
         <!-- Desktop: First 20 characters -->
 
         <p class="text-[16px] text-[var(--sec-text)] block">
+            {% if chat.messages %}
             {{ chat.messages[-1].sender[:6] }}
             {% if chat.messages[-1].sender|length >
-                6 %}
-                ...
+            6 %}
+            ...
             {% endif %}
             : {{ chat.messages[-1].message[:15] }}
             {% if
-                chat.messages[-1].message|length > 15 %}
-                ...
+            chat.messages[-1].message|length > 15 %}
+            ...
+            {% endif %}
+            {% else %}
+            No messages yet
             {% endif %}
         </p>
 
@@ -48,9 +52,9 @@
         <div class="flex flex-row gap-2">
 
 
-            <div hx-post="/admin/whatsapp/{{ chat.phone_no }}/delete" hx-target="#chat-{{ chat.phone_no }}" hx-swap="none"
-                hx-trigger="click" hx-on::click="event.stopPropagation();" onclick="event.stopPropagation()"
-                hx-confirm="Are you sure you want to delete this chat?"
+            <div hx-post="/admin/whatsapp/{{ chat.phone_no }}/delete" hx-target="#chat-{{ chat.phone_no }}"
+                hx-swap="none" hx-trigger="click" hx-on::click="event.stopPropagation();"
+                onclick="event.stopPropagation()" hx-confirm="Are you sure you want to delete this chat?"
                 hx-on::after-request="handleDeleteResponse(event, '{{ chat.phone_no }}'); console.log('delete succ')"
                 class="flex items-center gap-3 px-2 py-2 hover:opacity-80 hover:cursor-pointer hover:bg-[var(--border-color)] duration-300 transition-all rounded-md">
                 <i data-lucide="trash-2" class="text-red-500 size-[18px]"></i>
