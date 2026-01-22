@@ -140,41 +140,6 @@
                             All Calls <span class="float-right">({{ call_counts.all or calls|length }})</span>
                         </div>
                         
-                        <div 
-                            hx-get="/admin/calls/ongoing?page=0"
-                            hx-target="#call_list_container"
-                            hx-trigger="click"
-                            hx-on:click="selectOption(this, 'Ongoing Calls', '{{ call_counts.ongoing or 0 }}')"
-                            hx-indicator="#loading-indicator"
-                            class="dropdown-option px-[18px] py-[8px] text-[14px] hover:bg-[var(--border-color)] cursor-pointer flex flex-row gap-2 flex-nowrap justify-between"
-                            data-value="ongoing"
-                        >
-                            Ongoing Calls <span class="float-right">({{ call_counts.ongoing or 0 }})</span>
-                        </div>
-                        
-                        <div 
-                            hx-get="/admin/calls/ended?page=0"
-                            hx-target="#call_list_container"
-                            hx-trigger="click"
-                            hx-on:click="selectOption(this, 'Ended Calls', '{{ call_counts.ended or 0 }}')"
-                            hx-indicator="#loading-indicator"
-                            class="dropdown-option px-[18px] py-[8px] text-[14px] hover:bg-[var(--border-color)] cursor-pointer flex flex-row gap-2 flex-nowrap justify-between"
-                            data-value="ended"
-                        >
-                            Ended Calls <span class="float-right">({{ call_counts.ended or 0 }})</span>
-                        </div>
-                        
-                        <div 
-                            hx-get="/admin/calls/in_progress?page=0"
-                            hx-target="#call_list_container"
-                            hx-trigger="click"
-                            hx-on:click="selectOption(this, 'In Progress Calls', '{{ call_counts.in_progress or 0 }}')"
-                            hx-indicator="#loading-indicator"
-                            class="dropdown-option px-[18px] py-[8px] text-[14px] hover:bg-[var(--border-color)] cursor-pointer flex flex-row gap-2 flex-nowrap justify-between"
-                            data-value="in_progress"
-                        >
-                            In Progress Calls <span class="float-right">({{ call_counts.in_progress or 0 }})</span>
-                        </div>
                     </div>
                 </div>
             </div>
