@@ -60,6 +60,13 @@ def _save_recording(recording_url: str, call_id: str) -> str:
 
 @call_bp.route("/sheet-hook", methods=["POST", "GET"])
 def sheet_hook():
+    # Check for password in payload
+    expected_password = os.environ.get("SHEET_HOOK_PASSWORD")
+    req_password = (request.json or {}).get("password") if request.is_json else None
+
+    if not expected_password or req_password != expected_password:
+        return jsonify({"error": "Unauthorized"}), 401
+
     data = request.json or []
     if isinstance(data, dict):
         data = [data]
@@ -91,7 +98,6 @@ def sheet_hook():
                     message="Failed to parse date/time",
                     data={"row": row, "date": date_str, "time": time_str, "error": str(e)}
                 )
-
 
         formatted_call = call_service.build_call_document(extracted_data)
         saved_path = _save_recording(extracted_data.get("recording_url"), formatted_call.get("call_id"))
