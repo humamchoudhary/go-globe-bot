@@ -8,6 +8,10 @@ class UsageService:
         self.db = db
         self.collection = db.usage
 
+        # Create indexes for common queries
+        self.collection.create_index("admin_id")
+        self.collection.create_index([("admin_id", 1), ("period", 1), ("date", 1)])
+
     def get_cost(self, admin_id: str) -> Dict[str, Any]:
         """Retrieves all token usage data for a specific admin as a structured dictionary."""
         usage_data = {}
@@ -218,3 +222,4 @@ if __name__ == "__main__":
     # Get usage for all admins
     all_usage = usage_service.get_all_admins_usage()
     print("All admins usage:", all_usage)
+

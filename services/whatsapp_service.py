@@ -22,7 +22,12 @@ class WhatsappService:
     def __init__(self, db):
         self.db = db
         self.whatsapp_collection: Collection[WhatsappUser] = db.whatsapp
-    
+        self._ensure_indexes()
+
+    def _ensure_indexes(self):
+        # Searches/updates/deletes use {"phone_no": ...}, and inserts should enforce uniqueness.
+        self.whatsapp_collection.create_index("phone_no", name="idx_phone_no")
+
     def create(self, phone_no):
         wa_doc = {
             "phone_no": phone_no,

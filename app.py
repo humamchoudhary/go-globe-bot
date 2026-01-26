@@ -702,6 +702,11 @@ def create_app(config_class=Config):
     def healthcheck():
         return "OK", 200
 
+    try:
+        db.sessions.create_index("id", unique=True)
+    except Exception:
+        pass
+
     return app, socketio
 
 
