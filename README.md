@@ -58,7 +58,7 @@ nohup gunicorn -k eventlet -w 1 -b 0.0.0.0:8000 app:app &
 
 ### Health Check Endpoint
 Here’s a standalone Python script that checks your `/healthcheck` endpoint. If it fails, it sends an email alert to a list of recipients. You can run this script via a cronjob.
-set the path of .env file in the script before using it, change variable env_path to the full path of your .env file.
+> ℹ️ set the path of .env file in the script before using it, change variable env_path to the full path of your .env file.
 
 **How to use:**
 2. Make the script executable:  
