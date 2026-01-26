@@ -56,6 +56,17 @@ nohup gunicorn -k eventlet -w 1 -b 0.0.0.0:8000 app:app &
 - If you get a `ModuleNotFoundError`, ensure you are in the correct virtual environment.
 - Make sure no other process is running on port `8000`.
 
+### Health Check Endpoint
+Here’s a standalone Python script that checks your `/healthcheck` endpoint. If it fails, it sends an email alert to a list of recipients. You can run this script via a cronjob.
+set the path of .env file in the script before using it, change variable env_path to the full path of your .env file.
+
+**How to use:**
+2. Make the script executable:  
+   `chmod +x <project_path>/services/healthcheck_alert.py`
+3. Add to your crontab (run every 5 minutes, for example):  
+   `*/5 * * * * <your-virtual-path-to-python> <project_path>/services/healthcheck_alert.py`
+
+This script will email the recipients if the healthcheck fails.
 ---
 
 ## Next Steps

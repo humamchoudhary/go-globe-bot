@@ -697,6 +697,10 @@ def create_app(config_class=Config):
     @app.route('/test-page')
     def testpage():
         return render_template('test.html')
+    
+    @app.route('/healthcheck')
+    def healthcheck():
+        return "OK", 200
 
     return app, socketio
 
