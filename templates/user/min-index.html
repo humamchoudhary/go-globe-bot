@@ -49,7 +49,7 @@
                 <button id="send-btn"
                     style="width: 50px;height: 45px;padding: 0;margin: 0;border-radius: 5px;outline: none;cursor: pointer;border: none;background-color: var(--goglobe-main-color);color: white;transition: all 0.3s ease;"
                     onclick="sendMessage()">
-                    <img src="/static/svg/enter.svg" alt=""
+                    <img src="{{settings['backend_url']}}/static/svg/enter.svg" alt=""
                         style="color: #fff; width: 21px; height: 21px; filter: invert(1);">
                 </button>
                 <!-- <div id="ping-admin-btn"
@@ -293,21 +293,21 @@
                 title: "Call support",
                 subtitle: "",
                 color: "#FFFFFF",
-                icon: "/static/svg/call-white.svg",
+                icon: "{{ settings['backend_url'] }}/static/svg/call-white.svg",
             },
             loading: {
                 type: "round",
                 title: "Connecting...",
                 subtitle: "",
                 color: "#FFFFFF",
-                icon: "/static/svg/loader-white.svg",
+                icon: "{{ settings['backend_url'] }}/static/svg/loader-white.svg",
             },
             active: {
                 type: "round",
                 title: "End call",
                 subtitle: "",
                 color: "#FFFFFF",
-                icon: "/static/svg/cut-call-white.svg",
+                icon: "{{ settings['backend_url'] }}/static/svg/cut-call-white.svg",
             },
         };
 

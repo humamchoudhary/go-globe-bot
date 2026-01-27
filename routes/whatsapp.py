@@ -45,6 +45,163 @@ def is_duplicate_message(message_id):
     processed_messages[message_id] = datetime.now()
     return False
 
+import re
+from google import genai
+
+
+def get_questions(settings):
+    """Get questions with V1/V2 format compatibility"""
+    questions = settings.get("whatsapp_onboarding_questions", [])[:5]  # Max 5
+    if not questions:
+        return []
+    # V1 format: list of strings -> convert to V2 format
+    if isinstance(questions[0], str):
+        return [{"text": q, "type": "text", "mandatory": False} for q in questions]
+    # V2 format: list of dicts
+    return questions
+
+
+def validate_with_fallback(question_type, answer, bot):
+    """
+    Validate answer against question type.
+    Uses AI validation for all types except 'text' (free-form).
+    Accepts answer on any AI failure.
+    """
+    answer = answer.strip()
+    q_type = question_type.lower().strip()
+    
+    # Free-form text always valid
+    if q_type == "text" or q_type == "":
+        return True
+    
+    # Use AI validation for all other types (name, email, phone, custom types)
+    try:
+        return validate_answer_ai(question_type, answer, bot)
+    except Exception as e:
+        print(f"AI validation failed, accepting answer: {e}")
+        return True  # Accept on AI failure
+
+
+def validate_answer_ai(question_type, answer, bot):
+    """Isolated AI validation - does NOT affect chat history"""
+    try:
+        client = genai.Client(api_key=bot.gm_key)
+        prompt = f'''Is "{answer}" a valid {question_type}?
+Respond with ONLY the word "VALID" or "INVALID", nothing else.'''
+        
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
+        result = response.text.strip().upper()
+        return result == "VALID"
+    except Exception:
+        return True  # Accept on any exception
+
+
+def handle_onboarding(chat, user_message, wa_service, settings, bot=None):
+    """
+    Handle onboarding flow V2.
+    Returns tuple: (response_message, should_return_early)
+    - (message, True) = send message and return
+    - (None, False) = onboarding complete, continue to AI
+    """
+    phone = chat["phone_no"]
+    
+    # Skip if feature disabled
+    if not settings.get("whatsapp_onboarding_enabled"):
+        wa_service.complete_onboarding(phone)
+        return None, False
+    
+    # Snapshot questions on first interaction
+    if chat.get("onboarding_questions_snapshot") is None:
+        questions = get_questions(settings)
+        if not questions:
+            wa_service.complete_onboarding(phone)
+            return None, False
+        wa_service.set_snapshot(phone, questions)
+        chat["onboarding_questions_snapshot"] = questions
+    
+    questions = chat["onboarding_questions_snapshot"]
+    step = chat.get("onboarding_step", 0)
+    attempts = chat.get("onboarding_attempt_count", 0)
+    
+    # If step == 0, this is the first message - ask first question
+    if step == 0:
+        wa_service.reset_attempt_and_advance(phone, 1)
+        q = questions[0]
+        q_text = q.get("text", q) if isinstance(q, dict) else q
+        mandatory = q.get("mandatory", False) if isinstance(q, dict) else False
+        suffix = "" if mandatory else " (type 'skip' to continue)"
+        return f"{q_text}{suffix}", True
+    
+    # Get previous question (step-1 because step is 1-indexed after first question)
+    prev_idx = step - 1
+    if prev_idx >= len(questions):
+        # All questions answered
+        wa_service.complete_onboarding(phone)
+        return None, False
+    
+    prev_q = questions[prev_idx]
+    q_text = prev_q.get("text", prev_q) if isinstance(prev_q, dict) else prev_q
+    q_type = prev_q.get("type", "text") if isinstance(prev_q, dict) else "text"
+    mandatory = prev_q.get("mandatory", False) if isinstance(prev_q, dict) else False
+    
+    user_input = user_message.strip()
+    is_skip = user_input.lower() == "skip" or user_input == ""  # Empty = skip
+    
+    # Handle skip attempt (including empty input)
+    if is_skip:
+        if mandatory:
+            return "This question is required. Please provide an answer.", True
+        else:
+            # Save as skipped, advance
+            wa_service.save_onboarding_response_v2(phone, prev_q, "skipped")
+            wa_service.reset_attempt_and_advance(phone, step + 1)
+            # Check if more questions
+            if step >= len(questions):
+                wa_service.complete_onboarding(phone)
+                return None, False
+            # Ask next question
+            next_q = questions[step]
+            next_text = next_q.get("text", next_q) if isinstance(next_q, dict) else next_q
+            next_mandatory = next_q.get("mandatory", False) if isinstance(next_q, dict) else False
+            suffix = "" if next_mandatory else " (type 'skip' to continue)"
+            return f"{next_text}{suffix}", True
+    
+    # Validate answer
+    is_valid = validate_with_fallback(q_type, user_input, bot) if bot else True
+    
+    if not is_valid:
+        if attempts >= 2:  # 3rd attempt (0, 1, 2)
+            # Accept anyway after 3 attempts
+            is_valid = True
+        else:
+            # Increment attempts and ask again
+            wa_service.increment_attempt(phone)
+            return f"Please provide a valid {q_type}. Try again:", True
+    
+    # Save valid answer and advance
+    wa_service.save_onboarding_response_v2(phone, prev_q, user_input)
+    wa_service.reset_attempt_and_advance(phone, step + 1)
+    
+    # Check if more questions
+    if step >= len(questions):
+        wa_service.complete_onboarding(phone)
+        return None, False
+    
+    # Ask next question
+    next_q = questions[step]
+    next_text = next_q.get("text", next_q) if isinstance(next_q, dict) else next_q
+    next_mandatory = next_q.get("mandatory", False) if isinstance(next_q, dict) else False
+    suffix = "" if next_mandatory else " (type 'skip' to continue)"
+    return f"{next_text}{suffix}", True
+
+
+def is_admin_enabled(chat):
+    """Check admin_enable with fallback to admin_enabled for backwards compatibility"""
+    return chat.get("admin_enable") or chat.get("admin_enabled", False)
+
 
 @wa_bp.route('/webhook', methods=['GET'])
 def verify_webhook():
@@ -202,76 +359,65 @@ def webhook():
                             # Handle text messages
                             if message_type == 'text':
                                 user_message = message.get('text', {}).get('body', '')
-                                # print(f"Received text message from {from_number}: {user_message}")
+                                
+                                # ONBOARDING CHECK - before add_message and socket emit
+                                if not chat.get("onboarding_complete", True):  # Default True = legacy skip
+                                    # Fetch fresh settings from DB to ensure multi-worker consistency
+                                    settings_doc = current_app.db.config.find_one({"id": "settings"}) or {}
+                                    # Fallback to config if DB read fails (rare), or empty dict
+                                    settings = settings_doc if settings_doc else current_app.config.get('SETTINGS', {})
+                                    
+                                    response, should_return = handle_onboarding(
+                                        chat, user_message, wa_service, settings, current_app.bot
+                                    )
+                                    if should_return:
+                                        send_whatsapp_message(from_number, response)
+                                        return jsonify({"status": "ok"}), 200
+                                    # Onboarding complete, refresh chat data
+                                    chat = wa_service.get_by_phone_no(from_number)
+                                
+                                # Normal flow continues
                                 wa_service.add_message(user_message, from_number, from_number, type="text")
+                                current_app.socketio.emit("wa_message", {"sender": from_number, "message": user_message})
+                                
+                                if not is_admin_enabled(chat):  # Use helper with fallback
+                                    # Use locally fetched settings from above (or fetch if missing for edge cases)
+                                    if 'settings' not in locals():
+                                        settings_doc = current_app.db.config.find_one({"id": "settings"}) or {}
+                                        settings = settings_doc if settings_doc else current_app.config.get('SETTINGS', {})
+                                    
+                                    # Context Injection Logic
+                                    if (settings.get("whatsapp_onboarding_use_context") 
+                                        and not chat.get("context_injected", False)):
+                                        
+                                        # Get validated answers
+                                        responses = chat.get("onboarding_responses", [])
+                                        valid_context_parts = []
+                                        
+                                        for resp in responses:
+                                            # Skip skipped/empty
+                                            answer = resp.get("answer", "")
+                                            if answer and answer.lower() != "skipped":
+                                                # Truncate to 200 chars for safety
+                                                safe_answer = answer[:200] + "..." if len(answer) > 200 else answer
+                                                q_text = resp.get("question", "Question")
+                                                valid_context_parts.append(f"{q_text}: {safe_answer}")
+                                        
+                                        if valid_context_parts:
+                                            context_str = "\n".join(valid_context_parts)
+                                            # Prepend context to user message
+                                            user_message = f"User provided context:\n{context_str}\n\nUser Message:\n{user_message}"
+                                            # Mark injected so we don't do it again
+                                            wa_service.set_context_injected(from_number, True)
 
-                                current_app.socketio.emit("wa_message",{"sender":from_number,"message":user_message})
-                                if not chat.get("admin_enable"):
                                     msg, usage = current_app.bot.respond(f"Message from whatsapp: {user_message}", from_number)
                                     print(f"Bot response: {msg}")
                                     wa_service.add_message(msg, from_number, "bot", type="text")
                                     send_whatsapp_message(from_number, msg)
                             
-                            # Handle audio messages
+                            # Handle audio messages - audio not supported yet
                             elif message_type == 'audio':
-                                audio_data = message.get('audio', {})
-                                audio_id = audio_data.get('id')
-                                audio_mime_type = audio_data.get('mime_type', 'audio/ogg')
-                                # print(f"Received audio message from {from_number}, audio_id: {audio_id}")
-                                
-                                # Download audio from WhatsApp
-                                audio_bytes = download_whatsapp_media(audio_id)
-                                
-                                if audio_bytes:
-                                    # print(f"Downloaded audio: {len(audio_bytes)} bytes")
-                                    
-                                    # Transcribe audio to text
-                                    transcribed_text = current_app.bot.transcribe(audio_bytes)
-                                    # print(f"Transcribed text: {transcribed_text}")
-                                    
-                                    # Save user audio message
-                                    msg_id = wa_service.add_message(transcribed_text, from_number, from_number, type="audio")
-                                    
-                                    # Save audio file
-                                    save_path = os.path.join('files', f"{from_number}", f"{msg_id}.ogg")
-                                    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                                    
-                                    with open(save_path, 'wb') as f:
-                                        f.write(audio_bytes)
-                                    # print(f"Saved audio to: {save_path}")
-                                    
-                                    # Get bot response
-
-                                    if not chat.get("admin_enable"):
-                                        msg, usage = current_app.bot.respond(f"Message from whatsapp: {transcribed_text}", from_number)
-                                        # print(f"Bot response: {msg}")
-                                        
-                                        # Generate audio response (raw format from Google API)
-                                        audio_response = current_app.bot.generate_audio(msg)
-                                        # print(f"Generated audio response: {len(audio_response)} bytes")
-                                        
-                                        # Convert to OGG Opus format for WhatsApp
-                                        ogg_audio = convert_to_ogg_opus(audio_response)
-                                        
-                                        if ogg_audio:
-                                            # Save bot audio message
-                                            bot_message_id = wa_service.add_message(msg, from_number, "bot", type="audio")
-                                            bot_audio_path = os.path.join('files', f"{from_number}", f"{bot_message_id}.ogg")
-                                            
-                                            # Save bot audio file
-                                            with open(bot_audio_path, 'wb') as f:
-                                                f.write(ogg_audio)
-                                            # print(f"Saved bot audio to: {bot_audio_path}")
-                                            
-                                            # Send audio response to user
-                                            resp = send_whatsapp_audio(from_number, ogg_audio)
-                                            # print(resp)
-                                        else:
-                                            # print("Failed to convert audio to OGG Opus")
-                                            send_whatsapp_message(from_number, msg)  # Fall back to text
-                                else:
-                                    # print(f"Failed to download audio from {from_number}")
-                                    send_whatsapp_message(from_number, "Sorry, I couldn't process your audio message.")
+                                send_whatsapp_message(from_number, "Please text instead, audio is not supported at the moment.")
                             
                             # Mark message as read
                             mark_message_read(message_id)
@@ -403,10 +549,11 @@ def send_whatsapp_message(phone_number, message):
     
     try:
         response = requests.post(url, headers=headers, json=payload)
+        print(f"WhatsApp API Response: {response.status_code} {response.text}")
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        # print(f"Error sending message: {e}")
+        print(f"Error sending message: {e}")
         return None
 
 

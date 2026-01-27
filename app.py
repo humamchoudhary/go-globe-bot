@@ -9,13 +9,15 @@ from pymongo import MongoClient
 import bcrypt
 import os
 from config import Config
-from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp,wa_bp
+from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp, wa_bp, call_bp
 from routes.chat import register_socketio_events
 from routes.admin import register_admin_socketio_events
+# don't remove these routes. imports
 import routes.auth
 import routes.min
 import routes.api
 import routes.whatsapp 
+import routes.call
 from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
@@ -570,6 +572,13 @@ def create_app(config_class=Config):
         app.config['SETTINGS']['2fa'] = {
             "duration": 1, "unit": 'days'}
 
+    # WhatsApp onboarding defaults
+    if "whatsapp_onboarding_questions" not in app.config['SETTINGS']:
+        app.config['SETTINGS']['whatsapp_onboarding_questions'] = []
+    if "whatsapp_onboarding_enabled" not in app.config['SETTINGS']:
+        app.config['SETTINGS']['whatsapp_onboarding_enabled'] = False
+        db.config.update_one({"id": "settings"}, {"$set": app.config['SETTINGS']})
+
     @app.context_processor
     def inject_settings():
         """Inject settings into templates, combining superadmin settings with admin-specific settings"""
@@ -613,8 +622,8 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp)
     app.register_blueprint(min_bp)
     app.register_blueprint(api_bp)
-
     app.register_blueprint(wa_bp)
+    app.register_blueprint(call_bp)
 
 
     # Register Socket.IO event handlers
@@ -688,6 +697,18 @@ def create_app(config_class=Config):
     @app.route('/test-page')
     def testpage():
         return render_template('test.html')
+    
+    @app.route('/healthcheck')
+    def healthcheck():
+        try:
+            app.db.command('ping')
+            return "OK", 200
+        except Exception:
+            return "MongoDB unavailable", 500
+    try:
+        db.sessions.create_index("id", unique=True)
+    except Exception:
+        pass
 
     return app, socketio
 

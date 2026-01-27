@@ -1,0 +1,89 @@
+<div
+  id="call-{{ call.call_id }}"
+  class="call-row flex flex-row justify-between py-[12px] px-[24px] {% if request.path.split('/')[-1] == call.call_id or (cur_call and cur_call.call_id == call.call_id ) %}bg-[var(--sec-bg-color)]{% endif %} border-y border-y-[var(--border-color)] hover:cursor-pointer duration-300 transition-all"
+>
+  <div
+    class="hidden"
+    hx-get="/admin/call/{{ call.call_id }}"
+    hx-target="#callarea"
+    hx-swap="outerHTML"
+    hx-trigger="click from:#call-{{ call.call_id }}"
+    hx-push-url="true"
+  ></div>
+
+  <div class="flex flex-col {% if call.viewed %}opacity-60{% endif %}">
+    <div class="flex flex-row gap-[15px] items-center">
+      <p class="text-[16px] font-bold">
+        {% if call.userdata.name %} {{ call.userdata.name[:15] }} {% if
+        call.userdata.name|length > 15 %}...{% endif %} {% else %} Unknown
+        Caller {% endif %}
+      </p>
+
+      {% if call.status == 'ongoing' %}
+      <div class="px-[9px] py-[3px] bg-green-500/20 rounded-full">
+        <p class="text-xs md:text-sm text-green-500">
+          <span class="md:hidden 2xl:inline">Ongoing</span>
+          <span class="hidden md:inline 2xl:hidden">●</span>
+        </p>
+      </div>
+      {% elif call.status == 'in_progress' %}
+      <div class="px-[9px] py-[3px] bg-yellow-500/20 rounded-full">
+        <p class="text-xs md:text-sm text-yellow-500">
+          <span class="md:hidden 2xl:inline">In Progress</span>
+          <span class="hidden md:inline 2xl:hidden">◐</span>
+        </p>
+      </div>
+      {% elif call.status == 'ended' %}
+      <div class="px-[9px] py-[3px] bg-blue-500/20 rounded-full">
+        <p class="text-xs md:text-sm text-blue-500">
+          <span class="md:hidden 2xl:inline">Ended</span>
+          <span class="hidden md:inline 2xl:hidden">✓</span>
+        </p>
+      </div>
+      {% endif %}
+    </div>
+
+    <p class="text-[16px] opacity-70 text-[var(--sec-text)]">
+      {{ call.userdata.From if call.userdata.From else 'No number' }}
+    </p>
+
+    <!-- Call duration or transcription count -->
+    <p class="text-[16px] text-[var(--sec-text)] block">
+      {% if call.transcription_length and call.transcription_length > 0 %}
+        {{ call.transcription_length }} message{{ 's' if call.transcription_length != 1 else '' }}
+      {% else %}
+        No messages yet
+      {% endif %}
+    </p>
+
+    
+  </div>
+
+  <div class="flex flex-col justify-between items-end">
+    <span
+      class="message-time {% if call.viewed %}opacity-60{% endif %}"
+      data-utc="{{ call.started_at.isoformat() }}"
+      title="{{ call.started_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}"
+    >
+      {{ call.started_at.strftime('%d %B %Y - %H:%M') }}
+    </span>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-row gap-2">
+      <div
+        hx-post="/admin/call/{{ call.call_id }}/delete"
+        hx-target="#call-{{ call.call_id }}"
+        hx-swap="none"
+        hx-trigger="click"
+        hx-on::click="event.stopPropagation();"
+        onclick="event.stopPropagation()"
+        hx-confirm="Are you sure you want to delete this call?"
+        hx-on::after-request="handleDeleteResponse(event, '{{ call.call_id }}'); console.log('delete succ')"
+        class="flex items-center gap-3 px-2 py-2 hover:opacity-80 hover:cursor-pointer hover:bg-[var(--border-color)] duration-300 transition-all rounded-md"
+      >
+        <i data-lucide="trash-2" class="text-red-500 size-[18px]"></i>
+        <p class="text-sm font-bold text-red-500 hidden 2xl:inline">Delete</p>
+      </div>
+    </div>
+  </div>
+</div>

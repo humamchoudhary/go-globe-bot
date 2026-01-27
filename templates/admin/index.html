@@ -74,6 +74,24 @@
             </div>
             {% endif %}
         </div>
+        <p class="text-[26px] text-[var(--sec-text)] mx-[24px] mt-[32px]">Latest Calls</p>
+        <div class="flex flex-col" id="call_list_container">
+            {% for call in calls[:5] %}
+            <a href="/admin/call/{{call.id}}" class="flex items-center gap-2 p-3 rounded-md hover:bg-[var(--sec-bg-color)] transition">
+                <button class="bg-[var(--main-color)] text-white px-4 py-2 rounded hover:opacity-90 transition-all duration-300">
+                    View Call
+                </button>
+                <span class="text-[var(--sec-text)]">{{ call.caller_name or "Unknown Caller" }}</span>
+                <span class="text-xs text-gray-400">{{ call.timestamp }}</span>
+            </a>
+            {% endfor %}
+            {% if calls|length > 5 %}
+            <div class="flex items-center justify-center py-4">
+                <a href="/admin/calls/" class="bg-[var(--main-color)] rounded-md px-6 py-2 hover:opacity-90 hover:cursor-pointer transition-all duration-300">More Calls
+                </a>
+            </div>
+            {% endif %}
+        </div>
         </div>
         <div class="hidden md:flex min-w-[640px] p-[84px]">
             <div class="w-[350px] flex flex-col gap-[32px]">

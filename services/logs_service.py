@@ -9,6 +9,13 @@ class LogsService:
     def __init__(self, db: MongoClient):
         self.db = db
         self.logs_collection: Collection = db.logs
+        # ensure indexes for efficient querying
+        self.logs_collection.create_index("log_id", unique=True)
+        self.logs_collection.create_index([("user_id", 1), ("timestamp", -1)])
+        self.logs_collection.create_index([("admin_id", 1), ("timestamp", -1)])
+        self.logs_collection.create_index([("tag", 1), ("timestamp", -1)])
+        self.logs_collection.create_index([("level", 1), ("timestamp", -1)])
+        self.logs_collection.create_index([("timestamp", -1)])
 
     def create_log(
         self,

@@ -12,6 +12,17 @@ class AdminService:
         self.admins_collection = db.admins
         self.two_fa_collection = db.two_fa_tokens
         self.trusted_ips_collection = db.trusted_ips
+        self._ensure_indexes()
+    def _ensure_indexes(self):
+        # Admins collection
+        self.admins_collection.create_index("username", unique=True)
+        self.admins_collection.create_index("admin_id", unique=True)
+        self.admins_collection.create_index("secret_key", unique=True)
+        self.admins_collection.create_index("role")
+        self.admins_collection.create_index("status")
+        self.admins_collection.create_index([("last_login", -1)])
+        self.admins_collection.create_index("password_reset_token")
+        self.admins_collection.create_index("password_reset_expires")
 
     def create_admin(self, username, password, role="admin", email=None, phone=None, created_by=None):
         """Create a new admin"""

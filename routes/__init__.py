@@ -7,4 +7,4 @@ auth_bp = Blueprint('auth', __name__)
 min_bp = Blueprint('min', __name__, url_prefix='/min')
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 wa_bp = Blueprint("wa",__name__,url_prefix="/wa")
-
+call_bp = Blueprint('call', __name__, url_prefix='/call')
