@@ -700,8 +700,11 @@ def create_app(config_class=Config):
     
     @app.route('/healthcheck')
     def healthcheck():
-        return "OK", 200
-
+        try:
+            app.db.command('ping')
+            return "OK", 200
+        except Exception:
+            return "MongoDB unavailable", 500
     try:
         db.sessions.create_index("id", unique=True)
     except Exception:
