@@ -212,6 +212,13 @@ function initializeChatbot() {
     cursor: grabbing;
   }
 
+  .md-content a,
+  .md-content a:visited,
+  .md-content a:hover,
+  .md-content a:active,
+  .md-content a:focus {
+    color: var(--goglobe-main-color);
+  }
   .drag-handle {
     display: flex;
     align-items: center;
