@@ -8,6 +8,10 @@ class UserService:
         self.db = db
         self.users_collection = db.users
 
+        # Create indexes for common queries
+        self.users_collection.create_index("user_id", unique=True)
+        self.users_collection.create_index([("name", 1), ("email", 1), ("phone", 1)])
+
     def create_user(
         self, name, desg=None, ip=None, email=None, phone=None, role="user"
     ):

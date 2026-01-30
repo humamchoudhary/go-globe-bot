@@ -7,6 +7,35 @@ class NotificationService:
     def __init__(self, db):
         self.db = db
         self.notifications_collection = db.notifications
+        self._ensure_indexes()
+
+    def _ensure_indexes(self):
+        self.notifications_collection.create_index("notification_id", unique=True)
+        self.notifications_collection.create_index([
+            ("admin_id", 1),
+            ("read", 1),
+            ("created_at", -1),
+        ])
+        self.notifications_collection.create_index([
+            ("admin_id", 1),
+            ("created_at", -1),
+        ])
+        self.notifications_collection.create_index([
+            ("admin_id", 1),
+            ("type", 1),
+            ("read", 1),
+            ("created_at", -1),
+        ])
+        self.notifications_collection.create_index([
+            ("admin_id", 1),
+            ("room_id", 1),
+            ("created_at", -1),
+        ])
+        self.notifications_collection.create_index([
+            ("admin_id", 1),
+            ("type", 1),
+            ("room_id", 1),
+        ])
 
     def create_notification(self, admin_id: str, title: str, message: str,
                             notification_type: str = "admin_required",
