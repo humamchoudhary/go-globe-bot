@@ -2476,12 +2476,24 @@ def get_notifications():
         session.get("admin_id"), unread_only=True
     )
     chat_service = ChatService(current_app.db)
+    call_service = CallService(current_app.db)
     notificaitons = []
 
     for noti in notis:
-        chat = chat_service.get_chat_by_room_id(noti.get('room_id'))
+        call, chat = None, None
+        if noti.get('room_id') is not None:
+            print(noti.get('room_id'))
+            if noti.get('room_id').startswith('call_'):
+                call = call_service.get_call_by_call_id(noti.get('room_id').replace('call_', ''))
+            else:
+                chat = chat_service.get_chat_by_room_id(noti.get('room_id'))
+
+        
+        
         if chat:
             notificaitons.append({**noti, **chat.to_dict()})
+        if call:
+            notificaitons.append({**noti, **call.to_dict()})
 
     return render_template(
         "components/notification-list.html", notifications=notificaitons

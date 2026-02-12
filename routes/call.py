@@ -9,6 +9,7 @@ from flask_mail import Mail
 
 from routes.admin import chat
 from services.admin_service import AdminService
+from services.notification_service import NotificationService
 from . import call_bp
 from flask import (
     render_template,
@@ -134,7 +135,10 @@ def sheet_hook():
         current_app.socketio.emit('new_call', {
             'username': extracted_data.get("name", "Unknown"),
         })
-        
+        # UI dropdown notification
+        # send mongodb notification
+        noti_service = NotificationService(current_app.db)
+        noti_service.create_notification("4258fbdf-3f75-4446-91b5-1f3780a79c07", "New call Received", f'{extracted_data.get("name", "Unknown")} Made a new call to Ana', "new_call", "call_" + formatted_call.get("call_id"))
         # create log
         logs_service.create_log(
             level=LogLevel.INFO,
