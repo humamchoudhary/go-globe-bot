@@ -84,8 +84,9 @@ def sheet_hook():
     logs_service = LogsService(current_app.db)
     call_service = CallService(current_app.db)
     call_collection = current_app.db.get_collection("calls")
+    admin_id = session.get('admin_id') or os.environ.get("DEFAULT_ADMIN_ID")
     admin_service = AdminService(current_app.db)
-    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    current_admin = admin_service.get_admin_by_id(admin_id)
     mail = Mail(current_app)
 
     for item in data:
@@ -138,7 +139,6 @@ def sheet_hook():
         current_app.socketio.emit('new_call', {
             'username': extracted_data.get("name", "Unknown"),
         })
-        admin_id = session.get('admin_id') or os.environ.get("DEFAULT_ADMIN_ID")
         # UI dropdown notification
         # send mongodb notification
         noti_service = NotificationService(current_app.db)
