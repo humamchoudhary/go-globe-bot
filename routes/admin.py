@@ -1681,20 +1681,20 @@ def set_theme(theme_type):
 
 
 @admin_bp.route("/settings/prompt", methods=["POST"])
-@admin_required
+@admin_required(roles=["admin"])
 def set_prompt():
     prpt = request.form.get("prompt")
     admin_service = AdminService(current_app.db)
     current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
     if current_admin.role == "superadmin":
-        current_app.config["SETTINGS"]["prompt"] = prpt
-    else:
-        current_admin.settings["prompt"] = prpt
-        admin_service.admins_collection.update_one(
-            {"admin_id": current_admin.admin_id}, {
-                "$set": {"settings.prompt": prpt}}
-        )
+        return "Forbidden", 403
+
+    current_admin.settings["prompt"] = prpt
+    admin_service.admins_collection.update_one(
+        {"admin_id": current_admin.admin_id}, {
+            "$set": {"settings.prompt": prpt}}
+    )
     return "", 200
 
 
