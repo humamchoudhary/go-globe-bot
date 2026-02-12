@@ -4,6 +4,11 @@ from flask import (
     url_for,
 )
 from functools import wraps
+
+from flask_mail import Mail
+
+from routes.admin import chat
+from services.admin_service import AdminService
 from . import call_bp
 from flask import (
     render_template,
@@ -18,6 +23,7 @@ from flask import (
 from . import call_bp
 from services.call_service import CallService
 from services.logs_service import LogsService
+from services.email_service import send_email
 from models.log import LogLevel, LogTag
 from services.call_service import CallService
 from services.logs_service import LogsService
@@ -74,6 +80,9 @@ def sheet_hook():
     logs_service = LogsService(current_app.db)
     call_service = CallService(current_app.db)
     call_collection = current_app.db.get_collection("calls")
+    admin_service = AdminService(current_app.db)
+    current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
+    mail = Mail(current_app)
 
     for item in data:
         row = (item or {}).get("rowNumber")
@@ -104,12 +113,29 @@ def sheet_hook():
         if saved_path:
             formatted_call["audio"] = saved_path
         call_collection.insert_one(formatted_call)
+        
+        # email notification
+        SEND_USER = os.environ.get("SMTP_TO")
+        admin_email = current_admin.email if current_admin else None
+
+        recipient = admin_email or SEND_USER
+        if recipient:
+            send_email(
+                recipient,
+                "New Call Received by Ana",
+                "A new call record has been added",
+                mail=mail,
+                html_message=render_template(
+                    "email/new_call.html",
+                    call=formatted_call
+                )
+            )
+        # create log
         logs_service.create_log(
             level=LogLevel.INFO,
             tag=LogTag.ACCESS,
             message="Sheet hook data saved",
             data={"row": row}
         )
-
     return jsonify({"status": "Call Data received and processed"}), 200
 
