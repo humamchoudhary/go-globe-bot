@@ -130,6 +130,11 @@ def sheet_hook():
                     call=formatted_call
                 )
             )
+        # push notification
+        current_app.socketio.emit('new_call', {
+            'username': extracted_data.get("name", "Unknown"),
+        })
+        
         # create log
         logs_service.create_log(
             level=LogLevel.INFO,
