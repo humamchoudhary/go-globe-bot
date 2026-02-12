@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from flask import (
     session,
     redirect,
@@ -34,6 +35,8 @@ import pytz
 import os
 import requests
 import time
+
+load_dotenv()
 
 def _save_recording(recording_url: str, call_id: str) -> str:
     if not recording_url or not call_id:
@@ -135,10 +138,11 @@ def sheet_hook():
         current_app.socketio.emit('new_call', {
             'username': extracted_data.get("name", "Unknown"),
         })
+        admin_id = session.get('admin_id') or os.environ.get("DEFAULT_ADMIN_ID")
         # UI dropdown notification
         # send mongodb notification
         noti_service = NotificationService(current_app.db)
-        noti_service.create_notification("4258fbdf-3f75-4446-91b5-1f3780a79c07", "New call Received", f'{extracted_data.get("name", "Unknown")} Made a new call to Ana', "new_call", "call_" + formatted_call.get("call_id"))
+        noti_service.create_notification(admin_id, "New call Received", f'{extracted_data.get("name", "Unknown")} Made a new call to Ana', "new_call", "call_" + formatted_call.get("call_id"))
         # create log
         logs_service.create_log(
             level=LogLevel.INFO,
