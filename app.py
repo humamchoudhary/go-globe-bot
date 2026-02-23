@@ -9,7 +9,7 @@ from pymongo import MongoClient
 import bcrypt
 import os
 from config import Config
-from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp, wa_bp, call_bp
+from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp, wa_bp, call_bp, fb_bp
 from routes.chat import register_socketio_events
 from routes.admin import register_admin_socketio_events
 # don't remove these routes. imports
@@ -18,6 +18,7 @@ import routes.min
 import routes.api
 import routes.whatsapp 
 import routes.call
+import routes.facebook
 from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
@@ -624,6 +625,7 @@ def create_app(config_class=Config):
     app.register_blueprint(api_bp)
     app.register_blueprint(wa_bp)
     app.register_blueprint(call_bp)
+    app.register_blueprint(fb_bp)
 
 
     # Register Socket.IO event handlers

@@ -748,11 +748,11 @@ def export_chat(room_id):
         elif r.status_code==404:
             if not chat_service.export_chat(room_id, None):
                 return "Error in exporting: Chat not found", 404
-            return f"Error from ERP: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",202
+            return f"Error from ERP: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>','').replace('</p>','')}",202
 
         else:
             # print(r.json())
-            return f"Error from ERP: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>',"").replace('</p>',"")}",500
+            return f"Error from ERP: {r.status_code}, {r.json().get('message','Internal Server error').replace('<p>','').replace('</p>','')}",500
         return "success", 200
 
     return "Chat not found", 404
@@ -1322,8 +1322,7 @@ def settings():
                     "selected_folders", [])
         except Exception as e:
             current_app.logger.error(
-                f"Failed to load Google Drive for admin {
-                    current_admin.admin_id}: {str(e)}"
+                f"Failed to load Google Drive for admin {current_admin.admin_id}: {str(e)}"
             )
 
     if current_admin.role == 'superadmin':
@@ -2210,8 +2209,7 @@ def google_files():
                 results = (
                     service.files()
                     .list(
-                        q=f"'{
-                            folder_id}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'",
+                        q=f"'{folder_id}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'",
                         pageSize=1000,
                         fields="files(id, name, mimeType, webViewLink, thumbnailLink)",
                     )
@@ -2224,8 +2222,7 @@ def google_files():
                 }
             except Exception as e:
                 current_app.logger.error(
-                    f"Error accessing folder {
-                        folder_id}: {str(e)}"
+                    f"Error accessing folder {folder_id}: {str(e)}"
                 )
                 continue
 
@@ -2325,8 +2322,7 @@ def download_google_files():
 
         if downloaded_files:
             flash(
-                f"Successfully downloaded {
-                    len(downloaded_files)} file(s) to server",
+                f"Successfully downloaded {len(downloaded_files)} file(s) to server",
                 "success",
             )
         else:
@@ -2420,8 +2416,7 @@ def create_admin():
             status = send_email(
                 form_data["email"],
                 f"Go Bot account created: {admin.username}",
-                f"Your account has been created.\n\nUsername:{
-                    form_data['username']}\nOne Time Password:{form_data['password']}",mail
+                f"Your account has been created.\n\nUsername:{form_data['username']}\nOne Time Password:{form_data['password']}",mail
             )
             if status == "SEND":
                 return "", 200
@@ -2848,7 +2843,7 @@ def save_data():
         
         # Execute the query to get all data (not just preview)
         if not query:
-            query =f'SELECT * from {data['table']}' 
+            query = f"SELECT * from {data['table']}"
 
         result = crawler.execute_query(data['connection'], query, data['table'])
         
@@ -3274,6 +3269,247 @@ def wa_delete_chat(room_id):
 def wa_admin_leave_chat(phone_no):
     wa_service = WhatsappService(current_app.db)
     wa_service.toggle_enabled_admin(phone_no)
+    return "", 200
+
+
+# ─────────────────────────────────────────────────────────────
+# Facebook Messenger Admin Routes
+# ─────────────────────────────────────────────────────────────
+FACEBOOK_PAGE_ACCESS_TOKEN = os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN")
+FB_GRAPH_VERSION = "v21.0"
+
+
+@admin_bp.route("/facebook/")
+@admin_required
+def fb_dashboard():
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    chats = fb_service.get_all_chats()
+    return render_template("admin/facebook.html", chats=chats)
+
+
+@admin_bp.route("/facebook/<sender_id>")
+@admin_required
+def get_fb_chat(sender_id):
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    chat = fb_service.get_by_sender_id(sender_id)
+    if request.headers.get("HX-Request"):
+        return render_template("components/facebook-chat-area.html", chat=chat)
+
+    chats = fb_service.get_all_chats()
+    return render_template("admin/facebook.html", chat=chat, chats=chats)
+
+
+@admin_bp.route("/facebook/get-all-chats")
+@admin_required
+def facebook_chats():
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    chats = fb_service.get_all_chats()
+    return render_template("components/facebook-chat-list.html", chats=chats)
+
+
+@admin_bp.route("/facebook/<sender_id>/details")
+@admin_required
+def fb_chat_details(sender_id):
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    chat = fb_service.get_by_sender_id(sender_id)
+    if not chat:
+        return "Chat not found", 404
+    return render_template("components/facebook-chat-item.html", chat=chat)
+
+
+@admin_bp.route("/facebook/chats/<string:filter>")
+@admin_required
+def filter_facebook_chats(filter):
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    chats = fb_service.get_all_chats()
+
+    if filter == "admin":
+        chats = [c for c in chats if c.get("admin_enabled")]
+    elif filter == "recent":
+        chats = sorted(chats, key=lambda c: c.get("updated_at", datetime.min), reverse=True)
+
+    return render_template("components/facebook-chat-list.html", chats=chats)
+
+
+@admin_bp.route("/facebook/<sender_id>/toggle_admin_enable")
+@admin_required
+def fb_toggle_admin(sender_id):
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    if fb_service.toggle_enabled_admin(sender_id):
+        return "", 200
+    return "", 500
+
+
+@admin_bp.route("/facebook/<sender_id>/audio_file/<message_id>/")
+@admin_required
+def fb_audio_file(sender_id, message_id):
+    from flask import abort
+    base_dir = os.path.join('files', 'facebook', sender_id)
+    file_path = os.path.join(base_dir, f"{message_id}.mp3")
+    print(file_path)
+    if not os.path.exists(file_path):
+        abort(404, description="Audio file not found")
+    return send_from_directory(base_dir, f"{message_id}.mp3", mimetype="audio/mpeg")
+
+
+@admin_bp.route("/facebook/<sender_id>/intervene", methods=["POST"])
+@admin_required
+def fb_intervene(sender_id):
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    print("FB INTERVENE")
+    if fb_service.toggle_enabled_admin(sender_id):
+        return "", 200
+    return "", 500
+
+
+@admin_bp.route("/facebook/<sender_id>/send_message", methods=["POST"])
+@admin_required
+def fb_send_message(sender_id):
+    """
+    Send a Facebook Messenger text message manually from the admin dashboard.
+    """
+    try:
+        message = request.form.get("message")
+        if not message:
+            if request.headers.get("HX-Request"):
+                return "Message cannot be empty", 400
+            return jsonify({"error": "Message cannot be empty"}), 400
+
+        # Facebook Graph API endpoint
+        url = f"https://graph.facebook.com/{FB_GRAPH_VERSION}/me/messages"
+        headers = {
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "recipient": {"id": sender_id},
+            "message": {"text": message},
+            "access_token": FACEBOOK_PAGE_ACCESS_TOKEN
+        }
+        print(f"Sending FB message payload: {payload}")
+
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        print(f"Facebook API response: {data}")
+
+        # Save to DB
+        try:
+            from services.facebook_service import FacebookService
+            fb_service = FacebookService(current_app.db)
+            fb_service.add_message(message, sender_id, "admin", type="text")
+            print(f"Message logged to DB for {sender_id}")
+        except Exception as e:
+            print(f"[WARN] Could not log message to DB: {e}")
+
+        if request.headers.get("HX-Request"):
+            return f"<p class='text-green-600'>Message sent to {sender_id}</p>", 200
+
+        return jsonify({
+            "status": "success",
+            "to": sender_id,
+            "message": message,
+            "facebook_response": data
+        }), 200
+
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Facebook API failed: {e}")
+        if hasattr(e, 'response') and e.response is not None and hasattr(e.response, 'text'):
+            print(f"[ERROR] Response body: {e.response.text}")
+        if request.headers.get("HX-Request"):
+            return f"<p class='text-red-600'>Failed to send message: {str(e)}</p>", 500
+        return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route("/facebook/<sender_id>/send_audio", methods=["POST"])
+@admin_required
+def fb_send_audio(sender_id):
+    """
+    Send an audio file via Facebook Messenger from admin dashboard.
+    """
+    if 'audio' not in request.files:
+        if request.headers.get('HX-Request'):
+            return "No audio file provided", 400
+        return jsonify({'error': 'No audio file provided'}), 400
+
+    audio_file = request.files['audio']
+    audio_bytes = audio_file.read()
+
+    try:
+        from io import BytesIO
+
+        # Upload and send audio via Facebook Graph API
+        url = f"https://graph.facebook.com/{FB_GRAPH_VERSION}/me/messages"
+        files = {
+            'filedata': ('audio.mp3', BytesIO(audio_bytes), 'audio/mpeg')
+        }
+        data = {
+            'recipient': f'{{"id":"{sender_id}"}}',
+            'message': '{"attachment":{"type":"audio", "payload":{"is_reusable":true}}}',
+            'access_token': FACEBOOK_PAGE_ACCESS_TOKEN
+        }
+
+        print(f"Uploading and sending audio to {sender_id} ({len(audio_bytes)} bytes)...")
+        response = requests.post(url, files=files, data=data)
+        response.raise_for_status()
+        response_data = response.json()
+        print(f"Audio sent successfully to {sender_id}: {response_data}")
+
+        # Save to DB
+        try:
+            from services.facebook_service import FacebookService
+            fb_service = FacebookService(current_app.db)
+
+            msg_id = fb_service.add_message("[Audio Message]", sender_id, "admin", type="audio")
+
+            save_path = os.path.join('files', 'facebook', f"{sender_id}", f"{msg_id}.mp3")
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            with open(save_path, 'wb') as f:
+                f.write(audio_bytes)
+            print(f"Audio logged to DB and saved to: {save_path}")
+
+        except Exception as e:
+            print(f"[WARN] Could not log audio to DB: {e}")
+
+        if request.headers.get('HX-Request'):
+            return f"<p class='text-green-600'>Audio sent to {sender_id}</p>", 200
+
+        return jsonify({
+            "status": "success",
+            "to": sender_id,
+            "facebook_response": response_data
+        }), 200
+
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Failed to send audio: {e}")
+        if hasattr(e, 'response') and e.response is not None and hasattr(e.response, 'text'):
+            print(f"[ERROR] Response body: {e.response.text}")
+        if request.headers.get('HX-Request'):
+            return f"<p class='text-red-600'>Failed to send audio: {str(e)}</p>", 500
+        return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route("/facebook/<string:sender_id>/delete", methods=["POST"])
+@admin_required
+def fb_delete_chat(sender_id):
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    print(f"FB Deleted: {fb_service.delete_chat(sender_id)}")
+    return "", 200
+
+
+@admin_bp.route("/facebook/<string:sender_id>/admin_leave", methods=["POST"])
+@admin_required
+def fb_admin_leave_chat(sender_id):
+    from services.facebook_service import FacebookService
+    fb_service = FacebookService(current_app.db)
+    fb_service.toggle_enabled_admin(sender_id)
     return "", 200
 
 
