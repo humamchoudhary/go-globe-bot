@@ -140,19 +140,19 @@ function initializeChatbot() {
 
   #chat-button {
     position: fixed;
-    bottom: 20px;
+    bottom: 50vh;
     right: 20px;
     cursor: pointer;
     z-index: 999;
     transition: all 0.3s ease;
-      height:60px;width:60px
+    height:60px;
+    width:60px;
   }
 
  #chat-button:hover{
-     opacity:0.7;
-     
-      height:62px;width:62px
-
+    opacity:0.7;
+    height:62px;
+    width:62px;
  }
 
   @keyframes spin {

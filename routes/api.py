@@ -1141,7 +1141,7 @@ def add_timing():
 
 
 @api_bp.route("/settings/prompt", methods=["POST"])
-@admin_required
+@admin_required(roles=["admin"])
 def set_prompt():
     data = request.get_json()
     if not data or 'prompt' not in data:
@@ -1151,17 +1151,16 @@ def set_prompt():
     admin_service = AdminService(current_app.db)
     current_admin = admin_service.get_admin_by_id(session.get("admin_id"))
 
+    if current_admin.role == "superadmin":
+        return error_json_response("Superadmin cannot update the system prompt", 403)
+
     try:
-        if current_admin.role == "superadmin":
-            current_app.config["SETTINGS"]["prompt"] = prpt
-            return success_json_response({"prompt": prpt}, 200)
-        else:
-            current_admin.settings["prompt"] = prpt
-            admin_service.admins_collection.update_one(
-                {"admin_id": current_admin.admin_id}, {
-                    "$set": {"settings.prompt": prpt}}
-            )
-            return success_json_response({"prompt": prpt}, 200)
+        current_admin.settings["prompt"] = prpt
+        admin_service.admins_collection.update_one(
+            {"admin_id": current_admin.admin_id}, {
+                "$set": {"settings.prompt": prpt}}
+        )
+        return success_json_response({"prompt": prpt}, 200)
     except Exception as e:
         current_app.logger.error(f"Error setting prompt: {str(e)}")
         return error_json_response("Failed to set prompt", 500)

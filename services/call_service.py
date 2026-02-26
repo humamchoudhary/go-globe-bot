@@ -1,6 +1,7 @@
 from datetime import datetime
+from functools import lru_cache
 import logging
-from flask import Blueprint, request, jsonify, current_app
+from models.call import Call
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -99,6 +100,14 @@ class CallService:
                 "descriptive_scale": extracted_data.get("descriptive_scale") or "",
             },
         }
+    @lru_cache(maxsize=128)
+    def get_call_by_call_id(self, call_id: str):
+        """Get chat by room ID with caching."""
+        call_data = self.call_collection.find_one(
+            {"call_id": call_id},
+            {"_id": 0}
+        )
+        return Call.from_dict(call_data) if call_data else None
 
     def extract_sheet_data(self, data):
         data = data or {}

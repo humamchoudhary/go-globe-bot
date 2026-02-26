@@ -598,6 +598,33 @@ socket.on("wa_message", function (data) {
         }
     });
 
+    socket.on("new_call", function (data) {
+        const notificationTitle = "New Call Created";
+        const notificationMessage = `New Call has been started by ${data.username || ''}`;
+        
+        // Add to notification list
+        addNotification(notificationTitle, notificationMessage);
+        
+        // Show popup notification
+        showPopupNotification(notificationTitle, notificationMessage);
+        
+        // Browser notification (optional)
+        if (Notification.permission === "granted") {
+            new Notification(notificationTitle, {
+                body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+            });
+        } else {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    new Notification(notificationTitle, {
+                        body: notificationMessage,
+              icon: "/static/img/logo-desktop-mini.svg",
+                    });
+                }
+            });
+        }
+    });
 
 
     socket.on("admin_required", function (data) {
