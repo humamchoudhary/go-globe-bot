@@ -313,16 +313,6 @@ function initializeChatbot() {
       width: 95vw;
       max-height: 65vh;
     }
-
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
   }
 
   @keyframes slideOutRight {
@@ -413,7 +403,6 @@ function initializeChatbot() {
 
 <div
   id="chat-container"
-  class="chat-container-close"
   style="background-color: #001f33;"
 >
 <div
@@ -738,7 +727,7 @@ function initializeChatbot() {
 // FIXED RESIZE FUNCTIONALITY WITH PROPER ABSOLUTE POSITIONING SUPPORT
 let isResizing = false;
 let currentResizer = null;
-let startX, startY, startWidth, startHeight, startLeft, startTop, startRight, startBottom;
+let startX, startY, startWidth, startHeight, startLeft, startTop
 
 const initResize = (e, direction) => {
     e.preventDefault();
@@ -767,8 +756,6 @@ const initResize = (e, direction) => {
     // Store all position values to handle both fixed and absolute positioning
     startLeft = rect.left;
     startTop = rect.top;
-    startRight = window.innerWidth - rect.right;
-    startBottom = window.innerHeight - rect.bottom;
     
     // Convert styles to ensure we're working with fixed positioning
     chatContainer.style.position = 'fixed';
@@ -804,11 +791,9 @@ const handleResize = (e) => {
     // Calculate mouse movement delta
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
-    
-    // Get current container position
-    const currentLeft = parseFloat(chatContainer.style.left) || startLeft;
-    const currentTop = parseFloat(chatContainer.style.top) || startTop;
-
+    //
+    startRight = window.innerWidth - rect.right;
+    startBottom = window.innerHeight - rect.bottom;
     if (currentResizer === "nw") {
         // Northwest: resize from top-left corner
         let newWidth = startWidth - deltaX;
