@@ -31,6 +31,8 @@ import json
 from services.admin_service import AdminService
 from urllib.parse import urlparse
 from flask_mail import Mail, Message
+from flask_minify import Minify
+
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -58,6 +60,7 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    Minify(app=app, html=True, js=True, cssless=True, go=True, caching_limit=0)
     CORS(app, origins=["*"],
          supports_credentials=True,
          allow_headers=["*"],
