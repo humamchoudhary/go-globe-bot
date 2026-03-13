@@ -791,9 +791,6 @@ const handleResize = (e) => {
     // Calculate mouse movement delta
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
-    //
-    startRight = window.innerWidth - rect.right;
-    startBottom = window.innerHeight - rect.bottom;
     if (currentResizer === "nw") {
         // Northwest: resize from top-left corner
         let newWidth = startWidth - deltaX;
