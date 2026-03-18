@@ -679,7 +679,24 @@ def create_app(config_class=Config):
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
             session['admin_id'] = admin_id
 
-        return Response(render_template('js/init_chat.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
+        return Response(
+            render_template(
+                'js/init_chat.js',
+                backend_url=app.config['SETTINGS']['backend_url'],
+                client_sec=client_sec,
+            ),
+            mimetype='application/javascript'
+        )
+
+    @app.route('/render-bot-html/')
+    def render_chatbot_html():
+        return Response(
+            render_template(
+                'js/chat_widget.html',
+                backend_url=app.config['SETTINGS']['backend_url'],
+            ),
+            mimetype='text/html'
+        )
 
     @app.route("/site-map")
     def site_map():
