@@ -7,9 +7,9 @@ from flask_socketio import SocketIO
 from flask_session import Session
 from pymongo import MongoClient
 import bcrypt
-import os
+import os, hashlib
 from config import Config
-from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp, wa_bp, call_bp
+from routes import chat_bp, admin_bp, auth_bp, min_bp,api_bp, wa_bp, call_bp, fb_bp
 from routes.chat import register_socketio_events
 from routes.admin import register_admin_socketio_events
 # don't remove these routes. imports
@@ -18,6 +18,7 @@ import routes.min
 import routes.api
 import routes.whatsapp 
 import routes.call
+import routes.facebook
 from routes.min import register_min_socketio_events
 import glob
 from models.bot import Bot
@@ -26,10 +27,11 @@ from services.logs_service import LogsService
 from models.log import LogLevel, LogTag, LogEntry
 import traceback
 from datetime import datetime
-import json
 from services.admin_service import AdminService
 from urllib.parse import urlparse
 from flask_mail import Mail, Message
+from flask_minify import Minify
+
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -57,6 +59,7 @@ def get_font_data():
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    Minify(app=app, html=True, js=True, cssless=True, go=True, caching_limit=0)
     CORS(app, origins=["*"],
          supports_credentials=True,
          allow_headers=["*"],
@@ -624,6 +627,7 @@ def create_app(config_class=Config):
     app.register_blueprint(api_bp)
     app.register_blueprint(wa_bp)
     app.register_blueprint(call_bp)
+    app.register_blueprint(fb_bp)
 
 
     # Register Socket.IO event handlers
@@ -656,6 +660,33 @@ def create_app(config_class=Config):
         # print('fonts called')
         return {'font_files': get_font_data()}
 
+    def build_cached_response(content: str, mimetype: str, max_age: int = 300, public: bool = True):
+        """
+        Helper function to build a cached response with ETag support
+        
+        :param content: The response content as a string
+        :param mimetype: The MIME type of the response (e.g., 'application/javascript')
+        :param max_age: The max-age for cache control in seconds
+        :param public: Whether the response is public or private for caching
+        :return: A Flask Response object with appropriate caching headers"""
+        response = Response(content, mimetype=mimetype)
+
+        # Cache headers
+        response.cache_control.max_age = max_age
+        if public:
+            response.cache_control.public = True
+        else:
+            response.cache_control.private = True
+
+        # ETag + conditional response support (returns 304 automatically when applicable)
+        etag = hashlib.sha256(content.encode('utf-8')).hexdigest()
+        response.set_etag(etag)
+        response.make_conditional(request)
+
+        # Keep compressed variants safe for shared caches/CDNs
+        response.headers['Vary'] = 'Accept-Encoding'
+        return response
+
     @app.route('/render-bot/', defaults={'client_sec': ""})
     @app.route('/render-bot/<string:client_sec>')
     def render_chatbot(client_sec):
@@ -674,7 +705,22 @@ def create_app(config_class=Config):
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
             session['admin_id'] = admin_id
 
-        return Response(render_template('js/init_chat.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
+        content = render_template(
+            'js/init_chat.js',
+            backend_url=app.config['SETTINGS']['backend_url'],
+            client_sec=client_sec,
+        )
+        # Shorter cache because this may vary by client_sec/session context
+        return build_cached_response(content, 'application/javascript', max_age=300, public=False)
+
+    @app.route('/render-bot-html/')
+    def render_chatbot_html():
+        content = render_template(
+            'js/chat_widget.html',
+            backend_url=app.config['SETTINGS']['backend_url'],
+        )
+        # Public cache for widget shell HTML
+        return build_cached_response(content, 'text/html', max_age=300, public=True)
 
     @app.route("/site-map")
     def site_map():
@@ -688,16 +734,19 @@ def create_app(config_class=Config):
 
     @app.route('/privacy')
     def privacy():
-        return render_template('privacy.html')
+        content = render_template('privacy.html')
+        return build_cached_response(content, 'text/html', max_age=300, public=True)
 
     @app.route('/terms')
     def terms():
-        return render_template('terms.html')
+        content = render_template('terms.html')
+        return build_cached_response(content, 'text/html', max_age=300, public=True)
 
     @app.route('/test-page')
     def testpage():
-        return render_template('test.html')
-    
+        content = render_template('test.html')
+        return build_cached_response(content, 'text/html', max_age=300, public=True)
+
     @app.route('/healthcheck')
     def healthcheck():
         try:

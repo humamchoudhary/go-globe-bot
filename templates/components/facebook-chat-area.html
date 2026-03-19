@@ -1,0 +1,140 @@
+<style>
+    /* Audio visualization styles */
+    #audio-visualizer {
+        display: flex;
+        align-items: end;
+        gap: 2px;
+        height: 20px;
+    }
+
+    /* Pulse animation for recording indicator */
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .animate-pulse {
+        animation: pulse 1.5s infinite;
+    }
+
+    /* Audio message styling */
+    .auto-play-audio {
+        /* Styles for auto-play audio elements */
+    }
+</style>
+<div id="chatarea-{{ chat.sender_id }}"
+    class="w-screen md:w-[500px] 2xl:w-[750px] flex flex-col gap-[10px] h-full overflow-hidden border-x border-[var(--border-color)]">
+    <div
+        class="h-[50px] bg-[var(--sec-bg-color)] flex md:hidden flex-row items-center justify-between px-[21px] py-[16px]">
+        <a href="/admin/facebook"><i data-lucide="chevron-left"
+                class="text-[var(--main-color)] hover:cursor-pointer"></i></a>
+        <p class="text-[var(--sec-text)] font-bold">{{ chat.user_info.name if chat.user_info and chat.user_info.name
+            else chat.sender_id }}</p>
+        <p id="toggleClientInfo" class="text-[var(--main-color)] font-bold text-[14px] cursor-pointer">
+            Client Info
+        </p>
+    </div>
+    <div id="messageArea"
+        class="flex flex-col gap-[20px] w-full overflow-y-auto flex-grow pt-[20px] px-[20px] md:px-[40px]">
+        {% for message in chat.messages %} {% include 'components/fb-message.html'
+        %} {% endfor %}
+    </div>
+    {% if chat.admin_enabled %}
+    <div class="relative w-full h-[60px] px-[20px] md:px-[40px] mb-[20px] flex gap-2">
+        <form class="relative w-full h-[60px]" hx-post="/admin/facebook/{{ chat.sender_id }}/send_message"
+            hx-trigger="submit" hx-swap="none" onsubmit="return !!this.message.value.trim()"
+            hx-on::after-request="this.reset(); checkInputValue(); location.reload()" id="messageForm">
+            <input rows="1" placeholder="Send a message..."
+                class="w-full border-2 border-[var(--border-color)] transition-all duration-300 focus:border-[var(--main-color)] rounded-[5px] h-[60px] resize-none overflow-x-auto overflow-y-hidden whitespace-nowrap focus:outline-none p-[19px] pr-[80px] text-[16px] leading-[22px]"
+                name="message" id="message" required onkeyup="handleKeyPress(event); checkInputValue()" />
+            <button type="submit" id="send-btn"
+                class="bg-[var(--main-color)] text-[var(--white)] hover:opacity-90 transition-opacity px-[2px] py-[1px] absolute right-[8px] bottom-[8px] flex items-center justify-center w-[44px] h-[44px] rounded-[5px] focus:outline-none cursor-not-allowed opacity-70">
+                <i data-lucide="corner-down-left" class="text-[var(--white)]"></i>
+            </button>
+        </form>
+
+        <div id="exit"
+            class="flex items-center justify-center w-[60px] h-[60px] rounded-[5px] border-2 border-[var(--border-color)] hover:border-[var(--main-color)] transition-all duration-300 cursor-pointer bg-[var(--sec-bg-color)]"
+            hx-post="/admin/facebook/{{chat.sender_id}}/admin_leave" hx-trigger="click" hx-swap="none"
+            hx-on::after-request="location.reload()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-log-out-icon lucide-log-out text-[var(--main-color)]">
+                <path d="m16 17 5-5-5-5" />
+                <path d="M21 12H9" />
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            </svg>
+        </div>
+    </div>
+    {% else %}
+    <!-- Jump In button -->
+    <div class="relative w-full h-[40px] px-[20px] md:px-[40px] mb-[20px]">
+        <div class="flex h-full bg-[var(--main-color)] rounded-md hover:opacity-90 duration-300 transition-all items-center justify-center py-4"
+            hx-post="/admin/facebook/{{chat.sender_id}}/intervene" hx-on::after-request="location.reload()"
+            hx-swap="none" hx-triger="click">
+            <p class="font-bold">Jump In</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<script>
+    // Audio recording variables
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let audioContext = null;
+    let analyser = null;
+    let microphone = null;
+    let javascriptNode = null;
+
+    // Input validation functions
+    function checkInputValue() {
+        const messageInput = document.getElementById("message");
+        const sendBtn = document.getElementById("send-btn");
+        if (messageInput && sendBtn) {
+            if (messageInput.value.trim() !== "") {
+                sendBtn.style.cursor = "pointer";
+                sendBtn.style.opacity = "1";
+            } else {
+                sendBtn.style.cursor = "not-allowed";
+                sendBtn.style.opacity = "0.7";
+            }
+        }
+    }
+
+    function handleKeyPress(event) {
+        if (
+            event.key === "Enter" &&
+            document.getElementById("message").value.trim() !== ""
+        ) {
+            document.getElementById("messageForm").requestSubmit();
+        }
+    }
+
+    // Scroll to bottom function
+    function scrollToBottom() {
+        const messageArea = document.getElementById("messageArea");
+        if (messageArea) {
+            messageArea.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        checkInputValue();
+        scrollToBottom();
+        // Refresh Lucide icons
+        if (typeof lucide !== "undefined") {
+            lucide.createIcons();
+        }
+    });
+</script>
