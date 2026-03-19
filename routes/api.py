@@ -398,7 +398,7 @@ def delete_chat(room_id):
 def latest_chats():
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
-    chats = chat_service.get_all_chats(admin_id=session.get("admin_id"))
+    chats = chat_service.get_all_chats(admin_id=session.get("admin_id"), limit=-1)
 
     if not chats:
         return success_json_response(data={"chats": [], "stats": {"total": 0, "today": 0, "this_month": 0}})

@@ -250,12 +250,11 @@ class ChatService:
         } if admin_id else {
             "$match": {
                 "subject": {"$nin": ["Job"]},
-
                 "$or": [{"archived": False}, {"archived": {"$exists": False}}],
                 "messages.1": {"$exists": True}
             }
         }
-
+    
         pipeline = [
             match_stage,
             {
@@ -265,11 +264,15 @@ class ChatService:
             },
             {"$sort": {"sort_date": -1}},
             {"$skip": skip},
-            {"$limit": limit},
-            # Remove _id and temporary sort_date field
-            {"$project": {"_id": 0, "sort_date": 0}}
         ]
-
+    
+        # Only apply limit if limit is not None
+        if limit >= 0:
+            pipeline.append({"$limit": limit})
+    
+        # Remove _id and temporary sort_date field
+        pipeline.append({"$project": {"_id": 0, "sort_date": 0}})
+    
         cursor = self.chats_collection.aggregate(pipeline)
         return [Chat.from_dict(chat_data) for chat_data in cursor]
 
