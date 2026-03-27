@@ -4,7 +4,7 @@ from flask import make_response
 from services.notification_service import NotificationService
 from flask_mail import Mail
 from services.admin_service import AdminService
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 from services.timezone import UTCZoneManager
 from flask import render_template_string
@@ -421,6 +421,11 @@ def audio_file(room_id, message_id):
     
     return send_from_directory(base_dir, f"{message_id}.wav", mimetype="audio/wav")
 
+# how many minutes it should wait before sending another email about new messages from the same user
+EMAIL_COOLDOWN = timedelta(minutes=5)
+# dictionary to track last email sent time for each user.name
+LAST_NEWMSG_EMAIL_SENT_TO_USER = {}
+NEW_MSG_EMAIL_COOLDOWN_LOCK = threading.Lock()
 
 @min_bp.route('/chat/<room_id>/send_message', methods=['POST'])
 @login_required
@@ -453,10 +458,27 @@ def send_message(room_id):
         'room_id': chat.room_id,
     }, room=chat.room_id)
 
+    # Email cooldown: only one email per user.name every 5 minutes
     current_admin = admin_service.get_admin_by_id(session.get('admin_id'))
-    mail = Mail(current_app)
-    send_email(current_admin.email, f'New Message from {user.name}: {chat.subject}', 
-               "Ping", mail, render_template('/email/new_message_received.html', user=user, chat=chat))
+    now_utc = datetime.utcnow()
+    should_send_email = False
+    
+    with NEW_MSG_EMAIL_COOLDOWN_LOCK:
+        last_sent_at = LAST_NEWMSG_EMAIL_SENT_TO_USER.get(user.user_id)
+        if last_sent_at is None or (now_utc - last_sent_at) >= EMAIL_COOLDOWN:
+            should_send_email = True
+            LAST_NEWMSG_EMAIL_SENT_TO_USER[user.user_id] = now_utc
+
+    if should_send_email and current_admin:
+        mail = Mail(current_app)
+        send_email(
+            current_admin.email,
+            f'New Message from {user.name}: {chat.subject}',
+            "Ping",
+            mail,
+            render_template('/email/new_message_received.html', user=user, chat=chat)
+        )
+
     noti_res = send_push_noti(
         admin_service.get_expo_tokens(session.get("admin_id")), 
         "New message!", 
@@ -464,27 +486,8 @@ def send_message(room_id):
         chat.room_id
     )
 
-
     # Handle bot response or admin notification
     if not chat.admin_required:
-        # try:
-        #     msg, usage = current_app.bot.respond(
-        #         f"Subject of chat: {chat.subject}\n{message}", chat.room_id)
-        #     
-        #     admin_service.update_tokens(admin.admin_id, usage['cost'])
-        #
-        #     bot_message = chat_service.add_message(chat.room_id, chat.bot_name, msg)
-        #
-        #     current_app.socketio.emit('new_message', {
-        #         'room_id': chat.room_id,
-        #         'sender': chat.bot_name,
-        #         'content': msg,
-        #         'timestamp': bot_message.timestamp.isoformat()
-        #     }, room=chat.room_id)
-        # except Exception as e:
-        #     print(f"Bot response error: {e}")
-
-
         noti_service = NotificationService(current_app.db)
         noti_service.create_notification(
             chat.admin_id, 
