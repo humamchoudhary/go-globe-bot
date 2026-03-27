@@ -2837,9 +2837,10 @@ def save_data():
         
         if data['connection'] not in crawler.connectors:
             return jsonify({'error': 'Connection not found'}), 404
-        
         # Get the query (if provided)
         query = data.get('query')
+        if crawler.connectors[data['connection']].type == 'mongodb' and not query:
+            query = "{}"
         
         # Execute the query to get all data (not just preview)
         if not query:
