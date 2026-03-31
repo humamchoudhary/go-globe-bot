@@ -167,7 +167,7 @@ class Bot:
 
         # Initialize system prompt with language restrictions if specified
         languages = admin_settings.get('languages', ['English'])
-        self.sys_prompt = f"{prompt}\n\nInitialize chat in English. If a person speaks or asks to speak in one of these languages, only respond in these languages: {', '.join(languages)}"
+        self.sys_prompt = f"{prompt}\n\nInitialize chat in English. If a person speaks or asks to speak in one of these languages {', '.join(languages)}, only respond in that languages in which user is speaking."
 
         if self._is_google_model(self.active_bot_name):
             chat_state = self._init_google_chat(text_content, images)
