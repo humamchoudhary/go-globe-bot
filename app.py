@@ -705,22 +705,8 @@ def create_app(config_class=Config):
             admin_id = os.environ.get('DEFAULT_ADMIN_ID')
             session['admin_id'] = admin_id
 
-        content = render_template(
-            'js/init_chat.js',
-            backend_url=app.config['SETTINGS']['backend_url'],
-            client_sec=client_sec,
-        )
-        # Shorter cache because this may vary by client_sec/session context
-        return build_cached_response(content, 'application/javascript', max_age=300, public=False)
+        return Response(render_template('js/init_chat.js', backend_url=app.config['SETTINGS']['backend_url']), mimetype='application/javascript')
 
-    @app.route('/render-bot-html/')
-    def render_chatbot_html():
-        content = render_template(
-            'js/chat_widget.html',
-            backend_url=app.config['SETTINGS']['backend_url'],
-        )
-        # Public cache for widget shell HTML
-        return build_cached_response(content, 'text/html', max_age=300, public=True)
 
     @app.route("/site-map")
     def site_map():

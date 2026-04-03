@@ -2,7 +2,6 @@
     // Configuration - Update these values as needed
     const config = {
         backendUrl: '{{backend_url}}', // Replace with your actual backend URL
-        chatMarkupUrl: '{{ url_for("render_chatbot_html") }}',
         fontFiles: {{ font_files | safe
 }}, // Replace with your font files array
 fontFolder: '{{settings["backend_url"]}}{{ url_for("static", filename="font/NeueHaas") }}' // Replace with your font folder path
@@ -119,22 +118,395 @@ document.head.appendChild(polyfillScript);
 
 // Function to initialize the chatbot
 async function initializeChatbot() {
-    let insertHtml = "";
-
-    try {
-        const response = await fetch(config.chatMarkupUrl, {
-            credentials: "include",
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to load chatbot markup: ${response.status}`);
-        }
-
-        insertHtml = await response.text();
-    } catch (error) {
-        console.error("Chatbot markup failed to load", error);
-        return;
+    let insertHtml = `
+<style>
+  @keyframes pulse-glow {
+    0% {
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(255, 88, 0, 0.4);
     }
+
+    50% {
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.2),
+        0 0 30px rgba(255, 88, 0, 0.7);
+    }
+
+    100% {
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(255, 88, 0, 0.4);
+    }
+  }
+
+  #chat-button {
+    position: fixed;
+    bottom: 50vh;
+    right: 20px;
+    cursor: pointer;
+    z-index: 999;
+    transition: all 0.3s ease;
+    height: 60px;
+    width: 60px;
+  }
+
+  #chat-button:hover {
+    opacity: 0.7;
+    height: 62px;
+    width: 62px;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  #chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 317px;
+    min-width: 317px;
+    max-width: 80vw;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    display: none;
+    resize: both;
+    max-height: 500px;
+    /* Initial max-height */
+    transition: height 0.3s ease, max-height 0.3s ease;
+    /* Add max-height transition */
+    padding-bottom: 10px;
+  }
+
+  #chat-container.dragging {
+    transition: none !important;
+    cursor: grabbing !important;
+  }
+
+  #chat-container.resized {
+    max-height: 80vh;
+    /* Resized state max-height */
+  }
+
+  #chat-container .chat-header {
+    padding: 1rem;
+    background-color: #001f33;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+  }
+
+  #chat-container .chat-header:hover {
+    cursor: grab;
+  }
+
+  #chat-container .chat-header:active {
+    cursor: grabbing;
+  }
+
+  .md-content a,
+  .md-content a:visited,
+  .md-content a:hover,
+  .md-content a:active,
+  .md-content a:focus {
+    color: var(--goglobe-main-color);
+  }
+
+  .drag-handle {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+    cursor: grab;
+  }
+
+  .drag-handle:hover::after {
+    content: "⠿";
+    color: #ff5800;
+    font-size: 16px;
+    margin-left: 8px;
+    opacity: 0.7;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+
+  /* Resize handle styles */
+  .resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+  }
+
+  .resize-handle:hover {
+    background-color: rgba(255, 88, 0, 0.1);
+  }
+
+  .resize-handle-nw {
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    cursor: nw-resize;
+    border-top: 2px solid transparent;
+    border-left: 2px solid transparent;
+  }
+
+  .resize-handle-nw:hover {
+    border-top-color: rgba(255, 88, 0, 0.6);
+    border-left-color: rgba(255, 88, 0, 0.6);
+  }
+
+  .resize-handle-n {
+    top: 0;
+    left: 12px;
+    right: 6px;
+    height: 6px;
+    cursor: n-resize;
+    border-top: 2px solid transparent;
+  }
+
+  .resize-handle-n:hover {
+    border-top-color: rgba(255, 88, 0, 0.6);
+  }
+
+  .resize-handle-w {
+    left: 0;
+    top: 12px;
+    bottom: 6px;
+    width: 6px;
+    cursor: w-resize;
+    border-left: 2px solid transparent;
+  }
+
+  .resize-handle-w:hover {
+    border-left-color: rgba(255, 88, 0, 0.6);
+  }
+
+  .resize-handle svg {
+    color: #ffffff;
+    opacity: 0.4;
+  }
+
+  .resize-handle svg:hover {
+    opacity: 0.8;
+  }
+
+  #chatbox {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 16px 0;
+    background-color: var(--goglobe-site-bg-color);
+  }
+
+  @media (max-width: 480px) {
+    #chat-container {
+      right: 10px;
+      bottom: 80px;
+      width: 95vw;
+      max-height: 65vh;
+    }
+  }
+
+  @keyframes slideOutRight {
+    0% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translateX(100px) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInRight {
+    0% {
+      transform: translateX(100px) scale(0.8);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUpFromBottom {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDownToBottom {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  .chat-button-hidden {
+    animation: slideOutRight 0.3s ease-out forwards;
+  }
+
+  .chat-button-visible {
+    animation: slideInRight 0.3s ease-out forwards;
+  }
+
+  .chat-container-open {
+    display: flex !important;
+    animation: slideUpFromBottom 0.4s ease-out forwards;
+  }
+
+  .chat-container-closing {
+    animation: slideDownToBottom 0.3s ease-out forwards;
+  }
+</style>
+
+<svg id="chat-button" width="60" height="63" viewBox="0 0 60 63" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M34.9837 2.98219C20.5215 0.285021 6.57007 9.60674 3.90138 23.9148C1.2329 38.2232 10.8863 51.9479 25.3487 54.6451L52.7215 59.7501L51.3281 55.6944L48.652 47.8958C52.6893 44.1138 55.4226 39.1538 56.4308 33.7085C59.0971 19.4014 49.4448 5.67934 34.9837 2.98219Z"
+    fill="white" stroke="#FF5800" stroke-width="5" />
+  <path d="M16.9164 28.0168V41.5406H43.5974L43.4739 28.0168L42.2 21.4509L19.1703 22.7249L16.9164 28.0168Z"
+    fill="#F7D5B1" />
+  <path
+    d="M11.2324 17.1385L16.9163 28.0164L19.1703 22.7244L42.1999 21.4505L43.4739 28.0164L46.3158 18.2165L40.1419 16.9425L42.1019 13.8066L38.721 14.2476L42.1509 9.54366L35.095 12.7776L38.525 5.91772L28.1371 12.4836L27.1572 9.73966L11.2324 17.1385Z"
+    fill="#52504D" />
+  <path d="M16.9412 41.3388V47.0213H43.2018V41.3125L16.9412 41.3388Z" fill="white" />
+  <path d="M19.6604 41.4421L30.2442 52.026L40.7301 41.4421H19.6604Z" fill="#E8EAEB" />
+  <path d="M20.3463 41.4421L24.1683 45.9501L30.1462 41.5401L36.2221 45.9501L40.044 41.4421H20.3463Z" fill="white" />
+  <path d="M30.1462 41.5403L28.0882 43.0103V43.5003H32.4001V43.0103L30.1462 41.5403Z" fill="#C95C1C" />
+  <path d="M30.0715 51.5885H33.4968L32.4001 43.5002H28.0882L27.2171 51.5885H30.0715Z" fill="#FF5E00" />
+  <path
+    d="M30.3974 37.0812C32.3947 37.0812 34.2856 35.0523 34.0847 34.1945C33.8838 33.3367 32.3947 34.1945 30.3974 34.1945C28.4002 34.1945 26.9525 33.1927 26.852 34.1945C26.7515 35.1964 28.3588 36.9372 30.3974 37.0812Z"
+    fill="#3B3731" />
+  <path
+    d="M22.6335 29.1925C23.283 29.1925 23.8095 28.666 23.8095 28.0166C23.8095 27.3671 23.283 26.8406 22.6335 26.8406C21.984 26.8406 21.4575 27.3671 21.4575 28.0166C21.4575 28.666 21.984 29.1925 22.6335 29.1925Z"
+    fill="#3B3731" />
+  <path
+    d="M37.6275 29.1925C38.277 29.1925 38.8035 28.666 38.8035 28.0166C38.8035 27.3671 38.277 26.8406 37.6275 26.8406C36.978 26.8406 36.4515 27.3671 36.4515 28.0166C36.4515 28.666 36.978 29.1925 37.6275 29.1925Z"
+    fill="#3B3731" />
+  <path d="M16.9164 28.0168V41.5406H43.5974L43.4739 28.0168L42.2 21.4509L19.1703 22.7249L16.9164 28.0168Z"
+    fill="#F7D5B1" />
+  <path
+    d="M11.2324 17.1385L16.9163 28.0164L19.1703 22.7244L42.1999 21.4505L43.4739 28.0164L46.3158 18.2165L40.1419 16.9425L42.1019 13.8066L38.721 14.2476L42.1509 9.54366L35.095 12.7776L38.525 5.91772L28.1371 12.4836L27.1572 9.73966L11.2324 17.1385Z"
+    fill="#52504D" />
+  <path d="M16.9412 41.3388V47.0213H43.2018V41.3125L16.9412 41.3388Z" fill="white" />
+  <path d="M19.6604 41.4421L30.2442 52.026L40.7301 41.4421H19.6604Z" fill="#E8EAEB" />
+  <path d="M20.3463 41.4421L24.1683 45.9501L30.1462 41.5401L36.2221 45.9501L40.044 41.4421H20.3463Z" fill="white" />
+  <path d="M30.1462 41.5403L28.0882 43.0103V43.5003H32.4001V43.0103L30.1462 41.5403Z" fill="#C95C1C" />
+  <path d="M30.0715 51.5885H33.4968L32.4001 43.5002H28.0882L27.2171 51.5885H30.0715Z" fill="#FF5E00" />
+  <path
+    d="M30.3974 37.0812C32.3947 37.0812 34.2856 35.0523 34.0847 34.1945C33.8838 33.3367 32.3947 34.1945 30.3974 34.1945C28.4002 34.1945 26.9525 33.1927 26.852 34.1945C26.7515 35.1964 28.3588 36.9372 30.3974 37.0812Z"
+    fill="#3B3731" />
+  <path
+    d="M22.6335 29.1925C23.283 29.1925 23.8095 28.666 23.8095 28.0166C23.8095 27.3671 23.283 26.8406 22.6335 26.8406C21.984 26.8406 21.4575 27.3671 21.4575 28.0166C21.4575 28.666 21.984 29.1925 22.6335 29.1925Z"
+    fill="#3B3731" />
+  <path
+    d="M37.6275 29.1925C38.277 29.1925 38.8035 28.666 38.8035 28.0166C38.8035 27.3671 38.277 26.8406 37.6275 26.8406C36.978 26.8406 36.4515 27.3671 36.4515 28.0166C36.4515 28.666 36.978 29.1925 37.6275 29.1925Z"
+    fill="#3B3731" />
+</svg>
+
+<div id="chat-container" style="background-color: #001f33;">
+  <div class="chat-header" style="
+    padding: 20px 15px 0px;
+    background-color: #001f33;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 
+  ">
+    <div class="drag-handle"></div>
+
+    <!-- Return Button -->
+    <div hx-get="${config.backendUrl}/min/onboarding" hx-trigger="click" hx-target="#chatbox" hx-swap="innerHTML"
+      id="return-chat" style="
+      color: var(--goglobe-main-color);
+    " onMouseOver="this.style.opacity=0.7" onMouseOut="this.style.opacity=1">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M1.33333 5.66672L0.744165 6.25589L0.154999 5.66672L0.744165 5.07756L1.33333 5.66672ZM5.5 15.6667C5.27899 15.6667 5.06702 15.5789 4.91074 15.4226C4.75446 15.2664 4.66667 15.0544 4.66667 14.8334C4.66667 14.6124 4.75446 14.4004 4.91074 14.2441C5.06702 14.0879 5.27899 14.0001 5.5 14.0001V15.6667ZM4.91083 10.4226L0.744165 6.25589L1.9225 5.07756L6.08917 9.24422L4.91083 10.4226ZM0.744165 5.07756L4.91083 0.910889L6.08917 2.08922L1.9225 6.25589L0.744165 5.07756ZM1.33333 4.83339H10.0833V6.50005H1.33333V4.83339ZM10.0833 15.6667H5.5V14.0001H10.0833V15.6667ZM15.5 10.2501C15.5 11.6866 14.9293 13.0644 13.9135 14.0802C12.8977 15.096 11.5199 15.6667 10.0833 15.6667V14.0001C10.5758 14.0001 11.0634 13.9031 11.5184 13.7146C11.9734 13.5261 12.3868 13.2499 12.735 12.9017C13.0832 12.5535 13.3594 12.1401 13.5479 11.6851C13.7363 11.2301 13.8333 10.7425 13.8333 10.2501H15.5ZM10.0833 4.83339C11.5199 4.83339 12.8977 5.40407 13.9135 6.41989C14.9293 7.43572 15.5 8.81347 15.5 10.2501H13.8333C13.8333 9.7576 13.7363 9.26996 13.5479 8.81499C13.3594 8.36002 13.0832 7.94662 12.735 7.5984C12.3868 7.25019 11.9734 6.97396 11.5184 6.78551C11.0634 6.59705 10.5758 6.50005 10.0833 6.50005V4.83339Z"
+          fill="#FF5800" />
+      </svg>
+    </div>
+
+    <!-- Close Button -->
+    <div id="close-chat" style="color: var(--goglobe-main-color);" onMouseOver="this.style.opacity=0.7"
+      onMouseOut="this.style.opacity=1">
+      <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M1.66666 14.7916L0.208328 13.3333L6.04166 7.49992L0.208328 1.66659L1.66666 0.208252L7.49999 6.04159L13.3333 0.208252L14.7917 1.66659L8.95833 7.49992L14.7917 13.3333L13.3333 14.7916L7.49999 8.95825L1.66666 14.7916Z"
+          fill="#FF5800" />
+      </svg>
+    </div>
+  </div>
+
+  <div id="chatbox" hx-get="${config.backendUrl}/min/" hx-trigger="load" hx-target="#chatbox" hx-swap="innerHTML"
+    data-base-url="${config.backendUrl}">
+    <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 350px;
+      ">
+      <svg class="spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="
+          animation: spin 1s linear infinite;
+          color: white;
+          width: 25px;
+          height: 25px;
+        ">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Resize handles -->
+  <div class="resize-handle resize-handle-nw" title="resize window" id="resize-nw">
+    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+      <polygon points="0,6 2,6 8,0 6,0" />
+      <polygon points="0,10 2,10 12,0 10,0" />
+      <polygon points="0,14 2,14 16,0 14,0" />
+    </svg>
+  </div>
+  <div class="resize-handle resize-handle-n" title="resize window" id="resize-n"></div>
+  <div class="resize-handle resize-handle-w" title="resize window" id="resize-w"></div>
+  <div class="resize-indicator"></div>
+</div>
+    `;
 
     document.body.insertAdjacentHTML("beforeend", insertHtml);
 
