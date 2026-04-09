@@ -119,6 +119,13 @@ document.head.appendChild(polyfillScript);
 // Function to initialize the chatbot
 async function initializeChatbot() {
     let insertHtml = `
+<stats collection>
+<script async src="https://analytics.ahwar.dev/js/pa-fagULBL1kLUadzV1URiKW.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
 <style>
   @keyframes pulse-glow {
     0% {
@@ -559,6 +566,11 @@ async function initializeChatbot() {
         });
         console.log("Event pushed:", eventName, params);
     }
+    const trackChatOpenGoal = (source) => {
+      if (typeof window.plausible === "function") {
+        window.plausible("chatbox_opened", { props: { source } });
+      }
+    };
 
 
 
@@ -655,6 +667,9 @@ async function initializeChatbot() {
         setTimeout(() => {
             chatContainer.classList.add("chat-container-open");
             isChatOpen = true;
+            // Track the chat open goal
+            trackChatOpenGoal(triggerType);
+            console.log('Chat opened via auto-trigger:', triggerType);
             const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
             audio.play().catch(() => { });
             if (scrollToBottom) {
@@ -925,6 +940,8 @@ document.querySelector(".resize-indicator").addEventListener("mousedown", (e) =>
             setTimeout(() => {
                 chatContainer.classList.add("chat-container-open");
                 isChatOpen = true;
+                trackChatOpenGoal("Manual Click");
+                console.log('Chat opened via manual click');
                 const audio = new Audio(baseURL + "/static/sounds/pop-up.wav");
                 audio.play().catch(() => { });
                 scrollToBottom();
