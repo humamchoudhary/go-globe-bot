@@ -1,0 +1,10 @@
+{% extends 'admin/base.html' %}
+{% set title = "Analytics" %}
+
+{% block content %}
+<div class="w-full p-4 md:p-6">
+    <h1 class="text-xl font-semibold text-[var(--text-color)]">Analytics</h1>
+</div>
+<iframe plausible-embed src="https://analytics.ahwar.dev/share/go-globe.dev?auth=H5r20Jtsa8eWP2Dcll-m0&embed=true&theme=system" scrolling="no" frameborder="0" loading="lazy" style="width: 1px; min-width: 100%; height: 1600px; color-scheme: auto;"></iframe>
+<script async src="https://analytics.ahwar.dev/js/embed.host.js"></script>
+{% endblock %}

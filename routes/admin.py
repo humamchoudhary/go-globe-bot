@@ -108,6 +108,12 @@ def faq_page():
     return render_template("admin/faq.html")
 
 
+@admin_bp.route("/analytics/")
+@admin_required
+def analytics_page():
+    return render_template("admin/analytics.html")
+
+
 @admin_bp.route("/change-logs")
 @admin_required
 def changelogs_page():
