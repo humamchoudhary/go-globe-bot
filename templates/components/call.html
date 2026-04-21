@@ -110,10 +110,14 @@
         <!-- Started At -->
         <div class="flex flex-col gap-2">
           <span class="text-sm text-[var(--sec-text)] opacity-70">Call Time</span>
+          {% if call.started_at %}
           <p class="text-base">{{ call.started_at.strftime('%d %B %Y') }}</p>
           <p class="text-sm text-[var(--sec-text)]">
             {{ call.started_at.strftime('%H:%M:%S') }}
           </p>
+          {% else %}
+          <p class="text-base">Unknown time</p>
+          {% endif %}
         </div>
 
         <!-- Ended At (if available) -->
@@ -127,6 +131,7 @@
         </div>
 
         <!-- Duration -->
+        {% if call.started_at %}
         <div class="flex flex-col gap-2">
           <span class="text-sm text-[var(--sec-text)] opacity-70">Duration</span>
           <p class="text-base font-semibold">
@@ -134,6 +139,7 @@
             round(1) }} minutes
           </p>
         </div>
+        {% endif %}
         {% endif %}
 
 
