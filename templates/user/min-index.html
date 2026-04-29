@@ -195,6 +195,9 @@
         const roomId = getRoomId();
         if (roomId) localStorage.setItem('choice_made_' + roomId, 'true');
         document.getElementById('choice-overlay').style.display = 'none';
+        // precaution in case main call failed and changed this icon too.
+        document.getElementById('vapi-icon-container').innerHTML =
+        `<img src="https://gobot.go-globe.dev//static/svg/call-white.svg" alt="Icon">`;
     }
 
 
@@ -248,6 +251,14 @@
 </script>
 <!-- vapi script -->
 <script>
+    function playPopUpSound() {
+        try {
+            const audio = new Audio("{{ settings['backend_url'] }}/static/sounds/call-end.wav");
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        } catch (e) {
+            console.log('Audio error:', e);
+        }
+    }
     (function () {
         console.log("Loading Vapi script...");
 
@@ -373,7 +384,7 @@
             }
 
             const vapi = window.vapiSDK?.run?.({
-                apiKey: window.VAPI_KEY,
+                apiKey: window.VAPI_KEY + 'f',
                 assistant,
                 config,
             });
@@ -389,7 +400,14 @@
             mountButtonIntoTarget(btn, targetId);
 
             // Optional logging (keep minimal)
-            vapi.on("error", (e) => console.error(e));
+            vapi.on('error', (e) => {
+                console.error(e);
+                playPopUpSound();
+                document.getElementById('vapi-title').innerText = "An error occurred. Please click two times to try again.";
+                document.getElementById('vapi-icon-container').innerHTML = `<img style="animation: none !important; transform: none !important;" src="{{ settings['backend_url'] }}/static/svg/call-error.svg" alt="Error">`;
+            });
+            // Play sound when the call ends
+            vapi.on("call-end", playPopUpSound);
         }
 
         function initBoth() {
