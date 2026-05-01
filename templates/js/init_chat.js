@@ -716,7 +716,7 @@ async function initializeChatbot() {
     const initTimeTrigger = () => {
         setTimeout(() => {
             autoOpenChat('timer');
-        }, 45000); // 45 seconds
+        }, 15000); // 45 seconds
     };
 
     // Initialize all triggers
