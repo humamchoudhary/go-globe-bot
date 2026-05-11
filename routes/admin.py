@@ -17,6 +17,7 @@ from functools import lru_cache
 import logging
 # from # p# # print import p# print
 from services.usage_service import UsageService
+from services.call_service import CallService
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 import requests
@@ -579,11 +580,14 @@ def get_chat_list():
 def search():
     query = request.form.get("search-q").lower()
     if not query:
-        return render_template("components/search-results.html", search_chats=[])
+        return render_template("components/search-results.html", search_chats=[], search_calls=[])
 
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
+    call_service = CallService(current_app.db)
+    
     chats = chat_service.get_all_chats(session.get("admin_id"))
+    calls = call_service.get_all_calls(session.get("admin_id"))
 
     search_chats = set()
     for chat in chats:
@@ -606,9 +610,30 @@ def search():
         if any(query in message.content.lower() for message in chat.messages):
             search_chats.add(chat)
 
+    search_calls = []
+    for call in calls:
+        userdata = call.get("userdata", {})
+        if (
+            query in userdata.get("name", "").lower() or
+            query in userdata.get("email", "").lower() or
+            query in userdata.get("phone_number", "").lower()
+        ):
+            search_calls.append(call)
+            continue
+            
+        call_metadata = call.get("call_metadata", {})
+        if query in call_metadata.get("product_discussed", "").lower():
+            search_calls.append(call)
+            continue
+            
+        transcription = call.get("transcription", [])
+        if any(query in t.get("transcription", "").lower() for t in transcription):
+            search_calls.append(call)
+
     return render_template(
         "components/search-results.html",
-        search_chats=list(search_chats)
+        search_chats=list(search_chats),
+        search_calls=list(search_calls)
     )
 
 
@@ -2023,6 +2048,7 @@ def delete_chats():
         return "", 200
     except Exception as e:
         return f"Error {e}",500
+
 from services.call_service import CallService
 @admin_bp.route("/calls/", methods=["GET"])
 @admin_required
@@ -2048,6 +2074,21 @@ def get_all_calls():
         next_page=1,
         current_filter='all'
     )
+@admin_bp.route("/calls/ongoing", methods=["GET"])
+def get_ongoing_calls():
+    """Get ongoing calls."""
+    call_service = CallService(current_app.db)
+    
+    # Get ongoing calls with limited data
+    calls = call_service.get_all_calls(
+        limit=20,
+        skip=0,
+    )
+    
+    # Get call counts for dropdown
+    call_counts = call_service.get_call_counts_by_filter(session.get('admin_id'))
+    
+    return calls
 
 @admin_bp.route("/call/<call_id>")
 @admin_required
