@@ -582,6 +582,11 @@ def search():
     if not query:
         return render_template("components/search-results.html", search_chats=[], search_calls=[])
 
+    def normalize_search_value(value):
+        if value is None:
+            return ""
+        return str(value).lower()
+
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
     call_service = CallService(current_app.db)
@@ -599,35 +604,35 @@ def search():
 
         # Match against user fields
         if (
-            query in user.name.lower() or
-            (user.country and query in user.country.lower()) or
-            (user.city and query in user.city.lower())
+            query in normalize_search_value(user.name) or
+            query in normalize_search_value(user.country) or
+            query in normalize_search_value(user.city)
         ):
             search_chats.add(chat)
             continue
 
         # Match against messages
-        if any(query in message.content.lower() for message in chat.messages):
+        if any(query in normalize_search_value(message.content) for message in chat.messages):
             search_chats.add(chat)
 
     search_calls = []
     for call in calls:
         userdata = call.get("userdata", {})
         if (
-            query in userdata.get("name", "").lower() or
-            query in userdata.get("email", "").lower() or
-            query in userdata.get("phone_number", "").lower()
+            query in normalize_search_value(userdata.get("name")) or
+            query in normalize_search_value(userdata.get("email")) or
+            query in normalize_search_value(userdata.get("phone_number"))
         ):
             search_calls.append(call)
             continue
             
         call_metadata = call.get("call_metadata", {})
-        if query in call_metadata.get("product_discussed", "").lower():
+        if query in normalize_search_value(call_metadata.get("product_discussed")):
             search_calls.append(call)
             continue
             
         transcription = call.get("transcription", [])
-        if any(query in t.get("transcription", "").lower() for t in transcription):
+        if any(query in normalize_search_value(t.get("transcription")) for t in transcription):
             search_calls.append(call)
 
     return render_template(
