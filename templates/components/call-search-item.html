@@ -1,0 +1,55 @@
+<tr>
+  <td>
+    <a
+      href="/admin/call/{{ call.call_id }}"
+      class="flex flex-row justify-between py-[12px] px-[24px] border-y border-y-[var(--border-color)] hover:opacity-80 hover:cursor-pointer duration-300 transition-all w-full"
+    >
+      <div class="flex flex-col">
+        <div class="flex flex-row gap-[15px]">
+          <p class="text-[16px] font-bold text-[var(--main-color)]">
+            {{ call.userdata.name or call.userdata.get('name') or 'Unknown' }}
+          </p>
+          {% if call.status == 'ended' %}
+          <div class="px-[9px] py-[3px] bg-[#56ABFF]/20 rounded-full">
+            <p class="text-sm text-[#56ABFF]">Ended</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <p class="text-[14px] opacity-60 text-[var(--sec-text)]">
+          {% if call.started_at %}
+            {% if call.started_at is string or call.started_at is number %}
+              {{ call.started_at }}
+            {% else %}
+              {{ call.started_at.strftime('%d %b %Y - %H:%M') }}
+            {% endif %}
+          {% else %}
+            N/A
+          {% endif %}
+        </p>
+
+        {% if call.transcription %}
+        {% set last_msg = call.transcription[-1] %}
+        {% if last_msg is mapping %}
+          {% set text = last_msg.get('transcription') or last_msg.get('transcript') or last_msg.get('text') or last_msg.get('content') or last_msg.get('message') or '' %}
+          {% set speaker = (last_msg.get('speaker') or last_msg.get('sender') or '') %}
+        {% elif last_msg is string %}
+          {% set text = last_msg %}
+          {% set speaker = '' %}
+        {% else %}
+          {% set text = last_msg.transcription or last_msg.transcript or last_msg.text or last_msg.content or last_msg.message or '' %}
+          {% set speaker = (last_msg.speaker or last_msg.sender or '') %}
+        {% endif %}
+
+        <p class="text-[16px] text-[var(--sec-text)] block md:hidden">
+          {% if speaker %}<span class="font-semibold">{{ speaker }}:</span> {% endif %}{{ text[:10] }} {% if text|length > 10 %} ... {% endif %}
+        </p>
+        <!-- Desktop: First 30 characters -->
+        <p class="text-[16px] text-[var(--sec-text)] hidden md:block">
+          {% if speaker %}<span class="font-semibold">{{ speaker }}:</span> {% endif %}{{ text[:30] }} {% if text|length > 30 %} ... {% endif %}
+        </p>
+        {% endif %}
+      </div>
+    </a>
+  </td>
+</tr>

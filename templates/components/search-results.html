@@ -4,7 +4,7 @@
   <div class="border-b border-[var(--border-color)] px-[20px] py-[15px]">
     <p class="text-[20px] text-[var(--sec-text)]">Chats</p>
   </div>
-  {% for chat in search_chats %} {% include 'components/search-item.html' %} {%
+  {% for chat in search_chats %} {% include 'components/chat-search-item.html' %} {%
   endfor %}
 </div>
 
@@ -18,7 +18,7 @@
   <table class="w-full call-table">
     <tbody class="text-[var(--text-color)] text-[14px]">
       {% for call in search_calls %}
-        {% include 'components/call-item.html' ignore missing %}
+        {% include 'components/call-search-item.html' ignore missing %}
       {% endfor %}
     </tbody>
   </table>
