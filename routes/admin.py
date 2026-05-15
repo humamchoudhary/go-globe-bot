@@ -587,7 +587,7 @@ def search():
     call_service = CallService(current_app.db)
     
     chats = chat_service.get_all_chats(session.get("admin_id"))
-    calls = call_service.get_all_calls(session.get("admin_id"))
+    calls = call_service.get_all_calls()
 
     search_chats = set()
     for chat in chats:
