@@ -62,10 +62,10 @@
   <div class="flex flex-col justify-between items-end">
     <span
       class="message-time {% if call.viewed %}opacity-60{% endif %}"
-      data-utc="{{ call.started_at.isoformat() }}"
-      title="{{ call.started_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}"
+      data-utc="{{ call.started_at.isoformat() if call.started_at else '' }}"
+      title="{{ call.started_at.strftime('%Y-%m-%d %H:%M:%S UTC') if call.started_at else 'Unknown time' }}"
     >
-      {{ call.started_at.strftime('%d %B %Y - %H:%M') }}
+      {{ call.started_at.strftime('%d %B %Y - %H:%M') if call.started_at else 'Unknown time' }}
     </span>
 
     <!-- Action Buttons -->

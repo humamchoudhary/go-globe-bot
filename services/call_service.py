@@ -175,6 +175,39 @@ class CallService:
             call['transcription_length'] = len(call.get('transcription') or [])
         return calls
     
+    
+    def get_all_calls(self, admin_id=None, limit=100, skip=0):
+        """
+        Get all calls with their full data, including complete transcripts.
+        """
+        query = {}
+        # If your calls use admin routing, uncomment below:
+        # if admin_id:
+        #     query["admin_id"] = admin_id
+
+        cursor = self.call_collection.find(query, {"_id": 0}).sort("started_at", -1).skip(skip)
+        
+        if limit >= 0:
+            cursor = cursor.limit(limit)
+            
+        calls = list(cursor)
+
+        # Parse string datetimes to objects
+        for call in calls:
+            if isinstance(call.get('started_at'), str):
+                try:
+                    call['started_at'] = datetime.fromisoformat(call['started_at'].replace('Z', '+00:00'))
+                except Exception:
+                    call['started_at'] = None
+                    
+            if call.get('ended_at') and isinstance(call['ended_at'], str):
+                try:
+                    call['ended_at'] = datetime.fromisoformat(call['ended_at'].replace('Z', '+00:00'))
+                except Exception:
+                    pass
+                    
+        return calls
+    
     def get_call_counts_by_filter(self, admin_id=None):
         """Get counts for all call filters."""
         base_query = {}

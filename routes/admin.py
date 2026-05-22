@@ -17,6 +17,7 @@ from functools import lru_cache
 import logging
 # from # p# # print import p# print
 from services.usage_service import UsageService
+from services.call_service import CallService
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 import requests
@@ -106,6 +107,12 @@ def pricing_page():
 @admin_required
 def faq_page():
     return render_template("admin/faq.html")
+
+
+@admin_bp.route("/analytics/")
+@admin_required
+def analytics_page():
+    return render_template("admin/analytics.html")
 
 
 @admin_bp.route("/change-logs")
@@ -573,11 +580,19 @@ def get_chat_list():
 def search():
     query = request.form.get("search-q").lower()
     if not query:
-        return render_template("components/search-results.html", search_chats=[])
+        return render_template("components/search-results.html", search_chats=[], search_calls=[])
+
+    def normalize_search_value(value):
+        if value is None:
+            return ""
+        return str(value).lower()
 
     chat_service = ChatService(current_app.db)
     user_service = UserService(current_app.db)
+    call_service = CallService(current_app.db)
+    
     chats = chat_service.get_all_chats(session.get("admin_id"))
+    calls = call_service.get_all_calls()
 
     search_chats = set()
     for chat in chats:
@@ -589,20 +604,41 @@ def search():
 
         # Match against user fields
         if (
-            query in user.name.lower() or
-            (user.country and query in user.country.lower()) or
-            (user.city and query in user.city.lower())
+            query in normalize_search_value(user.name) or
+            query in normalize_search_value(user.country) or
+            query in normalize_search_value(user.city)
         ):
             search_chats.add(chat)
             continue
 
         # Match against messages
-        if any(query in message.content.lower() for message in chat.messages):
+        if any(query in normalize_search_value(message.content) for message in chat.messages):
             search_chats.add(chat)
+
+    search_calls = []
+    for call in calls:
+        userdata = call.get("userdata", {})
+        if (
+            query in normalize_search_value(userdata.get("name")) or
+            query in normalize_search_value(userdata.get("email")) or
+            query in normalize_search_value(userdata.get("phone_number"))
+        ):
+            search_calls.append(call)
+            continue
+            
+        call_metadata = call.get("call_metadata", {})
+        if query in normalize_search_value(call_metadata.get("product_discussed")):
+            search_calls.append(call)
+            continue
+            
+        transcription = call.get("transcription", [])
+        if any(query in normalize_search_value(t.get("transcription")) for t in transcription):
+            search_calls.append(call)
 
     return render_template(
         "components/search-results.html",
-        search_chats=list(search_chats)
+        search_chats=list(search_chats),
+        search_calls=list(search_calls)
     )
 
 
@@ -2017,6 +2053,7 @@ def delete_chats():
         return "", 200
     except Exception as e:
         return f"Error {e}",500
+
 from services.call_service import CallService
 @admin_bp.route("/calls/", methods=["GET"])
 @admin_required
@@ -2042,6 +2079,21 @@ def get_all_calls():
         next_page=1,
         current_filter='all'
     )
+@admin_bp.route("/calls/ongoing", methods=["GET"])
+def get_ongoing_calls():
+    """Get ongoing calls."""
+    call_service = CallService(current_app.db)
+    
+    # Get ongoing calls with limited data
+    calls = call_service.get_all_calls(
+        limit=20,
+        skip=0,
+    )
+    
+    # Get call counts for dropdown
+    call_counts = call_service.get_call_counts_by_filter(session.get('admin_id'))
+    
+    return calls
 
 @admin_bp.route("/call/<call_id>")
 @admin_required
@@ -2837,9 +2889,10 @@ def save_data():
         
         if data['connection'] not in crawler.connectors:
             return jsonify({'error': 'Connection not found'}), 404
-        
         # Get the query (if provided)
         query = data.get('query')
+        if crawler.connectors[data['connection']].type == 'mongodb' and not query:
+            query = "{}"
         
         # Execute the query to get all data (not just preview)
         if not query:

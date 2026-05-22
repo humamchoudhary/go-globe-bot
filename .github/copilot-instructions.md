@@ -1,0 +1,1 @@
+the code should be in proper code blocks, and if this is a terminal command, it should be in a code block with the language specified as "bash".

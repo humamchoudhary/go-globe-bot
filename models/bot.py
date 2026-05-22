@@ -42,11 +42,17 @@ class Bot:
         self.dp_key = app.config['SETTINGS']['apiKeys']['deepseek']
 
         self.active_bot = None
-        self.active_bot_name = app.config['SETTINGS'].get('model', 'gemini_2.0_flash')
+        self.active_bot_name = app.config['SETTINGS'].get('model', 'gemini_2.5_flash')
         self.base_prompt = app.config["SETTINGS"]["prompt"]
 
         # Enhanced Google model configurations
         self.google_models = {
+            "gemini-2.5-flash": {
+                "supports_images": True,
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "pricing": {"input": 0.15, "output": 0.40}
+            },
             "gemini-2.0-flash": {
                 "supports_images": True,
                 "max_tokens": 8192,
@@ -107,6 +113,7 @@ class Bot:
     @classmethod
     def get_bots(cls):
         google_models = [
+            ('Gemini 2.5 Flash', "gemini_2.5_flash"),
             ('Gemini 2.0 Flash', "gemini_2.0_flash"),
             ('Gemini 1.5 Pro', "gemini_1.5_pro"),
             ('Gemini 1.5 Flash', "gemini_1.5_flash"),
@@ -167,7 +174,7 @@ class Bot:
 
         # Initialize system prompt with language restrictions if specified
         languages = admin_settings.get('languages', ['English'])
-        self.sys_prompt = f"{prompt}\n\nInitialize chat in English. If a person speaks or asks to speak in one of these languages, only respond in these languages: {', '.join(languages)}"
+        self.sys_prompt = f"{prompt}\n\nInitialize chat in English. If a person speaks or asks to speak in one of these languages {', '.join(languages)}, only respond in that languages in which user is speaking."
 
         if self._is_google_model(self.active_bot_name):
             chat_state = self._init_google_chat(text_content, images)
@@ -477,7 +484,7 @@ class Bot:
                 if "model_name" in chat_state:
                     self._set_bot(chat_state["model_name"])
                 else:
-                    self._set_bot('gemini_2.0_flash')
+                    self._set_bot('gemini_2.5_flash')
                 return chat_state
         except FileNotFoundError:
             raise ValueError(f"No chat session found for id {id}")
